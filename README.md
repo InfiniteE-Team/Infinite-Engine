@@ -1,2 +1,2 @@
 # Infinite-Engine
-The infinite engine is a FNF Engine writted since 0 in HaxeFlixel
+The infinite engine is an FNF engine written from scratch in HaxeFlixel.
