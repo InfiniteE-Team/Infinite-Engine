@@ -1,0 +1,200 @@
+{
+  "meta": {
+    "isPlayer": true
+  },
+  "gameplay": {
+    "position": [
+      0,
+      0
+    ],
+    "cameraOffset": [
+      0,
+      0
+    ],
+    "death": {
+      "character": "bf-death",
+      "sound": "gameplay/gameover/fnf_loss_sfx",
+      "endAnim": "gameplay/gameOverEnd"
+    },
+    "idleAfterSing": true
+  },
+  "render": {
+    "layers": [
+      {
+        "name": "body",
+        "path": "BOYFRIEND",
+        "position": [
+          0,
+          0
+        ],
+        "scale": [
+          1,
+          1
+        ],
+        "alpha": 1.0,
+        "visible": true,
+        "flipX": false,
+        "flipY": false,
+        "antialiasing": true,
+        "anims": [
+          {
+            "name": "idle",
+            "prefix": "BF idle dance",
+            "offsets": [
+              13,
+              4
+            ],
+            "framerate": 24,
+            "looped": false
+          },
+          {
+            "name": "singLEFT",
+            "prefix": "BF NOTE LEFT",
+            "offsets": [
+              10,
+              7
+            ],
+            "framerate": 24,
+            "looped": false
+          },
+          {
+            "name": "singLEFT_miss",
+            "prefix": "BF NOTE LEFT MISS",
+            "offsets": [
+              13,
+              18
+            ],
+            "framerate": 24,
+            "looped": false
+          },
+          {
+            "name": "singRIGHT",
+            "prefix": "BF NOTE RIGHT",
+            "offsets": [
+              -32,
+              11
+            ],
+            "framerate": 24,
+            "looped": false
+          },
+          {
+            "name": "singRIGHT_miss",
+            "prefix": "BF NOTE RIGHT MISS",
+            "offsets": [
+              -30,
+              24
+            ],
+            "framerate": 24,
+            "looped": false
+          },
+          {
+            "name": "singUP",
+            "prefix": "BF NOTE UP",
+            "offsets": [
+              -1,
+              76
+            ],
+            "framerate": 24,
+            "looped": false
+          },
+          {
+            "name": "singUP_miss",
+            "prefix": "BF NOTE UP MISS",
+            "offsets": [
+              -10,
+              70
+            ],
+            "framerate": 24,
+            "looped": false
+          },
+          {
+            "name": "singDOWN",
+            "prefix": "BF NOTE DOWN",
+            "offsets": [
+              -2,
+              -34
+            ],
+            "framerate": 24,
+            "looped": false
+          },
+          {
+            "name": "singDOWN_miss",
+            "prefix": "BF NOTE DOWN MISS",
+            "offsets": [
+              0,
+              -23
+            ],
+            "framerate": 24,
+            "looped": false
+          },
+          {
+            "name": "hey",
+            "prefix": "BF HEY!!",
+            "offsets": [
+              12,
+              14
+            ],
+            "framerate": 24,
+            "looped": false
+          },
+          {
+            "name": "cheer",
+            "prefix": "Boyfriend YEAH cheer",
+            "offsets": [
+              -30,
+              20
+            ],
+            "framerate": 24,
+            "looped": false
+          },
+          {
+            "name": "scared",
+            "prefix": "BF idle shaking",
+            "offsets": [
+              0,
+              0
+            ],
+            "framerate": 24,
+            "looped": false
+          }
+        ]
+      }
+    ]
+  },
+  "icon": {
+    "path": "bf",
+    "flipX": false,
+    "isGrid": false,
+    "bumpInBeats": true,
+    "stepTempo": 4,
+    "anims": [
+      {
+        "name": "losing",
+        "prefix": "0",
+        "offsets": [
+          0,
+          0
+        ],
+        "framerate": 24
+      },
+      {
+        "name": "normal",
+        "prefix": "1",
+        "offsets": [
+          0,
+          0
+        ],
+        "framerate": 24
+      },
+      {
+        "name": "winning",
+        "prefix": "2",
+        "offsets": [
+          0,
+          0
+        ],
+        "framerate": 24
+      }
+    ]
+  }
+}

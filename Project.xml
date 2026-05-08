@@ -31,15 +31,27 @@
 
 	<set name="BUILD_DIR" value="export" />
 	<source path="source" />
+
 	<assets path="engine" exclude="*.ogg" if="web"/>
 	<assets path="engine" exclude="*.mp3" unless="web"/>
+	
+	<assets path="assets" exclude="*.ogg" if="web"/>
+	<assets path="assets" exclude="*.mp3" unless="web"/>
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
-	<haxelib name="flixel" />
-
+	<haxelib name="flixel"/>
 	<!--In case you want to use the addons package-->
-	<haxelib name="flixel-addons" />
+	<haxelib name="flixel-addons"/>
+
+	<haxelib name="flixel-animate"/>
+
+	<haxelib name="openfl"/>
+
+	<haxelib name="hscript"/>
+
+	<!-- <haxelib name="rulescript" /> -->
+
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
