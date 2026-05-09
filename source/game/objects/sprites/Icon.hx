@@ -1,3 +1,4 @@
+package game.objects.sprites;
 class Icon extends FunkinSprite
 {
     public function new(char:String = 'bf', isPlayer:Bool)

@@ -21,7 +21,7 @@
   "render": {
     "layers": [
       {
-        "name": "body",
+        "name": "char",
         "path": "BOYFRIEND",
         "position": [
           0,

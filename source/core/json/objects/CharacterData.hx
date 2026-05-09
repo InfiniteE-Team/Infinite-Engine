@@ -16,7 +16,7 @@ typedef MetaData = {
 typedef GameplayData = {
     var position:Array<Float>;
     var cameraOffset:Array<Float>;
-    var death:CharDeath;
+    var ?death:CharDeath;
 
     var ?idleAfterSing:Bool;
 }

@@ -1,40 +1,53 @@
 package game;
-import game.objects.sprites.Character;
+
+import game.objects.Camera;
+import core.json.song.SongData.SongConfig;
+import game.objects.sprites.StrumNote;
+import game.controllers.CharacterController;
+
 class PlayState extends MusicBeatState {
-    public static var instance:PlayState;
-    
-    override public function create() {
-        instance = this;
+    public static var SONG:SongConfig;
+	public static var instance:PlayState;
+	public var chars:CharacterController;
+    public var curSong:String = 'fresh';
 
-        var charList = [
-            { id: "bf", name: "bf"}/*,
-            { id: "dad", name: "dad"},
-            { id: "gf",  name: "gf"}*/ 
-        ];
+    public var camGame:Camera;
 
-        super.create();
+	override public function create() {
+		instance = this;
+        camGame = new Camera();
+        FlxG.cameras.reset(camGame);
+        @:privateAccess flixel.FlxCamera._defaultCameras = [camGame];
 
-        for (data in charList) {
-            Character.spawn(data.id, data.name);
+        if (SONG == null) SONG = new SongConfig();
+        SONG.configSong(curSong,'');
+
+        addCharacters();
+
+		super.create();
+	}
+
+    public function addCharacters()
+    {
+        chars = new CharacterController('id_');
+        add(chars);
+        for (data in SONG.chars) {
+            chars.loadCharacter(data.id, data.name);
         }
     }
 
-    override public function update(elapsed:Float)
-    {
-        super.update(elapsed);
+	override public function update(elapsed:Float) {
+		super.update(elapsed);
 
-        if (FlxG.keys.justPressed.W)
-            Character.fetch('bf').playAnim('singUP',true);
-            
-    }
+        if (chars != null)
+            chars.isSinging();
+	}
 
-    override public function beatHit()
-    {
-        super.beatHit();
+	override public function beatHit() {
+		super.beatHit();
 
-        for (id in ['bf']) {
-            var char = Character.fetch(id);
-            if (char != null) char.dance();
-        }
-    }
+		for (data in SONG.chars) {
+			chars.get(data.id).dance();
+		}
+	}
 }
