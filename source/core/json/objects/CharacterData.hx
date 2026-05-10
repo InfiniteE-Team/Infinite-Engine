@@ -1,4 +1,5 @@
 package core.json.objects;
+import core.json.extensions.SpriteData;
 
 typedef CharacterData = {
 	var meta:MetaData;
@@ -29,7 +30,7 @@ typedef CharDeath = {
 
 // render for chars
 typedef RenderData = {
-    var layers:Array<SpriteData.ObjectData>;
+    var layers:Array<ObjectData>;
 }
 
 // icons for chars
@@ -41,5 +42,5 @@ typedef IconData = {
     var ?bumpInBeats:Bool;
     var ?stepTempo:Float;
 
-    var anims:Array<SpriteData.AnimData>;
+    var anims:Array<AnimData>;
 }

@@ -13,6 +13,7 @@ typedef MetaData = {
 	var bpm:Float;
 	var speed:Float;
     var ?needVoices:Bool;
+	var ?vocSeparated:Bool;
 }
 
 typedef GameplayData = {
@@ -22,8 +23,14 @@ typedef GameplayData = {
 
 typedef CharDataJson = {
 	var id:String;
-	var name:String;
-	var role:String;
+
+	var ?name:String;
+	var ?role:String;
+
+	var ?position:Array<Float>;
+	var ?camPos:Array<Float>;
+
+	var ?vocals:String;
 }
 
 typedef EventsData = {
@@ -44,9 +51,11 @@ typedef NoteData = {
 class SongConfig {
 	public var songData:SongData;
 
-	public var songName:String = 'tutorial';
-	public var bpmSong:Float = 100;
+	public var songName:String = 'Fresh';
+	public var bpmSong:Float = 120;
 	public var speed:Float = 1.2;
+	public var needVoices:Bool = true;
+
     public var chars:Array<Dynamic> = [];
 
     public function new() {}
@@ -55,11 +64,13 @@ class SongConfig {
 		songData = UtilsData.readJson(Paths.getPath('songs/$curSong/charts/$curSong$diff', 'json'));
 		if (songData == null)
 			return;
-        songName = songData.meta.song;
-		bpmSong = songData.meta.bpm;
-		speed = songData.meta.speed;
 
-        RhythmCore.bpm = bpmSong;
+        songName = songData.meta.song ?? 'Fresh';
+		bpmSong = songData.meta.bpm ?? 120;
+		speed = songData.meta.speed ?? 1.2;
+		needVoices = songData.meta.needVoices ?? true;
+
+        RhythmCore.changeBPM(bpmSong);
 
         chars = songData.gameplay.chars;
 	}

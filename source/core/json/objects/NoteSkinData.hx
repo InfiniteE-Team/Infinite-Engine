@@ -1,30 +1,23 @@
 package core.json.objects;
+import core.json.extensions.SpriteData;
 
 typedef NoteSkinData = {
-	var props:SpriteData.ObjectData;
+	var props:ObjectData;
 	var ?author:String;
 	var ?description:String;
 
-    var ?frameScale:Int;
+    var ?frameScale:Array<Float>;
 
 	// shader RGB
-
 	var ?colorAuto:Bool;
-
-	var ?colorMult:Float;
-
-	var ?colorDirections:Array<{r:Array<Float>, g:Array<Float>, b:Array<Float>}>;
-
-	var ?colorPalette:Array<{r:String, g:String, b:String}>;
-
+	var ?colorPalette:Array<{r:Array<Float>, g:Array<Float>, b:Array<Float>}>;
 	var ?noStaticRGB:Bool;
-
 	var ?colorHSV:Array<{h:Float, s:Float, b:Float}>;
 }
 
 /*
 	Example:
-	"colorDirections": [
+	"colorPalette": [
 		{
 			"r":[0.76,0.11,0.67],
 			"g":[0,0,0], 

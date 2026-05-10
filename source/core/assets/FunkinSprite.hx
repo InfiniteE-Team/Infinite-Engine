@@ -2,7 +2,7 @@ package core.assets;
 
 import animate.FlxAnimate;
 import flixel.math.FlxPoint;
-import core.json.objects.SpriteData.ObjectData;
+import core.json.extensions.SpriteData.ObjectData;
 import flixel.graphics.frames.FlxAtlasFrames;
 
 class FunkinSprite extends FlxAnimate {
@@ -58,8 +58,17 @@ class FunkinSprite extends FlxAnimate {
 			trace('$name Anim Not Existed! ERROR');
 			return;
 		}
+
 		animation.play(name, force);
 		activeOffsets(getAnimOffset());
+	}
+
+	public static function clearCache()
+	{
+		for (key => frames in cache) {
+        	frames.destroy();
+    	}
+    	cache.clear();
 	}
 
 	public function getAnimOffset():FlxPoint
@@ -71,9 +80,13 @@ class FunkinSprite extends FlxAnimate {
 	public function isFinished(anim:String):Bool
 		return animation.curAnim.finished && existsAnim(anim);
 
-	public function activeOffsets(offset:FlxPoint) {
-		this.x += offset.x;
-		this.y += offset.y;
+	public function activeOffsets(off:FlxPoint) {
+		offset.set(off.x,off.y);
+	}
+
+	override public function destroy()
+	{
+		super.destroy();
 	}
 
 	public function dance() {}

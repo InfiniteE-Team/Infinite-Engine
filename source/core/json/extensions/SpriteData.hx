@@ -1,11 +1,11 @@
-package core.json.objects;
+package core.json.extensions;
 
 import haxe.extern.EitherType;
 
 // Data for sprites objects
 typedef ObjectData = {
 	var name:String;
-	var path:String;
+	var ?path:String;
 	var ?position:Array<Float>;
 
 	var ?scale:Array<Float>;
@@ -15,7 +15,18 @@ typedef ObjectData = {
 	var ?flipX:Bool;
 	var ?flipY:Bool;
 
+	var ?angle:Float;
+
+	var ?active:Bool;
+
+	var ?scrollFactor:Array<Float>;
+
+	var ?color:String;
+
 	var ?antialiasing:Bool;
+
+	var ?blend:String;
+
 	var anims:Array<AnimData>;
 }
 

@@ -1,6 +1,7 @@
 package core.assets;
-import flixel.graphics.frames.FlxAtlasFrames;
 import sys.FileSystem;
+import game.PlayState;
+import flixel.graphics.frames.FlxAtlasFrames;
 
 class Paths
 {
@@ -11,8 +12,6 @@ class Paths
         try {
             switch (type)
             {
-                case "songJson":
-                    return findLib(fileName);
                 case "data":
                     return findLib("data/" + fileName);
                 case "json":
@@ -23,6 +22,8 @@ class Paths
                     return findLib("sounds/"+fileName+'.ogg');
                 case "music":
                     return findLib("music/"+fileName+'.ogg');
+                case "songAudio":
+                    return findLib('songs/${PlayState.SONG.songName.toLowerCase()}/audio/$fileName.ogg');
                 case "animated":
                     return FlxAtlasFrames.fromSparrow(getPath(fileName, "image"), getPath("images/" + fileName, "xml"));
                 case "xml":
