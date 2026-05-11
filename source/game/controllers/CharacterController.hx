@@ -9,6 +9,7 @@ class CharacterController extends FunkinObjectRegistry
 {
 	var chars:Character;
 	var control:Controls;
+	var note:NoteController = new NoteController();
 
     public function new(id:String, ?curCharacter:String = 'bf', ?x:Float = 0, ?y:Float = 0)
     {
@@ -36,8 +37,12 @@ class CharacterController extends FunkinObjectRegistry
         	if (char == null) continue;
 			for (i in 0...control.inputNotes.length){
 				if (control.getInputNotes()[i]){
-					char.playAnim('sing'+char.notesAnim[i], true);
+					char.playAnim('sing${char.notesAnim[i]}', true);
 					char.isSing = true;
+				}
+				else if (note.isMiss) {
+					char.playAnim('sing${char.notesAnim[i]}-miss', true);
+					char.isMiss = true;
 				}
 			}
 		}

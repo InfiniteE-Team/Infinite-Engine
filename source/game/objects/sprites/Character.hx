@@ -11,9 +11,10 @@ class Character extends FunkinObjectRegistry {
 	public var characterData:CharacterData;
 	public var layers:Array<FunkinSprite> = [];
 	public var isPlayer:Bool = false;
-    public var isSing:Bool = false;
+	public var isSing:Bool = false;
+	public var isMiss:Bool = false;
 
-	public var notesAnim:Array<String> = ['LEFT','UP','DOWN','RIGHT'];
+	public var notesAnim:Array<String> = ['LEFT', 'UP', 'DOWN', 'RIGHT'];
 
 	var idleAfterSing:Bool = true;
 
@@ -43,10 +44,11 @@ class Character extends FunkinObjectRegistry {
 			layers[i].setPosition(x + characterData.render.layers[i].position[0], y + characterData.render.layers[i].position[1]);
 		}
 
-		if (idleAfterSing && (isSing && layers[0].animation.finished)) {
+		if (idleAfterSing && ((isMiss || isSing) && layers[0].animation.finished)) {
 			isSing = false;
+			isMiss = false;
 			dance();
-    	}
+		}
 	}
 
 	override public function playAnim(name:String, ?force:Bool = true) {
@@ -68,21 +70,20 @@ class Character extends FunkinObjectRegistry {
 	var isDancing:Bool = false;
 
 	override public function dance() {
-        if (isSing)
-            return;
+		if (isSing || isMiss)
+			return;
 
 		if (existsAnim('danceLeft') && existsAnim('danceRight')) {
- isDancing = !isDancing;
+			isDancing = !isDancing;
 			playAnim(isDancing ? 'danceLeft' : 'danceRight', false);
-		} 
-        else
-   playAnim('idle', false);
+		} else
+			playAnim('idle', false);
 	}
 
 	override public function destroy() {
-  for (layer in layers) layer.destroy();
-  layers = [];
-  super.destroy();
-  
+		for (layer in layers)
+			layer.destroy();
+		layers = [];
+		super.destroy();
 	};
 }
