@@ -72,14 +72,17 @@ class Character extends FunkinObjectRegistry {
             return;
 
 		if (existsAnim('danceLeft') && existsAnim('danceRight')) {
-			isDancing = !isDancing;
+ isDancing = !isDancing;
 			playAnim(isDancing ? 'danceLeft' : 'danceRight', false);
 		} 
         else
-			playAnim('idle', false);
+   playAnim('idle', false);
 	}
 
 	override public function destroy() {
-		super.destroy();
+  for (layer in layers) layer.destroy();
+  layers = [];
+  super.destroy();
+  
 	};
 }
