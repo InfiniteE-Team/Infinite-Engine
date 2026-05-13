@@ -6,12 +6,11 @@ import rulescript.RuleScript;
 class ScriptCore {
 	var script:RuleScript = new RuleScript();
 
-	public function new(state:FlxState) {
-		super();
+	public function new(state:Class<FlxState>) {
 		refClass(state);
 	}
 
-	public function refClass(state:FlxState) {
+	public function refClass(state:Class<FlxState>) {
 		for (field in Type.getInstanceFields(Type.getClass(state)) script.set(field, Reflect.field(state, field)));
 		script.set("add", state.add);
 		script.set("remove", state.remove);

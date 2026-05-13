@@ -26,8 +26,10 @@ typedef ObjectData = {
 	var ?antialiasing:Bool;
 
 	var ?blend:String;
+	
+    var ?frameScale:Array<Int>;
 
-	var anims:Array<AnimData>;
+	var ?anims:Array<AnimData>;
 }
 
 // Data for anims

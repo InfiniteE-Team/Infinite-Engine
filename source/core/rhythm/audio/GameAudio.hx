@@ -14,7 +14,11 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 	}
 
 	public function loadSong(needVoices:Bool = true,onfinish:()->Void):Void {
-		forEachAlive(function(s:FlxSound) s = null);
+		forEachAlive(function(s:FlxSound) { s.stop(); s.destroy(); });
+		clear();
+		inst = null;
+		vocals = null;
+		
 		inst = audio('Inst',onfinish);
 		add(inst);
 		if (needVoices) {

@@ -17,8 +17,9 @@ class Character extends FunkinObjectRegistry {
 	public var notesAnim:Array<String> = ['LEFT', 'UP', 'DOWN', 'RIGHT'];
 
 	var idleAfterSing:Bool = true;
-
 	var isFlipXAnim:Bool = false;
+	public var singCountTime:Float = 0;
+	var singTime:Float = 4;
 
 	public function new(id:String, ?curCharacter:String = 'bf', ?x:Float = 0, ?y:Float = 0) {
 		super(id, x, y);
@@ -29,11 +30,12 @@ class Character extends FunkinObjectRegistry {
 	public function graphicLoad() {
 		var charData:String = Paths.getPath('data/characters/' + curCharacter, "json");
 		characterData = UtilsData.readJson(charData);
+		idleAfterSing = characterData.gameplay.idleAfterSing ?? true;
+		singTime = characterData.gameplay.singTime ?? 4;
 
 		for (layer in characterData.render.layers) {
 			var sprite = new FunkinSprite(0, 0);
 			sprite.loadProps(layer, 'characters');
-			idleAfterSing = characterData.gameplay.idleAfterSing;
 			layers.push(sprite);
 		}
 	}
@@ -43,6 +45,9 @@ class Character extends FunkinObjectRegistry {
 		for (i in 0...layers.length) {
 			layers[i].setPosition(x + characterData.render.layers[i].position[0], y + characterData.render.layers[i].position[1]);
 		}
+
+		if (isSing || isMiss)
+			singCountTime += elapsed;
 
 		if (idleAfterSing && ((isMiss || isSing) && layers[0].animation.finished)) {
 			isSing = false;
@@ -70,8 +75,10 @@ class Character extends FunkinObjectRegistry {
 	var isDancing:Bool = false;
 
 	override public function dance() {
-		if (isSing || isMiss)
+		if ((isSing && singCountTime > singTime) || isMiss){
+			singCountTime = 0;
 			return;
+		}
 
 		if (existsAnim('danceLeft') && existsAnim('danceRight')) {
 			isDancing = !isDancing;

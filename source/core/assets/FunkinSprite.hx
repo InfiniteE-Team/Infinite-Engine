@@ -1,6 +1,7 @@
 package core.assets;
 
 import animate.FlxAnimate;
+import animate.FlxAnimateFrames;
 import flixel.math.FlxPoint;
 import core.json.extensions.SpriteData.ObjectData;
 import flixel.graphics.frames.FlxAtlasFrames;
@@ -8,17 +9,47 @@ import flixel.graphics.frames.FlxAtlasFrames;
 class FunkinSprite extends FlxAnimate {
 	public var offsets:Map<String, FlxPoint> = new Map();
 
-	private static var cache = new Map<String, FlxAtlasFrames>();
+	private static var cache = new Map<String, Dynamic>();
 
 	override public function updateHitbox() {
 		super.updateHitbox();
 	}
 
 	public function loadProps(props:ObjectData, path:String):Void {
-		if (props.path != null){
-			if (!cache.exists(props.path))
-				cache.set(props.path, Paths.getPath('$path/${props.path}', "animated"));
-			frames = cache.get(props.path);
+		var assetPath = '$path/${props.path}';
+		if (!cache.exists(assetPath)) {
+			var loaded:Dynamic = Paths.getAnimated(assetPath);
+			if (loaded != null)
+				cache.set(assetPath, loaded);
+			else
+				trace('FunkinSprite could not load asset "$assetPath"');
+		}
+
+		trace('the file is: $assetPath');
+
+		var cached:Dynamic = cache.get(assetPath);
+		if (cached == null)
+			return;
+
+		var isSimpleImage:Bool = (cached is String);
+
+		if (isSimpleImage)
+			loadGraphic(cached, true, props.frameScale[0] ?? 0, props.frameScale[1] ?? 0);
+		else
+			frames = cached;
+
+		var isAnimate = frames is FlxAnimateFrames;
+
+		for (anim in props.anims) {
+			if (isSimpleImage) {
+				animation.add(anim.name, anim.indices, anim.framerate, anim.looped);
+			} else if (anim.indices?.length > 0) {
+				isAnimate ? this.anim.addBySymbolIndices(anim.name, anim.prefix, anim.indices, anim.framerate,
+					anim.looped) : animation.addByIndices(anim.name, anim.prefix, anim.indices, "", anim.framerate, anim.looped);
+			} else {
+				isAnimate ? this.anim.addBySymbol(anim.name, anim.prefix, anim.framerate,
+					anim.looped) : animation.addByPrefix(anim.name, anim.prefix, anim.framerate, anim.looped);
+			}
 		}
 
 		if (props.position != null)
@@ -36,20 +67,6 @@ class FunkinSprite extends FlxAnimate {
 		if (props.antialiasing != null)
 			antialiasing = props.antialiasing;
 
-		for (anim in props.anims) {
-			if (anim.filePath != null) {
-				var paths:Array<String> = (anim.filePath is Array) ? cast anim.filePath : [cast anim.filePath];
-				for (p in paths){
-					if (!cache.exists(p))
-						cache.set(p, Paths.getPath('$path/$p', "animated"));
-				}
-				frames = cache.get(paths[0]);
-			}
-
-			anim.indices?.length > 0 ? animation.addByIndices(anim.name, anim.prefix, anim.indices, "", anim.framerate,
-				anim.looped) : animation.addByPrefix(anim.name, anim.prefix, anim.framerate, anim.looped, anim.flipX, anim.flipY);
-		}
-
 		updateHitbox();
 	}
 
@@ -58,17 +75,20 @@ class FunkinSprite extends FlxAnimate {
 			trace('$name Anim Not Existed! ERROR');
 			return;
 		}
-
 		animation.play(name, force);
 		activeOffsets(getAnimOffset());
 	}
 
-	public static function clearCache()
-	{
+	/*
+		private function disposeFromRAM():Void {
+			if (graphic != null && graphic.bitmap != null)
+				graphic.bitmap.disposeImage();
+	}*/
+	public static function clearCache() {
 		for (key => frames in cache) {
-        	frames.destroy();
-    	}
-    	cache.clear();
+			frames.destroy();
+		}
+		cache.clear();
 	}
 
 	public function getAnimOffset():FlxPoint
@@ -81,11 +101,10 @@ class FunkinSprite extends FlxAnimate {
 		return animation.curAnim.finished && existsAnim(anim);
 
 	public function activeOffsets(off:FlxPoint) {
-		offset.set(off.x,off.y);
+		offset.set(off.x, off.y);
 	}
 
-	override public function destroy()
-	{
+	override public function destroy() {
 		super.destroy();
 	}
 

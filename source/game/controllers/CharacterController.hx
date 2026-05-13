@@ -1,24 +1,31 @@
 package game.controllers;
+
 import game.PlayState;
 import game.objects.sprites.Character;
 import core.assets.FunkinSprite;
 import core.assets.FunkinObjectRegistry;
 import core.config.Controls;
 
-class CharacterController extends FunkinObjectRegistry
-{
+class CharacterController extends FunkinObjectRegistry {
+	public var isPlayer:Bool = true;
+
 	var chars:Character;
 	var control:Controls;
-	var note:NoteController = new NoteController();
 
-    public function new(id:String, ?curCharacter:String = 'bf', ?x:Float = 0, ?y:Float = 0)
-    {
-		super(id,x,y);
-		control = new Controls();
-    }
+	public var namesPlayer:Array<String> = ['bf', 'boyfriend', 'player'];
+	public var namesGf:Array<String> = ['gf', 'girlfriend', 'mid', 'idk'];
+	public var namesOpponent:Array<String> = ['opponent', 'dad', 'bot', 'cpu'];
 
-    public function loadCharacter(id:String,name:String):FunkinSprite {
-        if (existsId(id)) {
+	var playerChars:Array<Character> = [];
+	var opponentChars:Array<Character> = [];
+
+	public function new(id:String, ?x:Float = 0, ?y:Float = 0) {
+		super(id, x, y);
+		control = Main.controls;
+	}
+
+	public function loadCharacter(id:String, name:String, role:String):FunkinSprite {
+		if (existsId(id)) {
 			return get(id);
 		}
 		chars = new Character(id, name);
@@ -27,24 +34,36 @@ class CharacterController extends FunkinObjectRegistry
 			PlayState.instance.add(layer);
 		PlayState.instance.add(chars);
 
+		if (namesPlayer.contains(role))
+			playerChars.push(chars);
+		else if (namesOpponent.contains(role))
+			opponentChars.push(chars);
+
 		return chars;
 	}
 
-	public function isSinging()
-	{
-		for (data in PlayState.SONG.chars){
-			var char = cast(get(data.id), Character);
-        	if (char == null) continue;
-			for (i in 0...control.inputNotes.length){
-				if (control.getInputNotes()[i]){
+	public function isSinging(note:NoteController, ?direction:Int) {
+		for (char in playerChars) {
+			for (i in 0...control.noteKeys.length) {
+				if (i >= char.notesAnim.length)
+					continue;
+				if (control.getInputNotes()[i]) {
 					char.playAnim('sing${char.notesAnim[i]}', true);
+					char.singCountTime = 0;
 					char.isSing = true;
-				}
-				else if (note.isMiss) {
+				} else if (note.isMiss && !note.isGood) { // miss
 					char.playAnim('sing${char.notesAnim[i]}-miss', true);
 					char.isMiss = true;
 				}
 			}
+		}
+
+		for (char in opponentChars) {/*
+			if (noteIndex >= char.notesAnim.length)
+				return;*/
+			//char.playAnim('sing${char.notesAnim[i]}', true);
+			char.singCountTime = 0;
+			char.isSing = true;
 		}
 	}
 
@@ -60,5 +79,11 @@ class CharacterController extends FunkinObjectRegistry
 		PlayState.instance.remove(chars);
 		chars.destroy();
 		registry.remove(id);
+	}
+
+	override public function destroy():Void {
+		playerChars = null;
+		opponentChars = null;
+		super.destroy();
 	}
 }

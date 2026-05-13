@@ -6,8 +6,6 @@ typedef NoteSkinData = {
 	var ?author:String;
 	var ?description:String;
 
-    var ?frameScale:Array<Float>;
-
 	// shader RGB
 	var ?colorAuto:Bool;
 	var ?colorPalette:Array<{r:Array<Float>, g:Array<Float>, b:Array<Float>}>;

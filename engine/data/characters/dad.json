@@ -17,7 +17,7 @@
     "layers": [
       {
         "name": "char",
-        "path": "DADDY_DEAREST",
+        "path": "dad",
         "position": [
           0,
           0
@@ -54,7 +54,7 @@
           },
           {
             "name": "singLEFT",
-            "prefix": "Dad Sing Note RIGHT",
+            "prefix": "dad sing note right",
             "offsets": [
               21,
               4
@@ -74,7 +74,7 @@
           },
           {
             "name": "singUP",
-            "prefix": "Dad Sing Note UP",
+            "prefix": "Dad Sing note UP",
             "offsets": [
               -4,
               30

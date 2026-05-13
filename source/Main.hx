@@ -1,5 +1,7 @@
 package;
 import core.system.FPSCounter;
+import core.system.WindowConfig;
+
 import flixel.FlxGame;
 import openfl.display.Sprite;
 import openfl.events.Event;
@@ -9,10 +11,15 @@ import openfl.Lib;
 
 import flixel.FlxState;
 import game.PlayState;
+import core.config.Controls;
+import core.config.SaveData;
 
 class Main extends Sprite {
     public var fps:FPSCounter = new FPSCounter(5,5,0xFFFFFF);
     public var mainState:Class<FlxState> = PlayState;
+    public static var save:SaveData;
+    public static var controls:Controls;
+
     public function new() {
         super();
         addEventListener(Event.ADDED_TO_STAGE, added);
@@ -25,24 +32,22 @@ class Main extends Sprite {
     }
 
     function mainGame()
-    {/*
-        if (FlxG.keys.justPressed.F11)
-            toggleFullscreen();*/
+    {
+        configGame();
         addChild(new FlxGame(1280, 720, mainState, 60, 60, true, false));
         addChild(fps);
+        if (FlxG.keys.justPressed.F11)
+            toggleFullscreen();
+        WindowConfig.applyAccentColor();
     }
-/*
-    function toggleFullscreen()
+
+    function configGame()
     {
-        var stage = Lib.current.stage;
+        save = new SaveData();
+        save.loadConfig();
+        controls = new Controls(save);
+    }
 
-        switch (stage.displayState)
-        {
-            case FULL_SCREEN:
-                stage.displayState = NORMAL;
-
-            default:
-                stage.displayState = FULL_SCREEN;
-        }
-    }*/
+    public static function toggleFullscreen():Void
+		FlxG.fullscreen = !FlxG.fullscreen;
 }

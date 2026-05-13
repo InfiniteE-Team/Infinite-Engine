@@ -20,6 +20,7 @@ typedef GameplayData = {
     var ?death:CharDeath;
 
     var ?idleAfterSing:Bool;
+    var ?singTime:Float;
 }
 
 typedef CharDeath = {
