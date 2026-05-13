@@ -2,12 +2,12 @@ package core.assets;
 
 import animate.FlxAnimate;
 import animate.FlxAnimateFrames;
-import flixel.math.FlxPoint;
+import utils.Point;
 import core.json.extensions.SpriteData.ObjectData;
 import flixel.graphics.frames.FlxAtlasFrames;
 
 class FunkinSprite extends FlxAnimate {
-	public var offsets:Map<String, FlxPoint> = new Map();
+	public var offsets:Map<String, Point> = new Map();
 
 	private static var cache = new Map<String, Dynamic>();
 
@@ -91,8 +91,8 @@ class FunkinSprite extends FlxAnimate {
 		cache.clear();
 	}
 
-	public function getAnimOffset():FlxPoint
-		return offsets.get(anim.name) ?? new FlxPoint();
+	public function getAnimOffset():Null<Point>
+		return offsets.get(anim.name) ?? {x:0,y:0};
 
 	public function existsAnim(anim:String):Bool
 		return animation.exists(anim);
@@ -100,11 +100,12 @@ class FunkinSprite extends FlxAnimate {
 	public function isFinished(anim:String):Bool
 		return animation.curAnim.finished && existsAnim(anim);
 
-	public function activeOffsets(off:FlxPoint) {
+	public function activeOffsets(off:Point) {
 		offset.set(off.x, off.y);
 	}
 
 	override public function destroy() {
+		offsets = null;
 		super.destroy();
 	}
 

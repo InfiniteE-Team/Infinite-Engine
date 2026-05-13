@@ -18,7 +18,7 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 		clear();
 		inst = null;
 		vocals = null;
-		
+
 		inst = audio('Inst',onfinish);
 		add(inst);
 		if (needVoices) {
@@ -42,6 +42,10 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 
 	public function pauseAll():Void {
 		forEachAlive(function(s:FlxSound) s.pause());
+	}
+
+	public function resumeAll():Void {
+    	forEachAlive(function(s:FlxSound) s.resume());
 	}
 
 	public function stopAll():Void {

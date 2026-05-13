@@ -108,7 +108,8 @@ class PlayState extends MusicBeatState {
 	}
 
 	override public function destroy() {
-		super.destroy();
+        FlxG.signals.focusLost.remove(onFocusLost);
+        FlxG.signals.focusGained.remove(onFocusGained);
 
 		FunkinSprite.clearCache();
 		camGame.destroy();
@@ -126,7 +127,6 @@ class PlayState extends MusicBeatState {
 
 		noteController = null;
 
-        FlxG.signals.focusLost.remove(onFocusLost);
-        FlxG.signals.focusGained.remove(onFocusGained);
+        super.destroy();
 	}
 }
