@@ -3,7 +3,7 @@
   "description": "Skin default FNF",
   "colorAuto": true,
   "noStaticRGB": true,
-  "colorDirections": [
+  "colorPalette": [
     {
       "r": [
         0.761,
@@ -87,7 +87,7 @@
     "antialiasing": true,
     "anims": [
       {
-        "name": "left",
+        "name": "purpleScroll",
         "prefix": "noteLeft",
         "framerate": 24,
         "offsets": [
@@ -97,7 +97,7 @@
         "filePath": "notes"
       },
       {
-        "name": "down",
+        "name": "blueScroll",
         "prefix": "noteDown",
         "framerate": 24,
         "offsets": [
@@ -107,7 +107,7 @@
         "filePath": "notes"
       },
       {
-        "name": "up",
+        "name": "greenScroll",
         "prefix": "noteUp",
         "framerate": 24,
         "offsets": [
@@ -117,7 +117,7 @@
         "filePath": "notes"
       },
       {
-        "name": "right",
+        "name": "redScroll",
         "prefix": "noteRight",
         "framerate": 24,
         "offsets": [
@@ -231,7 +231,7 @@
         "filePath": "NOTE_hold_assets"
       },
       {
-        "name": "strumLeft",
+        "name": "static",
         "prefix": "staticLeft",
         "framerate": 24,
         "offsets": [
@@ -240,7 +240,7 @@
         ]
       },
       {
-        "name": "strumDown",
+        "name": "static",
         "prefix": "staticDown",
         "framerate": 24,
         "offsets": [
@@ -249,7 +249,7 @@
         ]
       },
       {
-        "name": "strumUp",
+        "name": "static",
         "prefix": "staticUp",
         "framerate": 24,
         "offsets": [
@@ -258,7 +258,7 @@
         ]
       },
       {
-        "name": "strumRight",
+        "name": "static",
         "prefix": "staticRight",
         "framerate": 24,
         "offsets": [
@@ -267,7 +267,7 @@
         ]
       },
       {
-        "name": "strumLeftPress",
+        "name": "pressed",
         "prefix": "pressLeft",
         "framerate": 24,
         "offsets": [
@@ -276,7 +276,7 @@
         ]
       },
       {
-        "name": "strumDownPress",
+        "name": "pressed",
         "prefix": "pressDown",
         "framerate": 24,
         "offsets": [
@@ -285,7 +285,7 @@
         ]
       },
       {
-        "name": "strumUpPress",
+        "name": "pressed",
         "prefix": "pressUp",
         "framerate": 24,
         "offsets": [
@@ -294,7 +294,7 @@
         ]
       },
       {
-        "name": "strumRightPress",
+        "name": "pressed",
         "prefix": "pressRight",
         "framerate": 24,
         "offsets": [
@@ -303,7 +303,7 @@
         ]
       },
       {
-        "name": "strumLeftConfirm",
+        "name": "confirm",
         "prefix": "confirmLeft",
         "framerate": 24,
         "offsets": [
@@ -312,7 +312,7 @@
         ]
       },
       {
-        "name": "strumDownConfirm",
+        "name": "confirm",
         "prefix": "confirmDown",
         "framerate": 24,
         "offsets": [
@@ -321,7 +321,7 @@
         ]
       },
       {
-        "name": "strumUpConfirm",
+        "name": "confirm",
         "prefix": "confirmUp",
         "framerate": 24,
         "offsets": [
@@ -330,7 +330,7 @@
         ]
       },
       {
-        "name": "strumRightConfirm",
+        "name": "confirm",
         "prefix": "confirmRight",
         "framerate": 24,
         "offsets": [

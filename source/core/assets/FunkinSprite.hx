@@ -40,6 +40,29 @@ class FunkinSprite extends FlxAnimate {
 
 		var isAnimate = frames is FlxAnimateFrames;
 
+		if (!isSimpleImage && !isAnimate && props.anims != null) {
+			var merged = new Map<String, Bool>();
+			for (anim in props.anims) {
+				if (anim.filePath == null) continue;
+				var fp:String = (anim.filePath is String)
+					? cast(anim.filePath, String)
+					: (cast(anim.filePath, Array<Dynamic>))[0];
+				if (fp == null || fp == props.path || merged.exists(fp)) continue;
+				merged.set(fp, true);
+				var extraPath = '$path/$fp';
+				if (!cache.exists(extraPath)) {
+					var loaded:Dynamic = Paths.getAnimated(extraPath);
+					if (loaded != null)
+						cache.set(extraPath, loaded);
+					else
+						trace('Falling load multi asset "$extraPath"');
+				}
+				var extra:Dynamic = cache.get(extraPath);
+				if (extra != null && (extra is FlxAtlasFrames))
+					cast(frames, FlxAtlasFrames).addAtlas(cast extra);
+			}
+		}
+
 		for (anim in props.anims) {
 			if (isSimpleImage) {
 				animation.add(anim.name, anim.indices, anim.framerate, anim.looped);
@@ -66,6 +89,8 @@ class FunkinSprite extends FlxAnimate {
 			flipY = props.flipY;
 		if (props.antialiasing != null)
 			antialiasing = props.antialiasing;
+		if (props.firstAnim != null)
+			playAnim(props.firstAnim,true);
 
 		updateHitbox();
 	}

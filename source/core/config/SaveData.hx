@@ -8,7 +8,7 @@ class SaveData {
 	public var antialiasing:Bool = true;
 	public var downscroll:Bool = false;
     public var ghosttaping:Bool = true;
-	public var noteKeys:Array<String> = ['A', 'W', 'S', 'D'];
+	public var noteKeys:Array<String> = ['A', 'S', 'W', 'D'];
 
     public function new() {}
     
@@ -28,6 +28,6 @@ class SaveData {
         antialiasing = data.antialiasing ?? true;
         downscroll = data.downscroll ?? false;
         ghosttaping = data.ghosttaping ?? true;
-        noteKeys = data.noteKeys ?? ['A', 'W', 'S', 'D'];
+        noteKeys = data.noteKeys ?? ['A', 'S', 'W', 'D'];
     }
 }

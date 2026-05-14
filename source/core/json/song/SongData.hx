@@ -15,7 +15,6 @@ typedef MetaData = {
 	var speed:Float;
 	var ?needVoices:Bool;
 	var ?vocSeparated:Bool;
-	var ?directions:Array<String>;
 }
 
 typedef GameplayData = {
@@ -33,12 +32,14 @@ typedef CharDataJson = {
 	var ?vocals:String;
 
 	// strums song
-	var strumPos:Array<Float>;
-	var strumScale:Array<Float>;
+	var ?strumPos:Array<Float>;
+	var ?strumScale:Array<Float>;
 
 	// stages
 	var ?position:Array<Float>;
 	var ?camPos:Array<Float>;
+
+	var ?noteSkin:String;
 }
 
 typedef EventsData = {
@@ -65,9 +66,12 @@ class SongConfig {
 	public var needVoices:Bool = true;
 
 	public var chars:Array<Dynamic> = [];
-	public var directions:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
 
 	public var noteLane:Int = 0;
+
+	public var noteSkin:String = 'default';
+
+	public var noteTime:Float = 0;
 
 	public function new() {}
 
@@ -80,14 +84,24 @@ class SongConfig {
 		bpmSong = songData.meta.bpm ?? 120;
 		speed = songData.meta.speed ?? 1.2;
 		needVoices = songData.meta.needVoices ?? true;
-		directions = songData.meta.directions ?? ['LEFT', 'DOWN', 'UP', 'RIGHT'];
 
 		for (note in songData.notes) {
 			noteLane = note.lane ?? 0;
+			noteTime = note.time ?? 0;
 		}
 
 		RhythmCore.changeBPM(bpmSong);
 
 		chars = songData.gameplay.chars;
+
+		for (i in 0...chars.length)
+			noteSkin = chars[i].noteSkin ?? 'default';
 	}
+}
+
+enum Directions {
+	LEFT;
+	DOWN;
+	UP;
+	RIGHT;
 }

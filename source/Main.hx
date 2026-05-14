@@ -14,11 +14,14 @@ import game.PlayState;
 import core.config.Controls;
 import core.config.SaveData;
 
+import core.json.engine.GlobalData.GlobalConfig;
+
 class Main extends Sprite {
     public var fps:FPSCounter = new FPSCounter(5,5,0xFFFFFF);
     public var mainState:Class<FlxState> = PlayState;
     public static var save:SaveData;
     public static var controls:Controls;
+    public static var globalData:GlobalConfig = new GlobalConfig();
 
     public function new() {
         super();
@@ -46,6 +49,7 @@ class Main extends Sprite {
         save = new SaveData();
         save.loadConfig();
         controls = new Controls(save);
+        globalData.configGlobal();
     }
 
     public static function toggleFullscreen():Void

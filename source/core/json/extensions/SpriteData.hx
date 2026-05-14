@@ -30,6 +30,8 @@ typedef ObjectData = {
     var ?frameScale:Array<Int>;
 
 	var ?anims:Array<AnimData>;
+
+	var ?firstAnim:String;
 }
 
 // Data for anims
@@ -42,7 +44,7 @@ typedef AnimData = {
 	var ?looped:Bool;
 	var ?framerate:Float;
 
-	var prefix:String;
+	var ?prefix:String;
 
 	var ?indices:Array<Int>;
 

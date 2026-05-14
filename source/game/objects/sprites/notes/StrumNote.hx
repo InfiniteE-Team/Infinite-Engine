@@ -11,6 +11,7 @@ class StrumNote extends FunkinSprite {
 	}
 
 	public function strumLoad(x:Float,y:Float,noteSkinData:ObjectData) {
+		setPosition(x, y);
 		loadProps(noteSkinData, 'noteskins/$noteSkin');
 	}
 }

@@ -4,7 +4,9 @@ import game.PlayState;
 import game.objects.sprites.Character;
 import core.assets.FunkinSprite;
 import core.assets.FunkinObjectRegistry;
+import game.controllers.NoteController;
 import core.config.Controls;
+import game.objects.sprites.notes.Note;
 
 class CharacterController extends FunkinObjectRegistry {
 	public var isPlayer:Bool = true;
@@ -42,19 +44,31 @@ class CharacterController extends FunkinObjectRegistry {
 		return chars;
 	}
 
-	public function isSinging(note:NoteController, ?direction:Int) {
+	public function isSinging(noteController:NoteController, ?dir:Int) {
 		for (char in playerChars) {
+			var charStrums = noteController.getCharStrums(char.id);
 			for (i in 0...control.noteKeys.length) {
 				if (i >= char.notesAnim.length)
 					continue;
+
+				var note = noteController.getHittableNote(char.id, i);
+
 				if (control.getInputNotes()[i]) {
-					char.playAnim('sing${char.notesAnim[i]}', true);
-					char.singCountTime = 0;
-					char.isSing = true;
-				} else if (note.isMiss && !note.isGood) { // miss
+					charStrums[i].playAnim('confirm',true);
+					if (note != null) {
+						note.wasGoodHit = true;
+						note.kill();
+						char.playAnim('sing${char.notesAnim[i]}', true);
+						char.singCountTime = 0;
+						char.isSing = true;
+					}
+				} else if (note != null && note.tooLate && !note.wasGoodHit) { // miss
+					charStrums[i].playAnim('pressed', true);
 					char.playAnim('sing${char.notesAnim[i]}-miss', true);
 					char.isMiss = true;
 				}
+				else
+					charStrums[i].playAnim('static', true);
 			}
 		}
 

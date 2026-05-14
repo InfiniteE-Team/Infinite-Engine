@@ -11,9 +11,13 @@ import game.controllers.CharacterController;
 import core.rhythm.RhythmCore;
 import core.rhythm.audio.GameAudio;
 import core.json.song.SongData.SongConfig;
+// saves
+import core.config.SaveData;
 
 class PlayState extends MusicBeatState {
 	public static var instance:PlayState;
+	
+	public var isStoryMode:Bool = false;
 
 	public var chars:CharacterController;
 	// cameras
@@ -26,7 +30,10 @@ class PlayState extends MusicBeatState {
 	public var gameAudio:GameAudio = new GameAudio();
 	public var curSong:String = 'fresh';
 
-	public var noteController:NoteController = new NoteController();
+	public var noteController:NoteController;
+
+	// configs
+	public var saveData:SaveData = new SaveData();
 
 	override public function create() {
 		instance = this;
@@ -63,8 +70,19 @@ class PlayState extends MusicBeatState {
 		FlxG.cameras.add(camHUD, false);
 	}
 
+	function buildStrumsandNotes()
+	{
+		noteController = new NoteController(SONG,saveData.downscroll);
+		noteController.strums.cameras = [camHUD];
+		noteController.notes.cameras = [camHUD];
+		add(noteController.strums);
+		add(noteController.notes);
+	}
+
 	// Code Song
 	public function initSong() {
+		buildStrumsandNotes();
+		noteController.generateNotes(0, SONG);
 		gameAudio.loadSong(SONG.needVoices, endSong);
 		gameAudio.playAll();
 	}
@@ -93,10 +111,12 @@ class PlayState extends MusicBeatState {
 		if (gameAudio.inst != null)
 			RhythmCore.songPosition = gameAudio.inst.time;
 
-		if (chars != null)
-			chars.isSinging(noteController);
-
 		gameAudio.resyncVocals();
+
+		noteController.update(RhythmCore.songPosition);
+
+		if (chars != null)
+			chars.isSinging(noteController,SONG.noteLane);
 	}
 
 	override public function beatHit() {
@@ -116,6 +136,8 @@ class PlayState extends MusicBeatState {
 		camHUD.destroy();
 		gameAudio.destroy();
 		chars.destroy();
+
+		noteController.destroy();
 
 		instance = null;
 		chars = null;
