@@ -2,6 +2,7 @@ package game;
 
 // camera
 import game.objects.Camera;
+import game.controllers.CameraController;
 // notes
 import game.controllers.NoteController;
 // visuals
@@ -23,6 +24,7 @@ class PlayState extends MusicBeatState {
 	// cameras
 	public var camGame:Camera;
 	public var camHUD:Camera;
+	public var cameraController:CameraController;
 
 	// Song
 	public static var SONG:SongConfig = new SongConfig();
@@ -84,6 +86,8 @@ class PlayState extends MusicBeatState {
 
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD, false);
+
+		cameraController = new CameraController(camGame,camHUD);
 	}
 
 	function buildStrumsandNotes() {
@@ -132,6 +136,8 @@ class PlayState extends MusicBeatState {
 
 		gameAudio.resyncVocals();
 
+		cameraController.update(elapsed);
+
 		noteController.update(RhythmCore.songPosition);
 
 		if (chars != null)
@@ -145,6 +151,9 @@ class PlayState extends MusicBeatState {
 	override public function beatHit() {
 		super.beatHit();
 
+		if (beat % 4 == 0)
+			cameraController.bumpZoom();
+		
 		for (data in SONG.chars) {
 			chars.get(data.id).dance();
 		}
@@ -159,6 +168,8 @@ class PlayState extends MusicBeatState {
 			camGame.destroy();
 		if (camHUD != null)
 			camHUD.destroy();
+		if (cameraController != null)
+			cameraController.destroy();
 		if (gameAudio != null)
 			gameAudio.destroy();
 		if (chars != null)
@@ -176,6 +187,8 @@ class PlayState extends MusicBeatState {
 		camHUD = null;
 
 		noteController = null;
+
+		cameraController = null;
 
 		super.destroy();
 	}

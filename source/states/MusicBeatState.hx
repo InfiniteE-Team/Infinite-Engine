@@ -29,11 +29,14 @@ class MusicBeatState extends FlxState {
 
     override function update(elapsed:Float):Void {
         super.update(elapsed);
-        #if HSCRIPT_ALLOWED
-        if (Main.globalData.developerMode)
+        
+        if (Main.globalData.developerMode){
+            #if HSCRIPT_ALLOWED
             script.hotReload();
-        #end
-
+            #end
+            if (FlxG.keys.justPressed.F5)
+                FlxG.resetState();
+        }
         updateStep();
         updateBeat();
         stepHit();

@@ -50,7 +50,7 @@ typedef EventsData = {
 
 // note data
 typedef NoteData = {
-	var char:Int;
+	var char:String;
 	var lane:Int;
 	var time:Float;
 	var type:String;

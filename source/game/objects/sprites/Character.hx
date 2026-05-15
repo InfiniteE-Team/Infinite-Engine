@@ -75,7 +75,7 @@ class Character extends FunkinObjectRegistry {
 	var isDancing:Bool = false;
 
 	override public function dance() {
-		if ((isSing && singCountTime > singTime) || isMiss){
+		if (isSing || isMiss && singCountTime > singTime){
 			singCountTime = 0;
 			return;
 		}

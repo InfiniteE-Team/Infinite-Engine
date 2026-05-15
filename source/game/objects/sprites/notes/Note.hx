@@ -40,8 +40,7 @@ class Note extends FunkinSprite {
 
 	public function noteLoad(noteSkinData:ObjectData) {
 		loadProps(noteSkinData, 'noteskins/$noteSkin');
-		for (i in 0...keys)
-			playAnim(noteColors[i]+"Scroll",true);
+		playAnim(noteColors[direction]+"Scroll", true);
 	}
 
 	override function update(elapsed:Float) {

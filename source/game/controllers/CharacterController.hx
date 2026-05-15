@@ -14,12 +14,14 @@ class CharacterController extends FunkinObjectRegistry {
 	var chars:Character;
 	var control:Controls;
 
-	public var namesPlayer:Array<String> = ['bf', 'boyfriend', 'player'];
-	public var namesGf:Array<String> = ['gf', 'girlfriend', 'mid', 'idk'];
-	public var namesOpponent:Array<String> = ['opponent', 'dad', 'bot', 'cpu'];
+	public static var namesPlayer:Array<String> = ['bf', 'boyfriend', 'player'];
+	public static var namesGf:Array<String> = ['gf', 'girlfriend', 'mid', 'idk'];
+	public static var namesOpponent:Array<String> = ['opponent', 'dad', 'bot', 'cpu'];
 
 	var playerChars:Array<Character> = [];
 	var opponentChars:Array<Character> = [];
+
+	var input:InputController = new InputController();
 
 	public function new(id:String, ?x:Float = 0, ?y:Float = 0) {
 		super(id, x, y);
@@ -51,33 +53,58 @@ class CharacterController extends FunkinObjectRegistry {
 				if (i >= char.notesAnim.length)
 					continue;
 
-				var note = noteController.getHittableNote(char.id, i);
+				var note = input.handleInput(i, noteController, char.id);
 
-				if (control.getInputNotes()[i]) {
-					charStrums[i].playAnim('confirm',true);
+				if (input.isPressed(i)) {
 					if (note != null) {
-						note.wasGoodHit = true;
-						note.kill();
 						char.playAnim('sing${char.notesAnim[i]}', true);
 						char.singCountTime = 0;
 						char.isSing = true;
+						char.isMiss = false;
+						charStrums[i].playAnim('confirm', true);
+					} else if (input.justPressed(i)) {
+						charStrums[i].playAnim('pressed', true);
+						char.playAnim('sing${char.notesAnim[i]}-miss', true);
+						char.isMiss = true;
+					} else if (charStrums[i].isFinished('confirm')) {
+						charStrums[i].playAnim('pressed', true);
+						char.isSing = false;
+						char.isMiss = false;
 					}
-				} else if (note != null && note.tooLate && !note.wasGoodHit) { // miss
-					charStrums[i].playAnim('pressed', true);
-					char.playAnim('sing${char.notesAnim[i]}-miss', true);
-					char.isMiss = true;
-				}
-				else
+				} else {
+					// miss Note detection yep
+					for (note in noteController.notes.members) {
+						if (note == null || !note.alive || !note.mustPress)
+							continue;
+						if (note.strum == charStrums[i] && note.tooLate) {
+							note.alpha = 0.3;
+							char.playAnim('sing${char.notesAnim[i]}-miss', true);
+							char.isMiss = true;
+						}
+					}
 					charStrums[i].playAnim('static', true);
+					char.isSing = false;
+					char.isMiss = false;
+				}
 			}
 		}
 
-		for (char in opponentChars) {/*
-			if (noteIndex >= char.notesAnim.length)
-				return;*/
-			//char.playAnim('sing${char.notesAnim[i]}', true);
-			char.singCountTime = 0;
-			char.isSing = true;
+		for (char in opponentChars) {
+			var charStrums = noteController.getCharStrums(char.id);
+
+			for (i in 0...charStrums.length) {
+				var note = noteController.getHittableNote(char.id, i, false);
+
+				if (note != null) {
+					charStrums[i].playAnim('confirm', true);
+					note.wasGoodHit = true;
+					note.kill();
+					char.playAnim('sing${char.notesAnim[i]}', true);
+					char.singCountTime = 0;
+					char.isSing = true;
+				} else
+					charStrums[i].playAnim('static', true);
+			}
 		}
 	}
 

@@ -9,12 +9,20 @@
             {
                 "id": "bf",
                 "name": "bf",
-                "role": "player"
+                "role": "player",
+                "strumPos":[
+                    650,
+                    0
+                ]
             },
             {
                 "id": "dad",
                 "name": "dad",
-                "role": "opponent"
+                "role": "opponent",
+                "strumPos":[
+                    50,
+                    0
+                ]
             }
         ],
         "events": [
@@ -46,24 +54,28 @@
     },
     "notes": [
         {
+            "char": "dad",
             "lane": 0,
             "time": 1000,
             "type": "normal",
             "length": 0
         },
         {
+            "char": "dad",
             "lane": 1,
             "time": 1500,
             "type": "normal",
             "length": 0
         },
         {
+            "char": "bf",
             "lane": 2,
             "time": 2000,
             "type": "normal",
             "length": 750
         },
         {
+            "char": "bf",
             "lane": 3,
             "time": 3000,
             "type": "normal",

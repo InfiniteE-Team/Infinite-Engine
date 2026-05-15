@@ -9,6 +9,7 @@ import game.PlayStateConfig;
 // song
 import core.json.song.SongData.SongConfig;
 import core.json.engine.GlobalData.GlobalConfig;
+import Lambda;
 
 class NoteController {
 	public var isMiss:Bool = false;
@@ -72,8 +73,9 @@ class NoteController {
 
 	public function loadGenerateStrums(x:Float, y:Float) {
 		for (i in 0...keys) {
-			var strum = new StrumNote(x + i * (122 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props, noteSkin);
+			var strum = new StrumNote(x + i * (112 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props, noteSkin);
 			strum.ID = i;
+			strum.strumLoad(x + i * (112 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props);
 			strum.playAnim('static');
 			strums.add(strum);
 		}
@@ -86,7 +88,12 @@ class NoteController {
 	public function updateNotes(songTime:Float) {
 		while (unspawnNotes.length > 0) {
 			var note = unspawnNotes[0];
-			if (note.y > FlxG.height + 200) {
+
+			if (isDownscroll && note.y > FlxG.height + 200) {
+				note.kill();
+				continue;
+			}
+			if (!isDownscroll && note.y < -200) {
 				note.kill();
 				continue;
 			}
@@ -104,46 +111,60 @@ class NoteController {
 
 			note.x = note.strum.x;
 
-			note.y = note.strum.y - ((note.strumTime - songTime) * scrollSpeed);
+			if (isDownscroll)
+				note.y = note.strum.y - ((note.strumTime - songTime) * scrollSpeed);
+			else
+				note.y = note.strum.y + ((note.strumTime - songTime) * scrollSpeed);
+
+			if (note.y < -200 && !isDownscroll)
+				note.kill();
+			if (note.y > FlxG.height + 200 && isDownscroll)
+				note.kill();
 		}
 	}
 
-	public function getHittableNote(charId:String, dir:Int):Note {
+	public function getHittableNote(charId:String, dir:Int, mustPress:Bool = true):Note {
 		var offset = charStrumOffsets.get(charId);
 		if (offset == null)
 			return null;
 
-		var good:Note = null;
 		for (note in notes.members) {
-			if (note == null || !note.alive || !note.mustPress)
+			if (note == null || !note.alive || note.mustPress != mustPress)
 				continue;
-			if (note.direction == offset + dir && note.canBeHit && !note.wasGoodHit) {
-				if (good == null || note.strumTime < good.strumTime)
-					good = note;
-			}
+			if (note.direction != offset + dir)
+				continue;
+
+			var isHittable = mustPress ? (note.canBeHit && !note.wasGoodHit) : note.wasGoodHit;
+			if (isHittable)
+				return note;
 		}
-		return good;
+		return null;
 	}
 
 	public function generateNotes(songTime:Float, daSong:SongConfig) {
 		for (data in daSong.songData.notes) {
-			var charData = daSong.chars[data.char];
-        	if (charData == null) continue;
+			// char info
+			var charData = Lambda.find(daSong.chars, c -> c.id == data.char);
+			if (charData == null)
+				continue;
 
 			// offsets for strums or notes for strums group
 			var offset = charStrumOffsets.get(charData.id);
-        	if (offset == null) continue;
+			if (offset == null)
+				continue;
 
 			// global Lane for strums groups
-        	var globalLane = offset + data.lane;
-        	var strum = strums.members[globalLane];
-        	if (strum == null) continue;
+			var globalLane = offset + data.lane;
+			var strum = strums.members[globalLane];
+			if (strum == null)
+				continue;
 
 			// param for Note positions in strum groups
-			var strum = strums.members[data.lane];
 			var note = new Note(data.time, keys, strum.x, 0, data.length > 0, noteSkinData.props, noteSkin, data.lane);
 			note.ID = globalLane;
+			note.direction = globalLane;
 			note.strumTime = data.time;
+			note.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
 
 			note.strum = strum;
 
