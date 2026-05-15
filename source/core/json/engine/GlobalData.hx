@@ -1,14 +1,16 @@
 package core.json.engine;
 import utils.UtilsData;
 typedef GlobalData = {
+	var ?developerMode:Bool;
 	var ?noteSkin:String;
 	var ?hud:String;
 }
 
 class GlobalConfig {
     public var globalData:GlobalData;
-	public var noteSkin:String;
-	public var hud:String;
+	public var developerMode:Bool = true;
+	public var noteSkin:String = 'default';
+	public var hud:String = 'default';
 
 	public function new() {}
 
@@ -19,5 +21,6 @@ class GlobalConfig {
 
         noteSkin = globalData.noteSkin ?? 'default';
         hud = globalData.hud ?? 'default';
+		developerMode = globalData.developerMode ?? true;
     }
 }

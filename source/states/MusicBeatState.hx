@@ -1,18 +1,38 @@
 package states;
 import flixel.FlxState;
 import core.rhythm.RhythmCore;
+import core.scripting.ScriptCore;
 
 class MusicBeatState extends FlxState {
     private var step:Float = 0;
     private var beat:Float = 0;
     private var lastBeat:Float = -1;
+    #if HSCRIPT_ALLOWED
+    var script:ScriptCore;
+    #end
 
     override function create():Void {
+        #if HSCRIPT_ALLOWED
+        if (script == null) initScript();
+        //script.call("onCreate", []);
+        #end
         super.create();
     }
 
+    #if HSCRIPT_ALLOWED
+    function initScript() {
+        script = new ScriptCore(this);
+        var className = Type.getClassName(Type.getClass(this)).split('.').pop();
+        script.load(Paths.getPath(className, 'class'));
+    }
+    #end
+
     override function update(elapsed:Float):Void {
         super.update(elapsed);
+        #if HSCRIPT_ALLOWED
+        if (Main.globalData.developerMode)
+            script.hotReload();
+        #end
 
         updateStep();
         updateBeat();
@@ -35,12 +55,21 @@ class MusicBeatState extends FlxState {
             lastBeat = beat;
             beatHit();
         }
+        #if HSCRIPT_ALLOWED
+        script.call("onStepHit", [step]);
+        #end
 	}
 
     public function beatHit():Void {
+        #if HSCRIPT_ALLOWED
+        script.call("onBeatHit", [beat]);
+        #end
     }
 
     override function destroy():Void {
+        #if HSCRIPT_ALLOWED
+        script.call("onDestroy", []);
+        #end
 		super.destroy();
 	}
 }

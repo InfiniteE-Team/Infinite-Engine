@@ -5,10 +5,8 @@ import core.system.WindowConfig;
 import flixel.FlxGame;
 import openfl.display.Sprite;
 import openfl.events.Event;
-
 import openfl.display.StageDisplayState;
 import openfl.Lib;
-
 import flixel.FlxState;
 import game.PlayState;
 import core.config.Controls;

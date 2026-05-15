@@ -29,21 +29,23 @@ class Paths {
 					return FlxAtlasFrames.fromSparrow(getPath(fileName, "image"), getPath("images/" + fileName, "xml"));
 				case "xml":
 					return findLib(fileName + '.xml');
+				case "class":
+					return findLib('scripts/states/$fileName.hx');
+				case "songScript":
+					return findLib('songs/${PlayState.SONG.songName.toLowerCase()}/scripts/$fileName.hx');
 				default:
 					return findLib(fileName);
 			}
 		} catch (e:Dynamic) {
-			trace('not detected path $fileName: $e');
+			trace('Paths: "$fileName" not found: $e');
 			return null;
 		}
 	}
 
-	static function findLib(file:String):String {
+	public static function findLib(file:String):String {
 		for (lib in libs)
 			if (FileSystem.exists('$lib/$file'))
 				return '$lib/$file';
-
-		trace('Paths: "$file" not found.');
 		return null;
 	}
 

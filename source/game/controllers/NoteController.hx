@@ -72,7 +72,7 @@ class NoteController {
 
 	public function loadGenerateStrums(x:Float, y:Float) {
 		for (i in 0...keys) {
-			var strum = new StrumNote(x + i * (202 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props, noteSkin);
+			var strum = new StrumNote(x + i * (122 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props, noteSkin);
 			strum.ID = i;
 			strum.playAnim('static');
 			strums.add(strum);

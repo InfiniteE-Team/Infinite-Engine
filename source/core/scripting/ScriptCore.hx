@@ -1,26 +1,59 @@
 package core.scripting;
 
-import flixel.FlxState;
+import states.MusicBeatState;
 import rulescript.RuleScript;
 
 class ScriptCore {
-	var script:RuleScript = new RuleScript();
+	public static var sharedContext:rulescript.Context = new rulescript.Context();
 
-	public function new(state:Class<FlxState>) {
-		refClass(state);
+	var scripts:Array<RuleScript> = [];
+	var paths:Array<String> = [];
+	var modifiedTimes:Array<Float> = [];
+	var state:MusicBeatState;
+
+	public function new(state:MusicBeatState) {
+		this.state = state;
 	}
 
-	public function refClass(state:Class<FlxState>) {
-		for (field in Type.getInstanceFields(Type.getClass(state)) script.set(field, Reflect.field(state, field)));
-		script.set("add", state.add);
-		script.set("remove", state.remove);
+	public function load(path:String) {
+		if (path == null || !sys.FileSystem.exists(path))
+			return;
+
+		var script = new RuleScript(null, null, sharedContext);
+		script.errorHandler = (e) -> trace('[Script] $path → ${e.message}');
+		script.superInstance = state;
+		script.access.setVariable("add", state.add);
+		script.access.setVariable("remove", state.remove);
+		script.tryExecute(sys.io.File.getContent(path));
+		scripts.push(script);
+		paths.push(path);
+		modifiedTimes.push(sys.FileSystem.stat(path).mtime.getTime());
 	}
 
-	public function call(name:String, args:Array<Dynamic>) {
-		var func = script.get(name);
-		if (func != null)
-			Reflect.callMethod(script, func, args);
+	public function call(name:String, args:Array<Dynamic>):Dynamic {
+		var result:Dynamic = null;
+		for (script in scripts)
+			result = script.access.callFunction(name, args);
+		return result;
 	}
 
-	public function reload() {}
+	public function hotReload() {
+		for (i in 0...paths.length) {
+			if (!sys.FileSystem.exists(paths[i]))
+				continue;
+			var modified = sys.FileSystem.stat(paths[i]).mtime.getTime();
+			if (modified > modifiedTimes[i])
+				reload(i);
+		}
+	}
+
+	function reload(i:Int) {
+		scripts[i].access.resetInterp();
+		scripts[i].superInstance = state;
+		scripts[i].access.setVariable("add", state.add);
+		scripts[i].access.setVariable("remove", state.remove);
+		scripts[i].tryExecute(sys.io.File.getContent(paths[i]));
+		modifiedTimes[i] = sys.FileSystem.stat(paths[i]).mtime.getTime();
+		trace('Reload ${paths[i]}');
+	}
 }

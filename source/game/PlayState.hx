@@ -16,7 +16,7 @@ import core.config.SaveData;
 
 class PlayState extends MusicBeatState {
 	public static var instance:PlayState;
-	
+
 	public var isStoryMode:Bool = false;
 
 	public var chars:CharacterController;
@@ -39,6 +39,11 @@ class PlayState extends MusicBeatState {
 		instance = this;
 		FlxG.mouse.visible = false;
 
+		#if HSCRIPT_ALLOWED
+		initScript();
+		script.call("onCreate", []);
+		#end
+
 		addCameras();
 
 		SONG.configSong(curSong, '');
@@ -51,6 +56,17 @@ class PlayState extends MusicBeatState {
 		FlxG.signals.focusGained.add(onFocusGained);
 
 		super.create();
+
+		#if HSCRIPT_ALLOWED
+		var songScriptDir = Paths.findLib('songs/$curSong/scripts/');
+		if (songScriptDir != null && sys.FileSystem.exists(songScriptDir)) {
+			for (file in sys.FileSystem.readDirectory(songScriptDir)) {
+				if (file.endsWith('.hx'))
+					script.load('$songScriptDir$file');
+			}
+		}
+		script.call("postCreate", []);
+		#end
 	}
 
 	public function addCharacters() {
@@ -70,9 +86,8 @@ class PlayState extends MusicBeatState {
 		FlxG.cameras.add(camHUD, false);
 	}
 
-	function buildStrumsandNotes()
-	{
-		noteController = new NoteController(SONG,saveData.downscroll);
+	function buildStrumsandNotes() {
+		noteController = new NoteController(SONG, saveData.downscroll);
 		noteController.strums.cameras = [camHUD];
 		noteController.notes.cameras = [camHUD];
 		add(noteController.strums);
@@ -107,6 +122,10 @@ class PlayState extends MusicBeatState {
 	//
 
 	override public function update(elapsed:Float) {
+		#if HSCRIPT_ALLOWED
+		script.call("onUpdate", [elapsed]);
+		#end
+
 		super.update(elapsed);
 		if (gameAudio.inst != null)
 			RhythmCore.songPosition = gameAudio.inst.time;
@@ -116,7 +135,11 @@ class PlayState extends MusicBeatState {
 		noteController.update(RhythmCore.songPosition);
 
 		if (chars != null)
-			chars.isSinging(noteController,SONG.noteLane);
+			chars.isSinging(noteController, SONG.noteLane);
+
+		#if HSCRIPT_ALLOWED
+		script.call("postUpdate", [elapsed]);
+		#end
 	}
 
 	override public function beatHit() {
@@ -128,16 +151,21 @@ class PlayState extends MusicBeatState {
 	}
 
 	override public function destroy() {
-        FlxG.signals.focusLost.remove(onFocusLost);
-        FlxG.signals.focusGained.remove(onFocusGained);
+		FlxG.signals.focusLost.remove(onFocusLost);
+		FlxG.signals.focusGained.remove(onFocusGained);
 
 		FunkinSprite.clearCache();
-		camGame.destroy();
-		camHUD.destroy();
-		gameAudio.destroy();
-		chars.destroy();
+		if (camGame != null)
+			camGame.destroy();
+		if (camHUD != null)
+			camHUD.destroy();
+		if (gameAudio != null)
+			gameAudio.destroy();
+		if (chars != null)
+			chars.destroy();
 
-		noteController.destroy();
+		if (noteController != null)
+			noteController.destroy();
 
 		instance = null;
 		chars = null;
@@ -149,6 +177,6 @@ class PlayState extends MusicBeatState {
 
 		noteController = null;
 
-        super.destroy();
+		super.destroy();
 	}
 }
