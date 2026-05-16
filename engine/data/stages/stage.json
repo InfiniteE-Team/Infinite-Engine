@@ -1,0 +1,76 @@
+{
+    "name": "stage",
+    "defaultZoom": 0.9,
+    "hideGF": false,
+    "elements": [
+        {
+            "type": "sprite",
+            "props": {
+                "path": "stageback",
+                "position": [-100, -200],
+                "scrollFactor": [0.9, 0.9],
+                "antialiasing": true
+            }
+        },
+        {
+            "type": "sprite",
+            "props": {
+                "path": "stage_light",
+                "position": [-34, -110],
+                "scrollFactor": [1, 1],
+                "antialiasing": true,
+                "alpha": 1,
+                "flipX": false
+            }
+        },
+        {
+            "type": "sprite",
+            "props": {
+                "path": "stage_light",
+                "position": [1126, -110],
+                "scrollFactor": [1, 1],
+                "antialiasing": true,
+                "alpha": 1,
+                "flipX": true
+            }
+        },
+        {
+            "type": "sprite",
+            "props": {
+                "path": "stagefront",
+                "position": [-350, 600],
+                "scale": [1.1, 1.1],
+                "scrollFactor": [0.9, 0.9],
+                "antialiasing": true
+            }
+        },
+        {
+            "type": "character",
+            "id": "gf",
+            "position": [402, 96],
+            "camPos": [0, 0]
+        },
+        {
+            "type": "character",
+            "id": "dad",
+            "position": [106.666668551949, 46.6666672091937],
+            "camPos": [0, 0]
+        },
+        {
+            "type": "character",
+            "id": "bf",
+            "position": [895.697639369111, 442.847229015552],
+            "camPos": [0, 0]
+        },
+        {
+            "type": "sprite",
+            "props": {
+                "path": "stagecurtains",
+                "position": [-508.000043683472, -296.00000635396],
+                "scale": [0.9, 0.9],
+                "scrollFactor": [1.3, 1.3],
+                "antialiasing": true
+            }
+        }
+    ]
+}

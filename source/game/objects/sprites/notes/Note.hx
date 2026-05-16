@@ -18,11 +18,15 @@ class Note extends FunkinSprite {
 	public var mustPress:Bool = false;
 	public var tooLate:Bool = false;
 
+	public var length:Float = 0;
+
 	public var keys:Int = 4;
 
 	public var strum:StrumNote;
 
 	var noteColors:Array<String> = ['purple', 'blue', 'green', 'red'];
+
+	public static var notesAnim:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
 
 	public function new(strumTime:Float, keys:Int, x:Float, y:Float, isSustain:Bool, noteSkinData:ObjectData, noteSkin:String, direction:Int = 0,
 			?noteType:String = 'normal') {
@@ -39,8 +43,12 @@ class Note extends FunkinSprite {
 	}
 
 	public function noteLoad(noteSkinData:ObjectData) {
-		loadProps(noteSkinData, 'noteskins/$noteSkin');
-		playAnim(noteColors[direction]+"Scroll", true);
+		loadProps(noteSkinData, 'noteskins/$noteSkin/strumnotes');
+		if (!isSustain)
+			playAnim(noteColors[direction]+"Scroll", true);
+		else
+			playAnim((notesAnim[direction]).toLowerCase()+"Hold");
+			
 	}
 
 	override function update(elapsed:Float) {

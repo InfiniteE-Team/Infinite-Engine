@@ -14,8 +14,8 @@ class StrumNote extends FunkinSprite {
 
 	public function strumLoad(x:Float, y:Float, noteSkinData:ObjectData) {
 		setPosition(x, y);
-		loadProps(noteSkinData, 'noteskins/$noteSkin');
-
+		loadProps(noteSkinData, 'noteskins/$noteSkin/strumnotes');
+		// count for anims with the same name: "static", "confirm" and "pressed" yep.
 		var counts:Map<String, Int> = new Map();
 		for (anim in noteSkinData.anims) {
 			var c = counts.exists(anim.name) ? counts.get(anim.name) : 0;

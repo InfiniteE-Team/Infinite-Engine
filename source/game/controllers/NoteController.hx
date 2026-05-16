@@ -36,14 +36,17 @@ class NoteController {
 	var keys:Int = 4;
 	var spacing:Float = 0;
 
+	var input:InputController = new InputController();
+
 	public var scrollSpeed:Float = 1.0;
 
 	// configs
 	public var isDownscroll:Bool = false;
 
-	public function new(daSong:SongConfig, isDownscroll:Bool) {
+	public function new(daSong:SongConfig, isDownscroll:Bool, isGhostTapping:Bool) {
 		this.daSong = daSong;
 		this.isDownscroll = isDownscroll;
+		input.isGhostTapping = isGhostTapping;
 		loadJson();
 		for (i in 0...daSong.chars.length) {
 			charStrumOffsets.set(daSong.chars[i].id, strums.length);
@@ -61,12 +64,17 @@ class NoteController {
 		else if (globalData != null)
 			noteSkin = globalData.noteSkin;
 
-		var noteDataPath:String = 'noteskins/$noteSkin/skin';
+		// strumnotes
+		var noteDataPath:String = 'noteskins/$noteSkin/strumnotes';
 		noteSkinData = UtilsData.readJson(Paths.getPath('data/$noteDataPath', "json"));
 
 		keys = noteSkinData.keys ?? 4;
 		spacing = noteSkinData.spacing ?? 0;
 		scrollSpeed = daSong.speed ?? 1.2;
+
+		// splashes
+
+		// hold splashes
 
 		trace("Note Skin JSON loaded");
 	}
@@ -77,6 +85,8 @@ class NoteController {
 			strum.ID = i;
 			strum.strumLoad(x + i * (112 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props);
 			strum.playAnim('static');
+			if (!daSong.strumsVisible)
+				strum.visible = false;
 			strums.add(strum);
 		}
 	}
@@ -90,37 +100,53 @@ class NoteController {
 			var note = unspawnNotes[0];
 
 			if (isDownscroll && note.y > FlxG.height + 200) {
-				note.kill();
-				continue;
-			}
-			if (!isDownscroll && note.y < -200) {
-				note.kill();
+				unspawnNotes.shift();
+				note.destroy();
 				continue;
 			}
 
 			if (note.strumTime - songTime < 2000) {
-				notes.add(note);
+				if (note.isSustain)
+					sustains.add(note);
+				else
+					notes.add(note);
 				unspawnNotes.shift();
 			} else
 				break;
 		}
 
+		var toDestroy:Array<Note> = [];
+
 		for (note in notes.members) {
 			if (note == null)
 				continue;
-
 			note.x = note.strum.x;
-
 			if (isDownscroll)
 				note.y = note.strum.y - ((note.strumTime - songTime) * scrollSpeed);
 			else
 				note.y = note.strum.y + ((note.strumTime - songTime) * scrollSpeed);
 
-			if (note.y < -200 && !isDownscroll)
-				note.kill();
-			if (note.y > FlxG.height + 200 && isDownscroll)
-				note.kill();
+			if (note.isSustain)
+				note.scale.y = (note.length * scrollSpeed) / note.frameHeight;
+
+			if (note.isSustain && note.strumTime + note.length < songTime)
+				toDestroy.push(note);
+			else if (note.y < -200 && !isDownscroll)
+				toDestroy.push(note);
+			else if (note.y > FlxG.height + 200 && isDownscroll)
+				toDestroy.push(note);
 		}
+
+		for (note in toDestroy)
+			destroyNotes(note);
+	}
+
+	public function destroyNotes(note:Note) {
+		if (note.isSustain)
+			sustains.remove(note, true);
+		else
+			notes.remove(note, true);
+		note.destroy();
 	}
 
 	public function getHittableNote(charId:String, dir:Int, mustPress:Bool = true):Note {
@@ -141,6 +167,7 @@ class NoteController {
 		return null;
 	}
 
+	// Creation or Generation for Notes
 	public function generateNotes(songTime:Float, daSong:SongConfig) {
 		for (data in daSong.songData.notes) {
 			// char info
@@ -160,19 +187,34 @@ class NoteController {
 				continue;
 
 			// param for Note positions in strum groups
-			var note = new Note(data.time, keys, strum.x, 0, data.length > 0, noteSkinData.props, noteSkin, data.lane);
+			var note = new Note(data.time, keys, strum.x, 0, false, noteSkinData.props, noteSkin, data.lane);
 			note.ID = globalLane;
 			note.direction = globalLane;
 			note.strumTime = data.time;
 			note.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
+			if (!daSong.strumsVisible)
+				note.visible = false;
 
 			note.strum = strum;
 
 			note.noteType = data.type;
 
-			if (data.length > 0)
-				note.isSustain = true;
+			if (data.length > 0) {
+				var sustain = new Note(data.time, keys, strum.x, 0, data.length > 0, noteSkinData.props, noteSkin, data.lane);
+				sustain.ID = globalLane;
+				sustain.direction = globalLane;
+				sustain.strumTime = data.time;
+				sustain.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
+				if (!daSong.strumsVisible)
+					sustain.visible = false;
 
+				sustain.strum = strum;
+
+				sustain.noteType = data.type;
+				sustain.length = data.length;
+				sustain.isSustain = true;
+				unspawnNotes.push(sustain);
+			}
 			unspawnNotes.push(note);
 		}
 

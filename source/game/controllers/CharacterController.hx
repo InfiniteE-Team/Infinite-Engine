@@ -7,11 +7,13 @@ import core.assets.FunkinObjectRegistry;
 import game.controllers.NoteController;
 import core.config.Controls;
 import game.objects.sprites.notes.Note;
+import flixel.group.FlxGroup.FlxTypedGroup;
 
 class CharacterController extends FunkinObjectRegistry {
 	public var isPlayer:Bool = true;
 
-	var chars:Character;
+	public var chars:Character;
+
 	var control:Controls;
 
 	public static var namesPlayer:Array<String> = ['bf', 'boyfriend', 'player'];
@@ -28,15 +30,15 @@ class CharacterController extends FunkinObjectRegistry {
 		control = Main.controls;
 	}
 
-	public function loadCharacter(id:String, name:String, role:String):FunkinSprite {
+	public function loadCharacter(id:String, name:String, role:String, targetGroup:FlxTypedGroup<flixel.FlxBasic>):FunkinSprite {
 		if (existsId(id)) {
 			return get(id);
 		}
 		chars = new Character(id, name);
 		registry.set(id, chars);
 		for (layer in chars.layers)
-			PlayState.instance.add(layer);
-		PlayState.instance.add(chars);
+			targetGroup.add(layer);
+		targetGroup.add(chars);
 
 		if (namesPlayer.contains(role))
 			playerChars.push(chars);
@@ -50,41 +52,40 @@ class CharacterController extends FunkinObjectRegistry {
 		for (char in playerChars) {
 			var charStrums = noteController.getCharStrums(char.id);
 			for (i in 0...control.noteKeys.length) {
-				if (i >= char.notesAnim.length)
+				if (i >= Note.notesAnim.length)
 					continue;
 
 				var note = input.handleInput(i, noteController, char.id);
 
 				if (input.isPressed(i)) {
 					if (note != null) {
-						char.playAnim('sing${char.notesAnim[i]}', true);
+						char.playAnim('sing${Note.notesAnim[i]}', true);
 						char.singCountTime = 0;
 						char.isSing = true;
 						char.isMiss = false;
 						charStrums[i].playAnim('confirm', true);
 					} else if (input.justPressed(i)) {
 						charStrums[i].playAnim('pressed', true);
-						char.playAnim('sing${char.notesAnim[i]}-miss', true);
+						char.playAnim('sing${Note.notesAnim[i]}-miss', true);
 						char.isMiss = true;
-					} else if (charStrums[i].isFinished('confirm')) {
-						charStrums[i].playAnim('pressed', true);
-						char.isSing = false;
-						char.isMiss = false;
+						/*
+						if (!input.isGhostTapping) {
+						}*/
 					}
 				} else {
 					// miss Note detection yep
+					char.isSing = false;
+					char.isMiss = false;
 					for (note in noteController.notes.members) {
 						if (note == null || !note.alive || !note.mustPress)
 							continue;
 						if (note.strum == charStrums[i] && note.tooLate) {
 							note.alpha = 0.3;
-							char.playAnim('sing${char.notesAnim[i]}-miss', true);
+							char.playAnim('sing${Note.notesAnim[i]}-miss', true);
 							char.isMiss = true;
 						}
 					}
 					charStrums[i].playAnim('static', true);
-					char.isSing = false;
-					char.isMiss = false;
 				}
 			}
 		}
@@ -99,13 +100,20 @@ class CharacterController extends FunkinObjectRegistry {
 					charStrums[i].playAnim('confirm', true);
 					note.wasGoodHit = true;
 					note.kill();
-					char.playAnim('sing${char.notesAnim[i]}', true);
+					char.playAnim('sing${Note.notesAnim[i]}', true);
 					char.singCountTime = 0;
 					char.isSing = true;
 				} else
 					charStrums[i].playAnim('static', true);
 			}
 		}
+	}
+
+	public function isPlayerMissing():Bool {
+		for (char in playerChars)
+			if (char.isMiss)
+				return true;
+		return false;
 	}
 
 	public function removeChar(id:String):Void {

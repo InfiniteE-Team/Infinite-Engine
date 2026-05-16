@@ -43,5 +43,5 @@ typedef IconData = {
     var ?bumpInBeats:Bool;
     var ?stepTempo:Float;
 
-    var anims:Array<AnimData>;
+    var ?anims:Array<AnimData>;
 }

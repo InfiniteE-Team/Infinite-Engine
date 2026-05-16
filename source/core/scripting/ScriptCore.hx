@@ -30,6 +30,14 @@ class ScriptCore {
 		modifiedTimes.push(sys.FileSystem.stat(path).mtime.getTime());
 	}
 
+	public function exposeStatics(cls:Class<Dynamic>) {
+		for (field in Type.getClassFields(cls)) {
+			var value = Reflect.getProperty(cls, field);
+			for (script in scripts)
+				script.access.setVariable(field, value);
+		}
+	}
+
 	public function call(name:String, args:Array<Dynamic>):Dynamic {
 		var result:Dynamic = null;
 		for (script in scripts)
@@ -55,5 +63,13 @@ class ScriptCore {
 		scripts[i].tryExecute(sys.io.File.getContent(paths[i]));
 		modifiedTimes[i] = sys.FileSystem.stat(paths[i]).mtime.getTime();
 		trace('Reload ${paths[i]}');
+	}
+
+	public function destroy()
+	{
+		scripts = null;
+		paths = null;
+		modifiedTimes = null;
+		state = null;
 	}
 }

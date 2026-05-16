@@ -8,6 +8,7 @@ import game.controllers.NoteController;
 // visuals
 import core.assets.FunkinSprite;
 import game.controllers.CharacterController;
+import game.objects.sprites.Stage;
 // songs
 import core.rhythm.RhythmCore;
 import core.rhythm.audio.GameAudio;
@@ -20,7 +21,6 @@ class PlayState extends MusicBeatState {
 
 	public var isStoryMode:Bool = false;
 
-	public var chars:CharacterController;
 	// cameras
 	public var camGame:Camera;
 	public var camHUD:Camera;
@@ -33,6 +33,10 @@ class PlayState extends MusicBeatState {
 	public var curSong:String = 'fresh';
 
 	public var noteController:NoteController;
+
+	// visuals
+	public var chars:CharacterController;
+	public var stage:Stage;
 
 	// configs
 	public var saveData:SaveData = new SaveData();
@@ -50,7 +54,7 @@ class PlayState extends MusicBeatState {
 
 		SONG.configSong(curSong, '');
 
-		addCharacters();
+		buildStageandChars();
 
 		initSong();
 
@@ -71,14 +75,6 @@ class PlayState extends MusicBeatState {
 		#end
 	}
 
-	public function addCharacters() {
-		chars = new CharacterController('id_');
-		add(chars);
-		for (data in SONG.chars) {
-			chars.loadCharacter(data.id, data.name, data.role);
-		}
-	}
-
 	public function addCameras() {
 		camGame = new Camera();
 		camHUD = new Camera();
@@ -87,14 +83,35 @@ class PlayState extends MusicBeatState {
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD, false);
 
-		cameraController = new CameraController(camGame,camHUD);
+		cameraController = new CameraController(camGame, camHUD);
+	}
+
+	public function buildStageandChars() {
+		script.call("buildStage", []);
+
+		stage = new Stage(SONG.stage);
+		stage.cameras = [camGame];
+
+		cameraController.defaultZoom = stage.defaultZoom;
+		add(stage);
+l
+		chars = new CharacterController('id_');
+		stage.charLayer.add(chars);
+		for (data in SONG.chars) {
+			chars.loadCharacter(data.id, data.name, data.role, stage.charLayer);
+			stage.applyCharProps(chars.get(data.id), data.id);
+		}
+
+		script.call("postBuildStage", []);
 	}
 
 	function buildStrumsandNotes() {
-		noteController = new NoteController(SONG, saveData.downscroll);
+		noteController = new NoteController(SONG, saveData.downscroll, saveData.ghosttaping);
 		noteController.strums.cameras = [camHUD];
+		noteController.sustains.cameras = [camHUD];
 		noteController.notes.cameras = [camHUD];
 		add(noteController.strums);
+		add(noteController.sustains);
 		add(noteController.notes);
 	}
 
@@ -136,6 +153,8 @@ class PlayState extends MusicBeatState {
 
 		gameAudio.resyncVocals();
 
+		gameAudio.volumenVocs(SONG,chars.isPlayerMissing(),elapsed);
+
 		cameraController.update(elapsed);
 
 		noteController.update(RhythmCore.songPosition);
@@ -153,7 +172,7 @@ class PlayState extends MusicBeatState {
 
 		if (beat % 4 == 0)
 			cameraController.bumpZoom();
-		
+
 		for (data in SONG.chars) {
 			chars.get(data.id).dance();
 		}
@@ -178,9 +197,13 @@ class PlayState extends MusicBeatState {
 		if (noteController != null)
 			noteController.destroy();
 
+		if (stage != null)
+			stage.destroy();
+
 		instance = null;
 		chars = null;
 		gameAudio = null;
+		stage = null;
 
 		// cameras
 		camGame = null;

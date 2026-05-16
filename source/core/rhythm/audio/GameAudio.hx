@@ -3,6 +3,7 @@ package core.rhythm.audio;
 import core.assets.Paths;
 import flixel.sound.FlxSound;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import core.json.song.SongData.SongConfig;
 
 class GameAudio extends FlxTypedGroup<FlxSound> {
 	// Class for the game audio manager
@@ -38,6 +39,17 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 			vocals.time = inst.time;
 		}
 		forEachAlive(function(s:FlxSound) s.play());
+	}
+
+	public function volumenVocs(SONG:SongConfig,isMiss:Bool,elapsed:Float)
+	{
+		if (!SONG.vocSeparated || SONG.needVoices){
+			if (isMiss)
+				vocals.volume = 0;
+			else if (vocals.volume < 1)
+				vocals.volume = Math.min(1, vocals.volume + elapsed);
+		}
+
 	}
 
 	public function pauseAll():Void {

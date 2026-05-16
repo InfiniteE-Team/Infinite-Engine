@@ -25,7 +25,9 @@ typedef ObjectData = {
 
 	var ?antialiasing:Bool;
 
+	// shaders for sprites
 	var ?blend:String;
+	var ?shader:String;
 	
     var ?frameScale:Array<Int>;
 

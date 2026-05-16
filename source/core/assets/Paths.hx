@@ -33,6 +33,8 @@ class Paths {
 					return findLib('scripts/states/$fileName.hx');
 				case "songScript":
 					return findLib('songs/${PlayState.SONG.songName.toLowerCase()}/scripts/$fileName.hx');
+				case "frag":
+					return findLib('shaders/$fileName.frag');
 				default:
 					return findLib(fileName);
 			}

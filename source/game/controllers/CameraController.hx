@@ -9,10 +9,15 @@ class CameraController {
 
 	public var zoomEnabled:Bool = true;
 
+	// === CAMERA ===
+	public static inline var CAM_LERP_SPEED:Float = 2.4;
+	public static inline var CAM_ZOOM_AMOUNT:Float = 0.015;
+	public static inline var CAM_HUD_ZOOM_AMOUNT:Float = 0.03;
+	public static inline var CAM_NOTE_OFFSET:Float = 30.0;
+
 	public function new(camGame:Camera, camHUD:Camera) {
 		this.camGame = camGame;
 		this.camHUD = camHUD;
-		camGame.zoom = defaultZoom;
 		resolveZoom();
 	}
 

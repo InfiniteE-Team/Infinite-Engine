@@ -10,6 +10,15 @@ class InputController {
 	public static inline var BAD_WINDOW:Float = 135.0;
 	public static inline var SHIT_WINDOW:Float = 166.0;
 
+	// === HEALTH VALUES ===
+	public static inline var SICK_HEALTH:Float = 0.1;
+	public static inline var GOOD_HEALTH:Float = 0.05;
+	public static inline var BAD_HEALTH:Float = -0.03;
+	public static inline var SHIT_HEALTH:Float = -0.03;
+	public static inline var MISS_HEALTH:Float = -0.04;
+
+	public var isGhostTapping:Bool = true;
+
 	var control:Controls;
 
 	public function new() {

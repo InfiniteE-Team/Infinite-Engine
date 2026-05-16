@@ -13,6 +13,7 @@ typedef MetaData = {
 	var song:String;
 	var bpm:Float;
 	var speed:Float;
+	var ?stage:String;
 	var ?needVoices:Bool;
 	var ?vocSeparated:Bool;
 }
@@ -40,6 +41,8 @@ typedef CharDataJson = {
 	var ?camPos:Array<Float>;
 
 	var ?noteSkin:String;
+
+	var ?strumsVisible:Bool;
 }
 
 typedef EventsData = {
@@ -64,6 +67,7 @@ class SongConfig {
 	public var bpmSong:Float = 120;
 	public var speed:Float = 1.2;
 	public var needVoices:Bool = true;
+	public var stage:String = 'stage';
 
 	public var chars:Array<Dynamic> = [];
 
@@ -73,10 +77,18 @@ class SongConfig {
 
 	public var noteTime:Float = 0;
 
+	public var strumsVisible:Bool = true;
+
+	public var vocSeparated:Bool = false;
+
 	public function new() {}
 
 	public function configSong(curSong:String, diff:String) {
-		songData = UtilsData.readJson(Paths.getPath('songs/$curSong/charts/$curSong$diff', 'json'));
+		var raw:Dynamic = UtilsData.readJson(Paths.getPath('songs/$curSong/charts/$curSong$diff', 'json'));
+		if (raw == null) return;
+		var converted = ChartPorter.tryConvert(raw);
+		songData = converted ?? cast raw;
+
 		if (songData == null)
 			return;
 
@@ -84,6 +96,8 @@ class SongConfig {
 		bpmSong = songData.meta.bpm ?? 120;
 		speed = songData.meta.speed ?? 1.2;
 		needVoices = songData.meta.needVoices ?? true;
+		stage = songData.meta.stage ?? 'stage';
+		vocSeparated = songData.meta.vocSeparated ?? false;
 
 		for (note in songData.notes) {
 			noteLane = note.lane ?? 0;
@@ -94,14 +108,16 @@ class SongConfig {
 
 		chars = songData.gameplay.chars;
 
-		for (i in 0...chars.length)
+		for (i in 0...chars.length){
 			noteSkin = chars[i].noteSkin ?? 'default';
+			strumsVisible = chars[i].strumsVisible ?? true;
+		}
 	}
 }
-
+/*
 enum Directions {
 	LEFT;
 	DOWN;
 	UP;
 	RIGHT;
-}
+}*/
