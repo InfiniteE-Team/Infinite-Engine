@@ -94,7 +94,7 @@ class PlayState extends MusicBeatState {
 
 		cameraController.defaultZoom = stage.defaultZoom;
 		add(stage);
-l
+
 		chars = new CharacterController('id_');
 		stage.charLayer.add(chars);
 		for (data in SONG.chars) {
