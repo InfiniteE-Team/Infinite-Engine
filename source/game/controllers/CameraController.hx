@@ -1,5 +1,9 @@
 package game.controllers;
+
+import flixel.FlxObject;
 import game.objects.Camera;
+import flixel.math.FlxMath;
+import game.objects.sprites.Character;
 
 class CameraController {
 	// yep
@@ -7,17 +11,24 @@ class CameraController {
 	public var camHUD:Camera;
 	public var defaultZoom:Float = 1.0;
 
+	public var camPoint:FlxObject;
+
 	public var zoomEnabled:Bool = true;
 
+	public var followChar:Character = null;
+
+	public var existsCamEvents:Bool = false;
+
 	// === CAMERA ===
-	public static inline var CAM_LERP_SPEED:Float = 2.4;
-	public static inline var CAM_ZOOM_AMOUNT:Float = 0.015;
-	public static inline var CAM_HUD_ZOOM_AMOUNT:Float = 0.03;
-	public static inline var CAM_NOTE_OFFSET:Float = 30.0;
+	public var lerp:Float = 0.04;
 
 	public function new(camGame:Camera, camHUD:Camera) {
 		this.camGame = camGame;
 		this.camHUD = camHUD;
+
+		camPoint = new FlxObject(0, 0, 1, 1);
+		camGame.follow(camPoint, LOCKON, lerp);
+
 		resolveZoom();
 	}
 
@@ -26,27 +37,37 @@ class CameraController {
 	}
 
 	public function update(elapsed:Float):Void {
+		if (!existsCamEvents){
+			if (followChar != null) {
+				var pos = followChar.getCamPosition();
+				moveCameraTo(pos.x, pos.y);
+			}
+		}
 		lerpZoom(elapsed);
 	}
 
 	public function lerpZoom(elapsed:Float):Void {
-		var lerpVal:Float = flixel.math.FlxMath.bound(elapsed * 3.125, 0, 1);
-		camGame.zoom = flixel.math.FlxMath.lerp(camGame.zoom, defaultZoom, lerpVal);
-		camHUD.zoom  = flixel.math.FlxMath.lerp(camHUD.zoom, 1.0, lerpVal);
+		var lerpVal:Float = FlxMath.bound(elapsed * 3.125, 0, 1);
+		camGame.zoom = FlxMath.lerp(camGame.zoom, defaultZoom, lerpVal);
+		camHUD.zoom = FlxMath.lerp(camHUD.zoom, 1.0, lerpVal);
 	}
 
 	public function bumpZoom() {
 		if (!zoomEnabled)
 			return;
-		var bumpLimit:Float = 1.35;
-		if (camGame.zoom < bumpLimit) {
+		if (camGame.zoom < 1.35) {
 			camGame.zoom += 0.015;
 			camHUD.zoom += 0.03;
 		}
 	}
 
-	public function destroy()
-	{
+	public function moveCameraTo(x:Float, y:Float) {
+		camPoint.setPosition(x, y);
+	}
 
+	public function destroy() {
+		if (camPoint != null)
+			camPoint.destroy();
+		camPoint = null;
 	}
 }

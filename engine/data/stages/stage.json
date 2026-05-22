@@ -6,6 +6,7 @@
         {
             "type": "sprite",
             "props": {
+                "name": "stageback",
                 "path": "stageback",
                 "position": [-100, -200],
                 "scrollFactor": [0.9, 0.9],
@@ -15,6 +16,7 @@
         {
             "type": "sprite",
             "props": {
+                "name": "stage_light_LEFT",
                 "path": "stage_light",
                 "position": [-34, -110],
                 "scrollFactor": [1, 1],
@@ -26,6 +28,7 @@
         {
             "type": "sprite",
             "props": {
+                "name": "stage_light_RIGHT",
                 "path": "stage_light",
                 "position": [1126, -110],
                 "scrollFactor": [1, 1],
@@ -37,6 +40,7 @@
         {
             "type": "sprite",
             "props": {
+                "name": "stagefront",
                 "path": "stagefront",
                 "position": [-350, 600],
                 "scale": [1.1, 1.1],
@@ -65,6 +69,7 @@
         {
             "type": "sprite",
             "props": {
+                "name": "stagecurtains",
                 "path": "stagecurtains",
                 "position": [-508.000043683472, -296.00000635396],
                 "scale": [0.9, 0.9],

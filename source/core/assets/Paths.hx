@@ -4,9 +4,11 @@ import animate.FlxAnimateFrames;
 import sys.FileSystem;
 import game.PlayState;
 import flixel.graphics.frames.FlxAtlasFrames;
+import flixel.graphics.frames.FlxFramesCollection;
 
 class Paths {
 	static final libs = ["engine", "assets"];
+	private static var cache = new Map<String, Dynamic>();
 
 	public static function getPath(fileName:String, ?type:String = "default"):Dynamic {
 		try {
@@ -26,7 +28,7 @@ class Paths {
 				case "songAudio":
 					return findLib('songs/${PlayState.SONG.songName.toLowerCase()}/audio/$fileName.ogg');
 				case "animated":
-					return FlxAtlasFrames.fromSparrow(getPath(fileName, "image"), getPath("images/" + fileName, "xml"));
+					return getAnimated(fileName);
 				case "xml":
 					return findLib(fileName + '.xml');
 				case "class":
@@ -39,7 +41,7 @@ class Paths {
 					return findLib(fileName);
 			}
 		} catch (e:Dynamic) {
-			trace('Paths: "$fileName" not found: $e');
+			Trace.traceOnce('Paths: "$fileName" not found: $e');
 			return null;
 		}
 	}
@@ -65,26 +67,53 @@ class Paths {
 
 	public static function getAnimated(fileName:String):Dynamic {
 		// atlas texture
+		if (cache.exists(fileName))
+			return cache.get(fileName);
+
+		var result:Dynamic = null;
+
 		var folder = findLib('images/$fileName');
 		if (folder != null && FileSystem.exists('$folder/Animation.json'))
-			return FlxAnimateFrames.fromAnimate(folder);
+			result = FlxAnimateFrames.fromAnimate(folder);
 
-		var xml = findLib('images/$fileName.xml');
-		if (xml != null)
-			return FlxAtlasFrames.fromSparrow(getPath(fileName, 'image'), xml);
+		if (result == null) {
+			var xml = findLib('images/$fileName.xml');
+			if (xml != null)
+				result = FlxAtlasFrames.fromSparrow(getPath(fileName, 'image'), xml);
+		}
 
-		var txt = findLib('images/$fileName.txt');
-		if (txt != null)
-			return FlxAtlasFrames.fromLibGdx(getPath(fileName, 'image'), txt);
+		if (result == null) {
+			var txt = findLib('images/$fileName.txt');
+			if (txt != null)
+				result = FlxAtlasFrames.fromLibGdx(getPath(fileName, 'image'), txt);
+		}
 
-		var json = findLib('images/$fileName.json');
-		if (json != null)
-			return FlxAtlasFrames.fromTexturePackerJson(getPath(fileName, 'image'), json);
+		if (result == null) {
+			var json = findLib('images/$fileName.json');
+			if (json != null)
+				result = FlxAtlasFrames.fromTexturePackerJson(getPath(fileName, 'image'), json);
+		}
 
-		var png = findLib('images/$fileName.png');
-		if (png != null)
-			return png;
+		if (result == null) {
+			var png = findLib('images/$fileName.png');
+			if (png != null)
+				result = png;
+		}
 
-		return null;
+		if (result != null)
+			cache.set(fileName, result);
+
+		return result;
+	}
+
+	public static function clearCache():Void {
+		for (_ => asset in cache) {
+			if (asset is FlxFramesCollection)
+				(cast asset : FlxFramesCollection).destroy();
+			else if (asset is flixel.graphics.FlxGraphic)
+				(cast asset : flixel.graphics.FlxGraphic).destroy();
+		}
+		cache.clear();
+		FunkinSprite.cacheOffsets.clear();
 	}
 }

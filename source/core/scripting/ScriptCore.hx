@@ -20,7 +20,7 @@ class ScriptCore {
 			return;
 
 		var script = new RuleScript(null, null, sharedContext);
-		script.errorHandler = (e) -> trace('[Script] $path → ${e.message}');
+		script.errorHandler = (e) -> Trace.traceOnce('[Script] $path → ${e.message}');
 		script.superInstance = state;
 		script.access.setVariable("add", state.add);
 		script.access.setVariable("remove", state.remove);
@@ -62,7 +62,7 @@ class ScriptCore {
 		scripts[i].access.setVariable("remove", state.remove);
 		scripts[i].tryExecute(sys.io.File.getContent(paths[i]));
 		modifiedTimes[i] = sys.FileSystem.stat(paths[i]).mtime.getTime();
-		trace('Reload ${paths[i]}');
+		Trace.traceOnce('Reload ${paths[i]}');
 	}
 
 	public function destroy()

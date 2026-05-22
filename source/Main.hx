@@ -11,6 +11,7 @@ import flixel.FlxState;
 import game.PlayState;
 import core.config.Controls;
 import core.config.SaveData;
+import lime.app.Application;
 
 import core.json.engine.GlobalData.GlobalConfig;
 
@@ -37,8 +38,7 @@ class Main extends Sprite {
         configGame();
         addChild(new FlxGame(1280, 720, mainState, 60, 60, true, false));
         addChild(fps);
-        if (FlxG.keys.justPressed.F11)
-            toggleFullscreen();
+
         WindowConfig.applyAccentColor();
     }
 
@@ -48,8 +48,20 @@ class Main extends Sprite {
         save.loadConfig();
         controls = new Controls(save);
         globalData.configGlobal();
+
+        #if (DISCORD_ALLOWED && hxdiscord_rpc < "1.2.0")
+        core.api.DiscordAPI.init();
+        Application.current.onExit.add(function(exitCode:Int) {
+            core.api.DiscordAPI.shutdown();
+        });
+        #end
     }
 
-    public static function toggleFullscreen():Void
-		FlxG.fullscreen = !FlxG.fullscreen;
+    private function onKeyDown(e:openfl.events.KeyboardEvent):Void
+    {
+        if (e.keyCode == flash.ui.Keyboard.F11)
+        {
+            FlxG.fullscreen = !FlxG.fullscreen;
+        }
+    }
 }

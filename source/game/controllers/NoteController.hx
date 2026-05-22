@@ -2,6 +2,7 @@ package game.controllers;
 
 import core.json.objects.NoteSkinData;
 import game.objects.sprites.notes.Note;
+import game.objects.sprites.notes.NoteSustain;
 import game.objects.sprites.notes.StrumNote;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import utils.UtilsData;
@@ -24,7 +25,7 @@ class NoteController {
 
 	public var strums:FlxTypedGroup<StrumNote> = new FlxTypedGroup<StrumNote>();
 	public var notes:FlxTypedGroup<Note> = new FlxTypedGroup<Note>();
-	public var sustains:FlxTypedGroup<Note> = new FlxTypedGroup<Note>();
+	public var sustains:FlxTypedGroup<NoteSustain> = new FlxTypedGroup<NoteSustain>();
 
 	public var unspawnNotes:Array<Note> = [];
 
@@ -54,7 +55,7 @@ class NoteController {
 			var strumPos = daSong.chars[i].strumPos;
 			loadGenerateStrums(strumPos != null ? strumPos[0] : 0, strumPos != null ? strumPos[1] : 0);
 		}
-		trace("Created Strums");
+		Trace.traceOnce("Created Strums");
 	}
 
 	public function loadJson() {
@@ -76,15 +77,13 @@ class NoteController {
 
 		// hold splashes
 
-		trace("Note Skin JSON loaded");
+		Trace.traceOnce("Note Skin JSON loaded");
 	}
 
 	public function loadGenerateStrums(x:Float, y:Float) {
 		for (i in 0...keys) {
 			var strum = new StrumNote(x + i * (112 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props, noteSkin);
-			strum.ID = i;
-			strum.strumLoad(x + i * (112 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props);
-			strum.playAnim('static');
+			strum.playAnim('static'+i);
 			if (!daSong.strumsVisible)
 				strum.visible = false;
 			strums.add(strum);
@@ -106,8 +105,8 @@ class NoteController {
 			}
 
 			if (note.strumTime - songTime < 2000) {
-				if (note.isSustain)
-					sustains.add(note);
+				if (Std.isOfType(note, NoteSustain))
+					sustains.add(cast note);
 				else
 					notes.add(note);
 				unspawnNotes.shift();
@@ -121,20 +120,34 @@ class NoteController {
 			if (note == null)
 				continue;
 			note.x = note.strum.x;
-			if (isDownscroll)
-				note.y = note.strum.y - ((note.strumTime - songTime) * scrollSpeed);
-			else
-				note.y = note.strum.y + ((note.strumTime - songTime) * scrollSpeed);
+			note.y = isDownscroll ? note.strum.y - ((note.strumTime - songTime) * scrollSpeed) : note.strum.y + ((note.strumTime - songTime) * scrollSpeed);
 
-			if (note.isSustain)
-				note.scale.y = (note.length * scrollSpeed) / note.frameHeight;
-
-			if (note.isSustain && note.strumTime + note.length < songTime)
-				toDestroy.push(note);
-			else if (note.y < -200 && !isDownscroll)
+			if (note.y < -200 && !isDownscroll)
 				toDestroy.push(note);
 			else if (note.y > FlxG.height + 200 && isDownscroll)
 				toDestroy.push(note);
+		}
+
+		for (sustain in sustains.members) {
+			if (sustain == null)
+				continue;
+			sustain.x = sustain.strum.x;
+			sustain.y = isDownscroll ? sustain.strum.y - ((sustain.strumTime - songTime) * scrollSpeed) : sustain.strum.y
+				+ ((sustain.strumTime - songTime) * scrollSpeed);
+
+			sustain.scale.y = (sustain.length * scrollSpeed) / sustain.frameHeight;
+
+			if (sustain.endSprite != null) {
+				sustain.endSprite.x = sustain.x;
+				sustain.endSprite.y = sustain.y + sustain.height - sustain.endSprite.height;
+			}
+
+			if (sustain.strumTime + sustain.length < songTime)
+				toDestroy.push(sustain);
+			else if (sustain.y < -200 && !isDownscroll)
+				toDestroy.push(sustain);
+			else if (sustain.y > FlxG.height + 200 && isDownscroll)
+				toDestroy.push(sustain);
 		}
 
 		for (note in toDestroy)
@@ -142,8 +155,8 @@ class NoteController {
 	}
 
 	public function destroyNotes(note:Note) {
-		if (note.isSustain)
-			sustains.remove(note, true);
+		if (Std.isOfType(note, NoteSustain))
+			sustains.remove(cast note);
 		else
 			notes.remove(note, true);
 		note.destroy();
@@ -169,6 +182,11 @@ class NoteController {
 
 	// Creation or Generation for Notes
 	public function generateNotes(songTime:Float, daSong:SongConfig) {
+		if (daSong.songData == null) {
+			Trace.traceOnce('ERROR songData null, generated 0 notes');
+			return;
+		}
+
 		for (data in daSong.songData.notes) {
 			// char info
 			var charData = Lambda.find(daSong.chars, c -> c.id == data.char);
@@ -187,7 +205,7 @@ class NoteController {
 				continue;
 
 			// param for Note positions in strum groups
-			var note = new Note(data.time, keys, strum.x, 0, false, noteSkinData.props, noteSkin, data.lane);
+			var note = new Note(data.time, keys, strum.x, 0, noteSkinData.props, noteSkin, data.lane);
 			note.ID = globalLane;
 			note.direction = globalLane;
 			note.strumTime = data.time;
@@ -200,19 +218,18 @@ class NoteController {
 			note.noteType = data.type;
 
 			if (data.length > 0) {
-				var sustain = new Note(data.time, keys, strum.x, 0, data.length > 0, noteSkinData.props, noteSkin, data.lane);
+				var sustain = new NoteSustain(data.time, keys, strum.x, 0, noteSkinData.props, noteSkin, data.lane, data.length);
 				sustain.ID = globalLane;
 				sustain.direction = globalLane;
 				sustain.strumTime = data.time;
 				sustain.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
-				if (!daSong.strumsVisible)
-					sustain.visible = false;
-
 				sustain.strum = strum;
-
 				sustain.noteType = data.type;
-				sustain.length = data.length;
-				sustain.isSustain = true;
+				if (!daSong.strumsVisible) {
+					sustain.visible = false;
+					if (sustain.endSprite != null)
+						sustain.endSprite.visible = false;
+				}
 				unspawnNotes.push(sustain);
 			}
 			unspawnNotes.push(note);

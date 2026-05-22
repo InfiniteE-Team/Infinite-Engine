@@ -69,7 +69,7 @@ class SongConfig {
 	public var needVoices:Bool = true;
 	public var stage:String = 'stage';
 
-	public var chars:Array<Dynamic> = [];
+	public var chars:Array<CharDataJson> = [];
 
 	public var noteLane:Int = 0;
 

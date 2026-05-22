@@ -6,7 +6,6 @@ import core.rhythm.RhythmCore;
 import game.controllers.InputController;
 
 class Note extends FunkinSprite {
-	public var isSustain:Bool = false;
 	public var noteType:String = 'normal';
 	public var direction:Int = 0;
 	public var noteSkin:String = 'default';
@@ -18,17 +17,11 @@ class Note extends FunkinSprite {
 	public var mustPress:Bool = false;
 	public var tooLate:Bool = false;
 
-	public var length:Float = 0;
-
 	public var keys:Int = 4;
 
 	public var strum:StrumNote;
 
-	var noteColors:Array<String> = ['purple', 'blue', 'green', 'red'];
-
-	public static var notesAnim:Array<String> = ['LEFT', 'DOWN', 'UP', 'RIGHT'];
-
-	public function new(strumTime:Float, keys:Int, x:Float, y:Float, isSustain:Bool, noteSkinData:ObjectData, noteSkin:String, direction:Int = 0,
+	public function new(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:ObjectData, noteSkin:String, direction:Int = 0,
 			?noteType:String = 'normal') {
 		super(x, y);
 
@@ -36,7 +29,6 @@ class Note extends FunkinSprite {
 		this.keys = keys;
 		this.direction = direction;
 		this.strumTime = strumTime;
-		this.isSustain = isSustain;
 		this.noteType = noteType;
 		this.noteSkin = noteSkin;
 		noteLoad(noteSkinData);
@@ -44,11 +36,7 @@ class Note extends FunkinSprite {
 
 	public function noteLoad(noteSkinData:ObjectData) {
 		loadProps(noteSkinData, 'noteskins/$noteSkin/strumnotes');
-		if (!isSustain)
-			playAnim(noteColors[direction]+"Scroll", true);
-		else
-			playAnim((notesAnim[direction]).toLowerCase()+"Hold");
-			
+		playAnim('note$direction-Scroll', true);
 	}
 
 	override function update(elapsed:Float) {
@@ -65,9 +53,5 @@ class Note extends FunkinSprite {
 			if (RhythmCore.songPosition > strumTime + InputController.SHIT_WINDOW)
 				tooLate = true;
 		}
-	}
-
-	public function config() {
-		if (isSustain) {} else {}
 	}
 }

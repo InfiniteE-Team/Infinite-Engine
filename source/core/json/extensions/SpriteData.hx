@@ -28,12 +28,12 @@ typedef ObjectData = {
 	// shaders for sprites
 	var ?blend:String;
 	var ?shader:String;
-	
-    var ?frameScale:Array<Int>;
 
 	var ?anims:Array<AnimData>;
 
 	var ?firstAnim:String;
+
+	var ?frameScale:Array<Int>;
 }
 
 // Data for anims
@@ -42,6 +42,8 @@ typedef AnimData = {
 	var name:String;
 
 	var ?filePath:EitherType<String, Array<String>>;
+
+	var ?shaderColor:Array<{r:Array<String>, g:Array<String>, b:Array<String>}>;
 
 	var ?looped:Bool;
 	var ?framerate:Float;
@@ -53,4 +55,8 @@ typedef AnimData = {
 	var ?flipX:Bool;
 
     var ?flipY:Bool;
+
+	var ?frameScale:Array<Int>;
+
+	var ?suffix:String;
 }

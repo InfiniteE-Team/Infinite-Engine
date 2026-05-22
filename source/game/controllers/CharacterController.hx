@@ -8,6 +8,7 @@ import game.controllers.NoteController;
 import core.config.Controls;
 import game.objects.sprites.notes.Note;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import core.rhythm.audio.GameAudio;
 
 class CharacterController extends FunkinObjectRegistry {
 	public var isPlayer:Bool = true;
@@ -22,10 +23,11 @@ class CharacterController extends FunkinObjectRegistry {
 
 	var playerChars:Array<Character> = [];
 	var opponentChars:Array<Character> = [];
+	var gfChars:Array<Character> = [];
 
 	var input:InputController = new InputController();
 
-	public function new(id:String, ?x:Float = 0, ?y:Float = 0) {
+	public function new(?id:String, ?x:Float = 0, ?y:Float = 0) {
 		super(id, x, y);
 		control = Main.controls;
 	}
@@ -44,32 +46,32 @@ class CharacterController extends FunkinObjectRegistry {
 			playerChars.push(chars);
 		else if (namesOpponent.contains(role))
 			opponentChars.push(chars);
+		else if (namesGf.contains(role))
+			gfChars.push(chars);
 
 		return chars;
 	}
 
-	public function isSinging(noteController:NoteController, ?dir:Int) {
+	public function isSinging(noteController:NoteController,gameAudio:GameAudio) {
 		for (char in playerChars) {
 			var charStrums = noteController.getCharStrums(char.id);
 			for (i in 0...control.noteKeys.length) {
-				if (i >= Note.notesAnim.length)
-					continue;
-
 				var note = input.handleInput(i, noteController, char.id);
 
 				if (input.isPressed(i)) {
 					if (note != null) {
-						char.playAnim('sing${Note.notesAnim[i]}', true);
+						char.playAnim(Character.getCharAnim(note.direction), true);
 						char.singCountTime = 0;
 						char.isSing = true;
 						char.isMiss = false;
-						charStrums[i].playAnim('confirm', true);
+						charStrums[i].playAnim('confirm'+i, true);
 					} else if (input.justPressed(i)) {
-						charStrums[i].playAnim('pressed', true);
-						char.playAnim('sing${Note.notesAnim[i]}-miss', true);
+						charStrums[i].playAnim('press'+i, true);
+						char.playAnim('${Character.getCharAnim(i)}-miss', true);
 						char.isMiss = true;
+						gameAudio.onMiss();
 						/*
-						if (!input.isGhostTapping) {
+							if (!input.isGhostTapping) {
 						}*/
 					}
 				} else {
@@ -81,11 +83,12 @@ class CharacterController extends FunkinObjectRegistry {
 							continue;
 						if (note.strum == charStrums[i] && note.tooLate) {
 							note.alpha = 0.3;
-							char.playAnim('sing${Note.notesAnim[i]}-miss', true);
+							char.playAnim('${Character.getCharAnim(note.direction)}-miss', true);
 							char.isMiss = true;
+							gameAudio.onMiss();
 						}
 					}
-					charStrums[i].playAnim('static', true);
+					charStrums[i].playAnim('static'+i, true);
 				}
 			}
 		}
@@ -97,16 +100,25 @@ class CharacterController extends FunkinObjectRegistry {
 				var note = noteController.getHittableNote(char.id, i, false);
 
 				if (note != null) {
-					charStrums[i].playAnim('confirm', true);
+					charStrums[i].playAnim('confirm'+i, true);
 					note.wasGoodHit = true;
 					note.kill();
-					char.playAnim('sing${Note.notesAnim[i]}', true);
+					char.playAnim(Character.getCharAnim(note.direction), true);
 					char.singCountTime = 0;
 					char.isSing = true;
 				} else
-					charStrums[i].playAnim('static', true);
+					charStrums[i].playAnim('static'+i, true);
 			}
 		}
+	}
+
+	public function danceAll():Void {
+		for (c in playerChars)
+			c.dance();
+		for (c in opponentChars)
+			c.dance();
+		for (c in gfChars)
+			c.dance();
 	}
 
 	public function isPlayerMissing():Bool {
@@ -130,9 +142,24 @@ class CharacterController extends FunkinObjectRegistry {
 		registry.remove(id);
 	}
 
+	public function getActiveSingingChar():Null<Character> {
+		for (c in playerChars)
+			if (c.isSing)
+				return c;
+		for (c in opponentChars)
+			if (c.isSing)
+				return c;
+		if (opponentChars.length > 0)
+			return opponentChars[0];
+		if (playerChars.length > 0)
+			return playerChars[0];
+		return null;
+	}
+
 	override public function destroy():Void {
 		playerChars = null;
 		opponentChars = null;
+		gfChars = null;
 		super.destroy();
 	}
 }

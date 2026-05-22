@@ -87,7 +87,7 @@
     "antialiasing": true,
     "anims": [
       {
-        "name": "purpleScroll",
+        "name": "note0-Scroll",
         "prefix": "noteLeft",
         "framerate": 24,
         "offsets": [
@@ -97,7 +97,7 @@
         "filePath": "notes"
       },
       {
-        "name": "blueScroll",
+        "name": "note1-Scroll",
         "prefix": "noteDown",
         "framerate": 24,
         "offsets": [
@@ -107,7 +107,7 @@
         "filePath": "notes"
       },
       {
-        "name": "greenScroll",
+        "name": "note2-Scroll",
         "prefix": "noteUp",
         "framerate": 24,
         "offsets": [
@@ -117,7 +117,7 @@
         "filePath": "notes"
       },
       {
-        "name": "redScroll",
+        "name": "note3-Scroll",
         "prefix": "noteRight",
         "framerate": 24,
         "offsets": [
@@ -127,7 +127,7 @@
         "filePath": "notes"
       },
       {
-        "name": "leftHold",
+        "name": "note0-Hold",
         "prefix": "",
         "indices": [
           0
@@ -141,7 +141,7 @@
         "filePath": "NOTE_hold_assets"
       },
       {
-        "name": "downHold",
+        "name": "note1-Hold",
         "prefix": "",
         "indices": [
           2
@@ -155,7 +155,7 @@
         "filePath": "NOTE_hold_assets"
       },
       {
-        "name": "upHold",
+        "name": "note2-Hold",
         "prefix": "",
         "indices": [
           4
@@ -169,7 +169,7 @@
         "filePath": "NOTE_hold_assets"
       },
       {
-        "name": "rightHold",
+        "name": "note3-Hold",
         "prefix": "",
         "indices": [
           6
@@ -183,7 +183,7 @@
         "filePath": "NOTE_hold_assets"
       },
       {
-        "name": "leftHoldEnd",
+        "name": "note0-HoldEnd",
         "prefix": "",
         "indices": [
           1
@@ -197,7 +197,7 @@
         "filePath": "NOTE_hold_assets"
       },
       {
-        "name": "downHoldEnd",
+        "name": "note1-HoldEnd",
         "prefix": "",
         "indices": [
           3
@@ -211,7 +211,7 @@
         "filePath": "NOTE_hold_assets"
       },
       {
-        "name": "upHoldEnd",
+        "name": "note2-HoldEnd",
         "prefix": "",
         "indices": [
           5
@@ -225,7 +225,7 @@
         "filePath": "NOTE_hold_assets"
       },
       {
-        "name": "rightHoldEnd",
+        "name": "note3-HoldEnd",
         "prefix": "",
         "indices": [
           7
@@ -239,7 +239,7 @@
         "filePath": "NOTE_hold_assets"
       },
       {
-        "name": "static",
+        "name": "static0",
         "prefix": "staticLeft",
         "framerate": 24,
         "offsets": [
@@ -248,7 +248,7 @@
         ]
       },
       {
-        "name": "static",
+        "name": "static1",
         "prefix": "staticDown",
         "framerate": 24,
         "offsets": [
@@ -257,7 +257,7 @@
         ]
       },
       {
-        "name": "static",
+        "name": "static2",
         "prefix": "staticUp",
         "framerate": 24,
         "offsets": [
@@ -266,7 +266,7 @@
         ]
       },
       {
-        "name": "static",
+        "name": "static3",
         "prefix": "staticRight",
         "framerate": 24,
         "offsets": [
@@ -275,7 +275,7 @@
         ]
       },
       {
-        "name": "pressed",
+        "name": "press0",
         "prefix": "pressLeft",
         "framerate": 24,
         "offsets": [
@@ -284,7 +284,7 @@
         ]
       },
       {
-        "name": "pressed",
+        "name": "press1",
         "prefix": "pressDown",
         "framerate": 24,
         "offsets": [
@@ -293,7 +293,7 @@
         ]
       },
       {
-        "name": "pressed",
+        "name": "press2",
         "prefix": "pressUp",
         "framerate": 24,
         "offsets": [
@@ -302,7 +302,7 @@
         ]
       },
       {
-        "name": "pressed",
+        "name": "press3",
         "prefix": "pressRight",
         "framerate": 24,
         "offsets": [
@@ -311,7 +311,7 @@
         ]
       },
       {
-        "name": "confirm",
+        "name": "confirm0",
         "prefix": "confirmLeft",
         "framerate": 24,
         "offsets": [
@@ -320,7 +320,7 @@
         ]
       },
       {
-        "name": "confirm",
+        "name": "confirm1",
         "prefix": "confirmDown",
         "framerate": 24,
         "offsets": [
@@ -329,7 +329,7 @@
         ]
       },
       {
-        "name": "confirm",
+        "name": "confirm2",
         "prefix": "confirmUp",
         "framerate": 24,
         "offsets": [
@@ -338,7 +338,7 @@
         ]
       },
       {
-        "name": "confirm",
+        "name": "confirm3",
         "prefix": "confirmRight",
         "framerate": 24,
         "offsets": [

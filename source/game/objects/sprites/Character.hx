@@ -19,7 +19,15 @@ class Character extends FunkinObjectRegistry {
 
 	public var singCountTime:Float = 0;
 
+	public var cameraOffset:Point = {x: 0, y: 0};
+
 	var singTime:Float = 4;
+
+	static final CHAR_ANIMS:Array<String> = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
+
+	public static function getCharAnim(direction:Int):String {
+		return CHAR_ANIMS[direction % CHAR_ANIMS.length];
+	}
 
 	public function new(id:String, ?curCharacter:String = 'bf', ?x:Float = 0, ?y:Float = 0) {
 		super(id, x, y);
@@ -32,6 +40,10 @@ class Character extends FunkinObjectRegistry {
 		characterData = UtilsData.readJson(charData);
 		idleAfterSing = characterData.gameplay.idleAfterSing ?? true;
 		singTime = characterData.gameplay.singTime ?? 4;
+		cameraOffset = {
+			x: characterData.gameplay.cameraOffset != null ? characterData.gameplay.cameraOffset[0] : 0,
+			y: characterData.gameplay.cameraOffset != null ? characterData.gameplay.cameraOffset[1] : 0
+		};
 
 		if (characterData.gameplay.position != null)
 			setPosition(characterData.gameplay.position[0], characterData.gameplay.position[1]);
@@ -74,6 +86,15 @@ class Character extends FunkinObjectRegistry {
 				}
 			}
 		}
+	}
+
+	public function getCamPosition():Point {
+		var off = cameraOffset;
+		var mid = (layers != null && layers.length > 0) ? layers[0].getMidpoint() : getMidpoint();
+		return {
+			x: mid.x + (off != null ? off.x : 0.0),
+			y: mid.y + (off != null ? off.y : 0.0)
+		};
 	}
 
 	var isDancing:Bool = false;

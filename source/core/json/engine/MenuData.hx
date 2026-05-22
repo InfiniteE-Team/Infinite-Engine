@@ -1,16 +1,12 @@
-package core.json.objects;
+package core.json.engine;
 import core.json.extensions.AudioData;
 import core.json.extensions.SpriteData.ObjectData;
 
-typedef StageData =
-{
-	var name:String;
-	var defaultZoom:Float;
-	var elements:Array<StageElement>;
-	var ?hideGF:Bool;
+typedef MenuData = {
+    var elements:Array<Element>;
 }
 
-typedef StageElement =
+typedef Element =
 {
 	var type:Dynamic; // "sprite", "animated", "graphic", "group", "sound", "custom_class", "custom_class_group", "character"
     var ?props:ObjectData;
@@ -19,9 +15,4 @@ typedef StageElement =
 	var ?repeatY:Bool;
 	var ?velocityX:Float;
 	var ?velocityY:Float;
-
-	// chars
-	var ?id:String;
-    var ?position:Array<Float>;
-    var ?camPos:Array<Float>;
 }

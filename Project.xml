@@ -17,7 +17,7 @@
 
 	<define name="HSCRIPT_ALLOWED" if="desktop" />
 	<define name="LUA_ALLOWED" if="desktop" />
-	<define name="DISCORD_ALLOWED" />
+	<define name="DISCORD_ALLOWED" if="desktop"/>
 
 	<!-- ____________________________ Window Settings ___________________________ -->
 
@@ -69,5 +69,5 @@
 	<!-- _________________________________ Custom _______________________________ -->
 
 	<!-- Place custom nodes like icons here -->
-	<!-- <icon path="art/iconOG.png" /> -->
+	<icon path="engine/icon.png" />
 </project>

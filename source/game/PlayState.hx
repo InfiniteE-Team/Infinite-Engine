@@ -13,6 +13,7 @@ import game.objects.sprites.Stage;
 import core.rhythm.RhythmCore;
 import core.rhythm.audio.GameAudio;
 import core.json.song.SongData.SongConfig;
+import game.controllers.events.EventManager;
 // saves
 import core.config.SaveData;
 
@@ -31,6 +32,8 @@ class PlayState extends MusicBeatState {
 
 	public var gameAudio:GameAudio = new GameAudio();
 	public var curSong:String = 'fresh';
+
+	public var events:EventManager = new EventManager();
 
 	public var noteController:NoteController;
 
@@ -55,6 +58,8 @@ class PlayState extends MusicBeatState {
 		SONG.configSong(curSong, '');
 
 		buildStageandChars();
+
+		add(gameAudio);
 
 		initSong();
 
@@ -87,22 +92,38 @@ class PlayState extends MusicBeatState {
 	}
 
 	public function buildStageandChars() {
+		#if HSCRIPT_ALLOWED
 		script.call("buildStage", []);
+		#end
 
 		stage = new Stage(SONG.stage);
 		stage.cameras = [camGame];
 
 		cameraController.defaultZoom = stage.defaultZoom;
+		cameraController.resolveZoom();
 		add(stage);
 
-		chars = new CharacterController('id_');
+		chars = new CharacterController();
 		stage.charLayer.add(chars);
 		for (data in SONG.chars) {
 			chars.loadCharacter(data.id, data.name, data.role, stage.charLayer);
 			stage.applyCharProps(chars.get(data.id), data.id);
+			var stageProps = stage.charProps.get(data.id);
+			if (stageProps?.camPos != null) {
+				var char = cast(chars.get(data.id), game.objects.sprites.Character);
+				if (char != null) {
+					char.cameraOffset.x += stageProps.camPos[0];
+					char.cameraOffset.y += stageProps.camPos[1];
+				}
+			}
 		}
 
+		cameraController.followChar = cast(chars.get((Lambda.find(SONG.chars,
+			c -> CharacterController.namesOpponent.contains(c.role)) ?? SONG.chars[0]).id), game.objects.sprites.Character);
+
+		#if HSCRIPT_ALLOWED
 		script.call("postBuildStage", []);
+		#end
 	}
 
 	function buildStrumsandNotes() {
@@ -119,6 +140,10 @@ class PlayState extends MusicBeatState {
 	public function initSong() {
 		buildStrumsandNotes();
 		noteController.generateNotes(0, SONG);
+
+		if (SONG.songData.gameplay.events != null)
+			events.loadEvents(SONG.songData.gameplay.events);
+
 		gameAudio.loadSong(SONG.needVoices, endSong);
 		gameAudio.playAll();
 	}
@@ -140,6 +165,11 @@ class PlayState extends MusicBeatState {
 		gameAudio.playAll();
 	}
 
+	function rewindSong():Void {
+		gameAudio.stopAll();
+		initSong();
+	}
+
 	//
 
 	override public function update(elapsed:Float) {
@@ -147,20 +177,31 @@ class PlayState extends MusicBeatState {
 		script.call("onUpdate", [elapsed]);
 		#end
 
-		super.update(elapsed);
 		if (gameAudio.inst != null)
 			RhythmCore.songPosition = gameAudio.inst.time;
 
 		gameAudio.resyncVocals();
 
-		gameAudio.volumenVocs(SONG,chars.isPlayerMissing(),elapsed);
+		gameAudio.volumenVocs(SONG, chars.isPlayerMissing(), elapsed);
 
 		cameraController.update(elapsed);
 
 		noteController.update(RhythmCore.songPosition);
 
+		if (SONG.songData.gameplay.events != null) {
+			events.updateEvents(RhythmCore.songPosition);
+		}
+
 		if (chars != null)
-			chars.isSinging(noteController, SONG.noteLane);
+			chars.isSinging(noteController, gameAudio);
+
+		if (!cameraController.existsCamEvents) {
+			var singing = chars.getActiveSingingChar();
+			if (singing != null)
+				cameraController.followChar = singing;
+		}
+
+		super.update(elapsed);
 
 		#if HSCRIPT_ALLOWED
 		script.call("postUpdate", [elapsed]);
@@ -173,16 +214,13 @@ class PlayState extends MusicBeatState {
 		if (beat % 4 == 0)
 			cameraController.bumpZoom();
 
-		for (data in SONG.chars) {
-			chars.get(data.id).dance();
-		}
+		chars.danceAll();
 	}
 
 	override public function destroy() {
 		FlxG.signals.focusLost.remove(onFocusLost);
 		FlxG.signals.focusGained.remove(onFocusGained);
 
-		FunkinSprite.clearCache();
 		if (camGame != null)
 			camGame.destroy();
 		if (camHUD != null)
@@ -196,6 +234,10 @@ class PlayState extends MusicBeatState {
 
 		if (noteController != null)
 			noteController.destroy();
+
+		if (events != null)
+			events.destroy();
+		events = null;
 
 		if (stage != null)
 			stage.destroy();

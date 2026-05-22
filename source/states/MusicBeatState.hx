@@ -92,6 +92,7 @@ class MusicBeatState extends FlxState {
         script = null;
         #end
         infoHelp = null;
+        core.assets.Paths.clearCache();
 		super.destroy();
 	}
 }

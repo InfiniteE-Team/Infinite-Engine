@@ -8,7 +8,7 @@ class CustomShader {
 	public static function loadShader(name:String):FlxRuntimeShader {
 		var shaderPath = Paths.getPath('$name', 'frag');
 		if (!sys.FileSystem.exists(shaderPath)) {
-			trace('[CustomShader] Shader not found: $name');
+			Trace.traceOnce('[CustomShader] Shader not found: $name');
 			return null;
 		}
 		return new FlxRuntimeShader(sys.io.File.getContent(shaderPath));
