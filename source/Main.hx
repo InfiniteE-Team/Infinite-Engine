@@ -22,6 +22,8 @@ class Main extends Sprite {
     public static var controls:Controls;
     public static var globalData:GlobalConfig = new GlobalConfig();
 
+    public var framerate:Int = 60;
+
     public function new() {
         super();
         addEventListener(Event.ADDED_TO_STAGE, added);
@@ -36,7 +38,7 @@ class Main extends Sprite {
     function mainGame()
     {
         configGame();
-        addChild(new FlxGame(1280, 720, mainState, 60, 60, true, false));
+        addChild(new FlxGame(1280, 720, mainState, framerate, framerate, true, false));
         addChild(fps);
 
         WindowConfig.applyAccentColor();
@@ -48,6 +50,8 @@ class Main extends Sprite {
         save.loadConfig();
         controls = new Controls(save);
         globalData.configGlobal();
+
+        framerate = save.framerate;
 
         #if (DISCORD_ALLOWED && hxdiscord_rpc < "1.2.0")
         core.api.DiscordAPI.init();

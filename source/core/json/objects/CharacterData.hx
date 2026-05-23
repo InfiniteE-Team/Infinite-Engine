@@ -36,12 +36,7 @@ typedef RenderData = {
 
 // icons for chars
 typedef IconData = {
-    var path:String;
-    var ?flipX:Bool;
-    var ?flipY:Bool;
-
+    var ?props:ObjectData;
     var ?bumpInBeats:Bool;
     var ?stepTempo:Float;
-
-    var ?anims:Array<AnimData>;
 }

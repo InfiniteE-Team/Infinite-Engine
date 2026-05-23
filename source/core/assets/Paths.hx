@@ -33,6 +33,8 @@ class Paths {
 					return findLib(fileName + '.xml');
 				case "class":
 					return findLib('scripts/states/$fileName.hx');
+				case "script":
+					return findLib('scripts/$fileName.hx');
 				case "songScript":
 					return findLib('songs/${PlayState.SONG.songName.toLowerCase()}/scripts/$fileName.hx');
 				case "frag":
@@ -108,10 +110,16 @@ class Paths {
 
 	public static function clearCache():Void {
 		for (_ => asset in cache) {
-			if (asset is FlxFramesCollection)
-				(cast asset : FlxFramesCollection).destroy();
-			else if (asset is flixel.graphics.FlxGraphic)
-				(cast asset : flixel.graphics.FlxGraphic).destroy();
+			if (asset is FlxFramesCollection) {
+				var frames = cast(asset, FlxFramesCollection);
+				if (frames.parent != null)
+					FlxG.bitmap.remove(frames.parent);
+				frames.destroy();
+			} else if (asset is flixel.graphics.FlxGraphic) {
+				var asset = cast(asset, flixel.graphics.FlxGraphic);
+				FlxG.bitmap.remove(asset);
+				asset.destroy();
+			}
 		}
 		cache.clear();
 		FunkinSprite.cacheOffsets.clear();

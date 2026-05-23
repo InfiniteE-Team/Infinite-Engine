@@ -43,6 +43,9 @@ class PlayState extends MusicBeatState {
 
 	// configs
 	public var saveData:SaveData = new SaveData();
+	public var playStateConfig:PlayStateConfig = new PlayStateConfig(); // data for health, strum line, etc
+
+	var paused:Bool = false;
 
 	override public function create() {
 		instance = this;
@@ -50,6 +53,7 @@ class PlayState extends MusicBeatState {
 
 		#if HSCRIPT_ALLOWED
 		initScript();
+		script.load(Paths.getPath('hud', 'script'));
 		script.call("onCreate", []);
 		#end
 

@@ -87,39 +87,43 @@
     ]
   },
   "icon": {
-    "path": "dad",
-    "flipX": false,
-    "isGrid": false,
+    "props": {
+      "name": "dad-icon",
+      "path": "dad",
+      "flipX": false,
+      "frameScale": [
+        150,
+        150
+      ],
+      "firstAnim": "normal",
+      "anims": [
+        {
+          "name": "losing",
+          "indices": [
+            0
+          ],
+          "offsets": [
+            0,
+            0
+          ],
+          "framerate": 24,
+          "looped": false
+        },
+        {
+          "name": "normal",
+          "indices": [
+            1
+          ],
+          "offsets": [
+            0,
+            0
+          ],
+          "framerate": 24,
+          "looped": false
+        }
+      ]
+    },
     "bumpInBeats": true,
-    "stepTempo": 4,
-    "anims": [
-      {
-        "name": "losing",
-        "prefix": "0",
-        "offsets": [
-          0,
-          0
-        ],
-        "framerate": 24
-      },
-      {
-        "name": "normal",
-        "prefix": "1",
-        "offsets": [
-          0,
-          0
-        ],
-        "framerate": 24
-      },
-      {
-        "name": "winning",
-        "prefix": "2",
-        "offsets": [
-          0,
-          0
-        ],
-        "framerate": 24
-      }
-    ]
+    "stepTempo": 4
   }
 }

@@ -211,21 +211,43 @@
 		]
 	},
 	"icon": {
-		"path": "gf",
+		"props": {
+			"name": "gf-icon",
+			"path": "gf",
+			"flipX": false,
+			"frameScale": [
+				150,
+				150
+			],
+			"firstAnim": "normal",
+			"anims": [
+				{
+					"name": "losing",
+					"indices": [
+						0
+					],
+					"offsets": [
+						0,
+						0
+					],
+					"framerate": 24,
+					"looped": false
+				},
+				{
+					"name": "normal",
+					"indices": [
+						1
+					],
+					"offsets": [
+						0,
+						0
+					],
+					"framerate": 24,
+					"looped": false
+				}
+			]
+		},
 		"bumpInBeats": true,
-		"anims": [
-			{
-				"name": "idle",
-				"prefix": "idle",
-				"framerate": 24,
-				"looped": false
-			},
-			{
-				"name": "losing",
-				"prefix": "losing",
-				"framerate": 24,
-				"looped": false
-			}
-		]
+		"stepTempo": 4
 	}
 }

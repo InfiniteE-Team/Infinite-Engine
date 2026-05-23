@@ -86,13 +86,14 @@ class MusicBeatState extends FlxState {
     }
 
     override function destroy():Void {
+        core.assets.Paths.clearCache();
         #if HSCRIPT_ALLOWED
         script.call("onDestroy", []);
         script.destroy();
         script = null;
         #end
         infoHelp = null;
-        core.assets.Paths.clearCache();
+        core.assets.FunkinGlobalObjectReg.clear();
 		super.destroy();
 	}
 }

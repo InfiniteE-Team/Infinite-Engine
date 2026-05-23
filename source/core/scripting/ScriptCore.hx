@@ -62,6 +62,7 @@ class ScriptCore {
 		scripts[i].access.setVariable("remove", state.remove);
 		scripts[i].tryExecute(sys.io.File.getContent(paths[i]));
 		modifiedTimes[i] = sys.FileSystem.stat(paths[i]).mtime.getTime();
+		scripts[i].access.callFunction("postCreate", []);
 		Trace.traceOnce('Reload ${paths[i]}');
 	}
 

@@ -171,11 +171,6 @@ class FunkinSprite extends FlxAnimate {
 		activeOffsets(getAnimOffset());
 	}
 
-	public function disposeFromRAM():Void {
-		if (graphic != null && graphic.bitmap != null)
-			graphic.bitmap.disposeImage();
-	}
-
 	public function getAnimOffset():Null<Point>
 		return offsets.get(currentAnim) ?? {x: 0, y: 0};
 
@@ -197,10 +192,9 @@ class FunkinSprite extends FlxAnimate {
 	}
 
 	public function activeOffsets(off:Point)
-		offset.set(0-off.x, 0-off.y);
+		offset.set(0 - off.x, 0 - off.y);
 
 	override public function destroy() {
-		disposeFromRAM();
 		offsets = null;
 		_registeredAnims = null;
 		super.destroy();
