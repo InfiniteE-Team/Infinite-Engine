@@ -154,12 +154,19 @@ class PlayState extends MusicBeatState {
 
 	public function startCountdown() {}
 
-	public function endSong() {}
+	public function endSong() {
+		// idk what to do here, maybe go to score screen or something? for now just reset the state
+		MusicBeatState.resetState();
+	}
 
 	// Other screens idk
 	public function pauseMenu() {}
 
-	public function isDeath() {}
+	public function isDeath() {
+		Trace.traceOnce("isDeath is being called! This should be overridden in a subclass if you want to use it.");
+
+		MusicBeatState.resetState();
+	}
 
 	override function onFocusLost():Void {
 		gameAudio.pauseAll();
@@ -192,12 +199,15 @@ class PlayState extends MusicBeatState {
 
 		noteController.update(RhythmCore.songPosition);
 
+		if (playStateConfig.health <= 0)
+			isDeath();
+
 		if (SONG.songData.gameplay.events != null) {
 			events.updateEvents(RhythmCore.songPosition);
 		}
 
 		if (chars != null)
-			chars.isSinging(noteController, gameAudio);
+			chars.isSinging(noteController, gameAudio, playStateConfig);
 
 		if (!cameraController.existsCamEvents) {
 			var singing = chars.getActiveSingingChar();

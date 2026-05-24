@@ -51,6 +51,9 @@ class Main extends Sprite {
         controls = new Controls(save);
         globalData.configGlobal();
 
+        if (globalData.startState != null)
+            mainState = globalData.startState;
+
         framerate = save.framerate;
 
         #if (DISCORD_ALLOWED && hxdiscord_rpc < "1.2.0")

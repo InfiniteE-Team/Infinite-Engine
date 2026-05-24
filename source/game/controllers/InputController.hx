@@ -1,5 +1,8 @@
 package game.controllers;
+
 import game.objects.sprites.notes.Note;
+import game.controllers.NoteController;
+import core.rhythm.audio.GameAudio;
 import core.config.Controls;
 
 class InputController {
@@ -30,17 +33,67 @@ class InputController {
 			return null;
 
 		var note = noteController.getHittableNote(charId, i);
-		if (note != null) {
-			if (isPressed(i)){
-				note.wasGoodHit = true;
-				note.kill();
-			}
-			else if (justPressed(i))
-			{
-				note.alpha = note.alpha - 0.3;
-			}
+		if (note != null && justPressed(i)) {
+			note.wasGoodHit = true;
+			note.kill();
 		}
 		return note;
+	}
+
+	public function isPlayerHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, charId:String, noteController:NoteController, gameAudio:GameAudio, playStateConfig:PlayStateConfig,i):Note {
+		var note = handleInput(i, noteController, charId);
+		if (isPressed(i)) {
+			if (note != null) {
+				charStrums[i].playAnim('confirm' + i, true);
+			} else if (justPressed(i)) {
+				charStrums[i].playAnim('press' + i, true);
+				gameAudio.onMiss();
+				playStateConfig.health += noteController.getHealthDrain(note);
+				/*
+					if (!isGhostTapping) {
+				}*/
+			}
+		} else {
+			// miss Note detection yep
+			for (note in noteController.notes.members) {
+				if (note == null || !note.alive || !note.mustPress)
+					continue;
+				if (note.strum == charStrums[i] && note.tooLate) {
+					note.alpha = 0.3;
+					gameAudio.onMiss();
+					playStateConfig.health += noteController.getHealthDrain(note);
+				}
+			}
+			charStrums[i].playAnim('static' + i, true);
+		}
+
+		// sustain holding
+		for (sustain in noteController.sustains.members) {
+			if (sustain == null || !sustain.alive || !sustain.mustPress)
+				continue;
+			if (sustain.strum != charStrums[i])
+				continue;
+
+			var isActive = core.rhythm.RhythmCore.songPosition >= sustain.strumTime
+				&& core.rhythm.RhythmCore.songPosition <= sustain.strumTime + sustain.length;
+
+			if (isActive && isPressed(i)) {
+				sustain.isHeld = true;
+				charStrums[i].playAnim('confirm' + i, true);
+			}
+		}
+
+		return note;
+	}
+
+	public function isCPUHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, noteController:NoteController, charId:String, i:Int) {
+		var note = noteController.getHittableNote(charId, i, false);
+
+		if (note != null) {
+			charStrums[i].playAnim('confirm' + i, true);
+			note.wasGoodHit = true;
+			note.kill();
+		}
 	}
 
 	public function justPressed(i:Int):Bool

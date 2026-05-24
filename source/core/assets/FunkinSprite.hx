@@ -27,7 +27,7 @@ class FunkinSprite extends FlxAnimate {
 
 	public function loadProps(props:ObjectData, path:String):Void {
 		var assetPath = '$path/${props.path}';
-		var loaded = Paths.getAnimated(assetPath);
+		var loaded = Paths.getPath(assetPath,'animated');
 
 		if (loaded == null) {
 			Trace.traceOnce('FunkinSprite could not load asset "$assetPath"');

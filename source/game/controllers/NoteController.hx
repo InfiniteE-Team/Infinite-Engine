@@ -83,7 +83,7 @@ class NoteController {
 	public function loadGenerateStrums(x:Float, y:Float) {
 		for (i in 0...keys) {
 			var strum = new StrumNote(x + i * (112 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props, noteSkin);
-			strum.playAnim('static'+i);
+			strum.playAnim('static' + i);
 			if (!daSong.strumsVisible)
 				strum.visible = false;
 			strums.add(strum);
@@ -135,11 +135,31 @@ class NoteController {
 			sustain.y = isDownscroll ? sustain.strum.y - ((sustain.strumTime - songTime) * scrollSpeed) : sustain.strum.y
 				+ ((sustain.strumTime - songTime) * scrollSpeed);
 
-			sustain.scale.y = (sustain.length * scrollSpeed) / sustain.frameHeight;
+			if (sustain.isHeld && sustain.strumTime <= songTime) {
+				var remaining:Float = (sustain.strumTime + sustain.length) - songTime;
+				if (remaining <= 0) {
+					toDestroy.push(sustain);
+					continue;
+				}
+				var newScaleY:Float = (remaining * scrollSpeed) / sustain.frameHeight;
+				sustain.scale.y = newScaleY;
+				if (!isDownscroll)
+					sustain.y = sustain.strum.y - sustain.height;
+				else
+					sustain.y = sustain.strum.y;
+			} else {
+				sustain.scale.y = (sustain.length * scrollSpeed) / sustain.frameHeight;
+			}
 
 			if (sustain.endSprite != null) {
 				sustain.endSprite.x = sustain.x;
 				sustain.endSprite.y = sustain.y + sustain.height - sustain.endSprite.height;
+			}
+
+			if (!sustain.isHeld && sustain.strumTime <= songTime) {
+				sustain.alpha = 0;
+				if (sustain.endSprite != null)
+					sustain.endSprite.alpha = 0;
 			}
 
 			if (sustain.strumTime + sustain.length < songTime)
@@ -156,7 +176,7 @@ class NoteController {
 
 	public function destroyNotes(note:Note) {
 		if (Std.isOfType(note, NoteSustain))
-			sustains.remove(cast note);
+			sustains.remove(cast note, true);
 		else
 			notes.remove(note, true);
 		note.destroy();
@@ -236,6 +256,16 @@ class NoteController {
 		}
 
 		unspawnNotes.sort(sortNotes);
+	}
+
+	public function getHealthDrain(note:Note):Float {
+		if (note == null)
+			return InputController.MISS_HEALTH;
+
+		switch (note.rating) {
+			default:
+				return InputController.MISS_HEALTH;
+		}
 	}
 
 	public function destroy():Void {

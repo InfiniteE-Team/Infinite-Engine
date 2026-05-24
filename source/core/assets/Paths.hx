@@ -31,14 +31,15 @@ class Paths {
 					return getAnimated(fileName);
 				case "xml":
 					return findLib(fileName + '.xml');
-				case "class":
-					return findLib('scripts/states/$fileName.hx');
-				case "script":
-					return findLib('scripts/$fileName.hx');
 				case "songScript":
 					return findLib('songs/${PlayState.SONG.songName.toLowerCase()}/scripts/$fileName.hx');
 				case "frag":
 					return findLib('shaders/$fileName.frag');
+				// scripting
+				case "states":
+					return findLib('states/' + fileName + '.hx');
+				case "script":
+					return findLib('scripts/$fileName.hx');
 				default:
 					return findLib(fileName);
 			}

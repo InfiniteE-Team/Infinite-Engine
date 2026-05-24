@@ -17,6 +17,8 @@ class Note extends FunkinSprite {
 	public var mustPress:Bool = false;
 	public var tooLate:Bool = false;
 
+	public var rating:String = 'sick';
+
 	public var keys:Int = 4;
 
 	public var strum:StrumNote;

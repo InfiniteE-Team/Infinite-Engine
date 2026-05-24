@@ -19,6 +19,9 @@
 	<define name="LUA_ALLOWED" if="desktop" />
 	<define name="DISCORD_ALLOWED" if="desktop"/>
 
+	<!-- ____________________________ Template Settings ___________________________ -->
+	<template path="engine/alsoft.ini" />
+
 	<!-- ____________________________ Window Settings ___________________________ -->
 
 	<!--These window settings apply to all targets-->

@@ -1,6 +1,7 @@
 package game.controllers;
 
 import game.PlayState;
+import game.PlayStateConfig;
 import game.objects.sprites.Character;
 import core.assets.FunkinSprite;
 import core.assets.FunkinObjectRegistry;
@@ -42,73 +43,63 @@ class CharacterController extends FunkinObjectRegistry {
 			targetGroup.add(layer);
 		targetGroup.add(chars);
 
-		if (namesPlayer.contains(role))
-			playerChars.push(chars);
-		else if (namesOpponent.contains(role))
-			opponentChars.push(chars);
-		else if (namesGf.contains(role))
-			gfChars.push(chars);
+		var namesIdk = namesPlayer.contains(role) ? playerChars : namesOpponent.contains(role) ? opponentChars : namesGf.contains(role) ? gfChars : null;
+		if (namesIdk != null)
+			namesIdk.push(chars);
 
 		return chars;
 	}
 
-	public function isSinging(noteController:NoteController,gameAudio:GameAudio) {
+	public function isSinging(noteController:NoteController, gameAudio:GameAudio, playStateConfig:PlayStateConfig) {
+		// player
 		for (char in playerChars) {
-			var charStrums = noteController.getCharStrums(char.id);
-			for (i in 0...control.noteKeys.length) {
-				var note = input.handleInput(i, noteController, char.id);
-
-				if (input.isPressed(i)) {
-					if (note != null) {
-						char.playAnim(Character.getCharAnim(note.direction), true);
-						char.singCountTime = 0;
-						char.isSing = true;
-						char.isMiss = false;
-						charStrums[i].playAnim('confirm'+i, true);
-					} else if (input.justPressed(i)) {
-						charStrums[i].playAnim('press'+i, true);
-						char.playAnim('${Character.getCharAnim(i)}-miss', true);
-						char.isMiss = true;
-						gameAudio.onMiss();
-						/*
-							if (!input.isGhostTapping) {
-						}*/
-					}
+			var strums = noteController.getCharStrums(char.id);
+			for (i in 0...strums.length)
+				updatePlayerLane(char, strums, i, noteController, gameAudio, playStateConfig);
+		}
+		// opponent
+		for (char in opponentChars) {
+			var strums = noteController.getCharStrums(char.id);
+			for (i in 0...strums.length) {
+				var note = noteController.getHittableNote(char.id, i, false);
+				if (note != null) {
+					input.isCPUHit(strums, noteController, char.id, i);
+					setSing(char, note.direction);
 				} else {
-					// miss Note detection yep
-					char.isSing = false;
-					char.isMiss = false;
-					for (note in noteController.notes.members) {
-						if (note == null || !note.alive || !note.mustPress)
-							continue;
-						if (note.strum == charStrums[i] && note.tooLate) {
-							note.alpha = 0.3;
-							char.playAnim('${Character.getCharAnim(note.direction)}-miss', true);
-							char.isMiss = true;
-							gameAudio.onMiss();
-						}
-					}
-					charStrums[i].playAnim('static'+i, true);
+					strums[i].playAnim('static' + i, true);
 				}
 			}
 		}
+	}
 
-		for (char in opponentChars) {
-			var charStrums = noteController.getCharStrums(char.id);
+	function updatePlayerLane(char:Character, strums, i:Int, nc:NoteController, audio:GameAudio, cfg:PlayStateConfig) {
+		var hitNote = input.isPlayerHit(strums, char.id, nc, audio, cfg, i);
 
-			for (i in 0...charStrums.length) {
-				var note = noteController.getHittableNote(char.id, i, false);
-
-				if (note != null) {
-					charStrums[i].playAnim('confirm'+i, true);
-					note.wasGoodHit = true;
-					note.kill();
-					char.playAnim(Character.getCharAnim(note.direction), true);
-					char.singCountTime = 0;
-					char.isSing = true;
-				} else
-					charStrums[i].playAnim('static'+i, true);
+		if (input.isPressed(i)) {
+			if (hitNote != null) {
+				setSing(char, hitNote.direction);
+				char.isMiss = false;
+			} else if (input.justPressed(i) && !input.isGhostTapping) {
+				char.playAnim('${Character.getCharAnim(i)}-miss', true);
+				char.isMiss = true;
 			}
+		} else {
+			char.isSing = false;
+			char.isMiss = false;
+			for (note in nc.notes.members) {
+				if (note == null || !note.alive || !note.mustPress || note.strum != strums[i] || !note.tooLate)
+					continue;
+				char.playAnim('${Character.getCharAnim(note.direction)}-miss', true);
+				char.isMiss = true;
+			}
+		}
+
+		var songPos = core.rhythm.RhythmCore.songPosition;
+		for (sustain in nc.sustains.members) {
+			if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != strums[i])
+				continue;
+			if (songPos >= sustain.strumTime && songPos <= sustain.strumTime + sustain.length && input.isPressed(i))
+				setSing(char, sustain.direction);
 		}
 	}
 
@@ -119,13 +110,6 @@ class CharacterController extends FunkinObjectRegistry {
 			c.dance();
 		for (c in gfChars)
 			c.dance();
-	}
-
-	public function isPlayerMissing():Bool {
-		for (char in playerChars)
-			if (char.isMiss)
-				return true;
-		return false;
 	}
 
 	public function removeChar(id:String):Void {
@@ -142,19 +126,21 @@ class CharacterController extends FunkinObjectRegistry {
 		registry.remove(id);
 	}
 
-	public function getActiveSingingChar():Null<Character> {
-		for (c in playerChars)
-			if (c.isSing)
-				return c;
-		for (c in opponentChars)
-			if (c.isSing)
-				return c;
-		if (opponentChars.length > 0)
-			return opponentChars[0];
-		if (playerChars.length > 0)
-			return playerChars[0];
-		return null;
+	// utils
+
+	inline function setSing(char:Character, dir:Int) {
+		char.playAnim(Character.getCharAnim(dir), true);
+		char.singCountTime = 0;
+		char.isSing = true;
 	}
+
+	public function isPlayerMissing():Bool
+		return Lambda.exists(playerChars, c -> c.isMiss);
+
+	public function getActiveSingingChar():Null<Character>
+		return Lambda.find(playerChars, c -> c.isSing) ?? Lambda.find(opponentChars, c -> c.isSing) ?? (opponentChars[0] ?? playerChars[0]);
+
+	//
 
 	override public function destroy():Void {
 		playerChars = null;

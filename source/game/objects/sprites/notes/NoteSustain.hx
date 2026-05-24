@@ -6,6 +6,8 @@ class NoteSustain extends Note {
 	public var length:Float = 0;
 	public var endSprite:FunkinSprite;
 
+	public var isHeld:Bool = false;
+
 	public function new(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:ObjectData, noteSkin:String, direction:Int = 0, length:Float,
 			?noteType:String = 'normal') {
 		this.length = length;

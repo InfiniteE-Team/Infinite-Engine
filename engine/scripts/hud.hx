@@ -91,7 +91,7 @@ function _updateHealthBar() {
 }
 
 function _updateLosingAnim() {
-	var health = PlayState.instance.health;
+	var health = PlayState.instance.playStateConfig.health;
 
 	if (playerIcon != null) {
 		var losing = health < 0.4;
@@ -108,7 +108,7 @@ function _updateIconPositions() {
 	if (healthBarBG == null)
 		return;
 
-	var ratio = Math.max(0, Math.min(PlayState.instance.health / 2.0, 1.0));
+	var ratio = Math.max(0, Math.min(PlayState.instance.playStateConfig.health; / 2.0, 1.0));
 	var barCenterX = healthBarBG.x + healthBarBG.width * ratio;
 
 	if (playerIcon != null) {

@@ -20,7 +20,7 @@
         "framerate": 24,
         "offsets": [
           5,
-          -5
+          5
         ],
         "filePath": "notes"
       },
@@ -30,7 +30,7 @@
         "framerate": 24,
         "offsets": [
           5,
-          -5
+          5
         ],
         "filePath": "notes"
       },
@@ -40,7 +40,7 @@
         "framerate": 24,
         "offsets": [
           5,
-          -5
+          5
         ],
         "filePath": "notes"
       },
@@ -50,7 +50,7 @@
         "framerate": 24,
         "offsets": [
           5,
-          -5
+          5
         ],
         "filePath": "notes"
       },
@@ -163,8 +163,8 @@
         "prefix": "staticLeft",
         "framerate": 24,
         "offsets": [
-          -10,
-          -20
+          -20,
+          -40
         ]
       },
       {
@@ -172,8 +172,8 @@
         "prefix": "staticDown",
         "framerate": 24,
         "offsets": [
-          -10,
-          -20
+          -20,
+          -40
         ]
       },
       {
@@ -181,8 +181,8 @@
         "prefix": "staticUp",
         "framerate": 24,
         "offsets": [
-          -10,
-          -20
+          -20,
+          -40
         ]
       },
       {
@@ -190,8 +190,8 @@
         "prefix": "staticRight",
         "framerate": 24,
         "offsets": [
-          -10,
-          -20
+          -20,
+          -40
         ]
       },
       {
@@ -199,8 +199,8 @@
         "prefix": "pressLeft",
         "framerate": 24,
         "offsets": [
-          4,
-          -6
+          8,
+          -15
         ]
       },
       {
@@ -208,8 +208,8 @@
         "prefix": "pressDown",
         "framerate": 24,
         "offsets": [
-          4,
-          -6
+          8,
+          -15
         ]
       },
       {
@@ -217,8 +217,8 @@
         "prefix": "pressUp",
         "framerate": 24,
         "offsets": [
-          4,
-          -6
+          8,
+          -15
         ]
       },
       {
@@ -226,8 +226,8 @@
         "prefix": "pressRight",
         "framerate": 24,
         "offsets": [
-          4,
-          -6
+          8,
+          -15
         ]
       },
       {
@@ -235,8 +235,8 @@
         "prefix": "confirmLeft",
         "framerate": 24,
         "offsets": [
-          -10,
-          -20
+          -20,
+          -40
         ]
       },
       {
@@ -244,8 +244,8 @@
         "prefix": "confirmDown",
         "framerate": 24,
         "offsets": [
-          -10,
-          -20
+          -20,
+          -40
         ]
       },
       {
@@ -253,8 +253,8 @@
         "prefix": "confirmUp",
         "framerate": 24,
         "offsets": [
-          -10,
-          -20
+          -20,
+          -40
         ]
       },
       {
@@ -262,8 +262,8 @@
         "prefix": "confirmRight",
         "framerate": 24,
         "offsets": [
-          -10,
-          -20
+          -20,
+          -40
         ]
       }
     ]
