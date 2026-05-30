@@ -1,39 +1,31 @@
 package game.objects.sprites.notes;
+
 import core.assets.FunkinSprite;
 import core.json.extensions.SpriteData.ObjectData;
+import game.graphics.shaders.hardcode.RGBShader;
+import core.json.objects.NoteSkinData;
 
 class NoteSustain extends Note {
 	public var length:Float = 0;
-	public var endSprite:FunkinSprite;
 
 	public var isHeld:Bool = false;
 
-	public function new(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:ObjectData, noteSkin:String, direction:Int = 0, length:Float,
-			?noteType:String = 'normal') {
+	public var isSustainEnd:Bool = false;
+
+	public function new(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0, length:Float,
+			?noteType:String = 'normal', isSustainEnd:Bool = false) {
 		this.length = length;
+		this.isSustainEnd = isSustainEnd;
 		super(strumTime, keys, x, y, noteSkinData, noteSkin, direction, noteType);
 	}
 
-	override function noteLoad(noteSkinData:ObjectData) {
-		loadProps(noteSkinData, 'noteskins/$noteSkin/strumnotes');
-		playAnim('note$direction-Hold');
-		endSprite = new FunkinSprite(x, y);
-		endSprite.loadProps(noteSkinData, 'noteskins/$noteSkin/strumnotes');
-		endSprite.playAnim('note$direction-HoldEnd');
-	}
-
-	override function update(elapsed:Float) {
-		super.update(elapsed);
-
-		if (endSprite != null) {
-			endSprite.x = x;
-			endSprite.y = y + height - endSprite.height;
+	override function noteLoad(noteSkinData:NoteSkinData) {
+		loadProps(noteSkinData.props, 'noteskins/$noteSkin/strumnotes');
+		if (isSustainEnd) {
+			playAnim('note$direction-HoldEnd');
+		} else {
+			playAnim('note$direction-Hold');
 		}
-	}
-
-	override function draw() {
-		super.draw();
-		if (endSprite != null)
-			endSprite.draw();
+		RGBShader.applyFromSkin(this, noteSkinData, direction);
 	}
 }

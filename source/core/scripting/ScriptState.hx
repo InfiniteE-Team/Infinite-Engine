@@ -50,8 +50,8 @@ class ScriptState {
 		var script = new RuleScript(null, null, sharedContext);
 		script.errorHandler = (e) -> Trace.traceOnce('[Script] $path → ${e.message}');
 		script.superInstance = state;
-		script.access.setVariable("add", state.add);
-		script.access.setVariable("remove", state.remove);
+		script.access.setVariable("add", (o:flixel.FlxBasic) -> state.add(o));
+		script.access.setVariable("remove", (o:flixel.FlxBasic) -> state.remove(o));
 		script.tryExecute(sys.io.File.getContent(path));
 		scripts.push(script);
 		paths.push(path);
@@ -86,8 +86,8 @@ class ScriptState {
 	function reload(i:Int) {
 		scripts[i].access.resetInterp();
 		scripts[i].superInstance = state;
-		scripts[i].access.setVariable("add", state.add);
-		scripts[i].access.setVariable("remove", state.remove);
+		scripts[i].access.setVariable("add", (o:flixel.FlxBasic) -> state.add(o));
+		scripts[i].access.setVariable("remove", (o:flixel.FlxBasic) -> state.remove(o));
 		scripts[i].tryExecute(sys.io.File.getContent(paths[i]));
 		modifiedTimes[i] = sys.FileSystem.stat(paths[i]).mtime.getTime();
 		scripts[i].access.callFunction("postCreate", []);

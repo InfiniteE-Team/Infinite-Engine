@@ -8,8 +8,8 @@
       0
     ],
     "cameraOffset": [
-      0,
-      0
+      -300,
+      -200
     ],
     "death": {
       "character": "bf-death",

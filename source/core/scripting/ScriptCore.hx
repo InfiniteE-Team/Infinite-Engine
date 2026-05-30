@@ -21,9 +21,7 @@ class ScriptCore {
 
 		var script = new RuleScript(null, null, sharedContext);
 		script.errorHandler = (e) -> Trace.traceOnce('[Script] $path → ${e.message}');
-		script.superInstance = state;
-		script.access.setVariable("add", state.add);
-		script.access.setVariable("remove", state.remove);
+		setupScript(script);
 		script.tryExecute(sys.io.File.getContent(path));
 		scripts.push(script);
 		paths.push(path);
@@ -57,17 +55,23 @@ class ScriptCore {
 
 	function reload(i:Int) {
 		scripts[i].access.resetInterp();
-		scripts[i].superInstance = state;
-		scripts[i].access.setVariable("add", state.add);
-		scripts[i].access.setVariable("remove", state.remove);
+		setupScript(scripts[i]);
 		scripts[i].tryExecute(sys.io.File.getContent(paths[i]));
 		modifiedTimes[i] = sys.FileSystem.stat(paths[i]).mtime.getTime();
 		scripts[i].access.callFunction("postCreate", []);
 		Trace.traceOnce('Reload ${paths[i]}');
 	}
 
-	public function destroy()
-	{
+	function setupScript(script:RuleScript) {
+		script.superInstance = state;
+		script.access.setVariable("add", (o:flixel.FlxBasic) -> state.add(o));
+		script.access.setVariable("remove", (o:flixel.FlxBasic) -> state.remove(o));
+		script.access.setVariable("PlayState", game.PlayState);
+		script.access.setVariable("FlxG", flixel.FlxG);
+		script.access.setVariable("FlxSprite", flixel.FlxSprite);
+	}
+
+	public function destroy() {
 		scripts = null;
 		paths = null;
 		modifiedTimes = null;

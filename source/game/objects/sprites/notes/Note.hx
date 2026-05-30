@@ -4,6 +4,8 @@ import core.json.extensions.SpriteData.ObjectData;
 import core.assets.FunkinSprite;
 import core.rhythm.RhythmCore;
 import game.controllers.InputController;
+import game.graphics.shaders.hardcode.RGBShader;
+import core.json.objects.NoteSkinData;
 
 class Note extends FunkinSprite {
 	public var noteType:String = 'normal';
@@ -23,7 +25,7 @@ class Note extends FunkinSprite {
 
 	public var strum:StrumNote;
 
-	public function new(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:ObjectData, noteSkin:String, direction:Int = 0,
+	public function new(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0,
 			?noteType:String = 'normal') {
 		super(x, y);
 
@@ -36,9 +38,10 @@ class Note extends FunkinSprite {
 		noteLoad(noteSkinData);
 	}
 
-	public function noteLoad(noteSkinData:ObjectData) {
-		loadProps(noteSkinData, 'noteskins/$noteSkin/strumnotes');
+	public function noteLoad(noteSkinData:NoteSkinData) {
+		loadProps(noteSkinData.props, 'noteskins/$noteSkin/strumnotes');
 		playAnim('note$direction-Scroll', true);
+		RGBShader.applyFromSkin(this, noteSkinData, direction);
 	}
 
 	override function update(elapsed:Float) {

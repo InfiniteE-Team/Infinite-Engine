@@ -5,9 +5,15 @@ typedef NoteSkinData = {
 	var props:ObjectData;
 	var ?author:String;
 	var ?description:String;
-
+	var ?colorPalette:Array<NoteColor>;
 	var ?spacing:Float;
 	var ?keys:Int;
+}
+
+typedef NoteColor = {
+    var r:Array<Float>;
+    var g:Array<Float>;
+    var b:Array<Float>;
 }
 
 /*

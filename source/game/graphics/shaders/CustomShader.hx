@@ -6,7 +6,7 @@ import flixel.addons.display.FlxRuntimeShader;
 
 class CustomShader {
 	public static function loadShader(name:String):FlxRuntimeShader {
-		var shaderPath = Paths.getPath('$name', 'frag');
+		var shaderPath = Paths.getPath('$name', 'shaders');
 		if (!sys.FileSystem.exists(shaderPath)) {
 			Trace.traceOnce('[CustomShader] Shader not found: $name');
 			return null;

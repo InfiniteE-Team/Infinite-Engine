@@ -138,7 +138,7 @@ class CharacterController extends FunkinObjectRegistry {
 		return Lambda.exists(playerChars, c -> c.isMiss);
 
 	public function getActiveSingingChar():Null<Character>
-		return Lambda.find(playerChars, c -> c.isSing) ?? Lambda.find(opponentChars, c -> c.isSing) ?? (opponentChars[0] ?? playerChars[0]);
+		return Lambda.find(playerChars, c -> c.isSing) ?? Lambda.find(opponentChars, c -> c.isSing);
 
 	//
 

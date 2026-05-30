@@ -5,9 +5,11 @@ import game.objects.sprites.notes.Note;
 import game.objects.sprites.notes.NoteSustain;
 import game.objects.sprites.notes.StrumNote;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import game.graphics.shaders.hardcode.RGBShader;
 import utils.UtilsData;
 import game.PlayStateConfig;
 // song
+import core.rhythm.RhythmCore;
 import core.json.song.SongData.SongConfig;
 import core.json.engine.GlobalData.GlobalConfig;
 import Lambda;
@@ -43,6 +45,8 @@ class NoteController {
 
 	// configs
 	public var isDownscroll:Bool = false;
+
+	public var distanceRenderNotes:Float = 200;
 
 	public function new(daSong:SongConfig, isDownscroll:Bool, isGhostTapping:Bool) {
 		this.daSong = daSong;
@@ -84,6 +88,7 @@ class NoteController {
 		for (i in 0...keys) {
 			var strum = new StrumNote(x + i * (112 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props, noteSkin);
 			strum.playAnim('static' + i);
+			RGBShader.applyFromSkin(strum, noteSkinData, i);
 			if (!daSong.strumsVisible)
 				strum.visible = false;
 			strums.add(strum);
@@ -98,7 +103,7 @@ class NoteController {
 		while (unspawnNotes.length > 0) {
 			var note = unspawnNotes[0];
 
-			if (isDownscroll && note.y > FlxG.height + 200) {
+			if (isDownscroll && note.y > FlxG.height + distanceRenderNotes) {
 				unspawnNotes.shift();
 				note.destroy();
 				continue;
@@ -122,9 +127,9 @@ class NoteController {
 			note.x = note.strum.x;
 			note.y = isDownscroll ? note.strum.y - ((note.strumTime - songTime) * scrollSpeed) : note.strum.y + ((note.strumTime - songTime) * scrollSpeed);
 
-			if (note.y < -200 && !isDownscroll)
+			if (note.y < -distanceRenderNotes && !isDownscroll)
 				toDestroy.push(note);
-			else if (note.y > FlxG.height + 200 && isDownscroll)
+			else if (note.y > FlxG.height + distanceRenderNotes && isDownscroll)
 				toDestroy.push(note);
 		}
 
@@ -135,38 +140,30 @@ class NoteController {
 			sustain.y = isDownscroll ? sustain.strum.y - ((sustain.strumTime - songTime) * scrollSpeed) : sustain.strum.y
 				+ ((sustain.strumTime - songTime) * scrollSpeed);
 
-			if (sustain.isHeld && sustain.strumTime <= songTime) {
-				var remaining:Float = (sustain.strumTime + sustain.length) - songTime;
-				if (remaining <= 0) {
-					toDestroy.push(sustain);
-					continue;
-				}
-				var newScaleY:Float = (remaining * scrollSpeed) / sustain.frameHeight;
-				sustain.scale.y = newScaleY;
-				if (!isDownscroll)
-					sustain.y = sustain.strum.y - sustain.height;
-				else
-					sustain.y = sustain.strum.y;
+			if (!sustain.isSustainEnd) {
+				sustain.scale.y = (RhythmCore.stepInMs * (scrollSpeed * 0.45)) / sustain.frameHeight;
+				sustain.updateHitbox();
+			}
+
+			if (sustain.isSustainEnd) {
+				var stepPx = RhythmCore.stepInMs * scrollSpeed;
+				sustain.y += isDownscroll ? -stepPx : stepPx;
+			}
+
+			if (sustain.isHeld && sustain.strumTime <= songTime && !sustain.isSustainEnd) {
+				var strumY = sustain.strum.y;
+				var clipY = (strumY - sustain.y) / sustain.scale.y;
+				clipY = Math.max(0, clipY);
+				sustain.clipRect = new flixel.math.FlxRect(0, clipY, sustain.frameWidth, sustain.frameHeight - clipY);
 			} else {
-				sustain.scale.y = (sustain.length * scrollSpeed) / sustain.frameHeight;
+				sustain.clipRect = null;
 			}
 
-			if (sustain.endSprite != null) {
-				sustain.endSprite.x = sustain.x;
-				sustain.endSprite.y = sustain.y + sustain.height - sustain.endSprite.height;
-			}
-
-			if (!sustain.isHeld && sustain.strumTime <= songTime) {
-				sustain.alpha = 0;
-				if (sustain.endSprite != null)
-					sustain.endSprite.alpha = 0;
-			}
-
-			if (sustain.strumTime + sustain.length < songTime)
+			if (sustain.strumTime + RhythmCore.stepInMs < songTime)
 				toDestroy.push(sustain);
-			else if (sustain.y < -200 && !isDownscroll)
+			else if (sustain.y < -distanceRenderNotes && !isDownscroll)
 				toDestroy.push(sustain);
-			else if (sustain.y > FlxG.height + 200 && isDownscroll)
+			else if (sustain.y > FlxG.height + distanceRenderNotes && isDownscroll)
 				toDestroy.push(sustain);
 		}
 
@@ -225,7 +222,8 @@ class NoteController {
 				continue;
 
 			// param for Note positions in strum groups
-			var note = new Note(data.time, keys, strum.x, 0, noteSkinData.props, noteSkin, data.lane);
+			var note = new Note(data.time, keys, strum.x, 0, noteSkinData, noteSkin, data.lane);
+			RGBShader.applyFromSkin(note, noteSkinData, data.lane);
 			note.ID = globalLane;
 			note.direction = globalLane;
 			note.strumTime = data.time;
@@ -238,19 +236,33 @@ class NoteController {
 			note.noteType = data.type;
 
 			if (data.length > 0) {
-				var sustain = new NoteSustain(data.time, keys, strum.x, 0, noteSkinData.props, noteSkin, data.lane, data.length);
-				sustain.ID = globalLane;
-				sustain.direction = globalLane;
-				sustain.strumTime = data.time;
-				sustain.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
-				sustain.strum = strum;
-				sustain.noteType = data.type;
-				if (!daSong.strumsVisible) {
-					sustain.visible = false;
-					if (sustain.endSprite != null)
-						sustain.endSprite.visible = false;
+				var countSustains:Int = Math.round(data.length / RhythmCore.stepInMs);
+				if (countSustains < 1)
+					countSustains = 1;
+
+				for (i in 0...countSustains) {
+					var sustainTime = data.time + (RhythmCore.stepInMs * i);
+					var isFinal = (i == countSustains - 1);
+
+					var sustain = new NoteSustain(sustainTime, keys, strum.x, 0, noteSkinData, noteSkin, data.lane, RhythmCore.stepInMs, data.type, isFinal);
+					RGBShader.applyFromSkin(sustain, noteSkinData, data.lane);
+					sustain.ID = globalLane;
+					sustain.direction = globalLane;
+					sustain.strumTime = sustainTime;
+					sustain.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
+					sustain.strum = strum;
+					sustain.noteType = data.type;
+
+					sustain.y = strum.height / 2;
+
+					if (isDownscroll)
+						sustain.flipY = true;
+
+					if (!daSong.strumsVisible) {
+						sustain.visible = false;
+					}
+					unspawnNotes.push(sustain);
 				}
-				unspawnNotes.push(sustain);
 			}
 			unspawnNotes.push(note);
 		}

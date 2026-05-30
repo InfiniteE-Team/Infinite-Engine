@@ -40,7 +40,8 @@ class InputController {
 		return note;
 	}
 
-	public function isPlayerHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, charId:String, noteController:NoteController, gameAudio:GameAudio, playStateConfig:PlayStateConfig,i):Note {
+	public function isPlayerHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, charId:String, noteController:NoteController, gameAudio:GameAudio,
+			playStateConfig:PlayStateConfig, i):Note {
 		var note = handleInput(i, noteController, charId);
 		if (isPressed(i)) {
 			if (note != null) {
@@ -74,12 +75,12 @@ class InputController {
 			if (sustain.strum != charStrums[i])
 				continue;
 
-			var isActive = core.rhythm.RhythmCore.songPosition >= sustain.strumTime
-				&& core.rhythm.RhythmCore.songPosition <= sustain.strumTime + sustain.length;
-
+			var isActive = core.rhythm.RhythmCore.songPosition >= sustain.strumTime - SHIT_WINDOW;
 			if (isActive && isPressed(i)) {
 				sustain.isHeld = true;
 				charStrums[i].playAnim('confirm' + i, true);
+			} else if (!isPressed(i)) {
+				sustain.isHeld = false;
 			}
 		}
 

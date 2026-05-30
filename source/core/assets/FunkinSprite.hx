@@ -27,7 +27,7 @@ class FunkinSprite extends FlxAnimate {
 
 	public function loadProps(props:ObjectData, path:String):Void {
 		var assetPath = '$path/${props.path}';
-		var loaded = Paths.getPath(assetPath,'animated');
+		var loaded = Paths.getPath(assetPath, 'animated');
 
 		if (loaded == null) {
 			Trace.traceOnce('FunkinSprite could not load asset "$assetPath"');
@@ -38,9 +38,11 @@ class FunkinSprite extends FlxAnimate {
 		var isAnimate = false;
 
 		if (isSimpleImage) {
-			var scaleX = props.frameScale != null ? props.frameScale[0] : 0;
-			var scaleY = props.frameScale != null ? props.frameScale[1] : 0;
-			loadGraphic(loaded, true, scaleX, scaleY);
+			if (props.frameScale != null) {
+				loadGraphic(loaded, true, props.frameScale[0], props.frameScale[1]);
+			} else {
+				loadGraphic(loaded);
+			}
 		} else {
 			frames = cast(loaded, FlxFramesCollection);
 			isAnimate = (frames is FlxAnimateFrames);
@@ -72,9 +74,10 @@ class FunkinSprite extends FlxAnimate {
 						var fScale = getAnimFrameScale(props.anims, animPath);
 						if (fScale != null) {
 							var tileFrames = FlxTileFrames.fromGraphic(FlxG.bitmap.add(cast(extra, String)), FlxPoint.get(fScale[0], fScale[1]));
-							filePathOffsets.set(animPath, atlas.frames.length);
+							var offsetIdx = atlas.frames.length;
 							for (frame in (tileFrames.frames : Array<Dynamic>))
 								atlas.frames.push(frame);
+							filePathOffsets.set(animPath, offsetIdx);
 						}
 					}
 				}
@@ -98,8 +101,13 @@ class FunkinSprite extends FlxAnimate {
 				var animPath = getAnimFilePath(anim);
 				var offset = animPath != null ? (filePathOffsets.get(animPath) ?? 0) : 0;
 				var indices = offset > 0 ? anim.indices.map(i -> i + offset) : anim.indices;
-				isAnimate ? this.anim.addBySymbolIndices(fullAnimName, anim.prefix, indices, anim.framerate,
-					anim.looped) : animation.addByIndices(fullAnimName, anim.prefix, indices, "", anim.framerate, anim.looped);
+				if (isAnimate) {
+					this.anim.addBySymbolIndices(fullAnimName, anim.prefix, indices, anim.framerate, anim.looped);
+				} else if (anim.prefix != null) {
+					animation.addByIndices(fullAnimName, anim.prefix, indices, "", anim.framerate, anim.looped);
+				} else {
+					animation.add(fullAnimName, indices, Std.int(anim.framerate ?? 24), anim.looped ?? false);
+				}
 			} else {
 				isAnimate ? this.anim.addBySymbol(fullAnimName, anim.prefix, anim.framerate,
 					anim.looped) : animation.addByPrefix(fullAnimName, anim.prefix, anim.framerate, anim.looped);

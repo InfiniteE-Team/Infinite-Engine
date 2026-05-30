@@ -8,7 +8,7 @@
             "props": {
                 "name": "stageback",
                 "path": "stageback",
-                "position": [-100, -200],
+                "position": [-600, -250],
                 "scrollFactor": [0.9, 0.9],
                 "antialiasing": true
             }
@@ -18,7 +18,7 @@
             "props": {
                 "name": "stage_light_LEFT",
                 "path": "stage_light",
-                "position": [-34, -110],
+                "position": [-154, -140],
                 "scrollFactor": [1, 1],
                 "antialiasing": true,
                 "alpha": 1,
@@ -30,7 +30,7 @@
             "props": {
                 "name": "stage_light_RIGHT",
                 "path": "stage_light",
-                "position": [1126, -110],
+                "position": [1026, -140],
                 "scrollFactor": [1, 1],
                 "antialiasing": true,
                 "alpha": 1,
@@ -42,7 +42,7 @@
             "props": {
                 "name": "stagefront",
                 "path": "stagefront",
-                "position": [-350, 600],
+                "position": [-650, 600],
                 "scale": [1.1, 1.1],
                 "scrollFactor": [0.9, 0.9],
                 "antialiasing": true
@@ -63,7 +63,7 @@
         {
             "type": "character",
             "id": "bf",
-            "position": [895.697639369111, 442.847229015552],
+            "position": [905.697639369111, 402.847229015552],
             "camPos": [0, 0]
         },
         {
@@ -71,7 +71,7 @@
             "props": {
                 "name": "stagecurtains",
                 "path": "stagecurtains",
-                "position": [-508.000043683472, -296.00000635396],
+                "position": [-608.000043683472, -396.00000635396],
                 "scale": [0.9, 0.9],
                 "scrollFactor": [1.3, 1.3],
                 "antialiasing": true

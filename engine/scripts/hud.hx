@@ -6,7 +6,7 @@ var playerBumpScale = 1.0;
 var opponentBumpScale = 1.0;
 var BUMP_SCALE = 1.2;
 
-function onCreate() {
+function postCreate() {
 	var state = PlayState.instance;
 
 	var barW = 600;
@@ -108,7 +108,7 @@ function _updateIconPositions() {
 	if (healthBarBG == null)
 		return;
 
-	var ratio = Math.max(0, Math.min(PlayState.instance.playStateConfig.health; / 2.0, 1.0));
+	var ratio = Math.max(0, Math.min(PlayState.instance.playStateConfig.health / 2.0, 1.0));
 	var barCenterX = healthBarBG.x + healthBarBG.width * ratio;
 
 	if (playerIcon != null) {
