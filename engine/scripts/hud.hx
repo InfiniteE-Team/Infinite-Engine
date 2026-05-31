@@ -1,3 +1,5 @@
+import core.assets.Paths;
+
 var playerIcon = null;
 var opponentIcon = null;
 var healthBarBG = null;
@@ -7,41 +9,50 @@ var opponentBumpScale = 1.0;
 var BUMP_SCALE = 1.2;
 
 function postCreate() {
-	var state = PlayState.instance;
+	var healthBarY = saveData.downscroll ? FlxG.height * 0.1 : FlxG.height * 0.88;
 
-	var barW = 600;
-	var barH = 20;
-	var barY = FlxG.height - 34;
-	var barX = (FlxG.width - barW) / 2;
-
-	healthBarBG = new FlxSprite(barX, barY);
-	healthBarBG.makeGraphic(barW, barH, 0xFF000000);
-	healthBarBG.cameras = [state.camHUD];
+	healthBarBG = new FlxSprite(0, healthBarY);
+	healthBarBG.loadGraphic(Paths.getPath('hud/healthBar', 'image'));
 	healthBarBG.scrollFactor.set(0, 0);
+	healthBarBG.cameras = [camHUD];
+	healthBarBG.x = (FlxG.width - healthBarBG.width) * 0.5;
+	healthBarBG.antialiasing = true;
 	add(healthBarBG);
 
-	healthBarFill = new FlxSprite(barX + 2, barY + 2);
-	healthBarFill.makeGraphic(barW - 4, barH - 4, 0xFFFF0000);
-	healthBarFill.cameras = [state.camHUD];
+	healthBarFill = new flixel.ui.FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, LEFT_TO_RIGHT, Std.int(healthBarBG.width - 8),
+		Std.int(healthBarBG.height - 8), playStateConfig, 'health', 0, 2);
 	healthBarFill.scrollFactor.set(0, 0);
+	healthBarFill.flipX = true;
+	healthBarFill.cameras = [camHUD];
+
+	var dadColor = 0xFFFF0000;
+	var bfColor = 0xFF66FF33;
+	for (charData in PlayState.SONG.chars) {
+		var char = chars.get(charData.id);
+		if (char == null)
+			continue;
+		var isPlayer = game.controllers.CharacterController.namesPlayer.contains(charData.role);
+		var isOpponent = game.controllers.CharacterController.namesOpponent.contains(charData.role);
+		if (isPlayer && char.charData.healthBarColor != null)
+			bfColor = char.charData.healthBarColor;
+		if (isOpponent && char.charData.healthBarColor != null)
+			dadColor = char.charData.healthBarColor;
+	}
+	healthBarFill.createFilledBar(dadColor, bfColor);
 	add(healthBarFill);
 
 	for (charData in PlayState.SONG.chars) {
-		var char = state.chars.get(charData.id);
+		var char = chars.get(charData.id);
 		if (char == null)
 			continue;
-
 		var isPlayer = game.controllers.CharacterController.namesPlayer.contains(charData.role);
 		var isOpponent = game.controllers.CharacterController.namesOpponent.contains(charData.role);
-
 		if (!isPlayer && !isOpponent)
 			continue;
-
 		var icon = new game.objects.sprites.Icon(isPlayer, char.charData);
-		icon.cameras = [state.camHUD];
+		icon.cameras = [camHUD];
 		icon.scrollFactor.set(0, 0);
 		add(icon);
-
 		if (isPlayer)
 			playerIcon = icon;
 		else
@@ -52,7 +63,7 @@ function postCreate() {
 }
 
 function postUpdate(elapsed:Float) {
-	_updateHealthBar();
+	//_updateHealthBar();
 	_updateLosingAnim();
 	_updateIconPositions();
 	_lerpBumpScale(elapsed);
@@ -79,19 +90,8 @@ function onDestroy() {
 	healthBarFill = null;
 }
 
-function _updateHealthBar() {
-	if (healthBarFill == null)
-		return;
-
-	var ratio = Math.max(0, Math.min(PlayState.instance.health / 2.0, 1.0));
-	var maxW = healthBarBG.width - 4;
-
-	healthBarFill.scale.x = ratio;
-	healthBarFill.offset.x = -(maxW * (1.0 - ratio)) / 2.0;
-}
-
 function _updateLosingAnim() {
-	var health = PlayState.instance.playStateConfig.health;
+	var health = playStateConfig.health;
 
 	if (playerIcon != null) {
 		var losing = health < 0.4;
@@ -108,7 +108,7 @@ function _updateIconPositions() {
 	if (healthBarBG == null)
 		return;
 
-	var ratio = Math.max(0, Math.min(PlayState.instance.playStateConfig.health / 2.0, 1.0));
+	var ratio = Math.max(0, Math.min(playStateConfig.health / 2.0, 1.0));
 	var barCenterX = healthBarBG.x + healthBarBG.width * ratio;
 
 	if (playerIcon != null) {

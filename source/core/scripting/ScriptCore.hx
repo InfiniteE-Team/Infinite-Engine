@@ -11,6 +11,8 @@ class ScriptCore {
 	var modifiedTimes:Array<Float> = [];
 	var state:MusicBeatState;
 
+	var pendingPaths:Array<String> = [];
+
 	public function new(state:MusicBeatState) {
 		this.state = state;
 	}
@@ -18,14 +20,23 @@ class ScriptCore {
 	public function load(path:String) {
 		if (path == null || !sys.FileSystem.exists(path))
 			return;
+		pendingPaths.push(path);
+		Trace.traceOnce('Script added to load: $path');
+	}
 
-		var script = new RuleScript(null, null, sharedContext);
-		script.errorHandler = (e) -> Trace.traceOnce('[Script] $path → ${e.message}');
-		setupScript(script);
-		script.tryExecute(sys.io.File.getContent(path));
-		scripts.push(script);
-		paths.push(path);
-		modifiedTimes.push(sys.FileSystem.stat(path).mtime.getTime());
+	public function executeAll() {
+		for (path in pendingPaths) {
+			var parser = new rulescript.parsers.HxParser();
+			parser.allowAll();
+			var script = new RuleScript(parser, sharedContext);
+			setupScript(script);
+			script.errorHandler = (e) -> Trace.traceOnce('[ERROR] $path → ${e.details()}');
+			script.execute(sys.io.File.getContent(path));
+			scripts.push(script);
+			paths.push(path);
+			modifiedTimes.push(sys.FileSystem.stat(path).mtime.getTime());
+		}
+		pendingPaths = [];
 	}
 
 	public function exposeStatics(cls:Class<Dynamic>) {
@@ -66,6 +77,11 @@ class ScriptCore {
 		script.superInstance = state;
 		script.access.setVariable("add", (o:flixel.FlxBasic) -> state.add(o));
 		script.access.setVariable("remove", (o:flixel.FlxBasic) -> state.remove(o));
+
+		script.access.setVariable("FlxBar", flixel.ui.FlxBar);
+		script.access.setVariable("LEFT_TO_RIGHT", flixel.ui.FlxBar.FlxBarFillDirection.LEFT_TO_RIGHT);
+		script.access.setVariable("RIGHT_TO_LEFT", flixel.ui.FlxBar.FlxBarFillDirection.RIGHT_TO_LEFT);
+
 		script.access.setVariable("PlayState", game.PlayState);
 		script.access.setVariable("FlxG", flixel.FlxG);
 		script.access.setVariable("FlxSprite", flixel.FlxSprite);

@@ -49,7 +49,6 @@ class PlayState extends MusicBeatState {
 
 	override public function create() {
 		instance = this;
-		FlxG.mouse.visible = false;
 
 		#if HSCRIPT_ALLOWED
 		initScript();
@@ -70,6 +69,8 @@ class PlayState extends MusicBeatState {
 		FlxG.signals.focusLost.add(onFocusLost);
 		FlxG.signals.focusGained.add(onFocusGained);
 
+		FlxG.mouse.visible = false;
+
 		super.create();
 
 		#if HSCRIPT_ALLOWED
@@ -80,6 +81,7 @@ class PlayState extends MusicBeatState {
 					script.load('$songScriptDir$file');
 			}
 		}
+		script.executeAll();
 		script.call("postCreate", []);
 		#end
 	}
