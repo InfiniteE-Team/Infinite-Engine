@@ -8,18 +8,6 @@ import core.config.Controls;
 class InputController {
 	public var isGood:Bool = false;
 
-	public static inline var SICK_WINDOW:Float = 45.0;
-	public static inline var GOOD_WINDOW:Float = 90.0;
-	public static inline var BAD_WINDOW:Float = 135.0;
-	public static inline var SHIT_WINDOW:Float = 166.0;
-
-	// === HEALTH VALUES ===
-	public static inline var SICK_HEALTH:Float = 0.1;
-	public static inline var GOOD_HEALTH:Float = 0.05;
-	public static inline var BAD_HEALTH:Float = -0.03;
-	public static inline var SHIT_HEALTH:Float = -0.03;
-	public static inline var MISS_HEALTH:Float = -0.04;
-
 	public var isGhostTapping:Bool = true;
 
 	var control:Controls;
@@ -35,7 +23,7 @@ class InputController {
 		var note = noteController.getHittableNote(charId, i);
 		if (note != null && justPressed(i)) {
 			note.wasGoodHit = true;
-			note.kill();
+			// note.kill();
 		}
 		return note;
 	}
@@ -45,14 +33,37 @@ class InputController {
 		var note = handleInput(i, noteController, charId);
 		if (isPressed(i)) {
 			if (note != null) {
+				var diff = Math.abs(note.strumTime - core.rhythm.RhythmCore.songPosition);
+				var ratingType = noteController.getRatingForDiff(diff);
+
+				if (ratingType != null) {
+					playStateConfig.score += ratingType.score;
+					playStateConfig.health += ratingType.health;
+
+					playStateConfig.totalAccuracyWeight += ratingType.accuracyWeight;
+					playStateConfig.totalNotesHit++;
+					playStateConfig.accuracy = playStateConfig.totalAccuracyWeight / playStateConfig.totalNotesHit;
+
+					note.rating = ratingType.rating;
+					playStateConfig.rating = ratingType.rating;
+
+					if (ratingType.miss == true)
+						playStateConfig.combo = 0;
+					else
+						playStateConfig.combo++;
+				}
+
+				note.kill();
 				charStrums[i].playAnim('confirm' + i, true);
 			} else if (justPressed(i)) {
 				charStrums[i].playAnim('press' + i, true);
-				gameAudio.onMiss();
-				playStateConfig.health += noteController.getHealthDrain(note);
 				/*
-					if (!isGhostTapping) {
-				}*/
+					if (!isGhostTapping) { */
+				playStateConfig.misses++;
+				gameAudio.onMiss();
+				playStateConfig.health += noteController.getHealthDrain(null);
+				playStateConfig.combo = 0;
+				// }
 			}
 		} else {
 			// miss Note detection yep
@@ -60,9 +71,13 @@ class InputController {
 				if (note == null || !note.alive || !note.mustPress)
 					continue;
 				if (note.strum == charStrums[i] && note.tooLate) {
-					note.alpha = 0.3;
+					note.canBeHit = false;
+					note.alpha = 0.4;
 					gameAudio.onMiss();
-					playStateConfig.health += noteController.getHealthDrain(note);
+					playStateConfig.health += noteController.getHealthDrain(null);
+					playStateConfig.misses++;
+					playStateConfig.combo = 0;
+					note.tooLate = false;
 				}
 			}
 			charStrums[i].playAnim('static' + i, true);
@@ -75,12 +90,15 @@ class InputController {
 			if (sustain.strum != charStrums[i])
 				continue;
 
-			var isActive = core.rhythm.RhythmCore.songPosition >= sustain.strumTime - SHIT_WINDOW;
-			if (isActive && isPressed(i)) {
+			var worstWindow = noteController.getWorstWindow();
+			var isActive = core.rhythm.RhythmCore.songPosition >= sustain.strumTime - worstWindow;
+			var parentHit = sustain.parentNote == null || sustain.parentNote.wasGoodHit;
+			if (isActive && isPressed(i) && parentHit) {
 				sustain.isHeld = true;
 				charStrums[i].playAnim('confirm' + i, true);
 			} else if (!isPressed(i)) {
 				sustain.isHeld = false;
+				//playStateConfig.health += noteController.getHealthDrain(null);
 			}
 		}
 

@@ -24,7 +24,5 @@ class CustomShader {
 			cam.filters = [filter];
 		else
 			cam.filters.push(filter);
-
-		Camera.pruneEmptyFilters(cam);
 	}
 }

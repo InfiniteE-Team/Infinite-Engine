@@ -25,7 +25,7 @@
 	<!-- ____________________________ Window Settings ___________________________ -->
 
 	<!--These window settings apply to all targets-->
-	<window width="1280" height="720" fps="60" background="#000000" hardware="true" vsync="false" />
+	<window width="1280" height="720" fps="1000" background="#000000" hardware="true" vsync="false" />
 
 	<!--Desktop-specific-->
 	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" />
@@ -53,6 +53,8 @@
 
 	<haxelib name="hscript"/>
 	<haxelib name="rulescript"/>
+
+	<haxelib name="ale-json"/>
 
 	<haxelib name="hxvlc"/>  <!-- videos -->
 

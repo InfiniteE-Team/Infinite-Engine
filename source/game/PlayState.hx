@@ -45,6 +45,8 @@ class PlayState extends MusicBeatState {
 	public var saveData:SaveData = new SaveData();
 	public var playStateConfig:PlayStateConfig = new PlayStateConfig(); // data for health, strum line, etc
 
+	public var osuMode:Bool = true;
+
 	var paused:Bool = false;
 
 	override public function create() {
@@ -52,6 +54,7 @@ class PlayState extends MusicBeatState {
 
 		#if HSCRIPT_ALLOWED
 		initScript();
+		script.loadFolder('songs/$curSong/scripts');
 		script.load(Paths.getPath('hud', 'script'));
 		script.call("onCreate", []);
 		#end
@@ -64,7 +67,7 @@ class PlayState extends MusicBeatState {
 
 		add(gameAudio);
 
-		initSong();
+		startCountdown();
 
 		FlxG.signals.focusLost.add(onFocusLost);
 		FlxG.signals.focusGained.add(onFocusGained);
@@ -74,13 +77,6 @@ class PlayState extends MusicBeatState {
 		super.create();
 
 		#if HSCRIPT_ALLOWED
-		var songScriptDir = Paths.findLib('songs/$curSong/scripts/');
-		if (songScriptDir != null && sys.FileSystem.exists(songScriptDir)) {
-			for (file in sys.FileSystem.readDirectory(songScriptDir)) {
-				if (file.endsWith('.hx'))
-					script.load('$songScriptDir$file');
-			}
-		}
 		script.executeAll();
 		script.call("postCreate", []);
 		#end
@@ -107,10 +103,12 @@ class PlayState extends MusicBeatState {
 
 		cameraController.defaultZoom = stage.defaultZoom;
 		cameraController.resolveZoom();
-		add(stage);
+		if (!osuMode)
+			add(stage);
 
 		chars = new CharacterController();
-		stage.charLayer.add(chars);
+		if (!osuMode)
+			stage.charLayer.add(chars);
 		for (data in SONG.chars) {
 			chars.loadCharacter(data.id, data.name, data.role, stage.charLayer);
 			stage.applyCharProps(chars.get(data.id), data.id);
@@ -154,17 +152,31 @@ class PlayState extends MusicBeatState {
 		gameAudio.playAll();
 	}
 
-	public function startCountdown() {}
+	public function startCountdown() {
+		initSong();
+	}
 
 	public function endSong() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable('onEndSong', []))
+			return;
+		#end
 		// idk what to do here, maybe go to score screen or something? for now just reset the state
 		MusicBeatState.resetState();
 	}
 
 	// Other screens idk
-	public function pauseMenu() {}
+	public function pauseMenu() {
+		#if HSCRIPT_ALLOWED
+		script.call('onPauseMenu', []);
+		#end
+	}
 
 	public function isDeath() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable('onDeath', []))
+			return;
+		#end
 		Trace.traceOnce("isDeath is being called! This should be overridden in a subclass if you want to use it.");
 
 		MusicBeatState.resetState();
@@ -172,16 +184,31 @@ class PlayState extends MusicBeatState {
 
 	override function onFocusLost():Void {
 		gameAudio.pauseAll();
+		#if HSCRIPT_ALLOWED
+		script.call('onFocusLost', []);
+		#end
 	}
 
 	function onFocusGained():Void {
 		gameAudio.playAll();
+		#if HSCRIPT_ALLOWED
+		script.call('onFocusGained', []);
+		#end
 	}
 
 	function rewindSong():Void {
 		gameAudio.stopAll();
 		initSong();
 	}
+
+	#if HSCRIPT_ALLOWED
+	override function initScript():Void {
+		super.initScript();
+
+		script.expose('SONG', PlayState.SONG);
+		script.expose('instance', PlayState.instance);
+	}
+	#end
 
 	//
 
@@ -192,6 +219,10 @@ class PlayState extends MusicBeatState {
 
 		if (gameAudio.inst != null)
 			RhythmCore.songPosition = gameAudio.inst.time;
+
+		FlxG.log.add("Health: " + playStateConfig.health);
+
+		FlxG.log.add("Rating: " + playStateConfig.rating);
 
 		gameAudio.resyncVocals();
 
@@ -209,12 +240,17 @@ class PlayState extends MusicBeatState {
 		}
 
 		if (chars != null)
-			chars.isSinging(noteController, gameAudio, playStateConfig);
+			chars.processInput(noteController, gameAudio, playStateConfig);
 
-		if (!cameraController.existsCamEvents) {
-			var singing = chars.getActiveSingingChar();
-			if (singing != null)
-				cameraController.followChar = singing;
+		if (!osuMode && chars != null)
+			chars.isSinging(noteController);
+
+		if (!osuMode) {
+			if (!cameraController.existsCamEvents) {
+				var singing = chars.getActiveSingingChar();
+				if (singing != null)
+					cameraController.followChar = singing;
+			}
 		}
 
 		super.update(elapsed);
@@ -224,13 +260,22 @@ class PlayState extends MusicBeatState {
 		#end
 	}
 
-	override public function beatHit() {
-		super.beatHit();
+	override public function stepHit(step:Int) {
+		super.stepHit(step);
+	}
+
+	override public function beatHit(beat:Float) {
+		super.beatHit(beat);
 
 		if (beat % 4 == 0)
 			cameraController.bumpZoom();
 
-		chars.danceAll();
+		if (!osuMode)
+			chars.danceAll();
+
+		#if HSCRIPT_ALLOWED
+		script.call('postBeatHit', [beat]);
+		#end
 	}
 
 	override public function destroy() {

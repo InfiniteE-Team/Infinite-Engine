@@ -12,7 +12,9 @@ import game.PlayStateConfig;
 import core.rhythm.RhythmCore;
 import core.json.song.SongData.SongConfig;
 import core.json.engine.GlobalData.GlobalConfig;
-import Lambda;
+import core.json.song.RatingData;
+
+using Lambda;
 
 class NoteController {
 	public var isMiss:Bool = false;
@@ -48,6 +50,8 @@ class NoteController {
 
 	public var distanceRenderNotes:Float = 200;
 
+	public var ratingData:RatingData;
+
 	public function new(daSong:SongConfig, isDownscroll:Bool, isGhostTapping:Bool) {
 		this.daSong = daSong;
 		this.isDownscroll = isDownscroll;
@@ -72,6 +76,11 @@ class NoteController {
 		// strumnotes
 		var noteDataPath:String = 'noteskins/$noteSkin/strumnotes';
 		noteSkinData = UtilsData.readJson(Paths.getPath('data/$noteDataPath', "json"));
+
+		var ratingPath = Paths.getPath('data/ratings', 'json');
+		ratingData = UtilsData.readJson(ratingPath);
+		if (ratingData == null || ratingData.ratings == null)
+			trace("WARNING: ratings.json not found or invalid");
 
 		keys = noteSkinData.keys ?? 4;
 		spacing = noteSkinData.spacing ?? 0;
@@ -136,30 +145,51 @@ class NoteController {
 		for (sustain in sustains.members) {
 			if (sustain == null)
 				continue;
-			sustain.x = sustain.strum.x;
+
+			// end
+			if (sustain.isSustainEnd) {
+				sustain.offset.y = 0;
+
+				if (sustain.parentNote != null && sustain.parentNote.alive) {
+					var body = sustain.parentNote;
+					sustain.x = body.x;
+
+					if (isDownscroll)
+						sustain.y = body.y - sustain.height;
+					else
+						sustain.y = body.y + body.frameHeight * body.scale.y;
+
+					sustain.alpha = (body.clipRect != null) ? 0 : 1;
+				}
+
+				if (sustain.parentNote == null || !sustain.parentNote.alive)
+					toDestroy.push(sustain);
+
+				continue;
+			}
+
+			// body
+			final strumCenterX = sustain.strum.x - sustain.strum.offset.x + sustain.strum.frameWidth * sustain.strum.scale.x * 0.5;
+			sustain.x = strumCenterX - sustain.frameWidth * sustain.scale.x * 0.5;
+			
 			sustain.y = isDownscroll ? sustain.strum.y - ((sustain.strumTime - songTime) * scrollSpeed) : sustain.strum.y
 				+ ((sustain.strumTime - songTime) * scrollSpeed);
 
-			if (!sustain.isSustainEnd) {
-				sustain.scale.y = (RhythmCore.stepInMs * (scrollSpeed * 0.45)) / sustain.frameHeight;
-				sustain.updateHitbox();
-			}
+			sustain.scale.y = (RhythmCore.stepInMs * (scrollSpeed * 0.45)) / sustain.frameHeight;
+			sustain.offset.y = (sustain.scale.y * sustain.frameHeight - sustain.frameHeight) / 2;
 
-			if (sustain.isSustainEnd) {
-				var stepPx = RhythmCore.stepInMs * scrollSpeed;
-				sustain.y += isDownscroll ? -stepPx : stepPx;
-			}
+			if (sustain.isHeld && sustain.strumTime <= songTime) {
+				var halfStrum = sustain.strum.height * 0.5;
+				var strumY = isDownscroll ? sustain.strum.y - halfStrum : sustain.strum.y + halfStrum;
 
-			if (sustain.isHeld && sustain.strumTime <= songTime && !sustain.isSustainEnd) {
-				var strumY = sustain.strum.y;
-				var clipY = (strumY - sustain.y) / sustain.scale.y;
+				var clipY = (strumY - (sustain.y + sustain.offset.y)) / sustain.scale.y;
 				clipY = Math.max(0, clipY);
 				sustain.clipRect = new flixel.math.FlxRect(0, clipY, sustain.frameWidth, sustain.frameHeight - clipY);
 			} else {
 				sustain.clipRect = null;
 			}
 
-			if (sustain.strumTime + RhythmCore.stepInMs < songTime)
+			if (sustain.strumTime + sustain.length < songTime)
 				toDestroy.push(sustain);
 			else if (sustain.y < -distanceRenderNotes && !isDownscroll)
 				toDestroy.push(sustain);
@@ -233,36 +263,44 @@ class NoteController {
 
 			note.strum = strum;
 
+			note.noteControl = this;
+
 			note.noteType = data.type;
 
 			if (data.length > 0) {
-				var countSustains:Int = Math.round(data.length / RhythmCore.stepInMs);
-				if (countSustains < 1)
-					countSustains = 1;
+				var sustainTime = data.time + (RhythmCore.stepInMs * Math.round(data.length / RhythmCore.stepInMs));
+				var sustain = new NoteSustain(sustainTime, keys, strum.x, 0, noteSkinData, noteSkin, data.lane, data.length, data.type, false);
+				RGBShader.applyFromSkin(sustain, noteSkinData, data.lane);
+				sustain.ID = globalLane;
+				sustain.direction = globalLane;
+				sustain.strumTime = sustainTime;
+				sustain.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
+				sustain.noteControl = this;
+				sustain.parentNote = sustain;
+				sustain.strum = strum;
+				sustain.noteType = data.type;
+				if (isDownscroll)
+					sustain.flipY = true;
+				if (!daSong.strumsVisible)
+					sustain.visible = false;
+				unspawnNotes.push(sustain);
 
-				for (i in 0...countSustains) {
-					var sustainTime = data.time + (RhythmCore.stepInMs * i);
-					var isFinal = (i == countSustains - 1);
-
-					var sustain = new NoteSustain(sustainTime, keys, strum.x, 0, noteSkinData, noteSkin, data.lane, RhythmCore.stepInMs, data.type, isFinal);
-					RGBShader.applyFromSkin(sustain, noteSkinData, data.lane);
-					sustain.ID = globalLane;
-					sustain.direction = globalLane;
-					sustain.strumTime = sustainTime;
-					sustain.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
-					sustain.strum = strum;
-					sustain.noteType = data.type;
-
-					sustain.y = strum.height / 2;
-
-					if (isDownscroll)
-						sustain.flipY = true;
-
-					if (!daSong.strumsVisible) {
-						sustain.visible = false;
-					}
-					unspawnNotes.push(sustain);
-				}
+				// hold end
+				var sustainEnd = new NoteSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, noteSkin, data.lane, 0, data.type, true);
+				RGBShader.applyFromSkin(sustainEnd, noteSkinData, data.lane);
+				sustainEnd.ID = globalLane;
+				sustainEnd.direction = globalLane;
+				sustainEnd.strumTime = data.time + data.length;
+				sustainEnd.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
+				sustainEnd.noteControl = this;
+				sustainEnd.strum = strum;
+				
+				sustainEnd.noteType = data.type;
+				if (isDownscroll)
+					sustainEnd.flipY = true;
+				if (!daSong.strumsVisible)
+					sustainEnd.visible = false;
+				unspawnNotes.push(sustainEnd);
 			}
 			unspawnNotes.push(note);
 		}
@@ -271,13 +309,32 @@ class NoteController {
 	}
 
 	public function getHealthDrain(note:Note):Float {
-		if (note == null)
-			return InputController.MISS_HEALTH;
+		if (ratingData == null)
+			return -0.04;
 
-		switch (note.rating) {
-			default:
-				return InputController.MISS_HEALTH;
+		var missRating = ratingData.ratings.find(r -> r.miss == true && r.window == null);
+		return missRating != null ? missRating.health : -0.04;
+	}
+
+	public function getRatingForDiff(diff:Float):Null<RatingDataType> {
+		if (ratingData == null)
+			return null;
+
+		var windowed = ratingData.ratings.filter(r -> r.window != null);
+		windowed.sort((a, b) -> Std.int(a.window - b.window));
+
+		for (r in windowed) {
+			if (Math.abs(diff) <= r.window)
+				return r;
 		}
+		return null;
+	}
+
+	public function getWorstWindow():Float {
+		if (ratingData == null)
+			return 166.0;
+		var windows = ratingData.ratings.filter(r -> r.window != null).map(r -> r.window);
+		return windows.length > 0 ? Lambda.fold(windows, Math.max, 0) : 166.0;
 	}
 
 	public function destroy():Void {

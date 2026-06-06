@@ -3,7 +3,7 @@ package game.objects.sprites.notes;
 import core.json.extensions.SpriteData.ObjectData;
 import core.assets.FunkinSprite;
 import core.rhythm.RhythmCore;
-import game.controllers.InputController;
+import game.controllers.NoteController;
 import game.graphics.shaders.hardcode.RGBShader;
 import core.json.objects.NoteSkinData;
 
@@ -24,6 +24,8 @@ class Note extends FunkinSprite {
 	public var keys:Int = 4;
 
 	public var strum:StrumNote;
+
+	public var noteControl:NoteController;
 
 	public function new(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0,
 			?noteType:String = 'normal') {
@@ -52,10 +54,10 @@ class Note extends FunkinSprite {
 			if (strumTime <= RhythmCore.songPosition)
 				wasGoodHit = true;
 		} else if (mustPress && !wasGoodHit && !tooLate) {
-			canBeHit = (RhythmCore.songPosition >= strumTime - InputController.SHIT_WINDOW
-				&& RhythmCore.songPosition <= strumTime + InputController.SHIT_WINDOW);
+			canBeHit = (RhythmCore.songPosition >= strumTime - noteControl.getWorstWindow()
+				&& RhythmCore.songPosition <= strumTime + noteControl.getWorstWindow());
 
-			if (RhythmCore.songPosition > strumTime + InputController.SHIT_WINDOW)
+			if (RhythmCore.songPosition > strumTime + noteControl.getWorstWindow())
 				tooLate = true;
 		}
 	}

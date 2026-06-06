@@ -7,7 +7,7 @@ import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFramesCollection;
 
 class Paths {
-	static final libs = ["engine", "assets"];
+	static final libs = ["assets", "engine"];
 	private static var cache = new Map<String, Dynamic>();
 
 	public static function getPath(fileName:String, ?type:String = "default"):Dynamic {
@@ -37,9 +37,9 @@ class Paths {
 					return findLib('shaders/$fileName.frag');
 				// scripting
 				case "states":
-					return findLib('states/' + fileName + '.hx');
+					return findLib(resolveScript('states/$fileName'));
 				case "script":
-					return findLib('scripts/$fileName.hx');
+					return findLib(resolveScript('scripts/$fileName'));
 				default:
 					return findLib(fileName);
 			}
@@ -66,6 +66,18 @@ class Paths {
 			}
 		}
 		return result;
+	}
+
+	public static function resolveScript(fileName:String):String {
+		var extensions = ['.hx', '.lua', '.hxc'];
+
+		for (ext in extensions) {
+			if (FileSystem.exists(fileName + ext)) {
+				return fileName + ext;
+			}
+		}
+
+		return fileName + '.hx';
 	}
 
 	public static function getAnimated(fileName:String):Dynamic {

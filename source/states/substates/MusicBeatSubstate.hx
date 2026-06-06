@@ -1,4 +1,5 @@
-package states;
+package states.substates;
+
 import core.rhythm.TrackBeat;
 import core.json.JsonWatcher;
 import utils.InfoHelpDebug;
@@ -6,7 +7,7 @@ import utils.InfoHelpDebug;
 import core.scripting.ScriptHandler;
 #end
 
-class MusicBeatState extends flixel.FlxState {
+class MusicBeatSubstate extends flixel.FlxSubState {
 	var tracker:TrackBeat = new TrackBeat();
 	#if HSCRIPT_ALLOWED
 	var script:ScriptHandler;
@@ -47,7 +48,7 @@ class MusicBeatState extends flixel.FlxState {
 			#end
 
 			if (FlxG.keys.justPressed.F5) {
-				MusicBeatState.resetState();
+				MusicBeatSubstate.resetState();
 			}
 			if (FlxG.keys.justPressed.F4)
 				infoHelp.openUI();
@@ -59,22 +60,16 @@ class MusicBeatState extends flixel.FlxState {
 	public static function resetState():Void {
 		if (Main.globalData.developerMode)
 			JsonWatcher.updateSwitch();
-		FlxG.resetState();
+		var parent = _parentState;
+		var cls = Type.getClass(this);
+		close();
+		parent.openSubState(Type.createInstance(cls, []));
 	}
 
-	public static function switchState(state:MusicBeatState):Void {
-		if (Main.globalData.developerMode)
-			JsonWatcher.updateSwitch();
-		FlxG.switchState(() -> state);
-	}
-
-	public function stepHit(step:Int) {
+	public function stepHit(step:Int):Void {
 		#if HSCRIPT_ALLOWED
 		script.call("onStepHit", [step]);
 		#end
-
-		if (Main.globalData.developerMode)
-			infoHelp.text = 'Steps: $step';
 	}
 
 	public function beatHit(beat:Float):Void {

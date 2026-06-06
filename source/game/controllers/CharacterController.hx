@@ -50,24 +50,58 @@ class CharacterController extends FunkinObjectRegistry {
 		return chars;
 	}
 
-	public function isSinging(noteController:NoteController, gameAudio:GameAudio, playStateConfig:PlayStateConfig) {
-		// player
+	public function processInput(noteController:NoteController, gameAudio:GameAudio, playStateConfig:PlayStateConfig) {
 		for (char in playerChars) {
 			var strums = noteController.getCharStrums(char.id);
 			for (i in 0...strums.length)
 				updatePlayerLane(char, strums, i, noteController, gameAudio, playStateConfig);
 		}
-		// opponent
 		for (char in opponentChars) {
 			var strums = noteController.getCharStrums(char.id);
 			for (i in 0...strums.length) {
 				var note = noteController.getHittableNote(char.id, i, false);
 				if (note != null) {
 					input.isCPUHit(strums, noteController, char.id, i);
-					setSing(char, note.direction);
 				} else {
 					strums[i].playAnim('static' + i, true);
 				}
+			}
+		}
+	}
+
+	public function isSinging(noteController:NoteController) {
+		for (char in playerChars) {
+			var strums = noteController.getCharStrums(char.id);
+			for (i in 0...strums.length) {
+				if (input.isPressed(i)) {
+					setSing(char, i);
+				} else {
+					char.isSing = false;
+					char.isMiss = false;
+					for (note in noteController.notes.members) {
+						if (note == null || !note.alive || !note.mustPress || note.strum != strums[i] || !note.tooLate)
+							continue;
+						char.playAnim('${Character.getCharAnim(note.direction)}-miss', true);
+						char.isMiss = true;
+					}
+				}
+				var songPos = core.rhythm.RhythmCore.songPosition;
+				for (sustain in noteController.sustains.members) {
+					if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != strums[i])
+						continue;
+					if (songPos >= sustain.strumTime && songPos <= sustain.strumTime + sustain.length && input.isPressed(i))
+						setSing(char, sustain.direction);
+				}
+			}
+		}
+		for (char in opponentChars) {
+			var strums = noteController.getCharStrums(char.id);
+			for (i in 0...strums.length) {
+				var note = noteController.getHittableNote(char.id, i, false);
+				if (note != null)
+					setSing(char, note.direction);
+				else
+					strums[i].playAnim('static' + i, true);
 			}
 		}
 	}
@@ -79,16 +113,18 @@ class CharacterController extends FunkinObjectRegistry {
 			if (hitNote != null) {
 				setSing(char, hitNote.direction);
 				char.isMiss = false;
-			} else if (input.justPressed(i) && !input.isGhostTapping) {
+			} else if (input.justPressed(i) /*&& !input.isGhostTapping*/) {
 				char.playAnim('${Character.getCharAnim(i)}-miss', true);
 				char.isMiss = true;
 			}
 		} else {
 			char.isSing = false;
 			char.isMiss = false;
+
 			for (note in nc.notes.members) {
 				if (note == null || !note.alive || !note.mustPress || note.strum != strums[i] || !note.tooLate)
 					continue;
+
 				char.playAnim('${Character.getCharAnim(note.direction)}-miss', true);
 				char.isMiss = true;
 			}

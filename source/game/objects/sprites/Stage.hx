@@ -5,6 +5,9 @@ import utils.UtilsData;
 import core.assets.FunkinSprite;
 import core.json.objects.StageData;
 import flixel.group.FlxGroup.FlxTypedGroup;
+#if HSCRIPT_ALLOWED
+import core.scripting.ScriptHandler;
+#end
 
 class Stage extends FlxTypedGroup<FlxBasic> {
 	var stage:String = 'stage';
@@ -20,12 +23,28 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 
 	public var charLayer:FlxTypedGroup<FlxBasic> = new FlxTypedGroup();
 
+	#if HSCRIPT_ALLOWED
+    public var stageScript:ScriptHandler;
+    #end
+
 	public function new(stage:String) {
 		super();
 		this.stage = stage;
 		dataStage();
 		createStage();
+		#if HSCRIPT_ALLOWED
+		initStageScript();
+		#end
 	}
+
+	#if HSCRIPT_ALLOWED
+    function initStageScript():Void {
+        stageScript = new ScriptHandler(this);
+        stageScript.load(Paths.getPath('stages/$stage', 'script'));
+        stageScript.executeAll();
+        stageScript.call('onCreate', []);
+    }
+    #end
 
 	public function dataStage() {
 		var stageDataPath = Paths.getPath('data/stages/' + stage, "json");
@@ -95,7 +114,31 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 		}
 	}
 
+	override public function update(elapsed:Float):Void {
+		super.update(elapsed);
+		#if HSCRIPT_ALLOWED
+        stageScript.call('onUpdate', [elapsed]);
+        #end
+	}
+
+	public function onBeatHit(beat:Float):Void {
+        #if HSCRIPT_ALLOWED
+        stageScript.call('onBeatHit', [beat]);
+        #end
+    }
+
+    public function onStepHit(step:Int):Void {
+        #if HSCRIPT_ALLOWED
+        stageScript.call('onStepHit', [step]);
+        #end
+    }
+
 	override public function destroy() {
+		#if HSCRIPT_ALLOWED
+        stageScript.call('onDestroy', []);
+        stageScript.destroy();
+        stageScript = null;
+        #end
 		for (element in elements)
         	element.destroy();
 		elements = null;

@@ -11,6 +11,11 @@
             "version": "4.0.1"
         },
         {
+            "name": "lime",
+            "type": "haxelib",
+            "version": "8.3.1"
+        },
+        {
             "name": "flixel-animate",
             "type": "git",
             "url": "https://github.com/MaybeMaru/flixel-animate"
@@ -19,6 +24,11 @@
             "name": "openfl",
             "type": "haxelib",
             "version": "9.5.1"
+        },
+        {
+            "name": "ale-json",
+            "type": "haxelib",
+            "version": "1.0.0"
         },
         {
             "name": "hscript",

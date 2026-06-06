@@ -13,6 +13,7 @@ import core.config.Controls;
 import core.config.SaveData;
 import lime.app.Application;
 import core.json.engine.GlobalData.GlobalConfig;
+import core.scripting.ScriptGlobals;
 
 class Main extends Sprite {
 	public var fps:FPSCounter = new FPSCounter(5, 5, 0xFFFFFF);
@@ -60,6 +61,10 @@ class Main extends Sprite {
 			core.api.DiscordAPI.shutdown();
 		});
 		#end
+
+		#if HSCRIPT_ALLOWED
+        ScriptGlobals.init();
+        #end
 	}
 
 	private function onKeyDown(e:openfl.events.KeyboardEvent):Void {

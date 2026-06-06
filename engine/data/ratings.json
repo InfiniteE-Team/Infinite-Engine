@@ -1,0 +1,44 @@
+{
+    "ratings": [
+        {
+            "rating": "sick",
+            "path": "sick",
+            "score": 350,
+            "health": 0.10,
+            "window": 45,
+            "accuracyWeight": 1.0
+        },
+        {
+            "rating": "good",
+            "path": "good",
+            "score": 200,
+            "health": 0.05,
+            "window": 90,
+            "accuracyWeight": 0.75
+        },
+        {
+            "rating": "bad",
+            "path": "bad",
+            "score": 100,
+            "health": -0.03,
+            "window": 135,
+            "accuracyWeight": 0.50
+        },
+        {
+            "rating": "shit",
+            "path": "shit",
+            "score": 50,
+            "health": -0.03,
+            "window": 166,
+            "accuracyWeight": 0.25,
+            "miss": true
+        },
+        {
+            "rating": "miss",
+            "path": "miss",
+            "score": -10,
+            "health": -0.04,
+            "miss": true
+        }
+    ]
+}
