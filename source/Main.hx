@@ -14,6 +14,7 @@ import core.config.SaveData;
 import lime.app.Application;
 import core.json.engine.GlobalData.GlobalConfig;
 import core.scripting.ScriptGlobals;
+import core.config.CursorConfig;
 
 class Main extends Sprite {
 	public var fps:FPSCounter = new FPSCounter(5, 5, 0xFFFFFF);
@@ -22,6 +23,7 @@ class Main extends Sprite {
 	public static var save:SaveData;
 	public static var controls:Controls;
 	public static var globalData:GlobalConfig = new GlobalConfig();
+	public static var cursor:CursorConfig;
 
 	public var framerate:Int = 60;
 
@@ -40,6 +42,8 @@ class Main extends Sprite {
 		configGame();
 		addChild(new FlxGame(1280, 720, mainState, framerate, framerate, true, false));
 		addChild(fps);
+		cursor = new CursorConfig();
+		cursor.loadCursor();
 
 		WindowConfig.applyAccentColor();
 	}

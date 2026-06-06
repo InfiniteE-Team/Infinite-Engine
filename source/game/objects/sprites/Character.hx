@@ -69,7 +69,7 @@ class Character extends FunkinObjectRegistry {
 
 		for (layer in characterData.render.layers) {
 			var sprite = new FunkinSprite(0, 0);
-			sprite.loadProps(layer, 'characters');
+			sprite.loadProps(layer, 'game/characters');
 			layers.push(sprite);
 		}
 	}

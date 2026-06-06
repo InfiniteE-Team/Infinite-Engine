@@ -41,7 +41,7 @@ class Note extends FunkinSprite {
 	}
 
 	public function noteLoad(noteSkinData:NoteSkinData) {
-		loadProps(noteSkinData.props, 'noteskins/$noteSkin/strumnotes');
+		loadProps(noteSkinData.props, 'game/noteskins/$noteSkin/strumnotes');
 		playAnim('note$direction-Scroll', true);
 		RGBShader.applyFromSkin(this, noteSkinData, direction);
 	}

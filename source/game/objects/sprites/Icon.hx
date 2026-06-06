@@ -21,6 +21,6 @@ class Icon extends FunkinSprite {
 		if (characterData.icon.props != null)
 			setPosition(characterData.icon.props.position[0], characterData.icon.props.position[1]);
 
-		loadProps(characterData.icon.props, 'icons');
+		loadProps(characterData.icon.props, 'game/icons');
 	}
 }

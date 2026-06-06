@@ -10,18 +10,18 @@ class InputController {
 
 	public var isGhostTapping:Bool = true;
 
-	var control:Controls;
+	public var control:Controls;
 
 	public function new() {
 		control = Main.controls;
 	}
 
 	public function handleInput(i:Int, noteController:NoteController, charId:String):Note {
-		if (!control.getInputNotes()[i])
+		if (!control.getGroupInput("noteKeys")[i])
 			return null;
 
 		var note = noteController.getHittableNote(charId, i);
-		if (note != null && justPressed(i)) {
+		if (note != null && control.justPressed("noteKeys", i)) {
 			note.wasGoodHit = true;
 			// note.kill();
 		}
@@ -31,7 +31,7 @@ class InputController {
 	public function isPlayerHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, charId:String, noteController:NoteController, gameAudio:GameAudio,
 			playStateConfig:PlayStateConfig, i):Note {
 		var note = handleInput(i, noteController, charId);
-		if (isPressed(i)) {
+		if (control.getGroupInput("noteKeys")[i]) {
 			if (note != null) {
 				var diff = Math.abs(note.strumTime - core.rhythm.RhythmCore.songPosition);
 				var ratingType = noteController.getRatingForDiff(diff);
@@ -55,7 +55,7 @@ class InputController {
 
 				note.kill();
 				charStrums[i].playAnim('confirm' + i, true);
-			} else if (justPressed(i)) {
+			} else if (control.justPressed("noteKeys", i)) {
 				charStrums[i].playAnim('press' + i, true);
 				/*
 					if (!isGhostTapping) { */
@@ -93,10 +93,10 @@ class InputController {
 			var worstWindow = noteController.getWorstWindow();
 			var isActive = core.rhythm.RhythmCore.songPosition >= sustain.strumTime - worstWindow;
 			var parentHit = sustain.parentNote == null || sustain.parentNote.wasGoodHit;
-			if (isActive && isPressed(i) && parentHit) {
+			if (isActive && control.getGroupInput("noteKeys")[i] && parentHit) {
 				sustain.isHeld = true;
 				charStrums[i].playAnim('confirm' + i, true);
-			} else if (!isPressed(i)) {
+			} else if (!control.getGroupInput("noteKeys")[i]) {
 				sustain.isHeld = false;
 				//playStateConfig.health += noteController.getHealthDrain(null);
 			}
@@ -114,10 +114,4 @@ class InputController {
 			note.kill();
 		}
 	}
-
-	public function justPressed(i:Int):Bool
-		return control.justPressedNote(i);
-
-	public function isPressed(i:Int):Bool
-		return control.getInputNotes()[i];
 }

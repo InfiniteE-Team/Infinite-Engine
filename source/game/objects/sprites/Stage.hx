@@ -91,7 +91,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 		switch (type) {
 			case 'animated' | 'sprite' | 'group':
 				var sprite = new FunkinSprite(0, 0);
-				sprite.loadProps(element.props, 'stages/$stage');
+				sprite.loadProps(element.props, 'game/stages/$stage');
 				if (element.velocityX != null)
 					sprite.velocity.x = element.velocityX;
 				if (element.velocityY != null)

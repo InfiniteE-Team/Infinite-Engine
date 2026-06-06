@@ -10,46 +10,33 @@ class ScriptGlobals {
 			return;
 		initialized = true;
 
+		var root = RuleScript.defaultImports[''];
+
 		// Flixel
-		var flixelPkg:Map<String, Dynamic> = [
-			'FlxG' => flixel.FlxG,
-			'FlxSprite' => flixel.FlxSprite,
-			'FlxText' => flixel.text.FlxText,
-			'FlxSound' => flixel.sound.FlxSound,
-			'FlxCamera' => flixel.FlxCamera,
-			'FlxTween' => flixel.tweens.FlxTween,
-			'FlxTimer' => flixel.util.FlxTimer,
-			//'FlxColor' => flixel.util.FlxColor,
-			'FlxEase' => flixel.tweens.FlxEase,
-			'FlxMath' => flixel.math.FlxMath,
-			'FlxBar' => flixel.ui.FlxBar,
-			'LEFT_TO_RIGHT' => flixel.ui.FlxBar.FlxBarFillDirection.LEFT_TO_RIGHT,
-			'RIGHT_TO_LEFT' => flixel.ui.FlxBar.FlxBarFillDirection.RIGHT_TO_LEFT,
-		];
+		root['FlxG'] = flixel.FlxG;
+		root['FlxSprite'] = flixel.FlxSprite;
+		root['FlxText'] = flixel.text.FlxText;
+		root['FlxSound'] = flixel.sound.FlxSound;
+		root['FlxCamera'] = flixel.FlxCamera;
+		root['FlxTween'] = flixel.tweens.FlxTween;
+		root['FlxTimer'] = flixel.util.FlxTimer;
+		root['FlxEase'] = flixel.tweens.FlxEase;
+		root['FlxMath'] = flixel.math.FlxMath;
+		root['FlxBar'] = flixel.ui.FlxBar;
 
-		var enginePkg:Map<String, Dynamic> = [
-			'PlayState' => game.PlayState,
-			'Character' => game.objects.sprites.Character,
-			'Stage' => game.objects.sprites.Stage,
-			'Paths' => core.assets.Paths,
-			'FunkinSprite' => core.assets.FunkinSprite,
-			'RhythmCore' => core.rhythm.RhythmCore,
-			'ScriptHandler' => core.scripting.ScriptHandler,
-			'ScriptedStateBase' => core.scripting.ScriptStateBase,
-		];
+		// Engine
+		root['PlayState'] = game.PlayState;
+		root['Character'] = game.objects.sprites.Character;
+		root['Stage'] = game.objects.sprites.Stage;
+		root['Paths'] = core.assets.Paths;
+		root['FunkinSprite'] = core.assets.FunkinSprite;
+		root['RhythmCore'] = core.rhythm.RhythmCore;
+		root['ScriptHandler'] = core.scripting.ScriptHandler;
+		root['ScriptedStateBase'] = core.scripting.ScriptStateBase;
 
-		// Haxe Std
-		var stdExtra:Map<String, Dynamic> = ['Json' => haxe.Json, 'FileSystem' => sys.FileSystem, 'File' => sys.io.File,];
-
-		RuleScript.defaultImports.set('flixel', flixelPkg);
-		RuleScript.defaultImports.set('engine', enginePkg);
-		RuleScript.defaultImports.set('haxe', stdExtra);
-
-		var ctx = ScriptHandler.globalContext;
-		for (_ => pkg in RuleScript.defaultImports)
-			for (name => val in pkg)
-				ctx.types.set(name, val);
-
-		ctx.types.set('ScriptedStateBase', ScriptStateBase);
+		// Haxe std extra
+		root['Json'] = haxe.Json;
+		root['FileSystem'] = sys.FileSystem;
+		root['File'] = sys.io.File;
 	}
 }

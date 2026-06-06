@@ -23,7 +23,7 @@ class NoteSplash extends FunkinSprite {
 	}
 
 	public function noteLoad(noteSkinData:ObjectData) {
-		loadProps(noteSkinData, 'noteskins/$noteSkin/splashes');
+		loadProps(noteSkinData, 'game/noteskins/$noteSkin/splashes');
 		playAnim('note$direction-Scroll', true);
 	}
 

@@ -7,12 +7,15 @@ class SaveData {
 	static final path:String = 'engine/config/savedata.json';
 
 	// configs for engine
-	public var framerate:Int = 60;
-
+	public var framerate:Int = 144;
 	public var antialiasing:Bool = true;
+
 	public var downscroll:Bool = false;
+	public var middlescroll:Bool = false;
 	public var ghosttaping:Bool = true;
+
 	public var noteKeys:Array<String> = ['A', 'S', 'W', 'D'];
+	public var uiKeys:Array<String> = ['UP', 'DOWN', 'LEFT', 'RIGHT', 'ENTER', 'ESCAPE'];
 
 	public function new() {}
 
@@ -21,7 +24,7 @@ class SaveData {
 		if (!FileSystem.exists(dir))
 			FileSystem.createDirectory(dir);
 
-		var data = haxe.Json.stringify(this);
+		var data = haxe.Json.stringify(this, null, "\t");
 		sys.io.File.saveContent(path, data);
 	}
 
@@ -32,11 +35,10 @@ class SaveData {
 		if (data == null)
 			return;
 
-		framerate = data.framerate ?? 60;
-
-		antialiasing = data.antialiasing ?? true;
-		downscroll = data.downscroll ?? false;
-		ghosttaping = data.ghosttaping ?? true;
-		noteKeys = data.noteKeys ?? ['A', 'S', 'W', 'D'];
+		for (field in Reflect.fields(data)) {
+			if (Reflect.hasField(this, field)) {
+				Reflect.setProperty(this, field, Reflect.field(data, field));
+			}
+		}
 	}
 }

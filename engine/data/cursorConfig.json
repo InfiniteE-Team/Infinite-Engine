@@ -1,0 +1,15 @@
+{
+    "name": "cursor-default",
+    "path": "cursor-default",
+    "position": [
+        0,
+        0
+    ],
+    "scrollFactor": [
+        1,
+        1
+    ],
+    "antialiasing": true,
+    "alpha": 1,
+    "flipX": false
+}

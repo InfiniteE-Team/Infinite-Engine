@@ -1,0 +1,7 @@
+flixel.util.FlxColor
+flixel.util.FlxAxes
+flixel.util.FlxDirectionFlags
+flixel.math.FlxPoint
+flixel.input.keyboard.FlxKey
+flixel.tweens.FlxTween.FlxTweenType
+flixel.text.FlxText.FlxTextAlign

@@ -146,6 +146,27 @@ class NoteController {
 			if (sustain == null)
 				continue;
 
+			// body
+			final strumCenterX = sustain.strum.x - sustain.strum.offset.x + sustain.strum.frameWidth * sustain.strum.scale.x * 0.5;
+			sustain.x = strumCenterX - sustain.frameWidth * sustain.scale.x * 0.5;
+			
+			sustain.y = isDownscroll ? sustain.strum.y - ((sustain.strumTime - songTime) * scrollSpeed) : sustain.strum.y
+				+ ((sustain.strumTime - songTime) * scrollSpeed);
+
+			sustain.scale.y = (RhythmCore.stepInMs * (scrollSpeed * 0.45)) / sustain.frameHeight;
+			sustain.offset.y = (sustain.scale.y * sustain.frameHeight - sustain.frameHeight) / 2;
+
+			if (sustain.isHeld && sustain.strumTime <= songTime) {
+				var halfStrum = sustain.strum.height * 0.5;
+				var strumY = isDownscroll ? sustain.strum.y - halfStrum : sustain.strum.y + halfStrum;
+
+				var clipY = (strumY - (sustain.y + sustain.offset.y)) / sustain.scale.y;
+				clipY = Math.max(0, clipY);
+				sustain.clipRect = new flixel.math.FlxRect(0, clipY, sustain.frameWidth, sustain.frameHeight - clipY);
+			} else {
+				sustain.clipRect = null;
+			}
+
 			// end
 			if (sustain.isSustainEnd) {
 				sustain.offset.y = 0;
@@ -166,27 +187,6 @@ class NoteController {
 					toDestroy.push(sustain);
 
 				continue;
-			}
-
-			// body
-			final strumCenterX = sustain.strum.x - sustain.strum.offset.x + sustain.strum.frameWidth * sustain.strum.scale.x * 0.5;
-			sustain.x = strumCenterX - sustain.frameWidth * sustain.scale.x * 0.5;
-			
-			sustain.y = isDownscroll ? sustain.strum.y - ((sustain.strumTime - songTime) * scrollSpeed) : sustain.strum.y
-				+ ((sustain.strumTime - songTime) * scrollSpeed);
-
-			sustain.scale.y = (RhythmCore.stepInMs * (scrollSpeed * 0.45)) / sustain.frameHeight;
-			sustain.offset.y = (sustain.scale.y * sustain.frameHeight - sustain.frameHeight) / 2;
-
-			if (sustain.isHeld && sustain.strumTime <= songTime) {
-				var halfStrum = sustain.strum.height * 0.5;
-				var strumY = isDownscroll ? sustain.strum.y - halfStrum : sustain.strum.y + halfStrum;
-
-				var clipY = (strumY - (sustain.y + sustain.offset.y)) / sustain.scale.y;
-				clipY = Math.max(0, clipY);
-				sustain.clipRect = new flixel.math.FlxRect(0, clipY, sustain.frameWidth, sustain.frameHeight - clipY);
-			} else {
-				sustain.clipRect = null;
 			}
 
 			if (sustain.strumTime + sustain.length < songTime)
@@ -286,11 +286,11 @@ class NoteController {
 				unspawnNotes.push(sustain);
 
 				// hold end
-				var sustainEnd = new NoteSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, noteSkin, data.lane, 0, data.type, true);
+				var sustainEnd = new NoteSustain(data.length, keys, strum.x, 0, noteSkinData, noteSkin, data.lane, 0, data.type, true);
 				RGBShader.applyFromSkin(sustainEnd, noteSkinData, data.lane);
 				sustainEnd.ID = globalLane;
 				sustainEnd.direction = globalLane;
-				sustainEnd.strumTime = data.time + data.length;
+				sustainEnd.strumTime = data.length;
 				sustainEnd.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
 				sustainEnd.noteControl = this;
 				sustainEnd.strum = strum;

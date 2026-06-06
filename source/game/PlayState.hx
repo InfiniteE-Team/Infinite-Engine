@@ -56,6 +56,7 @@ class PlayState extends MusicBeatState {
 		initScript();
 		script.loadFolder('songs/$curSong/scripts');
 		script.load(Paths.getPath('hud', 'script'));
+		script.executeAll();
 		script.call("onCreate", []);
 		#end
 
@@ -67,17 +68,16 @@ class PlayState extends MusicBeatState {
 
 		add(gameAudio);
 
-		startCountdown();
-
 		FlxG.signals.focusLost.add(onFocusLost);
 		FlxG.signals.focusGained.add(onFocusGained);
 
 		FlxG.mouse.visible = false;
 
+		startCountdown();
+
 		super.create();
 
 		#if HSCRIPT_ALLOWED
-		script.executeAll();
 		script.call("postCreate", []);
 		#end
 	}
@@ -168,6 +168,21 @@ class PlayState extends MusicBeatState {
 	// Other screens idk
 	public function pauseMenu() {
 		#if HSCRIPT_ALLOWED
+		if (script.callCancellable('onPauseMenuCancel', []))
+			return;
+		#end
+
+		persistentUpdate = false;
+		persistentDraw = true;
+		paused = true;
+
+		FlxG.sound.pause();
+		if (gameAudio.inst != null)
+			gameAudio.inst.pause();
+		if (gameAudio.vocals != null)
+			gameAudio.vocals.pause();
+
+		#if HSCRIPT_ALLOWED
 		script.call('onPauseMenu', []);
 		#end
 	}
@@ -228,28 +243,30 @@ class PlayState extends MusicBeatState {
 
 		gameAudio.volumenVocs(SONG, chars.isPlayerMissing(), elapsed);
 
-		cameraController.update(elapsed);
+		if (!paused){
+			cameraController.update(elapsed);
 
-		noteController.update(RhythmCore.songPosition);
+			noteController.update(RhythmCore.songPosition);
+		
+			if (playStateConfig.health <= 0)
+				isDeath();
 
-		if (playStateConfig.health <= 0)
-			isDeath();
+			if (SONG.songData.gameplay.events != null) {
+				events.updateEvents(RhythmCore.songPosition);
+			}
 
-		if (SONG.songData.gameplay.events != null) {
-			events.updateEvents(RhythmCore.songPosition);
-		}
+			if (chars != null)
+				chars.processInput(noteController, gameAudio, playStateConfig);
 
-		if (chars != null)
-			chars.processInput(noteController, gameAudio, playStateConfig);
+			if (!osuMode && chars != null)
+				chars.isSinging(noteController);
 
-		if (!osuMode && chars != null)
-			chars.isSinging(noteController);
-
-		if (!osuMode) {
-			if (!cameraController.existsCamEvents) {
-				var singing = chars.getActiveSingingChar();
-				if (singing != null)
-					cameraController.followChar = singing;
+			if (!osuMode) {
+				if (!cameraController.existsCamEvents) {
+					var singing = chars.getActiveSingingChar();
+					if (singing != null)
+						cameraController.followChar = singing;
+				}
 			}
 		}
 
@@ -270,7 +287,7 @@ class PlayState extends MusicBeatState {
 		if (beat % 4 == 0)
 			cameraController.bumpZoom();
 
-		if (!osuMode)
+		if (!osuMode || !paused)
 			chars.danceAll();
 
 		#if HSCRIPT_ALLOWED

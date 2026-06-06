@@ -12,7 +12,7 @@ function postCreate() {
 	var healthBarY = saveData.downscroll ? FlxG.height * 0.1 : FlxG.height * 0.88;
 
 	healthBarBG = new FlxSprite(0, healthBarY);
-	healthBarBG.loadGraphic(Paths.getPath('hud/healthBar', 'image'));
+	healthBarBG.loadGraphic(Paths.getPath('game/hud/healthBar', 'image'));
 	healthBarBG.scrollFactor.set(0, 0);
 	healthBarBG.cameras = [camHUD];
 	healthBarBG.x = (FlxG.width - healthBarBG.width) * 0.5;

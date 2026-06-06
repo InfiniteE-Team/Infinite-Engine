@@ -22,6 +22,7 @@ class ScriptHandler {
 
 	public function expose(name:String, value:Dynamic):Void {
 		extraVars.set(name, value);
+		setVar(name, value);
 	}
 
 	public function load(path:String):Void {
@@ -103,7 +104,7 @@ class ScriptHandler {
 	function buildScript(path:String):Null<RuleScript> {
 		var parser = new HxParser();
 		parser.allowAll();
-		var script = new RuleScript(parser, globalContext);
+		var script = new RuleScript(null, parser, globalContext);
 		setupScript(script);
 		script.errorHandler = (e) -> Trace.traceOnce('[ScriptHandler ERROR] $path → ${e.details()}');
 		script.tryExecute(sys.io.File.getContent(path));
@@ -115,10 +116,6 @@ class ScriptHandler {
 
         for (name => value in extraVars)
             script.access.setVariable(name, value);
-
-		script.access.setVariable("FlxBar", flixel.ui.FlxBar);
-		script.access.setVariable("LEFT_TO_RIGHT", flixel.ui.FlxBar.FlxBarFillDirection.LEFT_TO_RIGHT);
-		script.access.setVariable("RIGHT_TO_LEFT", flixel.ui.FlxBar.FlxBarFillDirection.RIGHT_TO_LEFT);
 	}
 
 	function setVar(name:String, value:Dynamic):Void {

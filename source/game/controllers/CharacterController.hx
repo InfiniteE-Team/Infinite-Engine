@@ -73,7 +73,7 @@ class CharacterController extends FunkinObjectRegistry {
 		for (char in playerChars) {
 			var strums = noteController.getCharStrums(char.id);
 			for (i in 0...strums.length) {
-				if (input.isPressed(i)) {
+				if (input.control.getGroupInput("noteKeys")[i]) {
 					setSing(char, i);
 				} else {
 					char.isSing = false;
@@ -89,7 +89,7 @@ class CharacterController extends FunkinObjectRegistry {
 				for (sustain in noteController.sustains.members) {
 					if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != strums[i])
 						continue;
-					if (songPos >= sustain.strumTime && songPos <= sustain.strumTime + sustain.length && input.isPressed(i))
+					if (songPos >= sustain.strumTime && songPos <= sustain.strumTime + sustain.length && input.control.getGroupInput("noteKeys")[i])
 						setSing(char, sustain.direction);
 				}
 			}
@@ -109,11 +109,11 @@ class CharacterController extends FunkinObjectRegistry {
 	function updatePlayerLane(char:Character, strums, i:Int, nc:NoteController, audio:GameAudio, cfg:PlayStateConfig) {
 		var hitNote = input.isPlayerHit(strums, char.id, nc, audio, cfg, i);
 
-		if (input.isPressed(i)) {
+		if (input.control.getGroupInput("noteKeys")[i]) {
 			if (hitNote != null) {
 				setSing(char, hitNote.direction);
 				char.isMiss = false;
-			} else if (input.justPressed(i) /*&& !input.isGhostTapping*/) {
+			} else if (input.control.justPressed("noteKeys", i) /*&& !input.isGhostTapping*/) {
 				char.playAnim('${Character.getCharAnim(i)}-miss', true);
 				char.isMiss = true;
 			}
@@ -134,7 +134,7 @@ class CharacterController extends FunkinObjectRegistry {
 		for (sustain in nc.sustains.members) {
 			if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != strums[i])
 				continue;
-			if (songPos >= sustain.strumTime && songPos <= sustain.strumTime + sustain.length && input.isPressed(i))
+			if (songPos >= sustain.strumTime && songPos <= sustain.strumTime + sustain.length && input.control.getGroupInput("noteKeys")[i])
 				setSing(char, sustain.direction);
 		}
 	}
