@@ -80,26 +80,27 @@ class InputController {
 					note.tooLate = false;
 				}
 			}
-			charStrums[i].playAnim('static' + i, true);
-		}
 
-		// sustain holding
-		for (sustain in noteController.sustains.members) {
-			if (sustain == null || !sustain.alive || !sustain.mustPress)
-				continue;
-			if (sustain.strum != charStrums[i])
-				continue;
+			// sustain holding
+			for (sustain in noteController.sustains.members) {
+				if (sustain == null || !sustain.alive || !sustain.mustPress)
+					continue;
+				if (sustain.strum != charStrums[i])
+					continue;
 
-			var worstWindow = noteController.getWorstWindow();
-			var isActive = core.rhythm.RhythmCore.songPosition >= sustain.strumTime - worstWindow;
-			var parentHit = sustain.parentNote == null || sustain.parentNote.wasGoodHit;
-			if (isActive && control.getGroupInput("noteKeys")[i] && parentHit) {
-				sustain.isHeld = true;
-				charStrums[i].playAnim('confirm' + i, true);
-			} else if (!control.getGroupInput("noteKeys")[i]) {
-				sustain.isHeld = false;
-				//playStateConfig.health += noteController.getHealthDrain(null);
+				var worstWindow = noteController.getWorstWindow();
+				var isActive = core.rhythm.RhythmCore.songPosition >= sustain.strumTime - worstWindow;
+				var parentHit = sustain.parentNote == null || sustain.parentNote.wasGoodHit;
+				if (isActive && control.getGroupInput("noteKeys")[i] && parentHit) {
+					sustain.isHeld = true;
+					charStrums[i].playAnim('confirm' + i, true);
+				} else if (!control.getGroupInput("noteKeys")[i]) {
+					sustain.isHeld = false;
+					// playStateConfig.health += noteController.getHealthDrain(null);
+				}
 			}
+
+			charStrums[i].playAnim('static' + i, true);
 		}
 
 		return note;

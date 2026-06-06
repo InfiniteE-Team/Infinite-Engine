@@ -5,3 +5,4 @@ flixel.math.FlxPoint
 flixel.input.keyboard.FlxKey
 flixel.tweens.FlxTween.FlxTweenType
 flixel.text.FlxText.FlxTextAlign
+openfl.display.BlendMode

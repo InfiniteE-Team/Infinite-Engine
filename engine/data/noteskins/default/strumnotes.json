@@ -122,7 +122,7 @@
       },
       {
         "name": "note0-Hold",
-        "prefix": "purple hold end",
+        "prefix": "purple hold piece",
         "framerate": 24,
         "offsets": [
           0,
@@ -131,7 +131,7 @@
       },
       {
         "name": "note1-Hold",
-        "prefix": "purple hold end",
+        "prefix": "blue hold piece",
         "framerate": 24,
         "offsets": [
           0,
@@ -140,7 +140,7 @@
       },
       {
         "name": "note2-Hold",
-        "prefix": "purple hold end",
+        "prefix": "green hold piece",
         "framerate": 24,
         "offsets": [
           0,
@@ -149,7 +149,7 @@
       },
       {
         "name": "note3-Hold",
-        "prefix": "purple hold end",
+        "prefix": "red hold piece",
         "framerate": 24,
         "offsets": [
           0,

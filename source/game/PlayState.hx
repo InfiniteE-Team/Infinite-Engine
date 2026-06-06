@@ -25,6 +25,7 @@ class PlayState extends MusicBeatState {
 	// cameras
 	public var camGame:Camera;
 	public var camHUD:Camera;
+	
 	public var cameraController:CameraController;
 
 	// Song
@@ -57,10 +58,13 @@ class PlayState extends MusicBeatState {
 		script.loadFolder('songs/$curSong/scripts');
 		script.load(Paths.getPath('hud', 'script'));
 		script.executeAll();
-		script.call("onCreate", []);
 		#end
 
 		addCameras();
+
+		#if HSCRIPT_ALLOWED
+		script.call("onCreate", []);
+		#end
 
 		SONG.configSong(curSong, '');
 

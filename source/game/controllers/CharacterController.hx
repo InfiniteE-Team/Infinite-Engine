@@ -63,7 +63,19 @@ class CharacterController extends FunkinObjectRegistry {
 				if (note != null) {
 					input.isCPUHit(strums, noteController, char.id, i);
 				} else {
-					strums[i].playAnim('static' + i, true);
+					var songPos = core.rhythm.RhythmCore.songPosition;
+					var holdingActive = false;
+					for (sustain in noteController.sustains.members) {
+						if (sustain == null || !sustain.alive || sustain.strum != strums[i])
+							continue;
+						if (sustain.mustPress == false && songPos >= sustain.strumTime && songPos <= sustain.strumTime + sustain.length) {
+							strums[i].playAnim('confirm' + i, true);
+							holdingActive = true;
+							break;
+						}
+					}
+					if (!holdingActive)
+						strums[i].playAnim('static' + i, true);
 				}
 			}
 		}
@@ -89,7 +101,9 @@ class CharacterController extends FunkinObjectRegistry {
 				for (sustain in noteController.sustains.members) {
 					if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != strums[i])
 						continue;
-					if (songPos >= sustain.strumTime && songPos <= sustain.strumTime + sustain.length && input.control.getGroupInput("noteKeys")[i])
+					if (songPos >= sustain.strumTime
+						&& songPos <= sustain.strumTime + sustain.length
+						&& input.control.getGroupInput("noteKeys")[i])
 						setSing(char, sustain.direction);
 				}
 			}
@@ -134,7 +148,9 @@ class CharacterController extends FunkinObjectRegistry {
 		for (sustain in nc.sustains.members) {
 			if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != strums[i])
 				continue;
-			if (songPos >= sustain.strumTime && songPos <= sustain.strumTime + sustain.length && input.control.getGroupInput("noteKeys")[i])
+			if (songPos >= sustain.strumTime
+				&& songPos <= sustain.strumTime + sustain.length
+				&& input.control.getGroupInput("noteKeys")[i])
 				setSing(char, sustain.direction);
 		}
 	}

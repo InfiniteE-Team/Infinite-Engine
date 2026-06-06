@@ -8,7 +8,7 @@ var playerBumpScale = 1.0;
 var opponentBumpScale = 1.0;
 var BUMP_SCALE = 1.2;
 
-function postCreate() {
+function onCreate() {
 	var healthBarY = saveData.downscroll ? FlxG.height * 0.1 : FlxG.height * 0.88;
 
 	healthBarBG = new FlxSprite(0, healthBarY);
@@ -19,7 +19,7 @@ function postCreate() {
 	healthBarBG.antialiasing = true;
 	add(healthBarBG);
 
-	healthBarFill = new flixel.ui.FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, LEFT_TO_RIGHT, Std.int(healthBarBG.width - 8),
+	healthBarFill = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, LEFT_TO_RIGHT, Std.int(healthBarBG.width - 8),
 		Std.int(healthBarBG.height - 8), playStateConfig, 'health', 0, 2);
 	healthBarFill.scrollFactor.set(0, 0);
 	healthBarFill.flipX = true;
@@ -38,6 +38,7 @@ function postCreate() {
 		if (isOpponent && char.charData.healthBarColor != null)
 			dadColor = char.charData.healthBarColor;
 	}
+
 	healthBarFill.createFilledBar(dadColor, bfColor);
 	add(healthBarFill);
 
