@@ -49,7 +49,7 @@ class ScriptHandler {
 		if (resolved == null || !sys.FileSystem.exists(resolved))
 			return;
 		for (file in sys.FileSystem.readDirectory(resolved)) {
-			if (file.endsWith('.hx') || file.endsWith('.lua'))
+			if (file.endsWith('.hx') || file.endsWith('.lua') || file.endsWith('.hxc'))
 				load('$resolved/$file');
 		}
 	}

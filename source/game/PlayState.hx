@@ -132,7 +132,7 @@ class PlayState extends MusicBeatState {
 	}
 
 	function buildStrumsandNotes() {
-		noteController = new NoteController(SONG, saveData.downscroll, saveData.ghosttaping);
+		noteController = new NoteController(SONG, saveData.downscroll, saveData.ghosttaping, script);
 		noteController.strums.cameras = [camHUD];
 		noteController.sustains.cameras = [camHUD];
 		noteController.notes.cameras = [camHUD];

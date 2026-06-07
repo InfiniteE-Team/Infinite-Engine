@@ -13,6 +13,9 @@ import core.rhythm.RhythmCore;
 import core.json.song.SongData.SongConfig;
 import core.json.engine.GlobalData.GlobalConfig;
 import core.json.song.RatingData;
+#if HSCRIPT_ALLOWED
+import core.scripting.ScriptHandler;
+#end
 
 using Lambda;
 
@@ -55,11 +58,21 @@ class NoteController {
 
 	public var worstWindow:Float = 166.0;
 
-	public function new(daSong:SongConfig, isDownscroll:Bool, isGhostTapping:Bool) {
+	#if HSCRIPT_ALLOWED
+	var scriptNC:ScriptHandler;
+	#end
+
+	public function new(daSong:SongConfig, isDownscroll:Bool, isGhostTapping:Bool, script:ScriptHandler) {
 		this.daSong = daSong;
 		this.isDownscroll = isDownscroll;
 		input.isGhostTapping = isGhostTapping;
 		loadJson();
+
+		#if HSCRIPT_ALLOWED
+		scriptNC = script;
+		scriptNC.loadFolder('scripts/noteskins/$noteSkin/');
+		#end
+
 		for (i in 0...daSong.chars.length) {
 			charStrumOffsets.set(daSong.chars[i].id, strums.length);
 
@@ -105,14 +118,26 @@ class NoteController {
 
 	public function loadGenerateStrums(x:Float, y:Float) {
 		for (i in 0...keys) {
+			#if HSCRIPT_ALLOWED
+			scriptNC.call("onBuildStrums", []);
+			#end
 			var strum = new StrumNote(x + i * (112 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props, noteSkin);
 			strum.playAnim('static' + i);
-			//RGBShader.applyFromSkin(strum, noteSkinData, i);
+			// RGBShader.applyFromSkin(strum, noteSkinData, i);
 			if (!daSong.strumsVisible)
 				strum.visible = false;
 			if (isDownscroll)
 				strum.y += 500;
+
+			#if HSCRIPT_ALLOWED
+			scriptNC.call("safeBuildStrums", []);
+			#end
+
 			strums.add(strum);
+
+			#if HSCRIPT_ALLOWED
+			scriptNC.call("postBuildStrums", []);
+			#end
 		}
 	}
 
@@ -121,6 +146,10 @@ class NoteController {
 	}
 
 	public function updateNotes(songTime:Float) {
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("onNoteUpdate", [songTime]);
+		#end
+
 		while (unspawnNotes.length > 0) {
 			var note = unspawnNotes[0];
 
@@ -139,10 +168,20 @@ class NoteController {
 		for (note in notes.members) {
 			if (note == null)
 				continue;
+
+			#if HSCRIPT_ALLOWED
+			if (scriptNC.callCancellable('onNoteMovementCancel', []))
+				continue;
+			#end
+
 			note.x = note.strum.x;
 			note.y = isDownscroll ? note.strum.y - ((note.strumTime - songTime) * scrollSpeed) : note.strum.y + ((note.strumTime - songTime) * scrollSpeed);
 
 			// note.alpha = 0.3;
+
+			#if HSCRIPT_ALLOWED
+			scriptNC.call("onNoteMovement", [songTime]);
+			#end
 
 			if (note.y + note.frameHeight * note.scale.y < 0 && !isDownscroll)
 				toDestroy.push(note);
@@ -153,6 +192,11 @@ class NoteController {
 		for (sustain in sustains.members) {
 			if (sustain == null || sustain.isSustainEnd)
 				continue;
+
+			#if HSCRIPT_ALLOWED
+			if (scriptNC.callCancellable('onSustainMovementCancel', []))
+				continue;
+			#end
 
 			// body
 			final strumCenterX = sustain.strum.x - sustain.strum.offset.x + sustain.strum.frameWidth * sustain.strum.scale.x * 0.5;
@@ -195,6 +239,10 @@ class NoteController {
 				sustain.clipRect = null;
 			}
 
+			#if HSCRIPT_ALLOWED
+			scriptNC.call("onSustainMovement", [songTime]);
+			#end
+
 			if (sustain.strumTime + sustain.length < songTime)
 				toDestroy.push(sustain);
 			else if (sustain.y + scaledHeight < 0 && !isDownscroll)
@@ -207,6 +255,12 @@ class NoteController {
 		for (sustain in sustains.members) {
 			if (sustain == null || !sustain.isSustainEnd)
 				continue;
+
+			#if HSCRIPT_ALLOWED
+			if (scriptNC.callCancellable('onEndSustainMovementCancel', []))
+				continue;
+			#end
+
 			var body = sustain.parentNote;
 
 			if (body == null || toDestroy.contains(body)) {
@@ -232,6 +286,10 @@ class NoteController {
 			} else {
 				sustain.alpha = ((sustain.y + endHeight) <= strumMidScreen) ? 0 : 1;
 			}
+
+			#if HSCRIPT_ALLOWED
+			scriptNC.call("onEndSustainMovement", [songTime]);
+			#end
 		}
 
 		for (note in toDestroy)
@@ -245,17 +303,35 @@ class NoteController {
 		for (note in toDestroy)
 			if ((note is NoteSustain) && cast(note, NoteSustain).isSustainEnd)
 				destroyNotes(note);
+
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("postNoteUpdate", [songTime]);
+		#end
 	}
 
 	public function destroyNotes(note:Note) {
+		#if HSCRIPT_ALLOWED
+		if (scriptNC.callCancellable('onDestroyNotesCancel', []))
+			return;
+		#end
+
 		if (Std.isOfType(note, NoteSustain))
 			sustains.remove(cast note, true);
 		else
 			notes.remove(note, true);
 		note.destroy();
+
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("onDestroyNotes", []);
+		#end
 	}
 
 	public function getHittableNote(charId:String, dir:Int, mustPress:Bool = true):Note {
+		#if HSCRIPT_ALLOWED
+		if (scriptNC.callCancellable('onHittableNoteCancel', []))
+			return null;
+		#end
+
 		var offset = charStrumOffsets.get(charId);
 		if (offset == null)
 			return null;
@@ -280,6 +356,10 @@ class NoteController {
 			return;
 		}
 
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("onGenerateNotes", []);
+		#end
+
 		for (data in daSong.songData.notes) {
 			// char info
 			var charData = Lambda.find(daSong.chars, c -> c.id == data.char);
@@ -299,8 +379,8 @@ class NoteController {
 
 			// param for Note positions in strum groups
 			var note = new Note(data.time, keys, strum.x, 0, noteSkinData, noteSkin, data.lane);
-			
-			//RGBShader.applyFromSkin(note, noteSkinData, data.lane);
+
+			// RGBShader.applyFromSkin(note, noteSkinData, data.lane);
 			note.ID = globalLane;
 			note.direction = globalLane;
 			note.strumTime = data.time;
@@ -314,9 +394,13 @@ class NoteController {
 
 			note.noteType = data.type;
 
+			#if HSCRIPT_ALLOWED
+			scriptNC.call("onGenerateNote", []);
+			#end
+
 			if (data.length > 0) {
 				var sustain = new NoteSustain(data.time, keys, strum.x, 0, noteSkinData, noteSkin, data.lane, data.length, data.type, false);
-				//RGBShader.applyFromSkin(sustain, noteSkinData, data.lane);
+				// RGBShader.applyFromSkin(sustain, noteSkinData, data.lane);
 				sustain.ID = globalLane;
 				sustain.direction = globalLane;
 				sustain.strumTime = data.time;
@@ -329,11 +413,16 @@ class NoteController {
 					sustain.flipY = true;
 				if (!daSong.strumsVisible)
 					sustain.visible = false;
+
+				#if HSCRIPT_ALLOWED
+				scriptNC.call("onGenerateSustain", []);
+				#end
+
 				unspawnNotes.push(sustain);
 
 				// hold end
 				var sustainEnd = new NoteSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, noteSkin, data.lane, 0, data.type, true);
-				//RGBShader.applyFromSkin(sustainEnd, noteSkinData, data.lane);
+				// RGBShader.applyFromSkin(sustainEnd, noteSkinData, data.lane);
 				sustainEnd.ID = globalLane;
 				sustainEnd.direction = globalLane;
 				sustainEnd.strumTime = data.time + data.length;
@@ -346,10 +435,19 @@ class NoteController {
 					sustainEnd.flipY = true;
 				if (!daSong.strumsVisible)
 					sustainEnd.visible = false;
+
+				#if HSCRIPT_ALLOWED
+				scriptNC.call("onGenerateEndSustain", []);
+				#end
+
 				unspawnNotes.push(sustainEnd);
 			}
 			unspawnNotes.push(note);
 		}
+
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("postGenerateNotes", []);
+		#end
 
 		unspawnNotes.sort(sortNotes);
 	}
@@ -358,6 +456,11 @@ class NoteController {
 		if (ratingData == null)
 			return -0.04;
 
+		#if HSCRIPT_ALLOWED
+		if (scriptNC.callCancellable('onHealthDrainCancel', []))
+			return 0.0;
+		#end
+
 		var missRating = ratingData.ratings.find(r -> r.miss == true && r.window == null);
 		return missRating != null ? missRating.health : -0.04;
 	}
@@ -365,6 +468,12 @@ class NoteController {
 	public function getMissScore():Int {
 		if (ratingData == null)
 			return -10;
+
+		#if HSCRIPT_ALLOWED
+		if (scriptNC.callCancellable('onMissScoreCancel', []))
+			return 0;
+		#end
+
 		var missRating = ratingData.ratings.find(r -> r.miss == true && r.window == null);
 		return missRating != null ? missRating.score : -10;
 	}
@@ -372,6 +481,11 @@ class NoteController {
 	public function getRatingForDiff(diff:Float):Null<RatingDataType> {
 		if (ratingData == null)
 			return null;
+
+		#if HSCRIPT_ALLOWED
+		if (scriptNC.callCancellable('onRatingDiffCancel', []))
+			return null;
+		#end
 
 		var windowed = ratingData.ratings.filter(r -> r.window != null);
 		windowed.sort((a, b) -> Std.int(a.window - b.window));
@@ -386,6 +500,12 @@ class NoteController {
 	public function getWorstWindow():Float {
 		if (ratingData == null)
 			return 166.0;
+
+		#if HSCRIPT_ALLOWED
+		if (scriptNC.callCancellable('onWorstWindowCancel', []))
+			return 0.0;
+		#end
+
 		var windows = ratingData.ratings.filter(r -> r.window != null).map(r -> r.window);
 		return windows.length > 0 ? Lambda.fold(windows, Math.max, 0) : 166.0;
 	}
@@ -403,8 +523,17 @@ class NoteController {
 	var _charStrumsCache:Map<String, Array<StrumNote>> = new Map();
 
 	public function getCharStrums(charId:String):Array<StrumNote> {
+		#if HSCRIPT_ALLOWED
+		if (scriptNC.callCancellable('onGetCharStrumsCancel', []))
+			return [];
+		#end
+
 		if (_charStrumsCache.exists(charId))
 			return _charStrumsCache.get(charId);
+
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("onGetCharStrums", []);
+		#end
 
 		if (!charStrumOffsets.exists(charId)) {
 			_charStrumsCache.set(charId, []);
@@ -421,15 +550,32 @@ class NoteController {
 				result.push(s);
 		}
 		_charStrumsCache.set(charId, result);
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("postGetCharStrums", []);
+		#end
+
 		return result;
 	}
 
 	function sortNotes(a:Note, b:Note):Int {
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("onSortNotes", []);
+		#end
+
 		var diff = a.strumTime - b.strumTime;
+		var result:Int;
+
 		if (diff != 0)
-			return Std.int(diff);
-		var aOrder = (a is NoteSustain) ? (cast(a, NoteSustain).isSustainEnd ? 2 : 1) : 0;
-		var bOrder = (b is NoteSustain) ? (cast(b, NoteSustain).isSustainEnd ? 2 : 1) : 0;
-		return aOrder - bOrder;
+			result = Std.int(diff);
+		else {
+			var aOrder = (a is NoteSustain) ? (cast(a, NoteSustain).isSustainEnd ? 2 : 1) : 0;
+			var bOrder = (b is NoteSustain) ? (cast(b, NoteSustain).isSustainEnd ? 2 : 1) : 0;
+			result = aOrder - bOrder;
+		}
+
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("postSortNotes", []);
+		#end
+		return result;
 	}
 }

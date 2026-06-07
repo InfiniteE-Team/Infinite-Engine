@@ -116,6 +116,7 @@ class CharacterController extends FunkinObjectRegistry {
 
 				char.playAnim('${Character.getCharAnim(note.direction)}-miss', true);
 				char.isMiss = true;
+				note.tooLate = false;
 			}
 		}
 
@@ -123,9 +124,9 @@ class CharacterController extends FunkinObjectRegistry {
 		for (sustain in nc.sustains.members) {
 			if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != strums[i])
 				continue;
-			if (songPos >= sustain.strumTime
-				&& songPos <= sustain.strumTime + sustain.length
-				&& input.control.getGroupInput("noteKeys")[i])
+			if (songPos < sustain.strumTime || songPos > sustain.strumTime + sustain.length)
+				continue;
+			if (input.control.getGroupInput("noteKeys")[i])
 				setSing(char, sustain.direction);
 			else
 				getCharMiss(char, nc, strums, i);

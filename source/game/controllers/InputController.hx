@@ -94,7 +94,6 @@ class InputController {
 					playStateConfig.score += noteController.getMissScore();
 					playStateConfig.misses++;
 					playStateConfig.combo = 0;
-					note.tooLate = false;
 				}
 			}
 
