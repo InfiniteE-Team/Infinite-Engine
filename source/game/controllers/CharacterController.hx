@@ -83,33 +83,6 @@ class CharacterController extends FunkinObjectRegistry {
 	}
 
 	public function isSinging(noteController:NoteController) {
-		for (char in playerChars) {
-			var strums = noteController.getCharStrums(char.id);
-			for (i in 0...strums.length) {
-				if (input.control.getGroupInput("noteKeys")[i]) {
-					setSing(char, i);
-				} else {
-					char.isSing = false;
-					char.isMiss = false;
-					for (note in noteController.notes.members) {
-						if (note == null || !note.alive || !note.mustPress || note.strum != strums[i] || !note.tooLate)
-							continue;
-						char.playAnim('${Character.getCharAnim(note.direction)}-miss', true);
-						char.isMiss = true;
-					}
-				}
-				
-				var songPos = core.rhythm.RhythmCore.songPosition;
-				for (sustain in noteController.sustains.members) {
-					if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != strums[i])
-						continue;
-					if (songPos >= sustain.strumTime
-						&& songPos <= sustain.strumTime + sustain.length
-						&& input.control.getGroupInput("noteKeys")[i])
-						setSing(char, sustain.direction);
-				}
-			}
-		}
 		for (char in opponentChars) {
 			var strums = noteController.getCharStrums(char.id);
 			for (i in 0...strums.length) {
@@ -154,6 +127,19 @@ class CharacterController extends FunkinObjectRegistry {
 				&& songPos <= sustain.strumTime + sustain.length
 				&& input.control.getGroupInput("noteKeys")[i])
 				setSing(char, sustain.direction);
+			else
+				getCharMiss(char, nc, strums, i);
+		}
+	}
+
+	public function getCharMiss(char:Character, noteController:NoteController, strums, i:Int):Void {
+		char.isSing = false;
+		char.isMiss = false;
+		for (note in noteController.notes.members) {
+			if (note == null || !note.alive || !note.mustPress || note.strum != strums[i] || !note.tooLate)
+				continue;
+			char.playAnim('${Character.getCharAnim(note.direction)}-miss', true);
+			char.isMiss = true;
 		}
 	}
 

@@ -43,6 +43,9 @@ class NoteController {
 
 	var input:InputController = new InputController();
 
+	// sustains limit clipping rect
+	var _clipRect:flixel.math.FlxRect = new flixel.math.FlxRect();
+
 	public var scrollSpeed:Float = 1.0;
 
 	// configs
@@ -177,16 +180,18 @@ class NoteController {
 			if (sustain.isHeld && sustain.strumTime <= songTime) {
 				var strumMidScreen = sustain.strum.y + sustain.strum.frameHeight * 0.5 - sustain.strum.offset.y;
 				var clipY:Float;
+				
 				if (isDownscroll) {
 					var bodyBottom = sustain.y + scaledHeight;
 					clipY = sustain.frameHeight - (bodyBottom - strumMidScreen) / sustain.scale.y;
 					clipY = Math.min(sustain.frameHeight, Math.max(0, clipY));
-					sustain.clipRect = new flixel.math.FlxRect(0, 0, sustain.frameWidth, clipY);
+					_clipRect.set(0, 0, sustain.frameWidth, clipY);
 				} else {
 					clipY = (strumMidScreen - sustain.y) / sustain.scale.y;
 					clipY = Math.max(0, clipY);
-					sustain.clipRect = new flixel.math.FlxRect(0, clipY, sustain.frameWidth, sustain.frameHeight - clipY);
+					_clipRect.set(0, clipY, sustain.frameWidth, sustain.frameHeight - clipY);
 				}
+				sustain.clipRect = _clipRect;
 			} else {
 				sustain.clipRect = null;
 			}
@@ -223,7 +228,16 @@ class NoteController {
 		}
 
 		for (note in toDestroy)
-			destroyNotes(note);
+			if (!(note is NoteSustain))
+				destroyNotes(note);
+		// body sustains
+		for (note in toDestroy)
+			if ((note is NoteSustain) && !cast(note, NoteSustain).isSustainEnd)
+				destroyNotes(note);
+		// ends sustains
+		for (note in toDestroy)
+			if ((note is NoteSustain) && cast(note, NoteSustain).isSustainEnd)
+				destroyNotes(note);
 	}
 
 	public function destroyNotes(note:Note) {

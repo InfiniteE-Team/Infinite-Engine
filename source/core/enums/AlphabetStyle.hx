@@ -1,6 +1,6 @@
 package core.enums;
 
-@:enum abstract AlphabetStyle(String) from String to String {
+enum abstract AlphabetStyle(String) from String to String {
 	var Bold = "bold";
 	var Normal = "normal";
 	var Uppercase = "uppercase";

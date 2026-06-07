@@ -1,6 +1,6 @@
 package core.enums;
 
-@:enum abstract ElementType(String) from String to String {
+enum abstract ElementType(String) from String to String {
 	var Sprite = "sprite";
 	var Animated = "animated";
 	var Graphic = "graphic";
