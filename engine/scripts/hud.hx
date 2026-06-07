@@ -1,4 +1,5 @@
 import core.assets.Paths;
+import flixel.util.FlxStringUtil;
 
 var playerIcon = null;
 var opponentIcon = null;
@@ -7,6 +8,8 @@ var healthBarFill = null;
 var playerBumpScale = 1.0;
 var opponentBumpScale = 1.0;
 var BUMP_SCALE = 1.2;
+
+var scoreText:FlxText;
 
 function onCreate() {
 	var healthBarY = saveData.downscroll ? FlxG.height * 0.1 : FlxG.height * 0.88;
@@ -18,6 +21,14 @@ function onCreate() {
 	healthBarBG.x = (FlxG.width - healthBarBG.width) * 0.5;
 	healthBarBG.antialiasing = true;
 	add(healthBarBG);
+
+	scoreText = new FlxText(0, healthBarBG.y + 30, FlxG.width, "Score: 0");
+	scoreText.setFormat(Paths.getPath('vcr.ttf', 'font'), 16, 0xFFFFFFFF, "center");
+	//scoreText.setBorderStyle('outline', 0xFF000000, 2, 1);
+	scoreText.antialiasing = true;
+	scoreText.scrollFactor.set(0, 0);
+	scoreText.cameras = [camHUD];
+	add(scoreText);
 
 	healthBarFill = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, LEFT_TO_RIGHT, Std.int(healthBarBG.width - 8),
 		Std.int(healthBarBG.height - 8), playStateConfig, 'health', 0, 2);
@@ -38,7 +49,6 @@ function onCreate() {
 		if (isOpponent && char.charData.healthBarColor != null)
 			dadColor = char.charData.healthBarColor;
 	}
-
 	healthBarFill.createFilledBar(dadColor, bfColor);
 	add(healthBarFill);
 
@@ -65,9 +75,15 @@ function onCreate() {
 
 function postUpdate(elapsed:Float) {
 	//_updateHealthBar();
+	updateScore();
 	_updateLosingAnim();
 	_updateIconPositions();
 	_lerpBumpScale(elapsed);
+}
+
+function updateScore() {
+	var scoreFinal:String = FlxStringUtil.formatMoney(playStateConfig.score, false);
+	scoreText.text = 'Score: $scoreFinal - Misses: ${playStateConfig.misses}';
 }
 
 function onBeatHit(beat:Float) {
