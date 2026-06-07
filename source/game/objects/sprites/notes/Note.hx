@@ -54,8 +54,8 @@ class Note extends FunkinSprite {
 			if (strumTime <= RhythmCore.songPosition)
 				wasGoodHit = true;
 		} else if (mustPress && !wasGoodHit && !tooLate) {
-			canBeHit = (RhythmCore.songPosition >= strumTime - noteControl.getWorstWindow()
-				&& RhythmCore.songPosition <= strumTime + noteControl.getWorstWindow());
+			canBeHit = (RhythmCore.songPosition >= strumTime - noteControl.worstWindow
+				&& RhythmCore.songPosition <= strumTime + noteControl.worstWindow);
 
 			if (RhythmCore.songPosition > strumTime + noteControl.getWorstWindow())
 				tooLate = true;

@@ -25,7 +25,7 @@ class PlayState extends MusicBeatState {
 	// cameras
 	public var camGame:Camera;
 	public var camHUD:Camera;
-	
+
 	public var cameraController:CameraController;
 
 	// Song
@@ -46,7 +46,7 @@ class PlayState extends MusicBeatState {
 	public var saveData:SaveData = new SaveData();
 	public var playStateConfig:PlayStateConfig = new PlayStateConfig(); // data for health, strum line, etc
 
-	public var osuMode:Bool = true;
+	public var osuMode:Bool = false;
 
 	var paused:Bool = false;
 
@@ -239,19 +239,15 @@ class PlayState extends MusicBeatState {
 		if (gameAudio.inst != null)
 			RhythmCore.songPosition = gameAudio.inst.time;
 
-		FlxG.log.add("Health: " + playStateConfig.health);
-
-		FlxG.log.add("Rating: " + playStateConfig.rating);
-
 		gameAudio.resyncVocals();
 
 		gameAudio.volumenVocs(SONG, chars.isPlayerMissing(), elapsed);
 
-		if (!paused){
+		if (!paused) {
 			cameraController.update(elapsed);
 
 			noteController.update(RhythmCore.songPosition);
-		
+
 			if (playStateConfig.health <= 0)
 				isDeath();
 
@@ -259,11 +255,11 @@ class PlayState extends MusicBeatState {
 				events.updateEvents(RhythmCore.songPosition);
 			}
 
+			if (!osuMode || chars != null)
+				chars.isSinging(noteController);
+			
 			if (chars != null)
 				chars.processInput(noteController, gameAudio, playStateConfig);
-
-			if (!osuMode && chars != null)
-				chars.isSinging(noteController);
 
 			if (!osuMode) {
 				if (!cameraController.existsCamEvents) {

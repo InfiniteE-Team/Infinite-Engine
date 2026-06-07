@@ -1,0 +1,42 @@
+name: Infinite Engine CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            target: windows
+          - os: ubuntu-latest
+            target: linux
+          - os: macos-latest
+            target: mac
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Haxe
+        uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.3.4
+
+      - name: Install Lime & OpenFL
+        run: |
+          haxelib install lime --quiet
+          haxelib install openfl --quiet
+          haxelib run lime setup -quiet
+
+      - name: Install project libs
+        run: haxelib run lime install Project.xml --quiet
+
+      - name: Build
+        run: haxelib run lime build ${{ matrix.target }} -release

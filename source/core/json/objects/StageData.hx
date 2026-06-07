@@ -1,6 +1,7 @@
 package core.json.objects;
 import core.json.extensions.AudioData;
 import core.json.extensions.SpriteData.ObjectData;
+import core.enums.ElementType;
 
 typedef StageData =
 {
@@ -12,7 +13,7 @@ typedef StageData =
 
 typedef StageElement =
 {
-	var type:Dynamic; // "sprite", "animated", "graphic", "group", "sound", "custom_class", "custom_class_group", "character"
+	var type:ElementType;
     var ?props:ObjectData;
 	var ?audio:AudioData;
 	var ?repeatX:Bool;

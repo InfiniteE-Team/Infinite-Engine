@@ -69,6 +69,7 @@ class CharacterController extends FunkinObjectRegistry {
 						if (sustain == null || !sustain.alive || sustain.strum != strums[i])
 							continue;
 						if (sustain.mustPress == false && songPos >= sustain.strumTime && songPos <= sustain.strumTime + sustain.length) {
+							sustain.isHeld = true;
 							strums[i].playAnim('confirm' + i, true);
 							holdingActive = true;
 							break;
@@ -97,6 +98,7 @@ class CharacterController extends FunkinObjectRegistry {
 						char.isMiss = true;
 					}
 				}
+				
 				var songPos = core.rhythm.RhythmCore.songPosition;
 				for (sustain in noteController.sustains.members) {
 					if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != strums[i])

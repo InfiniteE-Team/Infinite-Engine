@@ -65,6 +65,21 @@ class InputController {
 				playStateConfig.combo = 0;
 				// }
 			}
+
+			// sustain holding
+			for (sustain in noteController.sustains.members) {
+				if (sustain == null || !sustain.alive || !sustain.mustPress)
+					continue;
+				if (sustain.strum != charStrums[i])
+					continue;
+
+				var isActive = core.rhythm.RhythmCore.songPosition >= sustain.strumTime - noteController.worstWindow;
+				var parentHit = sustain.parentNote == null || sustain.parentNote.wasGoodHit;
+				if (isActive && parentHit) {
+					sustain.isHeld = true;
+					charStrums[i].playAnim('confirm' + i, true);
+				}
+			}
 		} else {
 			// miss Note detection yep
 			for (note in noteController.notes.members) {
@@ -81,23 +96,12 @@ class InputController {
 				}
 			}
 
-			// sustain holding
 			for (sustain in noteController.sustains.members) {
 				if (sustain == null || !sustain.alive || !sustain.mustPress)
 					continue;
 				if (sustain.strum != charStrums[i])
 					continue;
-
-				var worstWindow = noteController.getWorstWindow();
-				var isActive = core.rhythm.RhythmCore.songPosition >= sustain.strumTime - worstWindow;
-				var parentHit = sustain.parentNote == null || sustain.parentNote.wasGoodHit;
-				if (isActive && control.getGroupInput("noteKeys")[i] && parentHit) {
-					sustain.isHeld = true;
-					charStrums[i].playAnim('confirm' + i, true);
-				} else if (!control.getGroupInput("noteKeys")[i]) {
-					sustain.isHeld = false;
-					// playStateConfig.health += noteController.getHealthDrain(null);
-				}
+				sustain.isHeld = false;
 			}
 
 			charStrums[i].playAnim('static' + i, true);

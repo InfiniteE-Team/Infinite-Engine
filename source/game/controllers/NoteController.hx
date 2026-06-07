@@ -52,6 +52,8 @@ class NoteController {
 
 	public var ratingData:RatingData;
 
+	public var worstWindow:Float = 166.0;
+
 	public function new(daSong:SongConfig, isDownscroll:Bool, isGhostTapping:Bool) {
 		this.daSong = daSong;
 		this.isDownscroll = isDownscroll;
@@ -81,6 +83,13 @@ class NoteController {
 		ratingData = UtilsData.readJson(ratingPath);
 		if (ratingData == null || ratingData.ratings == null)
 			trace("WARNING: ratings.json not found or invalid");
+		else {
+			var best = 0.0;
+			for (r in ratingData.ratings)
+				if (r.window != null && r.window > best)
+					best = r.window;
+			worstWindow = best > 0 ? best : 166.0;
+		}
 
 		keys = noteSkinData.keys ?? 4;
 		spacing = noteSkinData.spacing ?? 0;
@@ -130,7 +139,7 @@ class NoteController {
 			note.x = note.strum.x;
 			note.y = isDownscroll ? note.strum.y - ((note.strumTime - songTime) * scrollSpeed) : note.strum.y + ((note.strumTime - songTime) * scrollSpeed);
 
-			//note.alpha = 0.3;
+			// note.alpha = 0.3;
 
 			if (note.y + note.frameHeight * note.scale.y < 0 && !isDownscroll)
 				toDestroy.push(note);
@@ -166,16 +175,15 @@ class NoteController {
 			sustain.offset.y = 0;
 
 			if (sustain.isHeld && sustain.strumTime <= songTime) {
-				var halfStrum = sustain.strum.height * 0.5;
-				var strumY = isDownscroll ? sustain.strum.y - halfStrum : sustain.strum.y + halfStrum;
+				var strumMidScreen = sustain.strum.y + sustain.strum.frameHeight * 0.5 - sustain.strum.offset.y;
 				var clipY:Float;
 				if (isDownscroll) {
-					var bodyBottom = sustain.y + (sustain.length * scrollSpeed * 0.45) / sustain.frameHeight;
-					clipY = (sustain.frameHeight - (bodyBottom - strumY) / sustain.scale.y) + sustain.offset.y;
+					var bodyBottom = sustain.y + scaledHeight;
+					clipY = sustain.frameHeight - (bodyBottom - strumMidScreen) / sustain.scale.y;
 					clipY = Math.min(sustain.frameHeight, Math.max(0, clipY));
 					sustain.clipRect = new flixel.math.FlxRect(0, 0, sustain.frameWidth, clipY);
 				} else {
-					clipY = (strumY - sustain.y) / sustain.scale.y - sustain.offset.y;
+					clipY = (strumMidScreen - sustain.y) / sustain.scale.y;
 					clipY = Math.max(0, clipY);
 					sustain.clipRect = new flixel.math.FlxRect(0, clipY, sustain.frameWidth, sustain.frameHeight - clipY);
 				}
@@ -194,19 +202,16 @@ class NoteController {
 		for (sustain in sustains.members) {
 			if (sustain == null || !sustain.isSustainEnd)
 				continue;
-
 			var body = sustain.parentNote;
+
 			if (body == null || toDestroy.contains(body)) {
 				toDestroy.push(sustain);
 				continue;
 			}
-
 			sustain.x = body.x;
 			sustain.origin.y = 0;
-
 			var bodyScaledHeight = body.frameHeight * body.scale.y;
 			var endHeight = sustain.frameHeight * sustain.scale.y;
-
 			if (isDownscroll) {
 				sustain.flipY = true;
 				sustain.y = body.y - endHeight;
@@ -366,9 +371,16 @@ class NoteController {
 		sustains = null;
 	}
 
+	var _charStrumsCache:Map<String, Array<StrumNote>> = new Map();
+
 	public function getCharStrums(charId:String):Array<StrumNote> {
-		if (!charStrumOffsets.exists(charId))
+		if (_charStrumsCache.exists(charId))
+			return _charStrumsCache.get(charId);
+
+		if (!charStrumOffsets.exists(charId)) {
+			_charStrumsCache.set(charId, []);
 			return [];
+		}
 
 		var offset:Int = charStrumOffsets.get(charId);
 		var keys:Int = noteSkinData.keys ?? 4;
@@ -379,6 +391,7 @@ class NoteController {
 			if (s != null)
 				result.push(s);
 		}
+		_charStrumsCache.set(charId, result);
 		return result;
 	}
 
