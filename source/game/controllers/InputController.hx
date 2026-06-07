@@ -60,6 +60,7 @@ class InputController {
 				/*
 					if (!isGhostTapping) { */
 				playStateConfig.misses++;
+				playStateConfig.score += noteController.getMissScore();
 				gameAudio.onMiss();
 				playStateConfig.health += noteController.getHealthDrain(null);
 				playStateConfig.combo = 0;
@@ -90,6 +91,7 @@ class InputController {
 					note.alpha = 0.4;
 					gameAudio.onMiss();
 					playStateConfig.health += noteController.getHealthDrain(null);
+					playStateConfig.score += noteController.getMissScore();
 					playStateConfig.misses++;
 					playStateConfig.combo = 0;
 					note.tooLate = false;

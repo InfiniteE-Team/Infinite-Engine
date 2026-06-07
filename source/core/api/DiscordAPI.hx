@@ -84,11 +84,11 @@ class DiscordAPI
 
 	private static function onDisconnected(errorCode:Int, message:cpp.ConstCharStar):Void
 	{
-		Trace.traceOnce('Discord: Disconnected ($errorCode:$message)');
+		Trace.traceOnce('Discord: Disconnected ($errorCode:$message)', true);
 	}
 
 	private static function onError(errorCode:Int, message:cpp.ConstCharStar):Void
 	{
-		Trace.traceOnce('Discord: Error ($errorCode:$message)');
+		Trace.traceOnce('Discord: Error ($errorCode:$message)', true);
 	}
 }

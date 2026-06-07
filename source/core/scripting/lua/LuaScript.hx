@@ -1,0 +1,441 @@
+package core.scripting.lua;
+
+import llua.*;
+import llua.Lua.Lua_helper;
+import sys.FileSystem;
+
+class LuaScript {
+	var L:State;
+	var owner:Dynamic;
+	var path:String;
+
+	public static var globalClasses:Map<String, Dynamic> = null;
+
+	static var _current:LuaScript = null;
+
+	static var _stateMap:Map<Int, LuaScript> = [];
+
+	public function new(path:String, owner:Dynamic) {
+		this.path = path;
+		this.owner = owner;
+		L = LuaL.newstate();
+		LuaL.openlibs(L);
+		Lua.init_callbacks(L);
+		Lua.set_callbacks_function(cpp.Callable.fromStaticFunction(_callbackHandler));
+		ScriptGlobals.initLua();
+		registerCoreFunctions();
+		registerClasses();
+		registerOwner();
+		_stateMap.set(cast(L, Int), this);
+		var err = LuaL.dofile(L, path);
+		if (err != 0)
+			traceError('dofile');
+	}
+
+	public function call(func:String, ?args:Array<Dynamic>):Dynamic {
+		Lua.getglobal(L, func);
+		if (Lua.isnil(L, -1) != 0) {
+			Lua.pop(L, 1);
+			return null;
+		}
+		var argc = 0;
+		if (args != null) {
+			for (a in args)
+				pushValue(a);
+			argc = args.length;
+		}
+		if (Lua.pcall(L, argc, 1, 0) != 0) {
+			traceError(func);
+			Lua.pop(L, 1);
+			return null;
+		}
+		var result = readValue(L, -1);
+		Lua.pop(L, 1);
+		return result;
+	}
+
+	public function callCancellable(func:String, ?args:Array<Dynamic>):Bool {
+		var result = call(func, args);
+		return result == true;
+	}
+
+	public function expose(name:String, value:Dynamic):Void {
+		pushValue(value);
+		Lua.setglobal(L, name);
+	}
+
+	function registerClasses():Void {
+		for (name => cls in globalClasses) {
+			pushHaxeClass(cls);
+			Lua.setglobal(L, name);
+		}
+	}
+
+	function registerOwner():Void {
+		// superInstance RuleScript but in Lua
+		for (field in Reflect.fields(owner)) {
+			var val = Reflect.field(owner, field);
+			pushValue(val);
+			Lua.setglobal(L, field);
+		}
+		var cls = Type.getClass(owner);
+		if (cls != null) {
+			for (field in Type.getInstanceFields(cls)) {
+				var val = Reflect.getProperty(owner, field);
+				if (val != null) {
+					pushValue(val);
+					Lua.setglobal(L, field);
+				}
+			}
+		}
+	}
+
+	function registerCoreFunctions():Void {
+		_current = this;
+
+		// require: require("FlxTween") or require("flixel.tweens.FlxTween")
+		luaFunction("require", function(name:String):Dynamic {
+			if (globalClasses.exists(name))
+				return globalClasses[name]; // add_callback
+			var cls = Type.resolveClass(name);
+			if (cls != null)
+				return cls;
+			var dir = haxe.io.Path.directory(path);
+			var luaPath = '$dir/$name.lua';
+			if (FileSystem.exists(luaPath))
+				LuaL.dofile(L, luaPath);
+			return null;
+		});
+
+		luaFunction("print", function(args:Dynamic):Dynamic {
+			trace('[Lua:$path] $args');
+			return null;
+		});
+
+		luaFunction("getProperty", function(p:String):Dynamic {
+			return resolvePath(owner, p);
+		});
+
+		luaFunction("setProperty", function(p:String, val:Dynamic):Dynamic {
+			setPath(owner, p, val);
+			return null;
+		});
+
+		luaFunction("callMethod", function(p:String, args:Dynamic):Dynamic {
+			var parts = p.split('.');
+			var methodName = parts.pop();
+			var obj = parts.length > 0 ? resolvePath(owner, parts.join('.')) : owner;
+			if (obj == null)
+				return null;
+			var fn = Reflect.field(obj, methodName);
+			if (fn == null || !Reflect.isFunction(fn))
+				return null;
+			// filter nulls to final
+			return Reflect.callMethod(obj, fn, args);
+		});
+
+		luaFunction("addHaxeLibrary", function(varName:String, classPath:String):Dynamic {
+			var full = classPath != null && classPath.length > 0 ? '$classPath.$varName' : varName;
+			var cls = Type.resolveClass(full);
+			if (cls != null) {
+				pushHaxeClass(cls);
+				Lua.setglobal(L, varName);
+			}
+			return null;
+		});
+
+		luaFunction("luaCallback", function(funcName:String):Dynamic {
+			var wrapper:Dynamic = function(arg:Dynamic) {
+				Lua.getglobal(L, funcName);
+				Convert.toLua(L, arg);
+				Lua.pcall(L, 1, 0, 0);
+			};
+			return wrapper; // dynamic not good converter fuck
+		});
+	}
+
+	// metatables
+
+	function pushHaxeInstance(obj:Dynamic):Void {
+		if (obj == null) {
+			Lua.pushnil(L);
+			return;
+		}
+
+		var id = registerObject(obj);
+		Lua.newtable(L);
+		var tableIdx = Lua.gettop(L);
+		Lua.pushinteger(L, id);
+		Lua.setfield(L, tableIdx, "__hx_id");
+
+		Lua.newtable(L);
+		var metaIdx = Lua.gettop(L);
+
+		luaFunctionAt(metaIdx, "__index", _hxIndexCallback);
+
+		// capt the id in clousure, not stack
+		var capturedId = id;
+		luaFunctionAt(metaIdx, "__newindex", function(tbl:Dynamic, key:String, val:Dynamic):Dynamic {
+			var o = getObject(capturedId); // id captured
+			if (o != null)
+				Reflect.setProperty(o, key, val);
+			return null;
+		});
+
+		luaFunctionAt(metaIdx, "__tostring", function(tbl:Dynamic):Dynamic {
+			var o = getObject(capturedId);
+			return o != null ? Std.string(o) : "null";
+		});
+
+		Lua.setmetatable(L, tableIdx);
+	}
+
+	function pushHaxeClass(cls:Class<Dynamic>):Void {
+		if (cls == null) {
+			Lua.pushnil(L);
+			return;
+		}
+		Lua.newtable(L);
+		var tableIdx = Lua.gettop(L);
+
+		// statics metodes
+		for (field in Type.getClassFields(cls)) {
+			var val = Reflect.field(cls, field);
+			if (val == null)
+				continue;
+			if (Reflect.isFunction(val)) {
+				var captured = val;
+				var capturedCls = cls;
+				luaFunctionAt(tableIdx, field, function(a0:Dynamic, a1:Dynamic, a2:Dynamic, a3:Dynamic, a4:Dynamic):Dynamic {
+					var args = [a0, a1, a2, a3, a4];
+					while (args.length > 0 && args[args.length - 1] == null)
+						args.pop();
+					return Reflect.callMethod(capturedCls, captured, args);
+				});
+			} else {
+				Lua.pushstring(L, field);
+				pushValue(val);
+				Lua.settable(L, tableIdx);
+			}
+		}
+
+		var capturedCls = cls;
+		Lua.newtable(L);
+		luaFunctionAt(Lua.gettop(L), "__call", function(tbl:Dynamic, a0:Dynamic, a1:Dynamic, a2:Dynamic, a3:Dynamic):Dynamic {
+			var args = [a0, a1, a2, a3];
+			while (args.length > 0 && args[args.length - 1] == null)
+				args.pop();
+			return Type.createInstance(capturedCls, args);
+		});
+		Lua.setmetatable(L, tableIdx);
+	}
+
+	static function _hxIndexCallback(L:State):Int {
+		var self = _stateMap.get(cast(L, Int));
+		if (self == null) {
+			Lua.pushnil(L);
+			return 1;
+		}
+		var key = Lua.tostring(L, 2);
+		Lua.getfield(L, 1, "__hx_id");
+		var oid = Lua.tointeger(L, -1);
+		Lua.pop(L, 1);
+		var o = getObject(oid);
+		if (o == null) {
+			Lua.pushnil(L);
+			return 1;
+		}
+
+		var val = Reflect.getProperty(o, key);
+		if (val == null)
+			val = Reflect.field(o, key);
+
+		if (val != null && Reflect.isFunction(val)) {
+			var methodName = '__method_${_metaCounter++}';
+			var capturedO = o;
+			var capturedFn = val;
+			Lua_helper.add_callback(L, methodName, function(a0:Dynamic, a1:Dynamic, a2:Dynamic, a3:Dynamic, a4:Dynamic):Dynamic {
+				var args = [a0, a1, a2, a3, a4];
+				while (args.length > 0 && args[args.length - 1] == null)
+					args.pop();
+				return Reflect.callMethod(capturedO, capturedFn, args);
+			});
+			Lua.getglobal(L, methodName);
+			// not clean the global
+		} else {
+			self.pushValue(val);
+		}
+		return 1;
+	}
+
+	static var objectPool:Array<Dynamic> = [];
+	static var poolFreeIds:Array<Int> = [];
+
+	static function registerObject(obj:Dynamic):Int {
+		if (poolFreeIds.length > 0) {
+			var id = poolFreeIds.pop();
+			objectPool[id] = obj;
+			return id;
+		}
+		objectPool.push(obj);
+		return objectPool.length - 1;
+	}
+
+	static function getObject(id:Int):Dynamic {
+		if (id < 0 || id >= objectPool.length)
+			return null;
+		return objectPool[id];
+	}
+
+	function pushValue(v:Dynamic):Void {
+		if (v == null) {
+			Lua.pushnil(L);
+		} else if (Std.isOfType(v, Bool)) {
+			Lua.pushboolean(L, v);
+		} else if (Std.isOfType(v, Int)) {
+			Lua.pushinteger(L, v);
+		} else if (Std.isOfType(v, Float)) {
+			Lua.pushnumber(L, v);
+		} else if (Std.isOfType(v, String)) {
+			Lua.pushstring(L, v);
+		} else if (Std.isOfType(v, Array)) {
+			// array Haxe
+			var arr:Array<Dynamic> = v;
+			Lua.newtable(L);
+			for (i in 0...arr.length) {
+				pushValue(arr[i]);
+				Lua.rawseti(L, -2, i + 1);
+			}
+		} else {
+			// Haxe Obj -> instance
+			pushHaxeInstance(v);
+		}
+	}
+
+	function readValue(L:State, idx:Int):Dynamic {
+		var t = Lua.type(L, idx);
+		return switch (t) {
+			case Lua.LUA_TNIL: null;
+			case Lua.LUA_TBOOLEAN: Lua.toboolean(L, idx);
+			case Lua.LUA_TNUMBER:
+				var n = Lua.tonumber(L, idx);
+				var i = Std.int(n);
+				(i == n) ? i : n;
+			case Lua.LUA_TSTRING: Lua.tostring(L, idx);
+			case Lua.LUA_TTABLE:
+				// try recupere the Haxe obj for __hx_id
+				Lua.getfield(L, idx, "__hx_id");
+				if (Lua.isnil(L, -1) == 0) {
+					var id = Lua.tointeger(L, -1);
+					Lua.pop(L, 1);
+					getObject(id);
+				} else {
+					Lua.pop(L, 1);
+					// table plane → Map<String, Dynamic>
+					var map:Map<String, Dynamic> = [];
+					Lua.pushnil(L);
+					while (Lua.next(L, idx) != 0) {
+						var key = Lua.tostring(L, -2);
+						var val = readValue(L, -1);
+						map.set(key, val);
+						Lua.pop(L, 1);
+					}
+					map;
+				}
+			case _: null;
+		}
+	}
+
+	// helpers
+
+	static function _callbackHandler(L:State, fname:String):Int {
+		var cbf = Lua_helper.callbacks.get(fname);
+		if (cbf == null)
+			return 0;
+
+		var args:Array<Dynamic> = [];
+		for (i in 0...Lua.gettop(L))
+			args[i] = Convert.fromLua(L, i + 1);
+
+		var ret:Dynamic = Reflect.callMethod(null, cbf, args);
+
+		if (ret != null) {
+			var self = _stateMap.get(cast(L, Int));
+			if (self != null)
+				self.pushValue(ret);
+			else
+				Convert.toLua(L, ret);
+			return 1;
+		}
+		return 0;
+	}
+
+	function readArgs(L:State, startIdx:Int = 1):Array<Dynamic> {
+		var n = Lua.gettop(L);
+		var args:Array<Dynamic> = [];
+		for (i in startIdx...(n + 1))
+			args.push(readValue(L, i));
+		return args;
+	}
+
+	// resolvePath(owner, "noteController.scrollSpeed") → value
+	static function resolvePath(root:Dynamic, path:String):Dynamic {
+		var parts = path.split('.');
+		var cur:Dynamic = root;
+		for (p in parts) {
+			if (cur == null)
+				return null;
+			var next = Reflect.getProperty(cur, p);
+			if (next == null)
+				next = Reflect.field(cur, p);
+			cur = next;
+		}
+		return cur;
+	}
+
+	// setPath(owner, "noteController.scrollSpeed", 2.5)
+	static function setPath(root:Dynamic, path:String, value:Dynamic):Void {
+		var parts = path.split('.');
+		var last = parts.pop();
+		var cur:Dynamic = parts.length > 0 ? resolvePath(root, parts.join('.')) : root;
+		if (cur != null)
+			Reflect.setProperty(cur, last, value);
+	}
+
+	function luaFunction(name:String, fn:Dynamic):Void {
+		Lua_helper.add_callback(L, name, fn);
+	}
+
+	static var _metaCounter:Int = 0;
+
+	// Function register for stack
+	function luaFunctionAt(tableIdx:Int, name:String, fn:Dynamic):Void {
+		var uniqueName = '__meta_${name}_${_metaCounter++}'; // ← counter global
+		Lua_helper.add_callback(L, uniqueName, fn);
+		Lua.getglobal(L, uniqueName);
+		Lua.setfield(L, tableIdx, name);
+		// clear
+		Lua.pushnil(L);
+		Lua.setglobal(L, uniqueName);
+	}
+/*
+	// Push function anonime to stack (for __index dynamic)
+	function luaFunctionInline(fn:State->Int):Void {
+		Lua.pushcfunction(L, cpp.Callable.fromStaticFunction(fn));
+	}*/
+
+	function traceError(context:String):Void {
+		var msg = Lua.tostring(L, -1);
+		Trace.traceOnce('[LuaScript] $path → $context: $msg',true);
+	}
+
+	public function destroy():Void {
+		if (L != null) {
+			Lua.close(L);
+			_stateMap.remove(cast(L, Int));
+			L = null;
+		}
+
+		owner = null;
+	}
+}

@@ -27,6 +27,9 @@ class Note extends FunkinSprite {
 
 	public var noteControl:NoteController;
 
+	private var noteSkinData:NoteSkinData = null;
+	private var _lastAnimationName:String = '';
+
 	public function new(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0,
 			?noteType:String = 'normal') {
 		super(x, y);
@@ -37,17 +40,25 @@ class Note extends FunkinSprite {
 		this.strumTime = strumTime;
 		this.noteType = noteType;
 		this.noteSkin = noteSkin;
+		this.noteSkinData = noteSkinData;
 		noteLoad(noteSkinData);
 	}
 
 	public function noteLoad(noteSkinData:NoteSkinData) {
 		loadProps(noteSkinData.props, 'game/noteskins/$noteSkin/strumnotes');
 		playAnim('note$direction-Scroll', true);
-		RGBShader.applyFromSkin(this, noteSkinData, direction);
+		RGBShader.applyByAnimation(this, noteSkinData, 'note$direction-Scroll');
 	}
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
+
+		if (animation.name != null && animation.name != _lastAnimationName) {
+			_lastAnimationName = animation.name;
+			if (noteSkinData != null && noteSkinData.colorPalette != null) {
+				RGBShader.applyByAnimation(this, noteSkinData, _lastAnimationName);
+			}
+		}
 
 		if (!mustPress) {
 			canBeHit = false;

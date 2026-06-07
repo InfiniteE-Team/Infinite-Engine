@@ -79,7 +79,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 	public function applyCharProps(char:FunkinSprite, id:String) {
 		var props = charProps.get(id);
 		if (props == null) {
-			Trace.traceOnce('Not exist chars $id');
+			Trace.traceOnce('Not exist chars $id', true);
 			return;
 		}
 		if (props.position != null)
@@ -110,7 +110,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 					FlxG.sound.play(Paths.getPath('stages/' + element.audio.path, 'sound'), element.audio.volume ?? 1.0, element.audio.looped ?? false);
 
 			default:
-				Trace.traceOnce('Element Type Unknown $type');
+				Trace.traceOnce('Element Type Unknown $type', true);
 		}
 	}
 

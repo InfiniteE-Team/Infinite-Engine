@@ -7,7 +7,7 @@ class SaveData {
 	static final path:String = 'engine/config/savedata.json';
 
 	// configs for engine
-	public var framerate:Int = 144;
+	public var framerate:Int = 60;
 	public var antialiasing:Bool = true;
 
 	public var downscroll:Bool = false;

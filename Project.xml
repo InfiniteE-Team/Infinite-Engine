@@ -60,6 +60,8 @@
 
 	<haxelib name="hxdiscord_rpc"/>
 
+	<haxelib name="linc_luajit" />
+
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
 	<!--Disable the Flixel core focus lost screen-->
@@ -73,7 +75,8 @@
 
 	<haxedef name="HXCPP_DEBUG_LINK"/>
 
-	<!-- _________________________________ Custom _______________________________ -->
+	<!-- _______________________________Compiler Flags _______________________________ -->
+	<compilerflag name="-D HXCPP_M64" if="cpp" />
 
 	<!-- Place custom nodes like icons here -->
 	<icon path="engine/icon.png" />

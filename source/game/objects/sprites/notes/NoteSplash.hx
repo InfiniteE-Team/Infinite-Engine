@@ -9,6 +9,8 @@ class NoteSplash extends FunkinSprite {
 	public var direction:Int = 0;
 	public var noteSkin:String = 'default';
 
+	public var random:Float = 0;
+
 	public var keys:Int = 4;
 
 	public function new(keys:Int, x:Float, y:Float, noteSkinData:ObjectData, noteSkin:String, direction:Int = 0, ?noteType:String = 'normal') {
@@ -24,7 +26,15 @@ class NoteSplash extends FunkinSprite {
 
 	public function noteLoad(noteSkinData:ObjectData) {
 		loadProps(noteSkinData, 'game/noteskins/$noteSkin/splashes');
-		playAnim('note$direction-Scroll', true);
+		playAnim('note$direction-Splash$random', true);
+	}
+
+	override public function playAnim(name:Null<String>, ?force:Bool = true)
+	{
+		super.playAnim(name,force);
+
+		if (isFinished('splash'))
+			kill();
 	}
 
 	override function update(elapsed:Float) {

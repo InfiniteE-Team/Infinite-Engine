@@ -107,7 +107,7 @@ class NoteController {
 		for (i in 0...keys) {
 			var strum = new StrumNote(x + i * (112 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props, noteSkin);
 			strum.playAnim('static' + i);
-			RGBShader.applyFromSkin(strum, noteSkinData, i);
+			//RGBShader.applyFromSkin(strum, noteSkinData, i);
 			if (!daSong.strumsVisible)
 				strum.visible = false;
 			if (isDownscroll)
@@ -178,13 +178,12 @@ class NoteController {
 			sustain.offset.y = 0;
 
 			if (sustain.isHeld && sustain.strumTime <= songTime) {
-				var strumMidScreen = sustain.strum.y + sustain.strum.frameHeight * 0.5 - sustain.strum.offset.y;
+				var strumMidScreen = sustain.strum.y + (sustain.strum.frameHeight * 0.5) - sustain.strum.offset.y;
 				var clipY:Float;
-				
+
 				if (isDownscroll) {
-					var bodyBottom = sustain.y + scaledHeight;
-					clipY = sustain.frameHeight - (bodyBottom - strumMidScreen) / sustain.scale.y;
-					clipY = Math.min(sustain.frameHeight, Math.max(0, clipY));
+					clipY = (strumMidScreen - sustain.y) / sustain.scale.y;
+					clipY = Math.max(0, Math.min(sustain.frameHeight, clipY));
 					_clipRect.set(0, 0, sustain.frameWidth, clipY);
 				} else {
 					clipY = (strumMidScreen - sustain.y) / sustain.scale.y;
@@ -198,12 +197,13 @@ class NoteController {
 
 			if (sustain.strumTime + sustain.length < songTime)
 				toDestroy.push(sustain);
-			else if (sustain.y + (sustain.length * scrollSpeed * 0.45) < 0 && !isDownscroll)
+			else if (sustain.y + scaledHeight < 0 && !isDownscroll)
 				toDestroy.push(sustain);
 			else if (sustain.y - sustain.offset.y > FlxG.height && isDownscroll)
 				toDestroy.push(sustain);
 		}
 
+		// ends
 		for (sustain in sustains.members) {
 			if (sustain == null || !sustain.isSustainEnd)
 				continue;
@@ -224,7 +224,14 @@ class NoteController {
 				sustain.flipY = false;
 				sustain.y = body.y + bodyScaledHeight;
 			}
-			sustain.alpha = (body.clipRect != null && body.clipRect.height <= 0) ? 0 : 1;
+
+			var strumMidScreen = sustain.strum.y + (sustain.strum.frameHeight * 0.5) - sustain.strum.offset.y;
+
+			if (isDownscroll) {
+				sustain.alpha = (sustain.y >= strumMidScreen) ? 0 : 1;
+			} else {
+				sustain.alpha = ((sustain.y + endHeight) <= strumMidScreen) ? 0 : 1;
+			}
 		}
 
 		for (note in toDestroy)
@@ -269,7 +276,7 @@ class NoteController {
 	// Creation or Generation for Notes
 	public function generateNotes(songTime:Float, daSong:SongConfig) {
 		if (daSong.songData == null) {
-			Trace.traceOnce('ERROR songData null, generated 0 notes');
+			Trace.traceOnce('songData null, generated 0 notes', true);
 			return;
 		}
 
@@ -292,7 +299,8 @@ class NoteController {
 
 			// param for Note positions in strum groups
 			var note = new Note(data.time, keys, strum.x, 0, noteSkinData, noteSkin, data.lane);
-			RGBShader.applyFromSkin(note, noteSkinData, data.lane);
+			
+			//RGBShader.applyFromSkin(note, noteSkinData, data.lane);
 			note.ID = globalLane;
 			note.direction = globalLane;
 			note.strumTime = data.time;
@@ -308,7 +316,7 @@ class NoteController {
 
 			if (data.length > 0) {
 				var sustain = new NoteSustain(data.time, keys, strum.x, 0, noteSkinData, noteSkin, data.lane, data.length, data.type, false);
-				RGBShader.applyFromSkin(sustain, noteSkinData, data.lane);
+				//RGBShader.applyFromSkin(sustain, noteSkinData, data.lane);
 				sustain.ID = globalLane;
 				sustain.direction = globalLane;
 				sustain.strumTime = data.time;
@@ -325,7 +333,7 @@ class NoteController {
 
 				// hold end
 				var sustainEnd = new NoteSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, noteSkin, data.lane, 0, data.type, true);
-				RGBShader.applyFromSkin(sustainEnd, noteSkinData, data.lane);
+				//RGBShader.applyFromSkin(sustainEnd, noteSkinData, data.lane);
 				sustainEnd.ID = globalLane;
 				sustainEnd.direction = globalLane;
 				sustainEnd.strumTime = data.time + data.length;
@@ -352,6 +360,13 @@ class NoteController {
 
 		var missRating = ratingData.ratings.find(r -> r.miss == true && r.window == null);
 		return missRating != null ? missRating.health : -0.04;
+	}
+
+	public function getMissScore():Int {
+		if (ratingData == null)
+			return -10;
+		var missRating = ratingData.ratings.find(r -> r.miss == true && r.window == null);
+		return missRating != null ? missRating.score : -10;
 	}
 
 	public function getRatingForDiff(diff:Float):Null<RatingDataType> {

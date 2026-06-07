@@ -7,6 +7,8 @@ class ScriptHandler {
 	public static var globalContext:rulescript.Context = new rulescript.Context();
 
 	var scripts:Array<RuleScript> = [];
+	var luaScripts:Array<core.scripting.lua.LuaScript> = [];
+
 	var paths:Array<String> = [];
 	var modifiedTimes:Array<Float> = [];
 	var pendingPaths:Array<String> = [];
@@ -23,11 +25,21 @@ class ScriptHandler {
 	public function expose(name:String, value:Dynamic):Void {
 		extraVars.set(name, value);
 		setVar(name, value);
+		for (script in luaScripts)
+			script.expose(name, value);
 	}
 
 	public function load(path:String):Void {
 		if (path == null || !sys.FileSystem.exists(path))
 			return;
+
+		if (haxe.io.Path.extension(path) == 'lua') {
+			var script = new core.scripting.lua.LuaScript(path, owner);
+			luaScripts.push(script);
+			for (name => value in extraVars)
+				script.expose(name, value);
+			return;
+		}
 		pendingPaths.push(path);
 		Trace.traceOnce('[ScriptHandler] enqueued: $path');
 	}
@@ -37,7 +49,7 @@ class ScriptHandler {
 		if (resolved == null || !sys.FileSystem.exists(resolved))
 			return;
 		for (file in sys.FileSystem.readDirectory(resolved)) {
-			if (file.endsWith('.hx'))
+			if (file.endsWith('.hx') || file.endsWith('.lua'))
 				load('$resolved/$file');
 		}
 	}
@@ -60,6 +72,8 @@ class ScriptHandler {
 		var result:Dynamic = null;
 		for (script in scripts)
 			result = script.access.callFunction(name, args);
+		for (script in luaScripts)
+			result = script.call(name, args);
 		return result;
 	}
 
@@ -69,6 +83,10 @@ class ScriptHandler {
 		for (script in scripts) {
 			var result = script.access.callFunction(name, args);
 			if (result == true)
+				return true;
+		}
+		for (script in luaScripts) {
+			if (script.callCancellable(name, args))
 				return true;
 		}
 		return false;
@@ -93,14 +111,6 @@ class ScriptHandler {
 		}
 	}
 
-	public function destroy():Void {
-		scripts = null;
-		paths = null;
-		modifiedTimes = null;
-		extraVars = null;
-		owner = null;
-	}
-
 	function buildScript(path:String):Null<RuleScript> {
 		var parser = new HxParser();
 		parser.allowAll();
@@ -114,8 +124,8 @@ class ScriptHandler {
 	function setupScript(script:RuleScript):Void {
 		script.superInstance = owner;
 
-        for (name => value in extraVars)
-            script.access.setVariable(name, value);
+		for (name => value in extraVars)
+			script.access.setVariable(name, value);
 	}
 
 	function setVar(name:String, value:Dynamic):Void {
@@ -130,5 +140,16 @@ class ScriptHandler {
 		modifiedTimes[i] = sys.FileSystem.stat(paths[i]).mtime.getTime();
 		scripts[i].access.callFunction('postCreate', []);
 		Trace.traceOnce('[ScriptHandler] hot-reloaded: ${paths[i]}');
+	}
+
+	public function destroy():Void {
+		scripts = null;
+		paths = null;
+		modifiedTimes = null;
+		extraVars = null;
+		owner = null;
+		for (script in luaScripts)
+			script.destroy();
+		luaScripts = null;
 	}
 }

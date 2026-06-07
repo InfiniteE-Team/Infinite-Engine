@@ -19,7 +19,7 @@ class ChartPorter {
 				return converter.convert(raw);
 		}
 
-		Trace.traceOnce('Chart Format Unknown lol');
+		Trace.traceOnce('Chart Format Unknown lol', true);
 		return null;
 	}
 }

@@ -45,6 +45,9 @@ class Main extends Sprite {
 		cursor = new CursorConfig();
 		cursor.loadCursor();
 
+		if (globalData.developerMode)
+    		Trace.init();
+
 		WindowConfig.applyAccentColor();
 	}
 

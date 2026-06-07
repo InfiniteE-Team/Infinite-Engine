@@ -5,39 +5,7 @@ typedef NoteSkinData = {
 	var props:ObjectData;
 	var ?author:String;
 	var ?description:String;
-	var ?colorPalette:Array<NoteColor>;
+	var ?colorPalette:Map<String, String>;
 	var ?spacing:Float;
 	var ?keys:Int;
 }
-
-typedef NoteColor = {
-    var r:Array<Float>;
-    var g:Array<Float>;
-    var b:Array<Float>;
-}
-
-/*
-	Example:
-	"colorPalette": [
-		{
-			"r":[0.76,0.11,0.67],
-			"g":[0,0,0], 
-			"b":[0.09,0.03,0.94]
-		},
-		{
-			"r":[0,1,1],
-			"g":[0,0,0],
-			"b":[0,1,0]
-		},
-		{
-			"r":[0.07,0.98,0.02],
-			"g":[0,0,0],
-			"b":[0,0.96,0]
-		},
-		{ 
-			"r":[0.98,0.22,0.25],
-			"g":[0,0,0],
-			"b":[0.96,0.09,0.12]
-		}
-	]
- */

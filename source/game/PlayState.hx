@@ -54,10 +54,7 @@ class PlayState extends MusicBeatState {
 		instance = this;
 
 		#if HSCRIPT_ALLOWED
-		initScript();
-		script.loadFolder('songs/$curSong/scripts');
-		script.load(Paths.getPath('hud', 'script'));
-		script.executeAll();
+		startScript();
 		#end
 
 		addCameras();
@@ -198,7 +195,7 @@ class PlayState extends MusicBeatState {
 		#end
 		Trace.traceOnce("isDeath is being called! This should be overridden in a subclass if you want to use it.");
 
-		MusicBeatState.resetState();
+		rewindSong();
 	}
 
 	override function onFocusLost():Void {
@@ -215,9 +212,50 @@ class PlayState extends MusicBeatState {
 		#end
 	}
 
+	function startScript() {
+		initScript();
+		script.loadFolder('songs/$curSong/scripts');
+		script.load(Paths.getPath('hud', 'script'));
+		script.executeAll();
+	}
+
 	function rewindSong():Void {
+		#if HSCRIPT_ALLOWED
+		if (script != null) {
+			script.call("onDestroy", []);
+			script.destroy();
+			script = null;
+		}
+		startScript();
+		#end
+
 		gameAudio.stopAll();
+		if (noteController != null) {
+			remove(noteController.strums);
+			remove(noteController.sustains);
+			remove(noteController.notes);
+
+			noteController.destroy();
+		}
+
+		if (events != null) {
+			events.destroy();
+			events = new EventManager();
+		}
+
+		playStateConfig = new PlayStateConfig();
+
+		RhythmCore.songPosition = 0;
+		RhythmCore.changeBPM(SONG.bpmSong);
+
+		if (chars != null) {
+			chars.danceAll();
+		}
 		initSong();
+
+		#if HSCRIPT_ALLOWED
+		script.call('onRewind', []);
+		#end
 	}
 
 	#if HSCRIPT_ALLOWED
@@ -257,7 +295,7 @@ class PlayState extends MusicBeatState {
 
 			if (!osuMode || chars != null)
 				chars.isSinging(noteController);
-			
+
 			if (chars != null)
 				chars.processInput(noteController, gameAudio, playStateConfig);
 

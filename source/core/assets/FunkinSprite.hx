@@ -171,7 +171,7 @@ class FunkinSprite extends FlxAnimate {
 	public function playAnim(name:Null<String>, ?force:Bool = true) {
 		var fullName = name + (_suffixes.get(name) ?? '');
 		if (!existsAnim(fullName)) {
-			Trace.traceOnce('$name Anim Not Existed! ERROR');
+			Trace.traceOnce('$name Anim Not Existed!', true);
 			return;
 		}
 		currentAnim = fullName;

@@ -36,7 +36,7 @@
         {
             "rating": "miss",
             "path": "miss",
-            "score": -10,
+            "score": -100,
             "health": -0.04,
             "miss": true
         }

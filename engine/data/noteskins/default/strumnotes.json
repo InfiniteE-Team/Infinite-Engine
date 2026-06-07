@@ -4,76 +4,31 @@
   "props": {
     "name": "Default",
     "path": "default",
-    "colorPalette": [
-      {
-        "r": [
-          0.76,
-          0.11,
-          0.67
-        ],
-        "g": [
-          0,
-          0,
-          0
-        ],
-        "b": [
-          0.09,
-          0.03,
-          0.94
-        ]
-      },
-      {
-        "r": [
-          0,
-          1,
-          1
-        ],
-        "g": [
-          0,
-          0,
-          0
-        ],
-        "b": [
-          0,
-          1,
-          0
-        ]
-      },
-      {
-        "r": [
-          0.07,
-          0.98,
-          0.02
-        ],
-        "g": [
-          0,
-          0,
-          0
-        ],
-        "b": [
-          0,
-          0.96,
-          0
-        ]
-      },
-      {
-        "r": [
-          0.98,
-          0.22,
-          0.25
-        ],
-        "g": [
-          0,
-          0,
-          0
-        ],
-        "b": [
-          0.96,
-          0.09,
-          0.12
-        ]
-      }
-    ],
+    "colorPalette": {
+      "note0-Scroll": "0xFFC24B99",
+      "note0-Hold": "0xFFC24B99",
+      "note0-HoldEnd": "0xFFC24B99",
+      "press0": "0xFFC24B99",
+      "confirm0": "0xFFC24B99",
+
+      "note1-Scroll": "0xFF00FFFF",
+      "note1-Hold": "0xFF00FFFF",
+      "note1-HoldEnd": "0xFF00FFFF",
+      "press1": "0xFF00FFFF",
+      "confirm1": "0xFF00FFFF",
+
+      "note2-Scroll": "0xFF12FA05",
+      "note2-Hold": "0xFF12FA05",
+      "note2-HoldEnd": "0xFF12FA05",
+      "press2": "0xFF12FA05",
+      "confirm2": "0xFF12FA05",
+
+      "note3-Scroll": "0xFFF9393F",
+      "note3-Hold": "0xFFF9393F",
+      "note3-HoldEnd": "0xFFF9393F",
+      "press3": "0xFFF9393F",
+      "confirm3": "0xFFF9393F"
+    },
     "position": [
       0,
       0

@@ -87,9 +87,11 @@ class MusicBeatState extends flixel.FlxState {
 		core.assets.Paths.clearCache();
 		JsonWatcher.clear();
 		#if HSCRIPT_ALLOWED
-		script.call("onDestroy", []);
-		script.destroy();
-		script = null;
+		if (script != null) {
+			script.call("onDestroy", []);
+			script.destroy();
+			script = null;
+		}
 		#end
 		infoHelp = null;
 		core.assets.FunkinGlobalObjectReg.clear();

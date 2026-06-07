@@ -28,6 +28,6 @@ class NoteSustain extends Note {
 		} else {
 			playAnim('note$direction-Hold');
 		}
-		RGBShader.applyFromSkin(this, noteSkinData, direction);
+		//RGBShader.applyFromSkin(this, noteSkinData, direction);
 	}
 }

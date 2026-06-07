@@ -1,5 +1,6 @@
 import core.assets.Paths;
 import flixel.util.FlxStringUtil;
+import flixel.text.FlxTextBorderStyle;
 
 var playerIcon = null;
 var opponentIcon = null;
@@ -22,9 +23,9 @@ function onCreate() {
 	healthBarBG.antialiasing = true;
 	add(healthBarBG);
 
-	scoreText = new FlxText(0, healthBarBG.y + 30, FlxG.width, "Score: 0");
-	scoreText.setFormat(Paths.getPath('vcr.ttf', 'font'), 16, 0xFFFFFFFF, "center");
-	//scoreText.setBorderStyle('outline', 0xFF000000, 2, 1);
+	scoreText = new FlxText(0, healthBarBG.y + 30, FlxG.width, "Score: 0 - Misses: 0");
+	scoreText.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFFFFFFFF, "center");
+	scoreText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 	scoreText.antialiasing = true;
 	scoreText.scrollFactor.set(0, 0);
 	scoreText.cameras = [camHUD];
