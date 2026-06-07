@@ -23,11 +23,8 @@ class NoteSustain extends Note {
 
 	override function noteLoad(noteSkinData:NoteSkinData) {
 		loadProps(noteSkinData.props, 'game/noteskins/$noteSkin/strumnotes');
-		if (isSustainEnd) {
-			playAnim('note$direction-HoldEnd');
-		} else {
-			playAnim('note$direction-Hold');
-		}
-		//RGBShader.applyFromSkin(this, noteSkinData, direction);
+		var animName = isSustainEnd ? 'note$direction-HoldEnd' : 'note$direction-Hold';
+        playAnim(animName);
+		RGBShader.applyByAnimation(this, noteSkinData, animName);
 	}
 }

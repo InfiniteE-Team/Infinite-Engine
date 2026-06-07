@@ -1,34 +1,31 @@
 {
   "author": "ninjamuffin99",
   "description": "Skin default FNF",
+  "colorPalette": {
+    "note0-Scroll": "0xFFC24B99",
+    "note0-Hold": "0xFFC24B99",
+    "note0-HoldEnd": "0xFFC24B99",
+    "press0": "0xFFC24B99",
+    "confirm0": "0xFFC24B99",
+    "note1-Scroll": "0xFF00FFFF",
+    "note1-Hold": "0xFF00FFFF",
+    "note1-HoldEnd": "0xFF00FFFF",
+    "press1": "0xFF00FFFF",
+    "confirm1": "0xFF00FFFF",
+    "note2-Scroll": "0xFF12FA05",
+    "note2-Hold": "0xFF12FA05",
+    "note2-HoldEnd": "0xFF12FA05",
+    "press2": "0xFF12FA05",
+    "confirm2": "0xFF12FA05",
+    "note3-Scroll": "0xFFF9393F",
+    "note3-Hold": "0xFFF9393F",
+    "note3-HoldEnd": "0xFFF9393F",
+    "press3": "0xFFF9393F",
+    "confirm3": "0xFFF9393F"
+  },
   "props": {
     "name": "Default",
     "path": "default",
-    "colorPalette": {
-      "note0-Scroll": "0xFFC24B99",
-      "note0-Hold": "0xFFC24B99",
-      "note0-HoldEnd": "0xFFC24B99",
-      "press0": "0xFFC24B99",
-      "confirm0": "0xFFC24B99",
-
-      "note1-Scroll": "0xFF00FFFF",
-      "note1-Hold": "0xFF00FFFF",
-      "note1-HoldEnd": "0xFF00FFFF",
-      "press1": "0xFF00FFFF",
-      "confirm1": "0xFF00FFFF",
-
-      "note2-Scroll": "0xFF12FA05",
-      "note2-Hold": "0xFF12FA05",
-      "note2-HoldEnd": "0xFF12FA05",
-      "press2": "0xFF12FA05",
-      "confirm2": "0xFF12FA05",
-
-      "note3-Scroll": "0xFFF9393F",
-      "note3-Hold": "0xFFF9393F",
-      "note3-HoldEnd": "0xFFF9393F",
-      "press3": "0xFFF9393F",
-      "confirm3": "0xFFF9393F"
-    },
     "position": [
       0,
       0
