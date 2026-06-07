@@ -2,7 +2,6 @@ package utils;
 
 import flixel.text.FlxText;
 import flixel.group.FlxSpriteGroup;
-import flixel.FlxG;
 
 class Trace {
 	static var textGroup:FlxSpriteGroup;
