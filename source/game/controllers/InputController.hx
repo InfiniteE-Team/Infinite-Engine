@@ -75,8 +75,7 @@ class InputController {
 					continue;
 
 				var isActive = core.rhythm.RhythmCore.songPosition >= sustain.strumTime - noteController.worstWindow;
-				var parentHit = sustain.parentNote == null || sustain.parentNote.wasGoodHit;
-				if (isActive && parentHit) {
+				if (isActive) {
 					sustain.isHeld = true;
 					charStrums[i].playAnim('confirm' + i, true);
 				}
