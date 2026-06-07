@@ -51,8 +51,6 @@ class NoteController {
 	// configs
 	public var isDownscroll:Bool = false;
 
-	public var distanceRenderNotes:Float = 200;
-
 	public var ratingData:RatingData;
 
 	public var worstWindow:Float = 166.0;
@@ -112,6 +110,8 @@ class NoteController {
 			RGBShader.applyFromSkin(strum, noteSkinData, i);
 			if (!daSong.strumsVisible)
 				strum.visible = false;
+			if (isDownscroll)
+				strum.y += 500;
 			strums.add(strum);
 		}
 	}
