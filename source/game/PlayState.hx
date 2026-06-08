@@ -206,9 +206,12 @@ class PlayState extends MusicBeatState {
 	}
 
 	function onFocusGained():Void {
-		gameAudio.playAll();
 		#if HSCRIPT_ALLOWED
 		script.call('onFocusGained', []);
+		#end
+		gameAudio.playAll();
+		#if HSCRIPT_ALLOWED
+		script.call('postFocusGained', []);
 		#end
 	}
 

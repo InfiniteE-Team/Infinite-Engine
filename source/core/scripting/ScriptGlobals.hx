@@ -33,6 +33,9 @@ class ScriptGlobals {
 		root['RhythmCore'] = core.rhythm.RhythmCore;
 		root['ScriptHandler'] = core.scripting.ScriptHandler;
 		root['ScriptedStateBase'] = core.scripting.ScriptStateBase;
+		root['ScriptedState'] = core.scripting.ScriptedState;
+
+		root['WindowsAPI'] = winapi.WindowsAPI;
 
 		// Haxe std extra
 		root['Json'] = haxe.Json;
@@ -45,27 +48,28 @@ class ScriptGlobals {
 			return;
 		core.scripting.lua.LuaScript.globalClasses = [
 			// Flixel
-			"FlxG"       => flixel.FlxG,
-			"FlxSprite"  => flixel.FlxSprite,
-			"FlxText"    => flixel.text.FlxText,
-			"FlxSound"   => flixel.sound.FlxSound,
-			"FlxCamera"  => flixel.FlxCamera,
-			"FlxTween"   => flixel.tweens.FlxTween,
-			"FlxTimer"   => flixel.util.FlxTimer,
-			"FlxEase"    => flixel.tweens.FlxEase,
-			"FlxMath"    => flixel.math.FlxMath,
-			"FlxBar"     => flixel.ui.FlxBar,
+			"FlxG" => flixel.FlxG,
+			"FlxSprite" => flixel.FlxSprite,
+			"FlxText" => flixel.text.FlxText,
+			"FlxSound" => flixel.sound.FlxSound,
+			"FlxCamera" => flixel.FlxCamera,
+			"FlxTween" => flixel.tweens.FlxTween,
+			"FlxTimer" => flixel.util.FlxTimer,
+			"FlxEase" => flixel.tweens.FlxEase,
+			"FlxMath" => flixel.math.FlxMath,
+			"FlxBar" => flixel.ui.FlxBar,
 			// Engine
-			"PlayState"       => game.PlayState,
-			"Character"       => game.objects.sprites.Character,
-			"Stage"           => game.objects.sprites.Stage,
-			"Paths"           => core.assets.Paths,
-			"FunkinSprite"    => core.assets.FunkinSprite,
-			"RhythmCore"      => core.rhythm.RhythmCore,
+			"PlayState" => game.PlayState,
+			"Character" => game.objects.sprites.Character,
+			"Stage" => game.objects.sprites.Stage,
+			"Paths" => core.assets.Paths,
+			"FunkinSprite" => core.assets.FunkinSprite,
+			"RhythmCore" => core.rhythm.RhythmCore,
+			"WindowsAPI" => winapi.WindowsAPI,
 			// Std
-			"Json"        => haxe.Json,
-			"FileSystem"  => sys.FileSystem,
-			"File"        => sys.io.File,
+			"Json" => haxe.Json,
+			"FileSystem" => sys.FileSystem,
+			"File" => sys.io.File,
 		];
 	}
 }

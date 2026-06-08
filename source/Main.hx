@@ -1,7 +1,6 @@
 package;
 
 import core.system.FPSCounter;
-import core.system.WindowConfig;
 import flixel.FlxGame;
 import openfl.display.Sprite;
 import openfl.events.Event;
@@ -15,6 +14,8 @@ import lime.app.Application;
 import core.json.engine.GlobalData.GlobalConfig;
 import core.scripting.ScriptGlobals;
 import core.config.CursorConfig;
+// 
+import winapi.WindowsAPI;
 
 class Main extends Sprite {
 	public var fps:FPSCounter = new FPSCounter(5, 5, 0xFFFFFF);
@@ -48,7 +49,7 @@ class Main extends Sprite {
 		if (globalData.developerMode)
     		Trace.init();
 
-		WindowConfig.applyAccentColor();
+		WindowsAPI.windowDarkMode(true);
 	}
 
 	function configGame() {

@@ -56,6 +56,13 @@
             "name": "linc_luajit",
             "type": "haxelib",
             "version": "0.0.7"
+        },
+        {
+            "name": "sl-windows-api",
+            "type": "git",
+            "dir": null,
+            "ref": "main",
+            "url": "https://github.com/Slushi-Github/SL-Windows-API"
         }
     ]
 }

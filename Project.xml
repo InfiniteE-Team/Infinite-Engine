@@ -62,6 +62,8 @@
 
 	<haxelib name="linc_luajit" />
 
+	<haxelib name="sl-windows-api" />
+
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
 	<!--Disable the Flixel core focus lost screen-->

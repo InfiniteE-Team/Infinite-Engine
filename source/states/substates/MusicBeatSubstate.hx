@@ -46,17 +46,17 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 			#if HSCRIPT_ALLOWED
 			script.hotReload();
 			#end
-
+/*
 			if (FlxG.keys.justPressed.F5) {
 				MusicBeatSubstate.resetState();
-			}
+			}*/
 			if (FlxG.keys.justPressed.F4)
 				infoHelp.openUI();
 		}
 		tracker.update();
 		tracker.check(stepHit, beatHit);
 	}
-
+/*
 	public static function resetState():Void {
 		if (Main.globalData.developerMode)
 			JsonWatcher.updateSwitch();
@@ -64,7 +64,7 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 		var cls = Type.getClass(this);
 		close();
 		parent.openSubState(Type.createInstance(cls, []));
-	}
+	}*/
 
 	public function stepHit(step:Int):Void {
 		#if HSCRIPT_ALLOWED
@@ -76,6 +76,10 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 		#if HSCRIPT_ALLOWED
 		script.call("onBeatHit", [beat]);
 		#end
+	}
+
+	public static function openSubstate(subState:flixel.FlxSubState):Void {
+		openSubstate(subState);
 	}
 
 	override function destroy():Void {
