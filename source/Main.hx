@@ -4,22 +4,19 @@ import core.system.FPSCounter;
 import flixel.FlxGame;
 import openfl.display.Sprite;
 import openfl.events.Event;
-import openfl.display.StageDisplayState;
-import openfl.Lib;
 import flixel.FlxState;
-import game.PlayState;
 import core.config.Controls;
 import core.config.SaveData;
 import lime.app.Application;
 import core.json.engine.GlobalData.GlobalConfig;
 import core.scripting.ScriptGlobals;
 import core.config.CursorConfig;
-// 
+//
 import winapi.WindowsAPI;
 
 class Main extends Sprite {
 	public var fps:FPSCounter = new FPSCounter(5, 5, 0xFFFFFF);
-	public var mainState:Class<FlxState> = PlayState;
+	public var mainState:Class<FlxState> = game.PlayState;
 
 	public static var save:SaveData;
 	public static var controls:Controls;
@@ -47,9 +44,12 @@ class Main extends Sprite {
 		cursor.loadCursor();
 
 		if (globalData.developerMode)
-    		Trace.init();
+			Trace.init();
 
+		#if (cpp && !mobile)
+		WindowsAPI.reDefineMainWindowTitle(lime.app.Application.current.window.title);
 		WindowsAPI.windowDarkMode(true);
+		#end
 	}
 
 	function configGame() {
@@ -62,7 +62,7 @@ class Main extends Sprite {
 			mainState = globalData.startState;
 
 		framerate = save.framerate;
-		
+
 		#if (DISCORD_ALLOWED && hxdiscord_rpc < "1.2.0")
 		core.api.DiscordAPI.init();
 		Application.current.onExit.add(function(exitCode:Int) {
@@ -71,8 +71,8 @@ class Main extends Sprite {
 		#end
 
 		#if HSCRIPT_ALLOWED
-        ScriptGlobals.init();
-        #end
+		ScriptGlobals.init();
+		#end
 	}
 
 	private function onKeyDown(e:openfl.events.KeyboardEvent):Void {
