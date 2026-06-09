@@ -13,7 +13,7 @@ jobs:
             target: windows
           - os: ubuntu-latest
             target: linux
-          - os: macos-latest
+          - os: macos-13
             target: mac
 
     runs-on: ${{ matrix.os }}
@@ -31,7 +31,7 @@ jobs:
         run: |
           haxelib install lime --quiet
           haxelib install openfl --quiet
-          haxelib run lime setup -quiet
+          haxelib run lime setup -quiet -noconsole
 
       - name: Install project libs
         run: haxelib run lime install Project.xml --quiet
