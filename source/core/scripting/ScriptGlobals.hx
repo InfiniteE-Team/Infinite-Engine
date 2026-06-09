@@ -33,8 +33,8 @@ class ScriptGlobals {
 		root['RhythmCore'] = core.rhythm.RhythmCore;
 		root['ScriptHandler'] = core.scripting.ScriptHandler;
 
-		root['ScriptedStateBase'] = core.scripting.ScriptStateBase;
-		root['ScriptSubstateBase'] = core.scripting.ScriptSubstateBase;
+		root['ScriptedStateBase'] = core.scripting.interfaces.ScriptStateBase;
+		root['ScriptSubstateBase'] = core.scripting.interfaces.ScriptSubstateBase;
 
 		root['ScriptedState'] = core.scripting.ScriptedState;
 
