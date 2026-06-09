@@ -8,7 +8,7 @@ function onUpdate(elapsed)
 
 function onPauseMenu()
 {
-    
+    ScriptedState.openSubstate('PauseMenu');
 }
 
 /*

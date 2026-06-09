@@ -46,7 +46,7 @@ class Character extends FunkinObjectRegistry {
 	}
 
 	#if HSCRIPT_ALLOWED
-    function initCharScript():Void {
+    public function initCharScript():Void {
         charScript = new ScriptHandler(this);
         charScript.load(Paths.getPath('characters/$curCharacter', 'script'));
         charScript.executeAll();
@@ -88,10 +88,13 @@ class Character extends FunkinObjectRegistry {
 		if (isSing || isMiss)
 			singCountTime += elapsed;
 
-		if (idleAfterSing && ((isMiss || isSing) && layers[0].animation.finished)) {
-			isSing = false;
-			isMiss = false;
-			dance();
+		if (layers != null && layers.length > 0) {
+			if (idleAfterSing && ((isMiss || isSing) && layers[0].animation.finished)) {
+				isSing = false;
+				isMiss = false;
+				singCountTime = 0;
+				dance();
+			}
 		}
 
 		#if HSCRIPT_ALLOWED
@@ -133,7 +136,7 @@ class Character extends FunkinObjectRegistry {
 		#if HSCRIPT_ALLOWED
         if (charScript.callCancellable('onDance', [])) return;
         #end
-		if (isSing || isMiss && singCountTime > singTime) {
+		if ((isSing || isMiss) && singCountTime > singTime) {
 			singCountTime = 0;
 			return;
 		}

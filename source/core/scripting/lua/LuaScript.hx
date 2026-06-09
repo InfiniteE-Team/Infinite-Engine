@@ -90,20 +90,64 @@ class LuaScript {
 		}
 	}
 
+	var _requireCache:Map<String, Dynamic> = [];
+
 	function registerCoreFunctions():Void {
 		_current = this;
 
 		// require: require("FlxTween") or require("flixel.tweens.FlxTween")
 		luaFunction("require", function(name:String):Dynamic {
-			if (globalClasses.exists(name))
-				return globalClasses[name]; // add_callback
-			var cls = Type.resolveClass(name);
-			if (cls != null)
+			if (_requireCache.exists(name))
+				return _requireCache[name];
+
+			// Class registred globalClasses (name, ex: "FlxTween")
+			if (globalClasses != null && globalClasses.exists(name)) {
+				var cls = globalClasses[name];
+				_requireCache.set(name, cls);
 				return cls;
-			var dir = haxe.io.Path.directory(path);
-			var luaPath = '$dir/$name.lua';
-			if (FileSystem.exists(luaPath))
-				LuaL.dofile(L, luaPath);
+			}
+
+			// Class Haxe name complete (ex: "flixel.tweens.FlxTween")
+			var cls = Type.resolveClass(name);
+			if (cls != null) {
+				_requireCache.set(name, cls);
+				return cls;
+			}
+
+			// Enum Haxe (ex: "flixel.util.FlxAxes")
+			var enm = Type.resolveEnum(name);
+			if (enm != null) {
+				_requireCache.set(name, enm);
+				return enm;
+			}
+
+			var luaName = name.split('.').join('/') + '.lua';
+			var candidates = [
+				haxe.io.Path.directory(path) + '/' + luaName,
+				core.assets.Paths.findLib('scripts/$luaName'),
+				core.assets.Paths.findLib(luaName),
+			];
+			for (candidate in candidates) {
+				if (candidate != null && sys.FileSystem.exists(candidate)) {
+					var top = Lua.gettop(L);
+					var err = LuaL.dofile(L, candidate);
+					if (err != 0) {
+						traceError('require($name)');
+						Lua.pop(L, 1);
+						return null;
+					}
+					var newTop = Lua.gettop(L);
+					var result:Dynamic = null;
+					if (newTop > top) {
+						result = readValue(L, -1);
+						Lua.pop(L, newTop - top);
+					}
+					_requireCache.set(name, result ?? true);
+					return result;
+				}
+			}
+
+			Trace.traceOnce('[LuaScript] require("$name"): not found', true);
 			return null;
 		});
 
@@ -152,6 +196,49 @@ class LuaScript {
 			};
 			return wrapper; // dynamic not good converter fuck
 		});
+
+		LuaL.dostring(L, "
+			function class(base)
+				local cls = {}
+				cls.__index = cls
+
+				if base then
+					setmetatable(cls, { __index = base })
+				end
+
+    			-- perms for: local obj = MyClass(args)
+				setmetatable(cls, {
+					__index = base,
+					__call = function(c, ...)
+						local instance = setmetatable({}, c)
+						-- exposes super as a function that calls new() from the parent
+						if base and base.new then
+							instance.super = function(...)
+								base.new(instance, ...)
+							end
+						else
+							instance.super = function() end
+						end
+						if c.new then
+							c.new(instance, ...)
+						end
+						return instance
+					end
+				})
+
+				cls.isInstanceOf = function(self, klass)
+					local mt = getmetatable(self)
+					while mt do
+						if mt == klass then return true end
+						local parent = getmetatable(mt)
+						mt = parent and parent.__index
+					end
+					return false
+				end
+
+				return cls
+			end
+		");
 	}
 
 	// metatables
@@ -206,10 +293,7 @@ class LuaScript {
 			if (Reflect.isFunction(val)) {
 				var captured = val;
 				var capturedCls = cls;
-				luaFunctionAt(tableIdx, field, function(a0:Dynamic, a1:Dynamic, a2:Dynamic, a3:Dynamic, a4:Dynamic):Dynamic {
-					var args = [a0, a1, a2, a3, a4];
-					while (args.length > 0 && args[args.length - 1] == null)
-						args.pop();
+				luaFunctionAtDynamic(tableIdx, field, function(args:Array<Dynamic>):Dynamic {
 					return Reflect.callMethod(capturedCls, captured, args);
 				});
 			} else {
@@ -221,10 +305,9 @@ class LuaScript {
 
 		var capturedCls = cls;
 		Lua.newtable(L);
-		luaFunctionAt(Lua.gettop(L), "__call", function(tbl:Dynamic, a0:Dynamic, a1:Dynamic, a2:Dynamic, a3:Dynamic):Dynamic {
-			var args = [a0, a1, a2, a3];
-			while (args.length > 0 && args[args.length - 1] == null)
-				args.pop();
+		luaFunctionAtDynamic(Lua.gettop(L), "__call", function(args:Array<Dynamic>):Dynamic {
+			if (args.length > 0)
+				args.shift();
 			return Type.createInstance(capturedCls, args);
 		});
 		Lua.setmetatable(L, tableIdx);
@@ -254,18 +337,41 @@ class LuaScript {
 			var methodName = '__method_${_metaCounter++}';
 			var capturedO = o;
 			var capturedFn = val;
-			Lua_helper.add_callback(L, methodName, function(a0:Dynamic, a1:Dynamic, a2:Dynamic, a3:Dynamic, a4:Dynamic):Dynamic {
-				var args = [a0, a1, a2, a3, a4];
-				while (args.length > 0 && args[args.length - 1] == null)
-					args.pop();
-				return Reflect.callMethod(capturedO, capturedFn, args);
-			});
+			var wrapper = function(L:State, _:String):Int {
+				var args = self.readArgs(L);
+				var ret = Reflect.callMethod(capturedO, capturedFn, args);
+				if (ret != null) {
+					self.pushValue(ret);
+					return 1;
+				}
+				return 0;
+			};
+			Lua_helper.add_callback(L, methodName, wrapper);
 			Lua.getglobal(L, methodName);
 			// not clean the global
 		} else {
 			self.pushValue(val);
 		}
 		return 1;
+	}
+
+	function luaFunctionAtDynamic(tableIdx:Int, name:String, fn:Array<Dynamic>->Dynamic):Void {
+		var uniqueName = '__meta_${name}_${_metaCounter++}';
+		var self = this;
+		var wrapper = function(L:State, _:String):Int {
+			var args = self.readArgs(L);
+			var ret = fn(args);
+			if (ret != null) {
+				self.pushValue(ret);
+				return 1;
+			}
+			return 0;
+		};
+		Lua_helper.add_callback(L, uniqueName, wrapper);
+		Lua.getglobal(L, uniqueName);
+		Lua.setfield(L, tableIdx, name);
+		Lua.pushnil(L);
+		Lua.setglobal(L, uniqueName);
 	}
 
 	static var objectPool:Array<Dynamic> = [];
@@ -418,15 +524,15 @@ class LuaScript {
 		Lua.pushnil(L);
 		Lua.setglobal(L, uniqueName);
 	}
-/*
-	// Push function anonime to stack (for __index dynamic)
-	function luaFunctionInline(fn:State->Int):Void {
-		Lua.pushcfunction(L, cpp.Callable.fromStaticFunction(fn));
-	}*/
 
+	/*
+		// Push function anonime to stack (for __index dynamic)
+		function luaFunctionInline(fn:State->Int):Void {
+			Lua.pushcfunction(L, cpp.Callable.fromStaticFunction(fn));
+	}*/
 	function traceError(context:String):Void {
 		var msg = Lua.tostring(L, -1);
-		Trace.traceOnce('[LuaScript] $path → $context: $msg',true);
+		Trace.traceOnce('[LuaScript] $path → $context: $msg', true);
 	}
 
 	public function destroy():Void {
@@ -435,7 +541,7 @@ class LuaScript {
 			_stateMap.remove(cast(L, Int));
 			L = null;
 		}
-
+		_requireCache = null;
 		owner = null;
 	}
 }

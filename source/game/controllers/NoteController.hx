@@ -180,7 +180,7 @@ class NoteController {
 			// note.alpha = 0.3;
 
 			#if HSCRIPT_ALLOWED
-			scriptNC.call("onNoteMovement", [songTime]);
+			scriptNC.call("onNoteMovement", [note, songTime]);
 			#end
 
 			if (note.y + note.frameHeight * note.scale.y < 0 && !isDownscroll)
@@ -240,7 +240,7 @@ class NoteController {
 			}
 
 			#if HSCRIPT_ALLOWED
-			scriptNC.call("onSustainMovement", [songTime]);
+			scriptNC.call("onSustainMovement", [sustain, songTime]);
 			#end
 
 			if (sustain.strumTime + sustain.length < songTime)
@@ -346,6 +346,7 @@ class NoteController {
 			if (isHittable)
 				return note;
 		}
+
 		return null;
 	}
 

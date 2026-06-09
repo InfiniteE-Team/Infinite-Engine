@@ -111,7 +111,7 @@ class PlayState extends MusicBeatState {
 		if (!osuMode)
 			stage.charLayer.add(chars);
 		for (data in SONG.chars) {
-			chars.loadCharacter(data.id, data.name, data.role, stage.charLayer);
+			chars.loadCharacter(data.id, data.name, data.role, stage.charLayer, script);
 			stage.applyCharProps(chars.get(data.id), data.id);
 			var stageProps = stage.charProps.get(data.id);
 			if (stageProps?.camPos != null) {

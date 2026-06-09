@@ -10,6 +10,9 @@ import core.config.Controls;
 import game.objects.sprites.notes.Note;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import core.rhythm.audio.GameAudio;
+#if HSCRIPT_ALLOWED
+import core.scripting.ScriptHandler;
+#end
 
 class CharacterController extends FunkinObjectRegistry {
 	public var isPlayer:Bool = true;
@@ -28,16 +31,25 @@ class CharacterController extends FunkinObjectRegistry {
 
 	var input:InputController = new InputController();
 
+	#if HSCRIPT_ALLOWED
+	var scriptMap:Map<String, ScriptHandler> = [];
+	#end
+
 	public function new(?id:String, ?x:Float = 0, ?y:Float = 0) {
 		super(id, x, y);
 		control = Main.controls;
 	}
 
-	public function loadCharacter(id:String, name:String, role:String, targetGroup:FlxTypedGroup<flixel.FlxBasic>):FunkinSprite {
+	public function loadCharacter(id:String, name:String, role:String, targetGroup:FlxTypedGroup<flixel.FlxBasic>, script:ScriptHandler):FunkinSprite {
 		if (existsId(id)) {
 			return get(id);
 		}
 		chars = new Character(id, name);
+
+		#if HSCRIPT_ALLOWED
+		scriptMap.set(id, script);
+		#end
+
 		registry.set(id, chars);
 		for (layer in chars.layers)
 			targetGroup.add(layer);
@@ -58,11 +70,22 @@ class CharacterController extends FunkinObjectRegistry {
 		}
 		for (char in opponentChars) {
 			var strums = noteController.getCharStrums(char.id);
+			#if HSCRIPT_ALLOWED
+			var charScript = scriptMap.get(char.id);
+			#end
 			for (i in 0...strums.length) {
 				var note = noteController.getHittableNote(char.id, i, false);
 				if (note != null) {
 					input.isCPUHit(strums, noteController, char.id, i);
+					#if HSCRIPT_ALLOWED
+					if (charScript != null)
+						charScript.call("onNoteHitCPU", []);
+					#end
 				} else {
+					#if HSCRIPT_ALLOWED
+					if (charScript != null)
+						charScript.call("onNoteSustainCPU", []);
+					#end
 					var songPos = core.rhythm.RhythmCore.songPosition;
 					var holdingActive = false;
 					for (sustain in noteController.sustains.members) {
@@ -75,6 +98,10 @@ class CharacterController extends FunkinObjectRegistry {
 							break;
 						}
 					}
+					#if HSCRIPT_ALLOWED
+					if (charScript != null)
+						charScript.call("postNoteSustainCPU", []);
+					#end
 					if (!holdingActive)
 						strums[i].playAnim('static' + i, true);
 				}
@@ -98,6 +125,12 @@ class CharacterController extends FunkinObjectRegistry {
 	function updatePlayerLane(char:Character, strums, i:Int, nc:NoteController, audio:GameAudio, cfg:PlayStateConfig) {
 		var hitNote = input.isPlayerHit(strums, char.id, nc, audio, cfg, i);
 
+		#if HSCRIPT_ALLOWED
+		var charScript = scriptMap.get(char.id);
+		if (charScript != null)
+			charScript.call("onNoteHitPlayer", []);
+		#end
+
 		if (input.control.getGroupInput("noteKeys")[i]) {
 			if (hitNote != null) {
 				setSing(char, hitNote.direction);
@@ -107,17 +140,7 @@ class CharacterController extends FunkinObjectRegistry {
 				char.isMiss = true;
 			}
 		} else {
-			char.isSing = false;
-			char.isMiss = false;
-
-			for (note in nc.notes.members) {
-				if (note == null || !note.alive || !note.mustPress || note.strum != strums[i] || !note.tooLate)
-					continue;
-
-				char.playAnim('${Character.getCharAnim(note.direction)}-miss', true);
-				char.isMiss = true;
-				note.tooLate = false;
-			}
+			getCharMiss(char, nc, strums, i);
 		}
 
 		var songPos = core.rhythm.RhythmCore.songPosition;
@@ -131,6 +154,11 @@ class CharacterController extends FunkinObjectRegistry {
 			else
 				getCharMiss(char, nc, strums, i);
 		}
+
+		#if HSCRIPT_ALLOWED
+		if (charScript != null)
+			charScript.call("postNoteHitPlayer", []);
+		#end
 	}
 
 	public function getCharMiss(char:Character, noteController:NoteController, strums, i:Int):Void {
@@ -142,6 +170,12 @@ class CharacterController extends FunkinObjectRegistry {
 			char.playAnim('${Character.getCharAnim(note.direction)}-miss', true);
 			char.isMiss = true;
 		}
+
+		#if HSCRIPT_ALLOWED
+		var charScript = scriptMap.get(char.id);
+		if (charScript != null)
+			charScript.call("onNoteHitMiss", []);
+		#end
 	}
 
 	public function danceAll():Void {
@@ -165,14 +199,33 @@ class CharacterController extends FunkinObjectRegistry {
 		PlayState.instance.remove(chars);
 		chars.destroy();
 		registry.remove(id);
+
+		playerChars.remove(chars);
+		opponentChars.remove(chars);
+		gfChars.remove(chars);
+
+		#if HSCRIPT_ALLOWED
+		scriptMap.remove(id);
+		#end
 	}
 
 	// utils
 
 	inline function setSing(char:Character, dir:Int) {
+		#if HSCRIPT_ALLOWED
+		var charScript = scriptMap.get(char.id);
+		if (charScript != null)
+			charScript.call("onSing", []);
+		#end
+
 		char.playAnim(Character.getCharAnim(dir), true);
 		char.singCountTime = 0;
 		char.isSing = true;
+
+		#if HSCRIPT_ALLOWED
+		if (charScript != null)
+			charScript.call("postSing", []);
+		#end
 	}
 
 	public function isPlayerMissing():Bool
@@ -187,6 +240,9 @@ class CharacterController extends FunkinObjectRegistry {
 		playerChars = null;
 		opponentChars = null;
 		gfChars = null;
+		#if HSCRIPT_ALLOWED
+		scriptMap = null;
+		#end
 		super.destroy();
 	}
 }
