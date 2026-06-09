@@ -40,6 +40,8 @@ class ScriptGlobals {
 
 		#if windows
 		root['WindowsAPI'] = winapi.WindowsAPI;
+		root['WindowsGDI'] = winapi.gdi.WindowsGDI;
+		root['WindowsGDIThread'] = winapi.gdi.WindowsGDIThread;
 		#end
 
 		// Haxe std extra
@@ -71,7 +73,7 @@ class ScriptGlobals {
 			"FunkinSprite" => core.assets.FunkinSprite,
 			"RhythmCore" => core.rhythm.RhythmCore,
 			#if windows
-			"WindowsAPI" => winapi.WindowsAPI,
+			"WindowsAPI" => winapi.WindowsAPI, "WindowsGDI" => winapi.gdi.WindowsGDI, "WindowsGDIThread" => winapi.gdi.WindowsGDIThread,
 			#end
 			// Std
 			"Json" => haxe.Json,
