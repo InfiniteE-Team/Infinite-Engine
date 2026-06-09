@@ -12,7 +12,9 @@ import core.json.engine.GlobalData.GlobalConfig;
 import core.scripting.ScriptGlobals;
 import core.config.CursorConfig;
 //
+#if windows
 import winapi.WindowsAPI;
+#end
 
 class Main extends Sprite {
 	public var fps:FPSCounter = new FPSCounter(5, 5, 0xFFFFFF);
@@ -46,8 +48,10 @@ class Main extends Sprite {
 		if (globalData.developerMode)
 			Trace.init();
 
+		#if windows
 		WindowsAPI.reDefineMainWindowTitle(lime.app.Application.current.window.title);
 		WindowsAPI.windowDarkMode(true);
+		#end
 	}
 
 	function configGame() {

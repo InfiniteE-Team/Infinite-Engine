@@ -38,7 +38,9 @@ class ScriptGlobals {
 
 		root['ScriptedState'] = core.scripting.ScriptedState;
 
+		#if windows
 		root['WindowsAPI'] = winapi.WindowsAPI;
+		#end
 
 		// Haxe std extra
 		root['Json'] = haxe.Json;
@@ -68,7 +70,9 @@ class ScriptGlobals {
 			"Paths" => core.assets.Paths,
 			"FunkinSprite" => core.assets.FunkinSprite,
 			"RhythmCore" => core.rhythm.RhythmCore,
+			#if windows
 			"WindowsAPI" => winapi.WindowsAPI,
+			#end
 			// Std
 			"Json" => haxe.Json,
 			"FileSystem" => sys.FileSystem,
