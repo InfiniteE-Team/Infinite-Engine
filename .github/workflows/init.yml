@@ -37,6 +37,12 @@ jobs:
       - name: Install hxcpp
         run: haxelib install hxcpp --quiet
 
+      - name: Install LuaJIT (Linux)
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libluajit-5.1-dev
+
       - name: Setup Lime
         run: echo y | haxelib run lime setup
 
