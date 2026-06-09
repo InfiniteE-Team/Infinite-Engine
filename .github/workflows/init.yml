@@ -28,14 +28,14 @@ jobs:
         with:
           haxe-version: 4.3.4
 
-      - name: Install Lime & OpenFL
-        run: |
-          haxelib install lime
-          haxelib install openfl --quiet
-          echo y | haxelib run lime setup
+      - name: Install hmm
+        run: haxelib install hmm --quiet
 
-      - name: Install project libs
-        run: haxelib run lime install Project.xml
+      - name: Install dependencies via hmm
+        run: haxelib run hmm install
+
+      - name: Setup Lime
+        run: echo y | haxelib run lime setup
 
       - name: Build
         run: haxelib run lime build ${{ matrix.target }} -release
