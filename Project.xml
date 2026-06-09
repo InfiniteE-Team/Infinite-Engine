@@ -19,6 +19,8 @@
 	<define name="LUA_ALLOWED" if="desktop" />
 	<define name="DISCORD_ALLOWED" if="desktop"/>
 
+	<define name="HX_WINDOWS" if="windows cpp"/>
+
 	<!-- ____________________________ Template Settings ___________________________ -->
 	<template path="engine/alsoft.ini" />
 

@@ -46,10 +46,8 @@ class Main extends Sprite {
 		if (globalData.developerMode)
 			Trace.init();
 
-		#if (cpp && !mobile)
 		WindowsAPI.reDefineMainWindowTitle(lime.app.Application.current.window.title);
 		WindowsAPI.windowDarkMode(true);
-		#end
 	}
 
 	function configGame() {
