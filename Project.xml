@@ -58,13 +58,10 @@
 
 	<haxelib name="ale-json"/>
 
-	<haxelib name="hxvlc"/>  <!-- videos -->
-
-	<haxelib name="hxdiscord_rpc"/>
-
-	<haxelib name="linc_luajit" />
-
-	<haxelib name="sl-windows-api" />
+	<haxelib name="hxvlc" if="desktop"/>
+	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
+	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
+	<haxelib name="sl-windows-api" if="windows"/>
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
