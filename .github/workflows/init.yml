@@ -7,6 +7,7 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
@@ -29,12 +30,12 @@ jobs:
 
       - name: Install Lime & OpenFL
         run: |
-          haxelib install lime --quiet
+          haxelib install lime
           haxelib install openfl --quiet
-          haxelib run lime setup -quiet -noconsole
+          echo y | haxelib run lime setup
 
       - name: Install project libs
-        run: haxelib run lime install Project.xml --quiet
+        run: haxelib run lime install Project.xml
 
       - name: Build
         run: haxelib run lime build ${{ matrix.target }} -release
