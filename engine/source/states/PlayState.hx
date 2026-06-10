@@ -2,7 +2,7 @@ import core.scripting.ScriptedState;
 
 function postCreate()
 {
-	WindowsAPI.reDefineMainWindowTitle("Infinite Engine - Song: " + curSong);
+	lime.app.Application.current.window.title = "Infinite Engine - Song: " + curSong;
 }
 
 function onUpdate(elapsed)
