@@ -16,25 +16,50 @@ class InputController {
 		control = Main.controls;
 	}
 
-	public function handleInput(i:Int, noteController:NoteController, charId:String):Note {
-		if (!control.getGroupInput("noteKeys")[i])
-			return null;
-
-		var note = noteController.getHittableNote(charId, i);
-		if (note != null && control.justPressed("noteKeys", i)) {
-			note.wasGoodHit = true;
-			// note.kill();
-		}
-		return note;
-	}
-
 	public function isPlayerHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, charId:String, noteController:NoteController, gameAudio:GameAudio,
 			playStateConfig:PlayStateConfig, i):Note {
-		var note = handleInput(i, noteController, charId);
-		if (control.getGroupInput("noteKeys")[i]) {
-			if (note != null) {
+		var isPressed = control.getGroupInput("noteKeys")[i];
+		var justPress = control.justPressed("noteKeys", i);
+
+		if (isPressed) {
+			for (sustain in noteController.sustains.members) {
+				if (sustain == null || !sustain.alive || !sustain.mustPress)
+					continue;
+				if (sustain.strum != charStrums[i])
+					continue;
+				if (sustain.isSustainEnd)
+					continue;
+
+				var songPos = core.rhythm.RhythmCore.songPosition;
+				var canHold = songPos >= sustain.strumTime - 50 && songPos <= sustain.strumTime + sustain.length;
+				if (canHold) {
+					sustain.isHeld = true;
+					charStrums[i].playAnim('confirm' + i, true);
+				}
+			}
+
+			if (!justPress)
+				return null;
+
+			var bestNote:Note = null;
+			var bestDiff:Float = Math.POSITIVE_INFINITY;
+
+			for (note in noteController.notes.members) {
+				if (note == null || !note.alive || !note.mustPress || note.wasGoodHit || note.wasMissed)
+					continue;
+				if (note.strum != charStrums[i])
+					continue;
+
 				var diff = Math.abs(note.strumTime - core.rhythm.RhythmCore.songPosition);
-				var ratingType = noteController.getRatingForDiff(diff);
+				if (diff <= noteController.worstWindow && diff < bestDiff) {
+					bestDiff = diff;
+					bestNote = note;
+				}
+			}
+
+			if (bestNote != null) {
+				// HIT REAL
+				var ratingType = noteController.getRatingForDiff(bestDiff);
 
 				if (ratingType != null) {
 					playStateConfig.score += ratingType.score;
@@ -44,7 +69,7 @@ class InputController {
 					playStateConfig.totalNotesHit++;
 					playStateConfig.accuracy = playStateConfig.totalAccuracyWeight / playStateConfig.totalNotesHit;
 
-					note.rating = ratingType.rating;
+					bestNote.rating = ratingType.rating;
 					playStateConfig.rating = ratingType.rating;
 
 					if (ratingType.miss == true)
@@ -53,49 +78,21 @@ class InputController {
 						playStateConfig.combo++;
 				}
 
-				note.kill();
+				bestNote.wasGoodHit = true;
+				bestNote.kill();
 				charStrums[i].playAnim('confirm' + i, true);
-			} else if (control.justPressed("noteKeys", i)) {
+				return bestNote;
+			} else {
 				charStrums[i].playAnim('press' + i, true);
-				/*
-					if (!isGhostTapping) { */
-				playStateConfig.misses++;
-				playStateConfig.score += noteController.getMissScore();
-				gameAudio.onMiss();
-				playStateConfig.health += noteController.getHealthDrain(null);
-				playStateConfig.combo = 0;
-				// }
-			}
-
-			// sustain holding
-			for (sustain in noteController.sustains.members) {
-				if (sustain == null || !sustain.alive || !sustain.mustPress)
-					continue;
-				if (sustain.strum != charStrums[i])
-					continue;
-
-				var isActive = core.rhythm.RhythmCore.songPosition >= sustain.strumTime - noteController.worstWindow;
-				if (isActive) {
-					sustain.isHeld = true;
-					charStrums[i].playAnim('confirm' + i, true);
-				}
-			}
-		} else {
-			// miss Note detection yep
-			for (note in noteController.notes.members) {
-				if (note == null || !note.alive || !note.mustPress)
-					continue;
-				if (note.strum == charStrums[i] && note.tooLate) {
-					note.canBeHit = false;
-					note.alpha = 0.4;
+				if (!isGhostTapping) {
+					playStateConfig.misses++;
+					playStateConfig.score += noteController.getMissScore();
 					gameAudio.onMiss();
 					playStateConfig.health += noteController.getHealthDrain(null);
-					playStateConfig.score += noteController.getMissScore();
-					playStateConfig.misses++;
 					playStateConfig.combo = 0;
 				}
 			}
-
+		} else { // release key
 			for (sustain in noteController.sustains.members) {
 				if (sustain == null || !sustain.alive || !sustain.mustPress)
 					continue;
@@ -104,10 +101,26 @@ class InputController {
 				sustain.isHeld = false;
 			}
 
+			for (note in noteController.notes.members) {
+				if (note == null || !note.alive || !note.mustPress || note.wasMissed)
+					continue;
+				if (note.strum != charStrums[i] || !note.tooLate)
+					continue;
+
+				note.wasMissed = true;
+				note.canBeHit = false;
+				note.alpha = 0.4;
+				gameAudio.onMiss();
+				playStateConfig.health += noteController.getHealthDrain(null);
+				playStateConfig.score += noteController.getMissScore();
+				playStateConfig.misses++;
+				playStateConfig.combo = 0;
+			}
+
 			charStrums[i].playAnim('static' + i, true);
 		}
 
-		return note;
+		return null;
 	}
 
 	public function isCPUHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, noteController:NoteController, charId:String, i:Int) {

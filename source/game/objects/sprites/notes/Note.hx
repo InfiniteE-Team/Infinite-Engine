@@ -30,6 +30,8 @@ class Note extends FunkinSprite {
 	private var noteSkinData:NoteSkinData = null;
 	private var _lastAnimationName:String = '';
 
+	public var wasMissed:Bool = false;
+
 	public function new(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0,
 			?noteType:String = 'normal') {
 		super(x, y);
@@ -64,11 +66,11 @@ class Note extends FunkinSprite {
 			canBeHit = false;
 			if (strumTime <= RhythmCore.songPosition)
 				wasGoodHit = true;
-		} else if (mustPress && !wasGoodHit && !tooLate) {
+		} else if (mustPress && !wasGoodHit && !tooLate && !wasMissed) {
 			canBeHit = (RhythmCore.songPosition >= strumTime - noteControl.worstWindow
 				&& RhythmCore.songPosition <= strumTime + noteControl.worstWindow);
 
-			if (RhythmCore.songPosition > strumTime + noteControl.getWorstWindow())
+			if (RhythmCore.songPosition > strumTime + noteControl.worstWindow)
 				tooLate = true;
 		}
 	}

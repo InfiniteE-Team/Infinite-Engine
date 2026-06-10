@@ -34,7 +34,7 @@ class MenuState extends MusicBeatState {
 	override public function create():Void {
 		super.create();
 
-		UtilsData.readJson(menuData);
+		menuData = UtilsData.readJson(Paths.getPath('data/$menu_folder', 'json'));
 		if (menuData == null || menuData.elements == null) {
 			Trace.traceOnce('MenuState: not found $menu_folder', true);
 			return;
@@ -171,7 +171,7 @@ class MenuState extends MusicBeatState {
 	function applyTweenIn(obj:FlxBasic, el:Element):Void {
 		var tween = el.tweenIn;
 		var delay = (el.startDelay ?? 0) + (t.delay ?? 0);
-		var ease = utils.CoolUtil.resolveEase(t.ease);
+		var ease = utils.InfiniteUtil.resolveEase(t.ease);
 		var spr:Dynamic = cast obj;
 
 		switch (tween.type) {

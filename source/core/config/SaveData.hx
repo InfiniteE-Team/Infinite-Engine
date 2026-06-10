@@ -1,44 +1,69 @@
 package core.config;
 
 import sys.FileSystem;
-import utils.UtilsData;
+import core.json.engine.SaveDataFields;
 
 class SaveData {
-	static final path:String = 'engine/config/savedata.json';
+	public static var data(get, never):SaveDataFields;
 
-	// configs for engine
-	public var framerate:Int = 60;
-	public var antialiasing:Bool = true;
+	static inline function get_data():SaveDataFields
+		return (cast FlxG.save.data : SaveDataFields);
 
-	public var downscroll:Bool = false;
-	public var middlescroll:Bool = false;
-	public var ghosttaping:Bool = true;
-
-	public var noteKeys:Array<String> = ['A', 'S', 'W', 'D'];
-	public var uiKeys:Array<String> = ['UP', 'DOWN', 'LEFT', 'RIGHT', 'ENTER', 'ESCAPE'];
+	static var _defaults:Map<String, Dynamic> = [];
 
 	public function new() {}
 
-	public function saveConfig() {
-		var dir = haxe.io.Path.directory(path);
-		if (!FileSystem.exists(dir))
-			FileSystem.createDirectory(dir);
+	public static inline function flush():Void
+		FlxG.save.flush();
 
-		var data = haxe.Json.stringify(this, null, "\t");
-		sys.io.File.saveContent(path, data);
-	}
-
-	public function loadConfig() {
-		if (!FileSystem.exists(path))
-			return;
-		var data = UtilsData.readJson(path);
-		if (data == null)
-			return;
-
-		for (field in Reflect.fields(data)) {
-			if (Reflect.hasField(this, field)) {
-				Reflect.setProperty(this, field, Reflect.field(data, field));
+	public static function init():Void {
+		var dirty = false;
+		for (key => defaultValue in _defaults) {
+			if (Reflect.field(FlxG.save.data, key) == null) {
+				trace('[SaveData] init: auto-creating "$key" = $defaultValue');
+				Reflect.setField(FlxG.save.data, key, defaultValue);
+				dirty = true;
 			}
 		}
+
+		if (dirty) {
+			flush();
+			trace('[SaveData] init: ${_defaults.keys().hasNext() ? "fields initialized and persisted." : ""}');
+		} else {
+			trace('[SaveData] init: fields had already been initialized.');
+		}
+	}
+
+	public static function initSave():Void {
+		if (SaveData.data.framerate == null)
+			SaveData.data.framerate = 60;
+
+		if (SaveData.data.antialiasing == null)
+			SaveData.data.antialiasing = true;
+
+		if (SaveData.data.downscroll == null)
+			SaveData.data.downscroll = false;
+
+		if (SaveData.data.middlescroll == null)
+			SaveData.data.middlescroll = false;
+
+		if (SaveData.data.ghosttaping == null)
+			SaveData.data.ghosttaping = true;
+
+		if (SaveData.data.noteKeyPresets == null){
+			SaveData.data.noteKeyPresets = {
+				"4": [["A", "LEFT"], ["S", "DOWN"], ["W", "UP"], ["D", "RIGHT"]],
+				"5": [["A"],["S"], ["SPACE"], ["W"], ["D"]],
+				"6": [["A"], ["S"], ["D"], ["H"], ["J"], ["K"]],
+				"7": [["A"], ["S"], ["D"], ["SPACE"], ["H"], ["J"], ["K"]],
+				"8": [["A"], ["S"], ["D"], ["F"], ["H"], ["J"], ["K"], ["L"]],
+				"9": [["A"], ["S"], ["D"], ["F"], ["SPACE"], ["H"], ["J"], ["K"], ["L"]]
+			};
+		}
+
+		if (SaveData.data.uiKeys == null)
+			SaveData.data.uiKeys = [['UP','W'], ['DOWN','S'], ['LEFT','D'], ['RIGHT','A'], ['ENTER'], ['ESCAPE']];
+
+		flush();
 	}
 }

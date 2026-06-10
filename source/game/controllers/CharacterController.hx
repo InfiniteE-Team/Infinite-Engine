@@ -63,6 +63,7 @@ class CharacterController extends FunkinObjectRegistry {
 	}
 
 	public function processInput(noteController:NoteController, gameAudio:GameAudio, playStateConfig:PlayStateConfig) {
+		input.isGhostTapping = core.config.SaveData.data.ghosttaping;
 		for (char in playerChars) {
 			var strums = noteController.getCharStrums(char.id);
 			for (i in 0...strums.length)
@@ -135,7 +136,7 @@ class CharacterController extends FunkinObjectRegistry {
 			if (hitNote != null) {
 				setSing(char, hitNote.direction);
 				char.isMiss = false;
-			} else if (input.control.justPressed("noteKeys", i) /*&& !input.isGhostTapping*/) {
+			} else if (input.control.justPressed("noteKeys", i) && !input.isGhostTapping) {
 				char.playAnim('${Character.getCharAnim(i)}-miss', true);
 				char.isMiss = true;
 			}

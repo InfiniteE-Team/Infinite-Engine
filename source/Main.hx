@@ -35,6 +35,9 @@ class Main extends Sprite {
 	private function added(?e:Event):Void {
 		if (hasEventListener(Event.ADDED_TO_STAGE))
 			removeEventListener(Event.ADDED_TO_STAGE, added);
+
+		stage.addEventListener(openfl.events.KeyboardEvent.KEY_DOWN, onKeyDown);
+
 		mainGame();
 	}
 
@@ -55,15 +58,19 @@ class Main extends Sprite {
 	}
 
 	function configGame() {
-		save = new SaveData();
-		save.loadConfig();
-		controls = new Controls(save);
+		FlxG.save.bind("InfiniteEngine","InfiniteTeam");
+		
+		SaveData.init();
+		SaveData.initSave();
+
+		controls = new Controls();
+
 		globalData.configGlobal();
 
 		if (globalData.startState != null)
 			mainState = globalData.startState;
 
-		framerate = save.framerate;
+		framerate = SaveData.data.framerate;
 
 		#if (DISCORD_ALLOWED && hxdiscord_rpc < "1.2.0")
 		core.api.DiscordAPI.init();

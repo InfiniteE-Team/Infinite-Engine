@@ -1,6 +1,6 @@
 package core.json.song.modcharts;
 
-typedef ModEntry = {
+typedef ModChartEntry = {
 	name:String,
 	value:Float,
 	col:Int

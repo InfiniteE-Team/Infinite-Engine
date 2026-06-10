@@ -2,62 +2,79 @@ package core.config;
 
 import flixel.input.keyboard.FlxKey;
 
+using Lambda;
+
 class Controls {
-	public var save:SaveData;
+	public var keyGroups:Map<String, Array<Array<FlxKey>>> = new Map();
 
-	public var keyGroups:Map<String, Array<FlxKey>> = new Map();
-
-	public function new(save:SaveData) {
-		this.save = save;
-		loadGroup("noteKeys", save.noteKeys);
-        loadGroup("uiKeys", save.uiKeys);
+	public function new() {
+		loadGroup("noteKeys", SaveData.data.noteKeyPresets?.get("4"));
+		loadGroup("uiKeys", SaveData.data.uiKeys);
 	}
 
-	private function loadGroup(groupName:String, savedKeys:Array<String>):Void {
+	private function loadGroup(groupName:String, savedKeys:Array<Array<String>>):Void {
 		if (savedKeys == null)
 			return;
-		var keys = [for (k in savedKeys) FlxKey.fromString(k)];
+		var keys = [for (lane in savedKeys) [for (k in lane) FlxKey.fromString(k)]];
 		keyGroups.set(groupName, keys);
 	}
 
 	public function getGroupInput(groupName:String):Array<Bool> {
 		if (!keyGroups.exists(groupName))
 			return [];
-		var keys = keyGroups.get(groupName);
-
 		@:privateAccess
-		return [for (key in keys) FlxG.keys.pressed.check(key)];
+		return [
+			for (lane in keyGroups.get(groupName))
+				lane.exists(k -> FlxG.keys.pressed.check(k))
+		];
 	}
 
 	public function justPressed(groupName:String, index:Int):Bool {
-		if (!keyGroups.exists(groupName)) return false;
-        var keys = keyGroups.get(groupName);
-        
-        if (index >= keys.length) return false;
-        
-        @:privateAccess
-        return FlxG.keys.justPressed.check(keys[index]);
+		if (!keyGroups.exists(groupName))
+			return false;
+		var keys = keyGroups.get(groupName);
+		if (index >= keys.length)
+			return false;
+		@:privateAccess
+		return keys[index].exists(k -> FlxG.keys.justPressed.check(k));
 	}
 
 	public function justReleased(groupName:String, index:Int):Bool {
-        if (!keyGroups.exists(groupName)) return false;
-        var keys = keyGroups.get(groupName);
-        
-        if (index >= keys.length) return false;
-
+		if (!keyGroups.exists(groupName))
+			return false;
+		var keys = keyGroups.get(groupName);
+		if (index >= keys.length)
+			return false;
 		@:privateAccess
-		return FlxG.keys.justReleased.check(keys[index]);
+		return keys[index].exists(k -> FlxG.keys.justReleased.check(k));
 	}
 
-	public function setKey(groupName:String, index:Int, key:FlxKey):Void {
-		if (!keyGroups.exists(groupName)) return;
-        var keys = keyGroups.get(groupName);
-        
-        if (index >= keys.length) return;
-        
-        keys[index] = key;
-        
-        Reflect.setProperty(save, groupName, [for (k in keys) k.toString()]);
-		save.saveConfig();
+	public function setKey(groupName:String, laneIndex:Int, keyIndex:Int, key:FlxKey):Void {
+		if (!keyGroups.exists(groupName))
+			return;
+		var keys = keyGroups.get(groupName);
+		if (laneIndex >= keys.length)
+			return;
+		if (keyIndex >= keys[laneIndex].length)
+			return;
+
+		keys[laneIndex][keyIndex] = key;
+
+		var keyStrings = [for (lane in keys) [for (k in lane) k.toString()]];
+		if (groupName == "noteKeys")
+			SaveData.data.noteKeyPresets.set(Std.string(keys.length), keyStrings);
+		else {
+			Reflect.setProperty(SaveData.data, groupName, keyStrings);
+			SaveData.flush();
+		}
+	}
+
+	public function loadPreset(keyCount:Int):Void {
+		var presets = SaveData.data.noteKeyPresets;
+		if (presets == null)
+			return;
+		var preset = presets.get(Std.string(keyCount));
+		if (preset != null)
+			loadGroup("noteKeys", preset);
 	}
 }

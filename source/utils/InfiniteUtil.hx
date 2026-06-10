@@ -1,7 +1,13 @@
 package utils;
+
 import flixel.tweens.FlxEase;
 
-class CoolUtil {
+class InfiniteUtil {
+	public static function updateFramerate() {
+		FlxG.updateFramerate = core.config.SaveData.data.framerate;
+		FlxG.drawFramerate = core.config.SaveData.data.framerate;
+	}
+
 	public static function resolveEase(name:Null<String>):Float->Float {
 		return switch (name ?? 'linear') {
 			case 'easeIn': FlxEase.quadIn;
@@ -13,6 +19,8 @@ class CoolUtil {
 			case 'sineIn': FlxEase.sineIn;
 			case 'sineOut': FlxEase.sineOut;
 			case 'sineInOut': FlxEase.sineInOut;
+			case "cubeOut": FlxEase.cubeOut;
+			case "quartOut": FlxEase.quartOut;
 			default: FlxEase.linear;
 		}
 	}

@@ -32,18 +32,20 @@ class PlayState extends MusicBeatState {
 	public static var SONG:SongConfig = new SongConfig();
 
 	public var gameAudio:GameAudio = new GameAudio();
-	public var curSong:String = 'fresh';
+
+	public var curSong:String = 'GHOST';
 
 	public var events:EventManager = new EventManager();
 
 	public var noteController:NoteController;
+
+	public var modCharts:game.modchart.ModChartHelp;
 
 	// visuals
 	public var chars:CharacterController;
 	public var stage:Stage;
 
 	// configs
-	public var saveData:SaveData = new SaveData();
 	public var playStateConfig:PlayStateConfig = new PlayStateConfig(); // data for health, strum line, etc
 
 	public var osuMode:Bool = false;
@@ -73,6 +75,8 @@ class PlayState extends MusicBeatState {
 		FlxG.signals.focusGained.add(onFocusGained);
 
 		FlxG.mouse.visible = false;
+
+		modCharts = new game.modchart.ModChartHelp(this);
 
 		startCountdown();
 
@@ -132,13 +136,24 @@ class PlayState extends MusicBeatState {
 	}
 
 	function buildStrumsandNotes() {
-		noteController = new NoteController(SONG, saveData.downscroll, saveData.ghosttaping, script);
+		noteController = new NoteController(SONG, SaveData.data.downscroll, SaveData.data.ghosttaping, script);
+		noteController.onMiss = () -> {
+			playStateConfig.misses++;
+			playStateConfig.health += noteController.getHealthDrain(null);
+			playStateConfig.score += noteController.getMissScore();
+			playStateConfig.combo = 0;
+			gameAudio.onMiss();
+		};
+		Main.controls.loadPreset(noteController.keys);
 		noteController.strums.cameras = [camHUD];
 		noteController.sustains.cameras = [camHUD];
 		noteController.notes.cameras = [camHUD];
 		add(noteController.strums);
 		add(noteController.sustains);
 		add(noteController.notes);
+
+		if (modCharts != null)
+			modCharts.cacheStrumBase();
 	}
 
 	// Code Song

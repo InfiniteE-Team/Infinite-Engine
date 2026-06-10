@@ -41,10 +41,13 @@ class NoteController {
 	var daSong:SongConfig = new SongConfig();
 	var globalData:GlobalConfig;
 
-	var keys:Int = 4;
+	public var keys:Int = 4;
+
 	var spacing:Float = 0;
 
 	var input:InputController = new InputController();
+
+	public var onMiss:Void->Void = null;
 
 	// sustains limit clipping rect
 	var _clipRect:flixel.math.FlxRect = new flixel.math.FlxRect();
@@ -183,6 +186,16 @@ class NoteController {
 			scriptNC.call("onNoteMovement", [note, songTime]);
 			#end
 
+			if (note.tooLate && !note.wasMissed && !note.wasGoodHit) {
+				note.wasMissed = true;
+				note.alpha = 0.4;
+				if (onMiss != null)
+					onMiss();
+			}
+
+			if (!note.mustPress && note.wasGoodHit && !note.alive)
+    			toDestroy.push(note);
+			
 			if (note.y + note.frameHeight * note.scale.y < 0 && !isDownscroll)
 				toDestroy.push(note);
 			else if (note.y > FlxG.height && isDownscroll)
@@ -385,7 +398,7 @@ class NoteController {
 			note.ID = globalLane;
 			note.direction = globalLane;
 			note.strumTime = data.time;
-			note.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
+			note.mustPress = CharacterController.namesPlayer.contains(charData.role);
 			if (!daSong.strumsVisible)
 				note.visible = false;
 
@@ -496,19 +509,6 @@ class NoteController {
 				return r;
 		}
 		return null;
-	}
-
-	public function getWorstWindow():Float {
-		if (ratingData == null)
-			return 166.0;
-
-		#if HSCRIPT_ALLOWED
-		if (scriptNC.callCancellable('onWorstWindowCancel', []))
-			return 0.0;
-		#end
-
-		var windows = ratingData.ratings.filter(r -> r.window != null).map(r -> r.window);
-		return windows.length > 0 ? Lambda.fold(windows, Math.max, 0) : 166.0;
 	}
 
 	public function destroy():Void {

@@ -30,13 +30,13 @@ class Paths {
 				case MUSIC:
 					return findLib("music/" + fileName + '.ogg');
 				case SONG_AUDIO:
-					return findLib('songs/${PlayState.SONG.songName.toLowerCase()}/audio/$fileName.ogg');
+					return findLib('songs/${PlayState.SONG.songName}/audio/$fileName.ogg');
 				case ANIMATED:
 					return getAnimated(fileName);
 				case XML:
 					return findLib(fileName + '.xml');
 				case SONG_SCRIPT:
-					return findLib('songs/${PlayState.SONG.songName.toLowerCase()}/scripts/$fileName.hx');
+					return findLib('songs/${PlayState.SONG.songName}/scripts/$fileName.hx');
 				case SHADERS:
 					return findLib('shaders/$fileName.frag');
 				// scripting

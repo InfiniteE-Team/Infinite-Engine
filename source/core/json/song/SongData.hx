@@ -84,10 +84,28 @@ class SongConfig {
 	public function new() {}
 
 	public function configSong(curSong:String, diff:String) {
-		var raw:Dynamic = UtilsData.readJson(Paths.getPath('songs/$curSong/charts/$curSong$diff', 'json'));
-		if (raw == null) return;
-		var converted = ChartPorter.tryConvert(raw);
-		songData = converted ?? cast raw;
+		var osuPath:String = null;
+		var baseFile = 'songs/$curSong/charts/$curSong$diff';
+		for (lib in ['assets', 'engine']) {
+			var candidate = '$lib/$baseFile.osu';
+			if (sys.FileSystem.exists(candidate)) {
+				osuPath = candidate;
+				break;
+			}
+		}
+
+		if (osuPath != null) {
+			songData = ChartPorter.tryConvertOsu(osuPath);
+			//game.PlayState.instance.osuMode = true;
+		}
+
+		if (songData == null) {
+			var raw:Dynamic = UtilsData.readJson(Paths.getPath(baseFile, 'json'));
+			if (raw == null)
+				return;
+			var converted = ChartPorter.tryConvert(raw);
+			songData = converted ?? cast raw;
+		}
 
 		if (songData == null)
 			return;
@@ -108,14 +126,14 @@ class SongConfig {
 
 		chars = songData.gameplay.chars;
 
-		for (i in 0...chars.length){
+		for (i in 0...chars.length) {
 			noteSkin = chars[i].noteSkin ?? 'default';
 			strumsVisible = chars[i].strumsVisible ?? true;
 		}
 	}
 }
 /*
-enum Directions {
+	enum Directions {
 	LEFT;
 	DOWN;
 	UP;

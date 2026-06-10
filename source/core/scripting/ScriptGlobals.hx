@@ -38,6 +38,8 @@ class ScriptGlobals {
 
 		root['ScriptedState'] = core.scripting.ScriptedState;
 
+		root['SaveData'] = core.config.SaveData;
+
 		#if windows
 		root['WindowsAPI'] = winapi.WindowsAPI;
 		root['WindowsGDI'] = winapi.gdi.WindowsGDI;
@@ -72,6 +74,7 @@ class ScriptGlobals {
 			"Paths" => core.assets.Paths,
 			"FunkinSprite" => core.assets.FunkinSprite,
 			"RhythmCore" => core.rhythm.RhythmCore,
+			"SaveData" => core.config.SaveData,
 			#if windows
 			"WindowsAPI" => winapi.WindowsAPI, "WindowsGDI" => winapi.gdi.WindowsGDI, "WindowsGDIThread" => winapi.gdi.WindowsGDIThread,
 			#end
