@@ -23,4 +23,11 @@ class TrackBeat {
 			}
 		}
 	}
+
+	public function reset():Void {
+		step = 0;
+		beat = 0;
+		lastStep = -1;
+		lastBeat = -1;
+	}
 }

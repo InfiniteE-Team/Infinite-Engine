@@ -1,4 +1,5 @@
 package states;
+
 import core.rhythm.TrackBeat;
 import core.json.JsonWatcher;
 import utils.InfoHelpDebug;
@@ -42,12 +43,11 @@ class MusicBeatState extends flixel.FlxState {
 		super.update(elapsed);
 
 		if (Main.globalData.developerMode) {
-			#if HSCRIPT_ALLOWED
-			script.hotReload();
-			#end
-
 			if (FlxG.keys.justPressed.F5) {
 				MusicBeatState.resetState();
+				#if HSCRIPT_ALLOWED
+				script.hotReload();
+				#end
 			}
 			if (FlxG.keys.justPressed.F4)
 				infoHelp.openUI();

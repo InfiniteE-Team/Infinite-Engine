@@ -66,6 +66,7 @@ class PlayState extends MusicBeatState {
 		#end
 
 		SONG.configSong(curSong, '');
+		RhythmCore.changeBPM(SONG.bpmSong);
 
 		buildStageandChars();
 
@@ -166,6 +167,8 @@ class PlayState extends MusicBeatState {
 
 		gameAudio.loadSong(SONG.needVoices, endSong);
 		gameAudio.playAll();
+
+		tracker.reset();
 	}
 
 	public function startCountdown() {

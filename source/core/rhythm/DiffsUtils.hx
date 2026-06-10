@@ -12,10 +12,7 @@ class DiffsUtils
 
         if (FileSystem.exists(diffsDir)) {
             for (file in sys.FileSystem.readDirectory(diffsDir)) {
-				if (file.endsWith('.json')){
-					var diffName:String = file.replace('.json', '');
-                    difficulties.push(diffName);
-                }
+                
 			}
         }
 

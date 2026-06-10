@@ -1,5 +1,10 @@
 import core.scripting.ScriptedState;
 
+function onCreate()
+{
+	curSong = 'GHOST';
+}
+
 function postCreate()
 {
 	lime.app.Application.current.window.title = "Infinite Engine - Song: " + curSong;
