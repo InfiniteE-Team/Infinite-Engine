@@ -20,6 +20,8 @@ class PlayStateConfig {
 
 	public var rating:String = "N/A";
 
+	public var isStoryMode:Bool = false;
+
 	//
 
 	public function new() {}

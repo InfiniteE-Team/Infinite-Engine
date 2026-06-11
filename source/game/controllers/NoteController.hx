@@ -8,6 +8,7 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import game.graphics.shaders.hardcode.RGBShader;
 import utils.UtilsData;
 import game.PlayStateConfig;
+import flixel.tweens.FlxTween;
 // song
 import core.rhythm.RhythmCore;
 import core.json.song.SongData.SongConfig;
@@ -65,10 +66,13 @@ class NoteController {
 	var scriptNC:ScriptHandler;
 	#end
 
-	public function new(daSong:SongConfig, isDownscroll:Bool, isGhostTapping:Bool, script:ScriptHandler) {
+	public var playStateConfig:PlayStateConfig;
+
+	public function new(daSong:SongConfig, isDownscroll:Bool, isGhostTapping:Bool, script:ScriptHandler, playStateConfig:PlayStateConfig) {
 		this.daSong = daSong;
 		this.isDownscroll = isDownscroll;
 		input.isGhostTapping = isGhostTapping;
+		this.playStateConfig = playStateConfig;
 		loadJson();
 
 		#if HSCRIPT_ALLOWED
@@ -132,6 +136,11 @@ class NoteController {
 			if (isDownscroll)
 				strum.y += 500;
 
+			if (!playStateConfig.isStoryMode) {
+				strum.alpha = 0;
+				FlxTween.tween(strum, {alpha: 1}, 0.5, {startDelay: 0.5 + (0.2 * i)});
+			}
+
 			#if HSCRIPT_ALLOWED
 			scriptNC.call("safeBuildStrums", []);
 			#end
@@ -194,8 +203,8 @@ class NoteController {
 			}
 
 			if (!note.mustPress && note.wasGoodHit && !note.alive)
-    			toDestroy.push(note);
-			
+				toDestroy.push(note);
+
 			if (note.y + note.frameHeight * note.scale.y < 0 && !isDownscroll)
 				toDestroy.push(note);
 			else if (note.y > FlxG.height && isDownscroll)

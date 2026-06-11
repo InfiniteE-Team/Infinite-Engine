@@ -97,6 +97,8 @@ class SongConfig {
 		if (osuPath != null) {
 			songData = ChartPorter.tryConvertOsu(osuPath);
 			//game.PlayState.instance.osuMode = true;
+
+			Trace.traceOnce('SongData: load Song path: $osuPath');
 		}
 
 		if (songData == null) {
@@ -105,6 +107,8 @@ class SongConfig {
 				return;
 			var converted = ChartPorter.tryConvert(raw);
 			songData = converted ?? cast raw;
+
+			Trace.traceOnce('SongData: load Song path: $baseFile');
 		}
 
 		if (songData == null)

@@ -10,6 +10,7 @@ import core.assets.FunkinSprite;
 import game.controllers.CharacterController;
 import game.objects.sprites.Stage;
 // songs
+import core.rhythm.DiffsUtils;
 import core.rhythm.RhythmCore;
 import core.rhythm.audio.GameAudio;
 import core.json.song.SongData.SongConfig;
@@ -20,8 +21,6 @@ import core.config.SaveData;
 class PlayState extends MusicBeatState {
 	public static var instance:PlayState;
 
-	public var isStoryMode:Bool = false;
-
 	// cameras
 	public var camGame:Camera;
 	public var camHUD:Camera;
@@ -29,16 +28,13 @@ class PlayState extends MusicBeatState {
 	public var cameraController:CameraController;
 
 	// Song
+	public var curSong:String = 'GHOST';
 	public static var SONG:SongConfig = new SongConfig();
 
+	public var curDifficulty:Int = 0;
 	public var gameAudio:GameAudio = new GameAudio();
-
-	public var curSong:String = 'GHOST';
-
 	public var events:EventManager = new EventManager();
-
 	public var noteController:NoteController;
-
 	public var modCharts:game.modchart.ModChartHelp;
 
 	// visuals
@@ -51,6 +47,8 @@ class PlayState extends MusicBeatState {
 	public var osuMode:Bool = false;
 
 	var paused:Bool = false;
+
+	public var startCount:Bool = false;
 
 	override public function create() {
 		instance = this;
@@ -65,6 +63,7 @@ class PlayState extends MusicBeatState {
 		script.call("onCreate", []);
 		#end
 
+		DiffsUtils.getDifficulty();
 		SONG.configSong(curSong, '');
 		RhythmCore.changeBPM(SONG.bpmSong);
 
@@ -137,7 +136,7 @@ class PlayState extends MusicBeatState {
 	}
 
 	function buildStrumsandNotes() {
-		noteController = new NoteController(SONG, SaveData.data.downscroll, SaveData.data.ghosttaping, script);
+		noteController = new NoteController(SONG, SaveData.data.downscroll, SaveData.data.ghosttaping, script, playStateConfig);
 		noteController.onMiss = () -> {
 			playStateConfig.misses++;
 			playStateConfig.health += noteController.getHealthDrain(null);
@@ -158,21 +157,31 @@ class PlayState extends MusicBeatState {
 	}
 
 	// Code Song
-	public function initSong() {
-		buildStrumsandNotes();
+	public function loadSong() {
 		noteController.generateNotes(0, SONG);
 
 		if (SONG.songData.gameplay.events != null)
 			events.loadEvents(SONG.songData.gameplay.events);
 
 		gameAudio.loadSong(SONG.needVoices, endSong);
-		gameAudio.playAll();
-
-		tracker.reset();
 	}
 
 	public function startCountdown() {
+		buildStrumsandNotes();
+
+		loadSong();
+
+		startCount = true;
+
 		initSong();
+	}
+
+	public function initSong() {
+		startCount = false;
+
+		gameAudio.playAll();
+
+		tracker.reset();
 	}
 
 	public function endSong() {
@@ -302,7 +311,7 @@ class PlayState extends MusicBeatState {
 
 		gameAudio.volumenVocs(SONG, chars.isPlayerMissing(), elapsed);
 
-		if (!paused) {
+		if (!paused || !startCount) {
 			cameraController.update(elapsed);
 
 			noteController.update(RhythmCore.songPosition);
