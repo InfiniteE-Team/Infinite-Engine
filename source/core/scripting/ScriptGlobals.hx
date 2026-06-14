@@ -38,6 +38,8 @@ class ScriptGlobals {
 
 		root['ScriptedState'] = core.scripting.ScriptedState;
 
+		root['WindowModManager'] = windowmodcharting.WindowModManager;
+
 		root['SaveData'] = core.config.SaveData;
 
 		#if windows
@@ -74,6 +76,7 @@ class ScriptGlobals {
 			"Paths" => core.assets.Paths,
 			"FunkinSprite" => core.assets.FunkinSprite,
 			"RhythmCore" => core.rhythm.RhythmCore,
+			"WindowModManager" => windowmodcharting.WindowModManager,
 			"SaveData" => core.config.SaveData,
 			#if windows
 			"WindowsAPI" => winapi.WindowsAPI, "WindowsGDI" => winapi.gdi.WindowsGDI, "WindowsGDIThread" => winapi.gdi.WindowsGDIThread,

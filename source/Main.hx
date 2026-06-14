@@ -9,6 +9,7 @@ import core.config.Controls;
 import core.config.SaveData;
 import lime.app.Application;
 import core.json.engine.GlobalData.GlobalConfig;
+import windowmodcharting.engineImplementation.ConductorImplementation;
 import core.scripting.ScriptGlobals;
 import core.config.CursorConfig;
 //
@@ -52,6 +53,9 @@ class Main extends Sprite {
 		WindowsAPI.reDefineMainWindowTitle(lime.app.Application.current.window.title);
 		WindowsAPI.windowDarkMode(true);
 		#end
+
+		ConductorImplementation.custom_songPosition = () -> core.rhythm.RhythmCore.songPosition;
+		ConductorImplementation.custom_crochet = () -> core.rhythm.RhythmCore.crochet;
 
 		if (globalData.developerMode)
 			Trace.init();

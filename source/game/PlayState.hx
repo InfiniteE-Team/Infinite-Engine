@@ -15,6 +15,7 @@ import core.rhythm.RhythmCore;
 import core.rhythm.audio.GameAudio;
 import core.json.song.SongData.SongConfig;
 import game.controllers.events.EventManager;
+import windowmodcharting.WindowModManager;
 // saves
 import core.config.SaveData;
 
@@ -38,6 +39,8 @@ class PlayState extends MusicBeatState {
 	public var events:EventManager = new EventManager();
 	public var noteController:NoteController;
 	public var modCharts:game.modchart.ModChartHelp;
+
+	public var windowMod:WindowModManager = null;
 
 	// visuals
 	public var chars:CharacterController;
@@ -81,6 +84,10 @@ class PlayState extends MusicBeatState {
 		modCharts = new game.modchart.ModChartHelp(this);
 
 		buildStrumsandNotes();
+
+		windowMod = new WindowModManager();
+		add(windowMod);
+
 
 		startCountdown();
 
@@ -215,6 +222,8 @@ class PlayState extends MusicBeatState {
 			gameAudio.inst.pause();
 		if (gameAudio.vocals != null)
 			gameAudio.vocals.pause();
+
+		windowMod.pauseWindow();
 
 		#if HSCRIPT_ALLOWED
 		script.call('onPauseMenu', []);

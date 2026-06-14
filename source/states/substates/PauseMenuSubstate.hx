@@ -58,14 +58,15 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		if (input.control.justPressedAction("uiKeys", 'accept')) {
 			switch (options[curSelect]) {
 				case "Resume":
-					if (game.PlayState.instance != null)
-						game.PlayState.instance.paused = false;
+					reanudeFunction();
 					close();
 				case "Restart Song":
+					reanudeFunction();
 					if (game.PlayState.instance != null)
 						game.PlayState.instance.rewindSong();
 					close();
 				case "Exit to Menu":
+					reanudeFunction();
 					#if HSCRIPT_ALLOWED
 					script.call("ExitMenu", []);
 					#end
@@ -76,6 +77,13 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		#if HSCRIPT_ALLOWED
 		script.call("postUpdate", [elapsed]);
 		#end
+	}
+
+	function reanudeFunction() {
+		if (game.PlayState.instance != null) {
+			game.PlayState.instance.paused = false;
+			game.PlayState.instance.windowMod.resumeWindow();
+		}
 	}
 
 	public function changeCur() {
