@@ -28,10 +28,12 @@ class PlayState extends MusicBeatState {
 	public var cameraController:CameraController;
 
 	// Song
-	public var curSong:String = 'GHOST';
+	public var curSong:String = 'fresh';
+
 	public static var SONG:SongConfig = new SongConfig();
 
 	public var curDifficulty:Int = 0;
+
 	public var gameAudio:GameAudio = new GameAudio();
 	public var events:EventManager = new EventManager();
 	public var noteController:NoteController;
@@ -46,7 +48,7 @@ class PlayState extends MusicBeatState {
 
 	public var osuMode:Bool = false;
 
-	var paused:Bool = false;
+	public var paused:Bool = false;
 
 	public var startCount:Bool = false;
 
@@ -63,8 +65,8 @@ class PlayState extends MusicBeatState {
 		script.call("onCreate", []);
 		#end
 
-		DiffsUtils.getDifficulty();
-		SONG.configSong(curSong, '');
+		DiffsUtils.getDifficulty(curSong);
+		SONG.configSong(curSong, DiffsUtils.difficulties[curDifficulty]);
 		RhythmCore.changeBPM(SONG.bpmSong);
 
 		buildStageandChars();
@@ -77,6 +79,8 @@ class PlayState extends MusicBeatState {
 		FlxG.mouse.visible = false;
 
 		modCharts = new game.modchart.ModChartHelp(this);
+
+		buildStrumsandNotes();
 
 		startCountdown();
 
@@ -127,8 +131,9 @@ class PlayState extends MusicBeatState {
 			}
 		}
 
-		cameraController.followChar = cast(chars.get((Lambda.find(SONG.chars,
-			c -> CharacterController.namesOpponent.contains(c.role)) ?? SONG.chars[0]).id), game.objects.sprites.Character);
+		var opponentData = Lambda.find(SONG.chars, c -> CharacterController.namesOpponent.contains(c.role)) ?? (SONG.chars.length > 0 ? SONG.chars[0] : null);
+		if (opponentData != null)
+			cameraController.followChar = cast(chars.get(opponentData.id), game.objects.sprites.Character);
 
 		#if HSCRIPT_ALLOWED
 		script.call("postBuildStage", []);
@@ -167,8 +172,6 @@ class PlayState extends MusicBeatState {
 	}
 
 	public function startCountdown() {
-		buildStrumsandNotes();
-
 		loadSong();
 
 		startCount = true;
@@ -195,6 +198,9 @@ class PlayState extends MusicBeatState {
 
 	// Other screens idk
 	public function pauseMenu() {
+		if (paused)
+			return;
+
 		#if HSCRIPT_ALLOWED
 		if (script.callCancellable('onPauseMenuCancel', []))
 			return;
@@ -213,6 +219,12 @@ class PlayState extends MusicBeatState {
 		#if HSCRIPT_ALLOWED
 		script.call('onPauseMenu', []);
 		#end
+
+		openSubState(new states.substates.PauseMenuSubstate());
+
+		#if HSCRIPT_ALLOWED
+		script.call('postPauseMenu', []);
+		#end
 	}
 
 	public function isDeath() {
@@ -223,6 +235,16 @@ class PlayState extends MusicBeatState {
 		Trace.traceOnce("isDeath is being called! This should be overridden in a subclass if you want to use it.");
 
 		rewindSong();
+	}
+
+	override public function closeSubState():Void {
+		super.closeSubState();
+		paused = false;
+		FlxG.sound.resume();
+		if (gameAudio.inst != null)
+			gameAudio.inst.resume();
+		if (gameAudio.vocals != null)
+			gameAudio.vocals.resume();
 	}
 
 	override function onFocusLost():Void {
@@ -236,7 +258,8 @@ class PlayState extends MusicBeatState {
 		#if HSCRIPT_ALLOWED
 		script.call('onFocusGained', []);
 		#end
-		gameAudio.playAll();
+		if (!paused)
+			gameAudio.playAll();
 		#if HSCRIPT_ALLOWED
 		script.call('postFocusGained', []);
 		#end
@@ -247,9 +270,12 @@ class PlayState extends MusicBeatState {
 		script.loadFolder('songs/$curSong/scripts');
 		script.load(Paths.getPath('hud', 'script'));
 		script.executeAll();
+
+		script.expose('SONG', PlayState.SONG);
+		script.expose('instance', PlayState.instance);
 	}
 
-	function rewindSong():Void {
+	public function rewindSong():Void {
 		#if HSCRIPT_ALLOWED
 		if (script != null) {
 			script.call("onDestroy", []);
@@ -266,6 +292,7 @@ class PlayState extends MusicBeatState {
 			remove(noteController.notes);
 
 			noteController.destroy();
+			noteController = null;
 		}
 
 		if (events != null) {
@@ -278,24 +305,16 @@ class PlayState extends MusicBeatState {
 		RhythmCore.songPosition = 0;
 		RhythmCore.changeBPM(SONG.bpmSong);
 
-		if (chars != null) {
+		if (chars != null)
 			chars.danceAll();
-		}
-		initSong();
+
+		buildStrumsandNotes();
+		startCountdown();
 
 		#if HSCRIPT_ALLOWED
 		script.call('onRewind', []);
 		#end
 	}
-
-	#if HSCRIPT_ALLOWED
-	override function initScript():Void {
-		super.initScript();
-
-		script.expose('SONG', PlayState.SONG);
-		script.expose('instance', PlayState.instance);
-	}
-	#end
 
 	//
 

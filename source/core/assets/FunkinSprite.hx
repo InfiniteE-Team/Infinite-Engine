@@ -203,9 +203,15 @@ class FunkinSprite extends FlxAnimate {
 		offset.set(0 - off.x, 0 - off.y);
 
 	override public function destroy() {
+		super.destroy();
 		offsets = null;
 		_registeredAnims = null;
-		super.destroy();
+	}
+
+	override public function draw():Void {
+		if (isAnimate && timeline == null) 
+			return;
+		super.draw();
 	}
 
 	public function dance() {}

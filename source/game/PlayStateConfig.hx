@@ -22,6 +22,8 @@ class PlayStateConfig {
 
 	public var isStoryMode:Bool = false;
 
+	public var isBotplay:Bool = false;
+	
 	//
 
 	public function new() {}

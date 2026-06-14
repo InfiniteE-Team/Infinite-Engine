@@ -1,4 +1,5 @@
 package core.installer;
+import flixel.FlxSprite;
 
 class InstallerMenu extends states.MusicBeatState {
 	var bg:FlxSprite = new FlxSprite();

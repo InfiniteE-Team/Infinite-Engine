@@ -11,10 +11,6 @@ class ScriptedState {
 		MusicBeatState.switchState(load(className, args));
 	}
 
-	public static function openSubstate(className:String, ?args:Array<Dynamic>):Void {
-		MusicBeatSubstate.openSubstate(loadSub(className, args));
-	}
-
 	public static function load(className:String, ?args:Array<Dynamic>):MusicBeatState {
 		var path = Paths.getPath(className, 'states');
 
@@ -25,9 +21,24 @@ class ScriptedState {
 
 		var ctx = ScriptHandler.globalContext;
 
-		var script = new RuleScript(null, null, ctx);
-		script.errorHandler = (e) -> Trace.traceOnce('ScriptedState: $className → ${e.message}', true);
-		script.tryExecute(sys.io.File.getContent(path));
+		var content = sys.io.File.getContent(path);
+		var parser = new rulescript.parsers.HxParser();
+		parser.allowAll();
+
+		var moduleDecls:Array<hscript.Expr.ModuleDecl>;
+		try {
+			moduleDecls = parser.parseModule(content);
+		} catch (e) {
+			Trace.traceOnce('ScriptedState: parse error $className → ${e.details()}', true);
+			return null;
+		}
+
+		var module = new rulescript.types.ScriptedModule(className, moduleDecls, ctx);
+
+		for (name => type in module.types) {
+			ctx.types.set(name, cast type);
+			rulescript.scriptedClass.RuleScriptedClassUtil.registerRuleScriptedClass(name, cast type);
+		}
 
 		var access = RuleScript.resolveScriptedClass(className, ctx);
 		if (access == null) {
@@ -47,10 +58,30 @@ class ScriptedState {
 		}
 
 		var ctx = ScriptHandler.globalContext;
+		/*
+			var parser = new rulescript.parsers.HxParser();
+			parser.allowAll();
+			var script = new RuleScript(null, parser, ctx);
+			script.scriptName = className;
+			script.errorHandler = (e) -> Trace.traceOnce('ScriptedState: $className → ${e.details()}', true); */
+		var content = sys.io.File.getContent(path);
+		var parser = new rulescript.parsers.HxParser();
+		parser.allowAll();
 
-		var script = new RuleScript(null, null, ctx);
-		script.errorHandler = (e) -> Trace.traceOnce('ScriptedState: $className → ${e.message}', true);
-		script.tryExecute(sys.io.File.getContent(path));
+		var moduleDecls:Array<hscript.Expr.ModuleDecl>;
+		try {
+			moduleDecls = parser.parseModule(content);
+		} catch (e) {
+			Trace.traceOnce('ScriptedState: parse error $className → ${e.details()}', true);
+			return null;
+		}
+
+		var module = new rulescript.types.ScriptedModule(className, moduleDecls, ctx);
+
+		for (name => type in module.types) {
+			ctx.types.set(name, cast type);
+			rulescript.scriptedClass.RuleScriptedClassUtil.registerRuleScriptedClass(name, cast type);
+		}
 
 		var access = RuleScript.resolveScriptedClass(className, ctx);
 		if (access == null) {

@@ -128,8 +128,10 @@ class CharacterController extends FunkinObjectRegistry {
 
 		#if HSCRIPT_ALLOWED
 		var charScript = scriptMap.get(char.id);
-		if (charScript != null)
-			charScript.call("onNoteHitPlayer", []);
+		if (charScript != null){
+			if (hitNote != null)
+				charScript.call("onNoteHitPlayer", []);
+		}
 		#end
 
 		if (input.control.getGroupInput("noteKeys")[i]) {

@@ -21,10 +21,25 @@ class NoteSustain extends Note {
 		super(strumTime, keys, x, y, noteSkinData, noteSkin, direction, noteType);
 	}
 
+	public function reinitSustain(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0, length:Float,
+			?noteType:String = 'normal', isSustainEnd:Bool = false) {
+		this.length = length;
+		this.isSustainEnd = isSustainEnd;
+		this.isHeld = false;
+		this.parentNote = null;
+		clipRect = null;
+
+		reinit(strumTime, keys, x, y, noteSkinData, noteSkin, direction, noteType);
+
+		var animName = isSustainEnd ? 'note$direction-HoldEnd' : 'note$direction-Hold';
+		playAnim(animName, true);
+		RGBShader.applyByAnimation(this, noteSkinData, animName);
+	}
+
 	override function noteLoad(noteSkinData:NoteSkinData) {
 		loadProps(noteSkinData.props, 'game/noteskins/$noteSkin/strumnotes');
 		var animName = isSustainEnd ? 'note$direction-HoldEnd' : 'note$direction-Hold';
-        playAnim(animName);
+		playAnim(animName);
 		RGBShader.applyByAnimation(this, noteSkinData, animName);
 	}
 }

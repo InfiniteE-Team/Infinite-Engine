@@ -29,6 +29,18 @@ class Controls {
 		];
 	}
 
+	public function justPressedAction(groupName:String, actionName:String):Bool {
+		if (!keyGroups.exists(groupName))
+			return false;
+		var keys = keyGroups.get(groupName);
+		var actions = ["down", "up", "left", "right", "accept", "escape"];
+		var index = actions.indexOf(actionName.toLowerCase());
+		if (index == -1 || index >= keys.length)
+			return false;
+		@:privateAccess
+		return keys[index].exists(k -> FlxG.keys.justPressed.check(k));
+	}
+
 	public function justPressed(groupName:String, index:Int):Bool {
 		if (!keyGroups.exists(groupName))
 			return false;

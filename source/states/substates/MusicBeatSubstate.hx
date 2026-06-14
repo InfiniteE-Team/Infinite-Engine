@@ -6,6 +6,7 @@ import utils.InfoHelpDebug;
 #if HSCRIPT_ALLOWED
 import core.scripting.ScriptHandler;
 #end
+import game.controllers.InputController;
 
 class MusicBeatSubstate extends flixel.FlxSubState {
 	var tracker:TrackBeat = new TrackBeat();
@@ -14,6 +15,8 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 	#end
 
 	var infoHelp:InfoHelpDebug;
+
+	var input:InputController = new InputController();
 
 	override function create():Void {
 		#if HSCRIPT_ALLOWED
@@ -76,10 +79,6 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 		#if HSCRIPT_ALLOWED
 		script.call("onBeatHit", [beat]);
 		#end
-	}
-
-	public static function openSubstate(subState:flixel.FlxSubState):Void {
-		openSubstate(subState);
 	}
 
 	override function destroy():Void {

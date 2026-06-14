@@ -5,7 +5,7 @@ typedef NoteSkinData = {
 	var props:ObjectData;
 	var ?author:String;
 	var ?description:String;
-	var ?colorPalette:Map<String, String>;
+	var ?colorPalette:haxe.DynamicAccess<Array<String>>;
 	var ?spacing:Float;
 	var ?keys:Int;
 }

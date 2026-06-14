@@ -43,23 +43,23 @@ class Main extends Sprite {
 
 	function mainGame() {
 		configGame();
-		addChild(new FlxGame(1280, 720, mainState, framerate, framerate, true, false));
+		addChild(new core.Game(1280, 720, mainState, framerate));
 		addChild(fps);
 		cursor = new CursorConfig();
 		cursor.loadCursor();
-
-		if (globalData.developerMode)
-			Trace.init();
 
 		#if windows
 		WindowsAPI.reDefineMainWindowTitle(lime.app.Application.current.window.title);
 		WindowsAPI.windowDarkMode(true);
 		#end
+
+		if (globalData.developerMode)
+			Trace.init();
 	}
 
 	function configGame() {
-		FlxG.save.bind("InfiniteEngine","InfiniteTeam");
-		
+		FlxG.save.bind("InfiniteEngine", "InfiniteTeam");
+
 		SaveData.init();
 		SaveData.initSave();
 

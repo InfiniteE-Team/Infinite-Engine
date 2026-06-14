@@ -8,7 +8,7 @@ class RGBShader {
 
 	static function getSrc():String {
 		if (_src == null) {
-			var path = Paths.getPath('colorNotes', 'shaders');
+			var path = Paths.getPath('noteRGB', 'shaders');
 			if (sys.FileSystem.exists(path)) {
 				_src = sys.io.File.getContent(path);
 			} else {
@@ -18,17 +18,27 @@ class RGBShader {
 		return _src;
 	}
 
-	public static function applyHexColor(sprite:flixel.FlxSprite, hexColor:Int) {
+	public static function applyByAnimation(sprite:flixel.FlxSprite, noteSkinData:NoteSkinData, animationName:String) {
+		if (sprite == null || noteSkinData == null || animationName == null)
+			return;
+
+		if (noteSkinData.colorPalette == null)
+			return;
+
+		var colors:Array<String> = Reflect.field(noteSkinData.colorPalette, animationName);
+		if (colors == null || colors.length < 3)
+			return;
+
+		applyRGB(sprite, colors[0], colors[1], colors[2]);
+	}
+
+	public static function applyRGB(sprite:flixel.FlxSprite, hexR:String, hexG:String, hexB:String) {
 		if (sprite == null)
 			return;
 
 		var src = getSrc();
 		if (src == null)
 			return;
-
-		var r = ((hexColor >> 16) & 0xFF) / 255.0;
-		var g = ((hexColor >> 8) & 0xFF) / 255.0;
-		var b = (hexColor & 0xFF) / 255.0;
 
 		var shader:FlxRuntimeShader;
 		if (sprite.shader != null && (sprite.shader is FlxRuntimeShader))
@@ -37,34 +47,22 @@ class RGBShader {
 			shader = new FlxRuntimeShader(src);
 			sprite.shader = shader;
 		}
-		shader.setFloatArray('noteColor', [r, g, b, 1.0]);
+
+		shader.setFloatArray('r', hexToVec(hexR));
+		shader.setFloatArray('g', hexToVec(hexG));
+		shader.setFloatArray('b', hexToVec(hexB));
+		shader.setFloat('mult', 1.0);
 		sprite.shader = shader;
 	}
 
-	public static function applyHexString(sprite:flixel.FlxSprite, hexString:String) {
-		if (sprite == null || hexString == null)
-			return;
-
-		try {
-			var hexValue = Std.parseInt(hexString);
-			applyHexColor(sprite, hexValue);
-		} catch (e:Dynamic) {
-			Trace.traceOnce('Error parsing hex: $hexString - $e', true);
-		}
-	}
-
-	public static function applyByAnimation(sprite:flixel.FlxSprite, noteSkinData:NoteSkinData, animationName:String) {
-		if (sprite == null || noteSkinData == null || animationName == null)
-			return;
-
-		if (noteSkinData.colorPalette == null)
-			return;
-
-		var hexString:String = Reflect.field(noteSkinData.colorPalette, animationName);
-		if (hexString == null)
-			return;
-
-		applyHexString(sprite, hexString);
+	static function hexToVec(hex:String):Array<Float> {
+		var clean = hex.toUpperCase();
+		if (clean.startsWith('0X'))
+			clean = clean.substr(2);
+		if (clean.length == 8)
+			clean = clean.substr(2);
+		var val = Std.parseInt('0x' + clean);
+		return [((val >> 16) & 0xFF) / 255.0, ((val >> 8) & 0xFF) / 255.0, (val & 0xFF) / 255.0];
 	}
 
 	@:noCompletion

@@ -6,6 +6,7 @@ import utils.InfoHelpDebug;
 #if HSCRIPT_ALLOWED
 import core.scripting.ScriptHandler;
 #end
+import game.controllers.InputController;
 
 class MusicBeatState extends flixel.FlxState {
 	var tracker:TrackBeat = new TrackBeat();
@@ -14,6 +15,8 @@ class MusicBeatState extends flixel.FlxState {
 	#end
 
 	var infoHelp:InfoHelpDebug;
+
+	var input:InputController = new InputController();
 
 	override function create():Void {
 		#if HSCRIPT_ALLOWED

@@ -11,19 +11,18 @@ class DiffsUtils {
 
 	public function new() {}
 
-	public static function getDifficulty() {
+	public static function getDifficulty(curSong:String) {
 		difficulties = [];
-		var curSong = game.PlayState.instance.curSong;
 		var diffsDir = Paths.findLib('songs/$curSong/charts/');
 
 		if (FileSystem.exists(diffsDir)) {
 			for (file in sys.FileSystem.readDirectory(diffsDir)) {
 				var diffName = file.replace('.json', '').replace('.osu', '');
 
-				if (diffName.startsWith(curSong))
+				if (diffName.startsWith(curSong + '-'))
 					diffName = diffName.replace('$curSong-', '');
 				else if (diffName == curSong)
-					diffName = ''; // normal diff
+					diffName = '';
 
 				if (!difficulties.contains(diffName))
 					difficulties.push(diffName);

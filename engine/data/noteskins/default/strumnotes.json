@@ -2,26 +2,106 @@
   "author": "ninjamuffin99",
   "description": "Skin default FNF",
   "colorPalette": {
-    "note0-Scroll": "0xFFC24B99",
-    "note0-Hold": "0xFFC24B99",
-    "note0-HoldEnd": "0xFFC24B99",
-    "press0": "0xFFC24B99",
-    "confirm0": "0xFFC24B99",
-    "note1-Scroll": "0xFF00FFFF",
-    "note1-Hold": "0xFF00FFFF",
-    "note1-HoldEnd": "0xFF00FFFF",
-    "press1": "0xFF00FFFF",
-    "confirm1": "0xFF00FFFF",
-    "note2-Scroll": "0xFF12FA05",
-    "note2-Hold": "0xFF12FA05",
-    "note2-HoldEnd": "0xFF12FA05",
-    "press2": "0xFF12FA05",
-    "confirm2": "0xFF12FA05",
-    "note3-Scroll": "0xFFF9393F",
-    "note3-Hold": "0xFFF9393F",
-    "note3-HoldEnd": "0xFFF9393F",
-    "press3": "0xFFF9393F",
-    "confirm3": "0xFFF9393F"
+    "note0-Scroll": [
+      "0xFFC24B99",
+      "0xFFFFFFFF",
+      "0xFF3C1F56"
+    ],
+    "note0-Hold": [
+      "0xFFC24B99",
+      "0xFFFFFFFF",
+      "0xFF3C1F56"
+    ],
+    "note0-HoldEnd": [
+      "0xFFC24B99",
+      "0xFFFFFFFF",
+      "0xFF3C1F56"
+    ],
+    "press0": [
+      "0xFFC24B99",
+      "0xFFFFFFFF",
+      "0xFF3C1F56"
+    ],
+    "confirm0": [
+      "0xFFC24B99",
+      "0xFFFFFFFF",
+      "0xFF3C1F56"
+    ],
+    "note1-Scroll": [
+      "0xFF00FFFF",
+      "0xFFFFFFFF",
+      "0xFF1542B7"
+    ],
+    "note1-Hold": [
+      "0xFF00FFFF",
+      "0xFFFFFFFF",
+      "0xFF1542B7"
+    ],
+    "note1-HoldEnd": [
+      "0xFF00FFFF",
+      "0xFFFFFFFF",
+      "0xFF1542B7"
+    ],
+    "press1": [
+      "0xFF00FFFF",
+      "0xFFFFFFFF",
+      "0xFF1542B7"
+    ],
+    "confirm1": [
+      "0xFF00FFFF",
+      "0xFFFFFFFF",
+      "0xFF1542B7"
+    ],
+    "note2-Scroll": [
+      "0xFF12FA05",
+      "0xFFFFFFFF",
+      "0xFF0A4447"
+    ],
+    "note2-Hold": [
+      "0xFF12FA05",
+      "0xFFFFFFFF",
+      "0xFF0A4447"
+    ],
+    "note2-HoldEnd": [
+      "0xFF12FA05",
+      "0xFFFFFFFF",
+      "0xFF0A4447"
+    ],
+    "press2": [
+      "0xFF12FA05",
+      "0xFFFFFFFF",
+      "0xFF0A4447"
+    ],
+    "confirm2": [
+      "0xFF12FA05",
+      "0xFFFFFFFF",
+      "0xFF0A4447"
+    ],
+    "note3-Scroll": [
+      "0xFFF9393F",
+      "0xFFFFFFFF",
+      "0xFF651038"
+    ],
+    "note3-Hold": [
+      "0xFFF9393F",
+      "0xFFFFFFFF",
+      "0xFF651038"
+    ],
+    "note3-HoldEnd": [
+      "0xFFF9393F",
+      "0xFFFFFFFF",
+      "0xFF651038"
+    ],
+    "press3": [
+      "0xFFF9393F",
+      "0xFFFFFFFF",
+      "0xFF651038"
+    ],
+    "confirm3": [
+      "0xFFF9393F",
+      "0xFFFFFFFF",
+      "0xFF651038"
+    ]
   },
   "props": {
     "name": "Default",

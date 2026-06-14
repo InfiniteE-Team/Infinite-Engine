@@ -3,4 +3,5 @@ package core.scripting.interfaces;
 import rulescript.scriptedClass.RuleScriptedClass;
 
 @:keepSub
-class ScriptStateBase extends states.MusicBeatState implements RuleScriptedClass {}
+@:strictScriptedConstructor  
+class ScriptStateBase implements RuleScriptedClass extends states.MusicBeatState {}

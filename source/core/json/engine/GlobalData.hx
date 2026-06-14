@@ -1,8 +1,5 @@
 package core.json.engine;
-
 import utils.UtilsData;
-import flixel.FlxState;
-import game.PlayState;
 
 typedef GlobalData = {
 	var ?developerMode:Bool;
@@ -16,7 +13,7 @@ class GlobalConfig {
 	public var developerMode:Bool = true;
 	public var noteSkin:String = 'default';
 	public var hud:String = 'default';
-	public var startState:Class<FlxState> = PlayState;
+	public var startState:Class<flixel.FlxState> = game.PlayState;
 
 	public function new() {}
 
@@ -30,7 +27,7 @@ class GlobalConfig {
 		developerMode = globalData.developerMode ?? true;
 		var stateStr = globalData.startState;
 		if (stateStr != null) {
-			var cls:Class<FlxState> = cast(Type.resolveClass(stateStr) ?? Type.resolveClass('states.$stateStr'));
+			var cls:Class<flixel.FlxState> = cast(Type.resolveClass(stateStr) ?? Type.resolveClass('states.$stateStr'));
 			if (cls != null)
 				startState = cls;
 		}

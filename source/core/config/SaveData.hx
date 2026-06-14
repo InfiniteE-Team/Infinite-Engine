@@ -62,7 +62,7 @@ class SaveData {
 		}
 
 		if (SaveData.data.uiKeys == null)
-			SaveData.data.uiKeys = [['UP','W'], ['DOWN','S'], ['LEFT','D'], ['RIGHT','A'], ['ENTER'], ['ESCAPE']];
+			SaveData.data.uiKeys = [['LEFT','A'], ['UP','W'], ['DOWN','S'], ['RIGHT','D'], ['ENTER'], ['ESCAPE']];
 
 		flush();
 	}

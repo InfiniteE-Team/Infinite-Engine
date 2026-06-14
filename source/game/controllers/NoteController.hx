@@ -35,6 +35,10 @@ class NoteController {
 	public var notes:FlxTypedGroup<Note> = new FlxTypedGroup<Note>();
 	public var sustains:FlxTypedGroup<NoteSustain> = new FlxTypedGroup<NoteSustain>();
 
+	var _notePool:Map<String, Array<Note>> = new Map();
+
+	var _sustainPool:Map<String, Array<NoteSustain>> = new Map();
+
 	public var unspawnNotes:Array<Note> = [];
 
 	public var charStrumOffsets:Map<String, Int> = new Map();
@@ -130,7 +134,7 @@ class NoteController {
 			#end
 			var strum = new StrumNote(x + i * (112 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props, noteSkin);
 			strum.playAnim('static' + i);
-			// RGBShader.applyFromSkin(strum, noteSkinData, i);
+			strum.applyShader(noteSkinData);
 			if (!daSong.strumsVisible)
 				strum.visible = false;
 			if (isDownscroll)
@@ -187,7 +191,7 @@ class NoteController {
 			#end
 
 			note.x = note.strum.x;
-			note.y = isDownscroll ? note.strum.y - ((note.strumTime - songTime) * scrollSpeed) : note.strum.y + ((note.strumTime - songTime) * scrollSpeed);
+			note.y = isDownscroll ? note.strum.y + note.offset.y - ((note.strumTime - songTime) * scrollSpeed) : note.strum.y + note.offset.y + ((note.strumTime - songTime) * scrollSpeed);
 
 			// note.alpha = 0.3;
 
@@ -220,15 +224,10 @@ class NoteController {
 				continue;
 			#end
 
-			// body
 			final strumCenterX = sustain.strum.x - sustain.strum.offset.x + sustain.strum.frameWidth * sustain.strum.scale.x * 0.5;
 			sustain.x = strumCenterX - sustain.frameWidth * sustain.scale.x * 0.5;
 
-			sustain.origin.y = 0;
-
-			var scaledHeight = sustain.length * scrollSpeed * 0.45;
-
-			sustain.scale.y = scaledHeight / sustain.frameHeight;
+			var scaledHeight = (sustain.length * scrollSpeed) + 1;
 
 			var strumY = isDownscroll ? sustain.strum.y - ((sustain.strumTime - songTime) * scrollSpeed) : sustain.strum.y
 				+ ((sustain.strumTime - songTime) * scrollSpeed);
@@ -236,13 +235,12 @@ class NoteController {
 
 			if (isDownscroll) {
 				sustain.y = targetY - scaledHeight;
-				sustain.flipY = true;
 			} else {
 				sustain.y = targetY;
-				sustain.flipY = false;
 			}
 			sustain.offset.y = 0;
 
+			// clipping
 			if (sustain.isHeld && sustain.strumTime <= songTime) {
 				var strumMidScreen = sustain.strum.y + (sustain.strum.frameHeight * 0.5) - sustain.strum.offset.y;
 				var clipY:Float;
@@ -337,11 +335,19 @@ class NoteController {
 			return;
 		#end
 
-		if (Std.isOfType(note, NoteSustain))
+		if (Std.isOfType(note, NoteSustain)) {
 			sustains.remove(cast note, true);
-		else
+			note.kill();
+			if (!_sustainPool.exists(note.noteSkin))
+				_sustainPool.set(note.noteSkin, []);
+			_sustainPool.get(note.noteSkin).push(cast note);
+		} else {
 			notes.remove(note, true);
-		note.destroy();
+			note.kill();
+			if (!_notePool.exists(note.noteSkin))
+				_notePool.set(note.noteSkin, []);
+			_notePool.get(note.noteSkin).push(note);
+		}
 
 		#if HSCRIPT_ALLOWED
 		scriptNC.call("onDestroyNotes", []);
@@ -401,9 +407,18 @@ class NoteController {
 				continue;
 
 			// param for Note positions in strum groups
-			var note = new Note(data.time, keys, strum.x, 0, noteSkinData, noteSkin, data.lane);
+			var skinForChar = charData.noteSkin ?? noteSkin;
+			var pool = _notePool.get(skinForChar);
 
-			// RGBShader.applyFromSkin(note, noteSkinData, data.lane);
+			var note:Note;
+			if (pool != null && pool.length > 0) {
+				note = pool.pop();
+				note.revive();
+				note.reinit(data.time, keys, strum.x, 0, noteSkinData, skinForChar, data.lane);
+			} else {
+				note = new Note(data.time, keys, strum.x, 0, noteSkinData, skinForChar, data.lane);
+			}
+
 			note.ID = globalLane;
 			note.direction = globalLane;
 			note.strumTime = data.time;
@@ -422,48 +437,85 @@ class NoteController {
 			#end
 
 			if (data.length > 0) {
-				var sustain = new NoteSustain(data.time, keys, strum.x, 0, noteSkinData, noteSkin, data.lane, data.length, data.type, false);
-				// RGBShader.applyFromSkin(sustain, noteSkinData, data.lane);
-				sustain.ID = globalLane;
-				sustain.direction = globalLane;
-				sustain.strumTime = data.time;
-				sustain.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
-				sustain.noteControl = this;
-				sustain.parentNote = null;
-				sustain.strum = strum;
-				sustain.noteType = data.type;
-				if (isDownscroll)
-					sustain.flipY = true;
-				if (!daSong.strumsVisible)
-					sustain.visible = false;
+				var skinForChar = charData.noteSkin ?? noteSkin;
+				var pool = _sustainPool.get(skinForChar);
 
-				#if HSCRIPT_ALLOWED
-				scriptNC.call("onGenerateSustain", []);
-				#end
+				var totalLength:Float = data.length;
+				var curLength:Float = 0;
+				var lastSustain:NoteSustain = null;
 
-				unspawnNotes.push(sustain);
+				while (curLength < totalLength) {
+					var isEndSegment = (curLength + RhythmCore.stepInMs >= totalLength);
+					var segmentLength = isEndSegment ? (totalLength - curLength) : RhythmCore.stepInMs;
+					var sustainTime = data.time + curLength;
 
-				// hold end
-				var sustainEnd = new NoteSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, noteSkin, data.lane, 0, data.type, true);
-				// RGBShader.applyFromSkin(sustainEnd, noteSkinData, data.lane);
-				sustainEnd.ID = globalLane;
-				sustainEnd.direction = globalLane;
-				sustainEnd.strumTime = data.time + data.length;
-				sustainEnd.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
-				sustainEnd.noteControl = this;
-				sustainEnd.strum = strum;
-				sustainEnd.parentNote = sustain;
-				sustainEnd.noteType = data.type;
-				if (isDownscroll)
-					sustainEnd.flipY = true;
-				if (!daSong.strumsVisible)
-					sustainEnd.visible = false;
+					var sustain:NoteSustain;
+					if (pool != null && pool.length > 0) {
+						sustain = pool.pop();
+						sustain.revive();
+						sustain.reinitSustain(sustainTime, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, segmentLength, data.type, false);
+					} else {
+						sustain = new NoteSustain(sustainTime, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, segmentLength, data.type, false);
+					}
 
-				#if HSCRIPT_ALLOWED
-				scriptNC.call("onGenerateEndSustain", []);
-				#end
+					sustain.ID = globalLane;
+					sustain.direction = globalLane;
+					sustain.strumTime = sustainTime;
+					sustain.mustPress = CharacterController.namesPlayer.contains(charData.role);
+					sustain.noteControl = this;
+					sustain.strum = strum;
+					sustain.noteType = data.type;
+					if (isDownscroll)
+						sustain.flipY = true;
+					if (!daSong.strumsVisible)
+						sustain.visible = false;
 
-				unspawnNotes.push(sustainEnd);
+					sustain.origin.y = 0;
+					var scaledHeight = (sustain.length * scrollSpeed) + 1;
+					sustain.scale.y = scaledHeight / sustain.frameHeight;
+
+					#if HSCRIPT_ALLOWED
+					scriptNC.call("onGenerateSustain", []);
+					#end
+
+					unspawnNotes.push(sustain);
+					lastSustain = sustain;
+
+					curLength += RhythmCore.stepInMs;
+				}
+
+				// end
+				if (lastSustain != null) {
+					var sustainEnd:NoteSustain;
+					if (pool != null && pool.length > 0) {
+						sustainEnd = pool.pop();
+						sustainEnd.revive();
+						sustainEnd.reinitSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, 0, data.type, true);
+					} else {
+						sustainEnd = new NoteSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, 0, data.type, true);
+					}
+
+					sustainEnd.ID = globalLane;
+					sustainEnd.direction = globalLane;
+					sustainEnd.strumTime = data.time + data.length;
+					sustainEnd.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
+					sustainEnd.noteControl = this;
+					sustainEnd.strum = strum;
+					sustainEnd.parentNote = lastSustain;
+					sustainEnd.noteType = data.type;
+					if (isDownscroll)
+						sustainEnd.flipY = true;
+					if (!daSong.strumsVisible)
+						sustainEnd.visible = false;
+
+					sustainEnd.origin.y = 0;
+
+					#if HSCRIPT_ALLOWED
+					scriptNC.call("onGenerateEndSustain", []);
+					#end
+
+					unspawnNotes.push(sustainEnd);
+				}
 			}
 			unspawnNotes.push(note);
 		}

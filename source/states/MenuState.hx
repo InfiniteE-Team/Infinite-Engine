@@ -12,7 +12,6 @@ import core.json.extensions.AudioData;
 // tweens
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
-import flixel.util.FlxTimer;
 
 class MenuState extends MusicBeatState {
 	public var menuData:MenuData;

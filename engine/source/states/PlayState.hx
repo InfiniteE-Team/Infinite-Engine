@@ -1,4 +1,3 @@
-import core.scripting.ScriptedState;
 
 function onCreate()
 {
@@ -14,11 +13,6 @@ function onUpdate(elapsed)
 {
     if (FlxG.keys.justPressed.ENTER)
         pauseMenu();
-}
-
-function onPauseMenu()
-{
-    ScriptedState.openSubstate('PauseMenu');
 }
 
 /*

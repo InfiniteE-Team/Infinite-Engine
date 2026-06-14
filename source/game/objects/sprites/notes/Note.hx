@@ -46,6 +46,33 @@ class Note extends FunkinSprite {
 		noteLoad(noteSkinData);
 	}
 
+	public function reinit(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0,
+			?noteType:String = 'normal') {
+		setPosition(x, y);
+		this.keys = keys;
+		this.direction = direction;
+		this.strumTime = strumTime;
+		this.noteType = noteType ?? 'normal';
+		this.noteSkin = noteSkin;
+		this.noteSkinData = noteSkinData;
+
+		// reset estado
+		wasGoodHit = false;
+		canBeHit = false;
+		mustPress = false;
+		tooLate = false;
+		wasMissed = false;
+		rating = 'sick';
+		strum = null;
+		noteControl = null;
+		_lastAnimationName = '';
+		alpha = 1;
+		visible = true;
+
+		playAnim('note$direction-Scroll', true);
+		RGBShader.applyByAnimation(this, noteSkinData, 'note$direction-Scroll');
+	}
+
 	public function noteLoad(noteSkinData:NoteSkinData) {
 		loadProps(noteSkinData.props, 'game/noteskins/$noteSkin/strumnotes');
 		playAnim('note$direction-Scroll', true);
