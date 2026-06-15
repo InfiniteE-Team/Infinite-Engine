@@ -188,8 +188,8 @@ function _showComboNumbers(combo, pixelPart1, pixelPart2) {
 		numScore.visible = true;
 		numScore.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + 'nums/num' + Std.int(i) + pixelPart2,'image'));
 
-		numScore.x = FlxG.width * 0.55 + (43 * daLoop) - 90 + 140 + posX;
-		numScore.y = FlxG.height * 0.5 + 20 + posY;
+		numScore.x = FlxG.width * 0.55 + (43 * daLoop) - 90 + 140;
+		numScore.y = FlxG.height * 0.5 + 20;
 
 		if (!isPixel) {
 			numScore.antialiasing = SaveData.data.antialiasing;
@@ -230,8 +230,8 @@ function onMissPopup() {
 	else
 		rating.loadGraphic(Paths.getPath('game/hud/normal/score/miss','image'));
 
-	rating.x = FlxG.width * 0.55 - 40 + posX;
-	rating.y = FlxG.height * 0.5 - 90 + posY;
+	rating.x = FlxG.width * 0.55 - 40;
+	rating.y = FlxG.height * 0.5 - 90;
 
 	if (!isPixel) {
 		rating.setGraphicSize(Std.int(rating.width * 0.7));
