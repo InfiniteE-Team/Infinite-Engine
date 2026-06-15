@@ -28,7 +28,6 @@ class Note extends FunkinSprite {
 	public var noteControl:NoteController;
 
 	private var noteSkinData:NoteSkinData = null;
-	private var _lastAnimationName:String = '';
 
 	public var wasMissed:Bool = false;
 
@@ -43,7 +42,7 @@ class Note extends FunkinSprite {
 		this.noteType = noteType;
 		this.noteSkin = noteSkin;
 		this.noteSkinData = noteSkinData;
-		noteLoad(noteSkinData);
+		loadSprite(noteSkinData);
 	}
 
 	public function reinit(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0,
@@ -65,7 +64,6 @@ class Note extends FunkinSprite {
 		rating = 'sick';
 		strum = null;
 		noteControl = null;
-		_lastAnimationName = '';
 		alpha = 1;
 		visible = true;
 
@@ -73,7 +71,7 @@ class Note extends FunkinSprite {
 		RGBShader.applyByAnimation(this, noteSkinData, 'note$direction-Scroll');
 	}
 
-	public function noteLoad(noteSkinData:NoteSkinData) {
+	public function loadSprite(noteSkinData:NoteSkinData) {
 		loadProps(noteSkinData.props, 'game/noteskins/$noteSkin/strumnotes');
 		playAnim('note$direction-Scroll', true);
 		RGBShader.applyByAnimation(this, noteSkinData, 'note$direction-Scroll');
@@ -82,12 +80,8 @@ class Note extends FunkinSprite {
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (animation.name != null && animation.name != _lastAnimationName) {
-			_lastAnimationName = animation.name;
-			if (noteSkinData != null && noteSkinData.colorPalette != null) {
-				RGBShader.applyByAnimation(this, noteSkinData, _lastAnimationName);
-			}
-		}
+		if (currentAnim != null && currentAnim != '')
+			RGBShader.applyByAnimation(this, noteSkinData, currentAnim);
 
 		if (!mustPress) {
 			canBeHit = false;

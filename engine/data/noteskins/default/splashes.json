@@ -1,0 +1,172 @@
+{
+    "props": {
+        "name": "Splash",
+        "path": "default",
+        "position": [
+            0,
+            0
+        ],
+        "scale": [
+            1,
+            1
+        ],
+        "alpha": 1,
+        "visible": true,
+        "flipX": false,
+        "flipY": false,
+        "angle": 0,
+        "active": true,
+        "scrollFactor": [
+            1,
+            1
+        ],
+        "antialiasing": true,
+        "firstAnim": "splash 1",
+        "anims": [
+            {
+                "name": "note0-Splash0",
+                "prefix": "splash 1",
+                "indices": [
+                    0,
+                    1,
+                    2,
+                    3
+                ],
+                "framerate": 24,
+                "looped": false,
+                "flipX": false,
+                "flipY": false,
+                "offsets": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "note0-Splash1",
+                "prefix": "splash 2",
+                "indices": [
+                    0,
+                    1,
+                    2,
+                    3
+                ],
+                "framerate": 24,
+                "looped": false,
+                "flipX": false,
+                "flipY": false,
+                "offsets": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "note1-Splash0",
+                "prefix": "splash 1",
+                "indices": [
+                    0,
+                    1,
+                    2,
+                    3
+                ],
+                "framerate": 24,
+                "looped": false,
+                "flipX": false,
+                "flipY": false,
+                "offsets": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "note1-Splash1",
+                "prefix": "splash 2",
+                "indices": [
+                    0,
+                    1,
+                    2,
+                    3
+                ],
+                "framerate": 24,
+                "looped": false,
+                "flipX": false,
+                "flipY": false,
+                "offsets": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "note2-Splash0",
+                "prefix": "splash 1",
+                "indices": [
+                    0,
+                    1,
+                    2,
+                    3
+                ],
+                "framerate": 24,
+                "looped": false,
+                "flipX": false,
+                "flipY": false,
+                "offsets": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "note2-Splash1",
+                "prefix": "splash 2",
+                "indices": [
+                    0,
+                    1,
+                    2,
+                    3
+                ],
+                "framerate": 24,
+                "looped": false,
+                "flipX": false,
+                "flipY": false,
+                "offsets": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "note3-Splash0",
+                "prefix": "splash 1",
+                "indices": [
+                    0,
+                    1,
+                    2,
+                    3
+                ],
+                "framerate": 24,
+                "looped": false,
+                "flipX": false,
+                "flipY": false,
+                "offsets": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "name": "note3-Splash1",
+                "prefix": "splash 2",
+                "indices": [
+                    0,
+                    1,
+                    2,
+                    3
+                ],
+                "framerate": 24,
+                "looped": false,
+                "flipX": false,
+                "flipY": false,
+                "offsets": [
+                    0,
+                    0
+                ]
+            }
+        ]
+    }
+}

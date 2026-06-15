@@ -1,11 +1,5 @@
 package game.controllers;
 
-import core.json.objects.NoteSkinData;
-import game.objects.sprites.notes.Note;
-import game.objects.sprites.notes.NoteSustain;
-import game.objects.sprites.notes.StrumNote;
-import flixel.group.FlxGroup.FlxTypedGroup;
-import game.graphics.shaders.hardcode.RGBShader;
 import utils.UtilsData;
 import game.PlayStateConfig;
 import flixel.tweens.FlxTween;
@@ -14,6 +8,14 @@ import core.rhythm.RhythmCore;
 import core.json.song.SongData.SongConfig;
 import core.json.engine.GlobalData.GlobalConfig;
 import core.json.song.RatingData;
+// notes
+import core.json.objects.NoteSkinData;
+import game.objects.sprites.notes.StrumNote;
+import game.objects.sprites.notes.Note;
+import game.objects.sprites.notes.NoteSustain;
+import game.objects.sprites.notes.NoteSplash;
+import flixel.group.FlxGroup.FlxTypedGroup;
+import game.graphics.shaders.hardcode.RGBShader;
 #if HSCRIPT_ALLOWED
 import core.scripting.ScriptHandler;
 #end
@@ -34,10 +36,13 @@ class NoteController {
 	public var strums:FlxTypedGroup<StrumNote> = new FlxTypedGroup<StrumNote>();
 	public var notes:FlxTypedGroup<Note> = new FlxTypedGroup<Note>();
 	public var sustains:FlxTypedGroup<NoteSustain> = new FlxTypedGroup<NoteSustain>();
+	public var splashes:FlxTypedGroup<NoteSplash> = new FlxTypedGroup<NoteSplash>();
 
 	var _notePool:Map<String, Array<Note>> = new Map();
 
 	var _sustainPool:Map<String, Array<NoteSustain>> = new Map();
+
+	var _splashPool:Map<String, Array<NoteSplash>> = new Map();
 
 	public var unspawnNotes:Array<Note> = [];
 

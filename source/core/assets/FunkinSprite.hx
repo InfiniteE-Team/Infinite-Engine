@@ -140,7 +140,7 @@ class FunkinSprite extends FlxAnimate {
 
 	static function getAnimFrameScale(anims:Array<AnimData>, fp:String):Null<Array<Int>> {
 		for (anim in anims)
-			if (anim.frameScale != null && getAnimFilePath(a) == fp)
+			if (anim.frameScale != null && getAnimFilePath(anim) == fp)
 				return anim.frameScale;
 		return null;
 	}
