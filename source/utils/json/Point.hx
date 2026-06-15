@@ -1,4 +1,4 @@
-package utils;
+package utils.json;
 
 typedef Point = 
 {

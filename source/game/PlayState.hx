@@ -88,7 +88,6 @@ class PlayState extends MusicBeatState {
 		windowMod = new WindowModManager();
 		add(windowMod);
 
-
 		startCountdown();
 
 		super.create();
@@ -156,7 +155,7 @@ class PlayState extends MusicBeatState {
 			playStateConfig.combo = 0;
 			gameAudio.onMiss();
 		};
-		Main.controls.loadPreset(noteController.keys);
+		core.ConfigMain.controls.loadPreset(noteController.keys);
 		noteController.strums.cameras = [camHUD];
 		noteController.sustains.cameras = [camHUD];
 		noteController.notes.cameras = [camHUD];
@@ -217,13 +216,7 @@ class PlayState extends MusicBeatState {
 		persistentDraw = true;
 		paused = true;
 
-		FlxG.sound.pause();
-		if (gameAudio.inst != null)
-			gameAudio.inst.pause();
-		if (gameAudio.vocals != null)
-			gameAudio.vocals.pause();
-
-		windowMod.pauseWindow();
+		RhythmCore.pause(gameAudio,windowMod);
 
 		#if HSCRIPT_ALLOWED
 		script.call('onPauseMenu', []);
@@ -249,11 +242,7 @@ class PlayState extends MusicBeatState {
 	override public function closeSubState():Void {
 		super.closeSubState();
 		paused = false;
-		FlxG.sound.resume();
-		if (gameAudio.inst != null)
-			gameAudio.inst.resume();
-		if (gameAudio.vocals != null)
-			gameAudio.vocals.resume();
+		RhythmCore.resume(gameAudio,windowMod);
 	}
 
 	override function onFocusLost():Void {
@@ -311,8 +300,7 @@ class PlayState extends MusicBeatState {
 
 		playStateConfig = new PlayStateConfig();
 
-		RhythmCore.songPosition = 0;
-		RhythmCore.changeBPM(SONG.bpmSong);
+		RhythmCore.reset(SONG.bpmSong);
 
 		if (chars != null)
 			chars.danceAll();

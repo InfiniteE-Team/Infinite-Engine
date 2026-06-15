@@ -26,7 +26,7 @@ class MusicBeatState extends flixel.FlxState {
 		#end
 		super.create();
 
-		if (Main.globalData.developerMode) {
+		if (core.ConfigMain.globalData.developerMode) {
 			infoHelp = new InfoHelpDebug(FlxG.width - 300, 0, 0);
 			add(infoHelp);
 		}
@@ -45,7 +45,7 @@ class MusicBeatState extends flixel.FlxState {
 	override function update(elapsed:Float):Void {
 		super.update(elapsed);
 
-		if (Main.globalData.developerMode) {
+		if (core.ConfigMain.globalData.developerMode) {
 			if (FlxG.keys.justPressed.F5) {
 				MusicBeatState.resetState();
 				#if HSCRIPT_ALLOWED
@@ -60,13 +60,13 @@ class MusicBeatState extends flixel.FlxState {
 	}
 
 	public static function resetState():Void {
-		if (Main.globalData.developerMode)
+		if (core.ConfigMain.globalData.developerMode)
 			JsonWatcher.updateSwitch();
 		FlxG.resetState();
 	}
 
 	public static function switchState(state:MusicBeatState):Void {
-		if (Main.globalData.developerMode)
+		if (core.ConfigMain.globalData.developerMode)
 			JsonWatcher.updateSwitch();
 		FlxG.switchState(() -> state);
 	}
@@ -76,7 +76,7 @@ class MusicBeatState extends flixel.FlxState {
 		script.call("onStepHit", [step]);
 		#end
 
-		if (Main.globalData.developerMode)
+		if (core.ConfigMain.globalData.developerMode)
 			infoHelp.text = 'Steps: $step';
 	}
 

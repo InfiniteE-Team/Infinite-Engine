@@ -26,7 +26,7 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 		#end
 		super.create();
 
-		if (Main.globalData.developerMode) {
+		if (core.ConfigMain.globalData.developerMode) {
 			infoHelp = new InfoHelpDebug(FlxG.width - 300, 0, 0);
 			add(infoHelp);
 		}
@@ -45,7 +45,7 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 	override function update(elapsed:Float):Void {
 		super.update(elapsed);
 
-		if (Main.globalData.developerMode) {
+		if (core.ConfigMain.globalData.developerMode) {
 			#if HSCRIPT_ALLOWED
 			script.hotReload();
 			#end
@@ -61,7 +61,7 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 	}
 /*
 	public static function resetState():Void {
-		if (Main.globalData.developerMode)
+		if (core.ConfigMain.globalData.developerMode)
 			JsonWatcher.updateSwitch();
 		var parent = _parentState;
 		var cls = Type.getClass(this);
@@ -82,7 +82,7 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 	}
 
 	override function destroy():Void {
-		core.assets.Paths.clearCache();
+		// core.assets.Paths.clearCache(); fuck me
 		JsonWatcher.clear();
 		#if HSCRIPT_ALLOWED
 		script.call("onDestroy", []);

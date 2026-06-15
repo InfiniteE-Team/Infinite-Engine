@@ -1,7 +1,9 @@
 import flixel.FlxG;
 import states.MusicBeatState;
 import core.assets.Paths;
-import utils.Point;
+// utils
 import utils.Trace;
+import utils.InfiniteUtil;
+import utils.json.Point;
 
 using StringTools;

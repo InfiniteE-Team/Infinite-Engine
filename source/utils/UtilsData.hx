@@ -21,7 +21,7 @@ class UtilsData {
 			return null;
 
 		#if HSCRIPT_ALLOWED
-		if (Main.globalData.developerMode)
+		if (core.ConfigMain.globalData.developerMode)
 			JsonWatcher.watch(data, callback);
 		#end
 

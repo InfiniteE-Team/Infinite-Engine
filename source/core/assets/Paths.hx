@@ -95,40 +95,29 @@ class Paths {
 	}
 
 	public static function getAnimated(fileName:String):Dynamic {
-		// atlas texture
 		if (cache.exists(fileName))
 			return cache.get(fileName);
 
-		var result:Dynamic = null;
 		var imagePath = getPath(fileName, IMAGE);
-
 		var folder = findLib('images/$fileName');
+		var result:Dynamic = null;
+
+		inline function tryLib(ext:String, build:String->Dynamic):Bool {
+			var path = findLib('images/$fileName$ext');
+			if (path != null) {
+				result = build(path);
+				return true;
+			}
+			return false;
+		}
+
 		if (folder != null && FileSystem.exists('$folder/Animation.json'))
-			result = FlxAnimateFrames.fromAnimate(folder);
-
-		if (result == null) {
-			var xml = findLib('images/$fileName.xml');
-			if (xml != null)
-				result = FlxAtlasFrames.fromSparrow(imagePath, xml);
-		}
-
-		if (result == null) {
-			var txt = findLib('images/$fileName.txt');
-			if (txt != null)
-				result = FlxAtlasFrames.fromLibGdx(imagePath, txt);
-		}
-
-		if (result == null) {
-			var json = findLib('images/$fileName.json');
-			if (json != null)
-				result = FlxAtlasFrames.fromTexturePackerJson(imagePath, json);
-		}
-
-		if (result == null) {
-			var png = imagePath;
-			if (png != null)
-				result = png;
-		}
+			result = FlxAnimateFrames.fromAnimate(folder); 
+		else
+			tryLib('.xml', p -> FlxAtlasFrames.fromSparrow(imagePath, p))
+			|| tryLib('.txt', p -> FlxAtlasFrames.fromLibGdx(imagePath, p))
+			|| tryLib('.json', p -> FlxAtlasFrames.fromTexturePackerJson(imagePath, p))
+			|| (result = imagePath) != null;
 
 		if (result != null)
 			cache.set(fileName, result);
@@ -223,11 +212,15 @@ class Paths {
 		for (_ => asset in cache) {
 			if (asset is FlxFramesCollection) {
 				var frames = cast(asset, FlxFramesCollection);
-				if (frames.parent != null)
+				if (frames.parent != null) {
+					frames.parent.bitmap.dispose();
 					FlxG.bitmap.remove(frames.parent);
+				}
 				frames.destroy();
 			} else if (asset is flixel.graphics.FlxGraphic) {
 				var asset = cast(asset, flixel.graphics.FlxGraphic);
+				if (asset.bitmap != null)
+					asset.bitmap.dispose();
 				FlxG.bitmap.remove(asset);
 				asset.destroy();
 			}

@@ -13,7 +13,7 @@ class InputController {
 	public var control:Controls;
 
 	public function new() {
-		control = Main.controls;
+		control = core.ConfigMain.controls;
 	}
 
 	public function isPlayerHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, charId:String, noteController:NoteController, gameAudio:GameAudio,

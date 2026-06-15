@@ -120,6 +120,10 @@ class FunkinSprite extends FlxAnimate {
 		if (props.firstAnim != null)
 			playAnim(props.firstAnim, true);
 		updateHitbox();
+/*
+		if (graphic != null && graphic.bitmap != null) {
+			graphic.bitmap.disposeImage(); // clears RAM to use only the memory in VRAM
+		}*/
 	}
 
 	static function getAnimFilePath(anim:AnimData):Null<String> {
@@ -182,10 +186,8 @@ class FunkinSprite extends FlxAnimate {
 	public function getAnimOffset():Null<Point>
 		return offsets.get(currentAnim) ?? {x: 0, y: 0};
 
-	// Stores all registered anim names (both Sparrow and FlxAnimate systems)
 	var _registeredAnims:Array<String> = [];
 
-	// Override to register in both systems — called internally from loadProps
 	function _registerAnim(name:String) {
 		if (!_registeredAnims.contains(name))
 			_registeredAnims.push(name);
@@ -209,7 +211,7 @@ class FunkinSprite extends FlxAnimate {
 	}
 
 	override public function draw():Void {
-		if (isAnimate && timeline == null) 
+		if (isAnimate && (timeline == null || timeline.layers == null || timeline.layers.length == 0))
 			return;
 		super.draw();
 	}

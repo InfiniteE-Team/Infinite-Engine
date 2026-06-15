@@ -94,7 +94,7 @@ class NoteController {
 	}
 
 	public function loadJson() {
-		globalData = Main.globalData;
+		globalData = core.ConfigMain.globalData;
 		if (daSong != null && daSong.noteSkin != null)
 			noteSkin = daSong.noteSkin;
 		else if (globalData != null)
@@ -191,7 +191,7 @@ class NoteController {
 			#end
 
 			note.x = note.strum.x;
-			note.y = isDownscroll ? note.strum.y + note.offset.y - ((note.strumTime - songTime) * scrollSpeed) : note.strum.y + note.offset.y + ((note.strumTime - songTime) * scrollSpeed);
+			note.y = isDownscroll ? note.strum.y - ((note.strumTime - songTime) * scrollSpeed) : note.strum.y + ((note.strumTime - songTime) * scrollSpeed);
 
 			// note.alpha = 0.3;
 

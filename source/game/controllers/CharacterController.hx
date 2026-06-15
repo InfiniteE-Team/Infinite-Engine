@@ -37,7 +37,7 @@ class CharacterController extends FunkinObjectRegistry {
 
 	public function new(?id:String, ?x:Float = 0, ?y:Float = 0) {
 		super(id, x, y);
-		control = Main.controls;
+		control = core.ConfigMain.controls;
 	}
 
 	public function loadCharacter(id:String, name:String, role:String, targetGroup:FlxTypedGroup<flixel.FlxBasic>, script:ScriptHandler):FunkinSprite {

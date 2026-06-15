@@ -13,8 +13,8 @@ class SoundTray extends FlxSoundTray {
 	public function new() {
 		super();
 
-		scaleX = 0.7;
-		scaleY = 0.7;
+		scaleX = 0.5;
+		scaleY = 0.5;
 
 		volumeMaxSound = Paths.getPath("soundtray/VolMAX", 'sound');
 
@@ -32,16 +32,26 @@ class SoundTray extends FlxSoundTray {
 			}
 		}
 
+		var blockPath:String = Paths.getPath("soundtray/bars_10", 'image');
+		var bitmapData:BitmapData = blockPath != null ? BitmapData.fromFile(blockPath) : null;
+		if (bitmapData != null) {
+			var barPreview:Bitmap = new Bitmap(bitmapData);
+			barPreview.x = 30;
+			barPreview.y = 15;
+			barPreview.alpha = 0.3;
+			addChild(barPreview);
+		}
+
 		for (i in 1...11) {
-			var blockPath:String = Paths.getPath("soundtray/bars_" + i, 'image');
-			var bitmapData:BitmapData = blockPath != null ? BitmapData.fromFile(blockPath) : null;
-			if (bitmapData != null) {
-				var tmp:Bitmap = new Bitmap(bitmapData);
-				tmp.x = 23;
-				tmp.y = 15;
-				tmp.visible = false;
-				addChild(tmp);
-				blocks.push(tmp);
+			var blockPath2:String = Paths.getPath("soundtray/bars_" + i, 'image');
+			var bitmapData2:BitmapData = blockPath2 != null ? BitmapData.fromFile(blockPath2) : null;
+			if (bitmapData2 != null) {
+				var bar:Bitmap = new Bitmap(bitmapData2);
+				bar.x = 30;
+				bar.y = 15;
+				bar.visible = false;
+				addChild(bar);
+				blocks.push(bar);
 			}
 		}
 
@@ -83,8 +93,8 @@ class SoundTray extends FlxSoundTray {
 
 	private function updateBars(volume:Float):Void {
 		var globalVolume:Int = Math.round(volume * 10);
-		for (b in blocks)
-			b.visible = false;
+		for (block in blocks)
+			block.visible = false;
 		if (globalVolume > 0 && globalVolume <= blocks.length)
 			blocks[globalVolume - 1].visible = true;
 	}

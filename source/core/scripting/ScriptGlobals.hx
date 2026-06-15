@@ -38,8 +38,6 @@ class ScriptGlobals {
 
 		root['ScriptedState'] = core.scripting.ScriptedState;
 
-		root['WindowModManager'] = windowmodcharting.WindowModManager;
-
 		root['SaveData'] = core.config.SaveData;
 
 		#if windows
@@ -52,6 +50,9 @@ class ScriptGlobals {
 		root['Json'] = haxe.Json;
 		root['FileSystem'] = sys.FileSystem;
 		root['File'] = sys.io.File;
+
+		// modchart
+		root['WindowModManager'] = windowmodcharting.WindowModManager;
 	}
 
 	public static function initLua():Void {
@@ -76,7 +77,6 @@ class ScriptGlobals {
 			"Paths" => core.assets.Paths,
 			"FunkinSprite" => core.assets.FunkinSprite,
 			"RhythmCore" => core.rhythm.RhythmCore,
-			"WindowModManager" => windowmodcharting.WindowModManager,
 			"SaveData" => core.config.SaveData,
 			#if windows
 			"WindowsAPI" => winapi.WindowsAPI, "WindowsGDI" => winapi.gdi.WindowsGDI, "WindowsGDIThread" => winapi.gdi.WindowsGDIThread,
@@ -85,6 +85,8 @@ class ScriptGlobals {
 			"Json" => haxe.Json,
 			"FileSystem" => sys.FileSystem,
 			"File" => sys.io.File,
+			// modchart
+			"WindowModManager" => windowmodcharting.WindowModManager,
 		];
 	}
 }

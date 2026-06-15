@@ -7,19 +7,29 @@ import flixel.group.FlxSpriteGroup;
 
 class Trace {
 	static var textGroup:FlxSpriteGroup;
-	static var messages:Array<{text:String, color:Int, timer:FlxTimer, label:FlxText}> = [];
+	static var messages:Array<{
+		text:String,
+		color:Int,
+		timer:FlxTimer,
+		label:FlxText
+	}> = [];
 	static final DURATION:Float = 7.0;
 
 	public static function init() {
-		if (textGroup != null)
+		if (textGroup != null) {
+			if (!FlxG.state.members.contains(textGroup)) {
+				textGroup.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+				FlxG.state.add(textGroup);
+			}
 			return;
+		}
 		textGroup = new FlxSpriteGroup();
 		textGroup.scrollFactor.set(0, 0);
 		FlxG.state.add(textGroup);
 	}
 
 	public static function traceOnce(text:String, ?isError:Bool = false) {
-		if (textGroup == null || textGroup.members == null)
+		if (textGroup != null || textGroup.members == null)
 			textGroup = null;
 		if (textGroup == null)
 			init();

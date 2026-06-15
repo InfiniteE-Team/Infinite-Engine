@@ -1,7 +1,6 @@
 package core.scripting;
 
 import rulescript.RuleScript;
-import states.MusicBeatState;
 import states.substates.MusicBeatSubstate;
 
 class ScriptedState {

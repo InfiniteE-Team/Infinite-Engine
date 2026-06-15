@@ -13,7 +13,7 @@ class GlobalConfig {
 	public var developerMode:Bool = true;
 	public var noteSkin:String = 'default';
 	public var hud:String = 'default';
-	public var startState:Class<flixel.FlxState> = game.PlayState;
+	public var startState:Class<MusicBeatState> = game.PlayState;
 
 	public function new() {}
 
@@ -27,7 +27,7 @@ class GlobalConfig {
 		developerMode = globalData.developerMode ?? true;
 		var stateStr = globalData.startState;
 		if (stateStr != null) {
-			var cls:Class<flixel.FlxState> = cast(Type.resolveClass(stateStr) ?? Type.resolveClass('states.$stateStr'));
+			var cls:Class<MusicBeatState> = cast(Type.resolveClass(stateStr) ?? Type.resolveClass('states.$stateStr'));
 			if (cls != null)
 				startState = cls;
 		}
