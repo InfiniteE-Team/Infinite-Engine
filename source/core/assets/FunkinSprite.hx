@@ -50,46 +50,13 @@ class FunkinSprite extends FlxAnimate {
 
 		var filePathOffsets:Map<String, Int> = new Map();
 
-		if (!isSimpleImage && !isAnimate && props.anims != null) {
-			if (cacheOffsets.exists(assetPath)) {
-				filePathOffsets = cacheOffsets.get(assetPath);
-			} else {
-				var merged = new Map<String, Bool>();
-				for (anim in props.anims) {
-					var animPath = getAnimFilePath(anim);
-					if (animPath == null || animPath == props.path || merged.exists(animPath))
-						continue;
-					merged.set(animPath, true);
-
-					var extraPath = '$path/$animPath';
-					var extra = Paths.getAnimated(extraPath);
-					if (extra == null)
-						continue;
-
-					var atlas = cast(frames, FlxAtlasFrames);
-					if (extra is FlxAtlasFrames) {
-						filePathOffsets.set(animPath, atlas.frames.length);
-						atlas.addAtlas(cast extra);
-					} else if (extra is String) {
-						var fScale = getAnimFrameScale(props.anims, animPath);
-						if (fScale != null) {
-							var tileFrames = FlxTileFrames.fromGraphic(FlxG.bitmap.add(cast(extra, String)), FlxPoint.get(fScale[0], fScale[1]));
-							var offsetIdx = atlas.frames.length;
-							for (frame in (tileFrames.frames : Array<Dynamic>))
-								atlas.frames.push(frame);
-							filePathOffsets.set(animPath, offsetIdx);
-						}
-					}
-				}
-				cacheOffsets.set(assetPath, filePathOffsets);
-			}
-		}
+		if (!isSimpleImage && !isAnimate && props.anims != null)
+			filePathOffsets = loadAtlasOffsets(props, path);
 
 		for (anim in props.anims ?? []) {
 			var suffix = anim.suffix ?? '';
 			var fullAnimName = anim.name + suffix;
 			_suffixes.set(anim.name, suffix);
-
 			_registerAnim(fullAnimName);
 
 			if (anim.offsets != null)
@@ -97,33 +64,72 @@ class FunkinSprite extends FlxAnimate {
 
 			if (isSimpleImage) {
 				animation.add(fullAnimName, anim.indices, anim.framerate, anim.looped);
-			} else if (anim.indices?.length > 0) {
-				var animPath = getAnimFilePath(anim);
-				var offset = animPath != null ? (filePathOffsets.get(animPath) ?? 0) : 0;
+				continue;
+			}
+
+			var hasIndices = anim.indices?.length > 0;
+			var animPath = getAnimFilePath(anim);
+			var offset = animPath != null ? (filePathOffsets.get(animPath) ?? 0) : 0;
+
+			if (isAnimate) {
+				hasIndices ? this.anim.addBySymbolIndices(fullAnimName, anim.prefix, offset > 0 ? anim.indices.map(i -> i + offset) : anim.indices,
+					anim.framerate, anim.looped) : this.anim.addBySymbol(fullAnimName, anim.prefix, anim.framerate, anim.looped);
+			} else if (hasIndices) {
 				var indices = offset > 0 ? anim.indices.map(i -> i + offset) : anim.indices;
-				if (isAnimate) {
-					this.anim.addBySymbolIndices(fullAnimName, anim.prefix, indices, anim.framerate, anim.looped);
-				} else if (anim.prefix != null) {
-					animation.addByIndices(fullAnimName, anim.prefix, indices, "", anim.framerate, anim.looped);
-				} else {
-					animation.add(fullAnimName, indices, Std.int(anim.framerate ?? 24), anim.looped ?? false);
-				}
+				anim.prefix != null ? animation.addByIndices(fullAnimName, anim.prefix, indices, "", anim.framerate,
+					anim.looped) : animation.add(fullAnimName, indices, Std.int(anim.framerate ?? 24), anim.looped ?? false);
 			} else {
-				isAnimate ? this.anim.addBySymbol(fullAnimName, anim.prefix, anim.framerate,
-					anim.looped) : animation.addByPrefix(fullAnimName, anim.prefix, anim.framerate, anim.looped);
+				animation.addByPrefix(fullAnimName, anim.prefix, anim.framerate, anim.looped);
 			}
 		}
-
 		loadParams(props);
 		if (props.scale != null)
 			scale.set(props.scale[0], props.scale[1]);
 		if (props.firstAnim != null)
 			playAnim(props.firstAnim, true);
 		updateHitbox();
-/*
+
 		if (graphic != null && graphic.bitmap != null) {
 			graphic.bitmap.disposeImage(); // clears RAM to use only the memory in VRAM
-		}*/
+		}
+	}
+
+	private function loadAtlasOffsets(props:ObjectData, path:String):Map<String, Int> {
+		var assetPath = '$path/${props.path}';
+		if (cacheOffsets.exists(assetPath))
+			return cacheOffsets.get(assetPath);
+
+		var offsets = new Map<String, Int>();
+		var atlas = cast(frames, FlxAtlasFrames);
+		var merged = new Map<String, Bool>();
+
+		for (anim in props.anims) {
+			var animPath = getAnimFilePath(anim);
+			if (animPath == null || animPath == props.path || merged.exists(animPath))
+				continue;
+			merged.set(animPath, true);
+
+			var extra = Paths.getAnimated('$path/$animPath');
+			if (extra == null)
+				continue;
+
+			if (extra is FlxAtlasFrames) {
+				offsets.set(animPath, atlas.frames.length);
+				atlas.addAtlas(cast extra);
+			} else if (extra is String) {
+				var fScale = getAnimFrameScale(props.anims, animPath);
+				if (fScale == null)
+					continue;
+				var tileFrames = FlxTileFrames.fromGraphic(FlxG.bitmap.add(cast(extra, String)), FlxPoint.get(fScale[0], fScale[1]));
+				var offsetIdx = atlas.frames.length;
+				for (frame in (tileFrames.frames : Array<Dynamic>))
+					atlas.frames.push(frame);
+				offsets.set(animPath, offsetIdx);
+			}
+		}
+
+		cacheOffsets.set(assetPath, offsets);
+		return offsets;
 	}
 
 	static function getAnimFilePath(anim:AnimData):Null<String> {
@@ -133,9 +139,9 @@ class FunkinSprite extends FlxAnimate {
 	}
 
 	static function getAnimFrameScale(anims:Array<AnimData>, fp:String):Null<Array<Int>> {
-		for (a in anims)
-			if (a.frameScale != null && getAnimFilePath(a) == fp)
-				return a.frameScale;
+		for (anim in anims)
+			if (anim.frameScale != null && getAnimFilePath(a) == fp)
+				return anim.frameScale;
 		return null;
 	}
 
