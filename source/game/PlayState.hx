@@ -159,9 +159,11 @@ class PlayState extends MusicBeatState {
 		noteController.strums.cameras = [camHUD];
 		noteController.sustains.cameras = [camHUD];
 		noteController.notes.cameras = [camHUD];
+		noteController.splashes.cameras = [camHUD];
 		add(noteController.strums);
 		add(noteController.sustains);
 		add(noteController.notes);
+		add(noteController.splashes);
 
 		if (modCharts != null)
 			modCharts.cacheStrumBase();
@@ -288,6 +290,7 @@ class PlayState extends MusicBeatState {
 			remove(noteController.strums);
 			remove(noteController.sustains);
 			remove(noteController.notes);
+			remove(noteController.splashes);
 
 			noteController.destroy();
 			noteController = null;

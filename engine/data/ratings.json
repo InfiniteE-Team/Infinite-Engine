@@ -6,7 +6,8 @@
             "score": 350,
             "health": 0.10,
             "window": 45,
-            "accuracyWeight": 1.0
+            "accuracyWeight": 1.0,
+            "splash": true
         },
         {
             "rating": "good",

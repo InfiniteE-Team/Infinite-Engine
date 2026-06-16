@@ -29,6 +29,9 @@ class NoteController {
 	public var direction:Float = 0;
 
 	public var noteSkinData:NoteSkinData;
+	public var splashesSkinData:NoteSkinData;
+
+
 	public var noteSkin:String = 'default';
 
 	public var noteType:String = 'normal';
@@ -109,6 +112,9 @@ class NoteController {
 		var noteDataPath:String = 'noteskins/$noteSkin/strumnotes';
 		noteSkinData = UtilsData.readJson(Paths.getPath('data/$noteDataPath', "json"));
 
+		var splashesDataPath:String = 'noteskins/$noteSkin/splashes';
+		splashesSkinData = UtilsData.readJson(Paths.getPath('data/$splashesDataPath', "json"));
+
 		var ratingPath = Paths.getPath('data/ratings', 'json');
 		ratingData = UtilsData.readJson(ratingPath);
 		if (ratingData == null || ratingData.ratings == null)
@@ -160,6 +166,173 @@ class NoteController {
 			scriptNC.call("postBuildStrums", []);
 			#end
 		}
+	}
+
+	// Creation or Generation for Notes
+	public function generateNotes(songTime:Float, daSong:SongConfig) {
+		if (daSong.songData == null) {
+			Trace.traceOnce('songData null, generated 0 notes', true);
+			return;
+		}
+
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("onGenerateNotes", []);
+		#end
+
+		for (data in daSong.songData.notes) {
+			// char info
+			var charData = Lambda.find(daSong.chars, c -> c.id == data.char);
+			if (charData == null)
+				continue;
+
+			// offsets for strums or notes for strums group
+			var offset = charStrumOffsets.get(charData.id);
+			if (offset == null)
+				continue;
+
+			// global Lane for strums groups
+			var globalLane = offset + data.lane;
+			var strum = strums.members[globalLane];
+			if (strum == null)
+				continue;
+
+			// param for Note positions in strum groups
+			var skinForChar = charData.noteSkin ?? noteSkin;
+			var pool = _notePool.get(skinForChar);
+
+			var note:Note;
+			if (pool != null && pool.length > 0) {
+				note = pool.pop();
+				note.revive();
+				note.reinit(data.time, keys, strum.x, 0, noteSkinData, skinForChar, data.lane);
+			} else {
+				note = new Note(data.time, keys, strum.x, 0, noteSkinData, skinForChar, data.lane);
+			}
+
+			note.ID = globalLane;
+			note.direction = globalLane;
+			note.strumTime = data.time;
+			note.mustPress = CharacterController.namesPlayer.contains(charData.role);
+			if (!daSong.strumsVisible)
+				note.visible = false;
+
+			note.strum = strum;
+
+			note.noteControl = this;
+
+			note.noteType = data.type;
+
+			#if HSCRIPT_ALLOWED
+			scriptNC.call("onGenerateNote", []);
+			#end
+
+			if (data.length > 0) {
+				var skinForChar = charData.noteSkin ?? noteSkin;
+				var pool = _sustainPool.get(skinForChar);
+
+				var totalLength:Float = data.length;
+				var curLength:Float = 0;
+				var lastSustain:NoteSustain = null;
+
+				while (curLength < totalLength) {
+					var isEndSegment = (curLength + RhythmCore.stepInMs >= totalLength);
+					var segmentLength = isEndSegment ? (totalLength - curLength) : RhythmCore.stepInMs;
+					var sustainTime = data.time + curLength;
+
+					var sustain:NoteSustain;
+					if (pool != null && pool.length > 0) {
+						sustain = pool.pop();
+						sustain.revive();
+						sustain.reinitSustain(sustainTime, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, segmentLength, data.type, false);
+					} else {
+						sustain = new NoteSustain(sustainTime, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, segmentLength, data.type, false);
+					}
+
+					sustain.ID = globalLane;
+					sustain.direction = globalLane;
+					sustain.strumTime = sustainTime;
+					sustain.mustPress = CharacterController.namesPlayer.contains(charData.role);
+					sustain.noteControl = this;
+					sustain.strum = strum;
+					sustain.noteType = data.type;
+					if (isDownscroll)
+						sustain.flipY = true;
+					if (!daSong.strumsVisible)
+						sustain.visible = false;
+
+					sustain.origin.y = 0;
+					var scaledHeight = (sustain.length * scrollSpeed) + 1;
+					sustain.scale.y = scaledHeight / sustain.frameHeight;
+
+					#if HSCRIPT_ALLOWED
+					scriptNC.call("onGenerateSustain", []);
+					#end
+
+					unspawnNotes.push(sustain);
+					lastSustain = sustain;
+
+					curLength += RhythmCore.stepInMs;
+				}
+
+				// end
+				if (lastSustain != null) {
+					var sustainEnd:NoteSustain;
+					if (pool != null && pool.length > 0) {
+						sustainEnd = pool.pop();
+						sustainEnd.revive();
+						sustainEnd.reinitSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, 0, data.type, true);
+					} else {
+						sustainEnd = new NoteSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, 0, data.type, true);
+					}
+
+					sustainEnd.ID = globalLane;
+					sustainEnd.direction = globalLane;
+					sustainEnd.strumTime = data.time + data.length;
+					sustainEnd.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
+					sustainEnd.noteControl = this;
+					sustainEnd.strum = strum;
+					sustainEnd.parentNote = lastSustain;
+					sustainEnd.noteType = data.type;
+					if (isDownscroll)
+						sustainEnd.flipY = true;
+					if (!daSong.strumsVisible)
+						sustainEnd.visible = false;
+
+					sustainEnd.origin.y = 0;
+
+					#if HSCRIPT_ALLOWED
+					scriptNC.call("onGenerateEndSustain", []);
+					#end
+
+					unspawnNotes.push(sustainEnd);
+				}
+			}
+			unspawnNotes.push(note);
+		}
+
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("postGenerateNotes", []);
+		#end
+
+		unspawnNotes.sort(sortNotes);
+	}
+
+	public function spawnSplash(strum:StrumNote, direction:Int, noteType:String = 'normal'):Void {
+		var pool = _splashPool.get(noteSkin);
+		var splash:NoteSplash;
+
+		if (pool != null && pool.length > 0) {
+			splash = pool.pop();
+			splash.revive();
+		} else {
+			splash = new NoteSplash(keys, strum.x + strum.offset.x, strum.y + strum.offset.y, splashesSkinData, noteSkin, direction, noteType);
+		}
+
+		splash.random = Std.int(Math.random() * 2);
+		splash.direction = direction;
+		splash.setPosition(strum.x + strum.offset.x, strum.y + strum.offset.y);
+		splash.loadSprite(splashesSkinData);
+		splashes.add(splash);
 	}
 
 	public function update(songTime:Float) {
@@ -383,155 +556,6 @@ class NoteController {
 		return null;
 	}
 
-	// Creation or Generation for Notes
-	public function generateNotes(songTime:Float, daSong:SongConfig) {
-		if (daSong.songData == null) {
-			Trace.traceOnce('songData null, generated 0 notes', true);
-			return;
-		}
-
-		#if HSCRIPT_ALLOWED
-		scriptNC.call("onGenerateNotes", []);
-		#end
-
-		for (data in daSong.songData.notes) {
-			// char info
-			var charData = Lambda.find(daSong.chars, c -> c.id == data.char);
-			if (charData == null)
-				continue;
-
-			// offsets for strums or notes for strums group
-			var offset = charStrumOffsets.get(charData.id);
-			if (offset == null)
-				continue;
-
-			// global Lane for strums groups
-			var globalLane = offset + data.lane;
-			var strum = strums.members[globalLane];
-			if (strum == null)
-				continue;
-
-			// param for Note positions in strum groups
-			var skinForChar = charData.noteSkin ?? noteSkin;
-			var pool = _notePool.get(skinForChar);
-
-			var note:Note;
-			if (pool != null && pool.length > 0) {
-				note = pool.pop();
-				note.revive();
-				note.reinit(data.time, keys, strum.x, 0, noteSkinData, skinForChar, data.lane);
-			} else {
-				note = new Note(data.time, keys, strum.x, 0, noteSkinData, skinForChar, data.lane);
-			}
-
-			note.ID = globalLane;
-			note.direction = globalLane;
-			note.strumTime = data.time;
-			note.mustPress = CharacterController.namesPlayer.contains(charData.role);
-			if (!daSong.strumsVisible)
-				note.visible = false;
-
-			note.strum = strum;
-
-			note.noteControl = this;
-
-			note.noteType = data.type;
-
-			#if HSCRIPT_ALLOWED
-			scriptNC.call("onGenerateNote", []);
-			#end
-
-			if (data.length > 0) {
-				var skinForChar = charData.noteSkin ?? noteSkin;
-				var pool = _sustainPool.get(skinForChar);
-
-				var totalLength:Float = data.length;
-				var curLength:Float = 0;
-				var lastSustain:NoteSustain = null;
-
-				while (curLength < totalLength) {
-					var isEndSegment = (curLength + RhythmCore.stepInMs >= totalLength);
-					var segmentLength = isEndSegment ? (totalLength - curLength) : RhythmCore.stepInMs;
-					var sustainTime = data.time + curLength;
-
-					var sustain:NoteSustain;
-					if (pool != null && pool.length > 0) {
-						sustain = pool.pop();
-						sustain.revive();
-						sustain.reinitSustain(sustainTime, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, segmentLength, data.type, false);
-					} else {
-						sustain = new NoteSustain(sustainTime, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, segmentLength, data.type, false);
-					}
-
-					sustain.ID = globalLane;
-					sustain.direction = globalLane;
-					sustain.strumTime = sustainTime;
-					sustain.mustPress = CharacterController.namesPlayer.contains(charData.role);
-					sustain.noteControl = this;
-					sustain.strum = strum;
-					sustain.noteType = data.type;
-					if (isDownscroll)
-						sustain.flipY = true;
-					if (!daSong.strumsVisible)
-						sustain.visible = false;
-
-					sustain.origin.y = 0;
-					var scaledHeight = (sustain.length * scrollSpeed) + 1;
-					sustain.scale.y = scaledHeight / sustain.frameHeight;
-
-					#if HSCRIPT_ALLOWED
-					scriptNC.call("onGenerateSustain", []);
-					#end
-
-					unspawnNotes.push(sustain);
-					lastSustain = sustain;
-
-					curLength += RhythmCore.stepInMs;
-				}
-
-				// end
-				if (lastSustain != null) {
-					var sustainEnd:NoteSustain;
-					if (pool != null && pool.length > 0) {
-						sustainEnd = pool.pop();
-						sustainEnd.revive();
-						sustainEnd.reinitSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, 0, data.type, true);
-					} else {
-						sustainEnd = new NoteSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, 0, data.type, true);
-					}
-
-					sustainEnd.ID = globalLane;
-					sustainEnd.direction = globalLane;
-					sustainEnd.strumTime = data.time + data.length;
-					sustainEnd.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
-					sustainEnd.noteControl = this;
-					sustainEnd.strum = strum;
-					sustainEnd.parentNote = lastSustain;
-					sustainEnd.noteType = data.type;
-					if (isDownscroll)
-						sustainEnd.flipY = true;
-					if (!daSong.strumsVisible)
-						sustainEnd.visible = false;
-
-					sustainEnd.origin.y = 0;
-
-					#if HSCRIPT_ALLOWED
-					scriptNC.call("onGenerateEndSustain", []);
-					#end
-
-					unspawnNotes.push(sustainEnd);
-				}
-			}
-			unspawnNotes.push(note);
-		}
-
-		#if HSCRIPT_ALLOWED
-		scriptNC.call("postGenerateNotes", []);
-		#end
-
-		unspawnNotes.sort(sortNotes);
-	}
-
 	public function getHealthDrain(note:Note):Float {
 		if (ratingData == null)
 			return -0.04;
@@ -581,10 +605,13 @@ class NoteController {
 		strums.destroy();
 		notes.destroy();
 		sustains.destroy();
+		splashes.destroy();
 
 		strums = null;
 		notes = null;
 		sustains = null;
+
+		splashes = null;
 	}
 
 	var _charStrumsCache:Map<String, Array<StrumNote>> = new Map();

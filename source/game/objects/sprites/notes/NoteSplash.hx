@@ -32,17 +32,13 @@ class NoteSplash extends FunkinSprite {
 		RGBShader.applyByAnimation(this, noteSkinData, 'note$direction-Scroll');
 	}
 
-	override public function playAnim(name:Null<String>, ?force:Bool = true) {
-		super.playAnim(name, force);
-
-		if (isFinished('splash'))
-			kill();
-	}
-
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
 		if (currentAnim != null && currentAnim != '')
 			RGBShader.applyByAnimation(this, noteSkinData, currentAnim);
+
+		if (animation.curAnim != null && animation.curAnim.finished)
+			kill();
 	}
 }

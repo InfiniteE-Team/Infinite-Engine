@@ -1,4 +1,46 @@
 {
+    "colorPalette": {
+        "note0-Splash0": [
+            "0xFFC24B99",
+            "0xFFFFFFFF",
+            "0xFF3C1F56"
+        ],
+        "note0-Splash1": [
+            "0xFFC24B99",
+            "0xFFFFFFFF",
+            "0xFF3C1F56"
+        ],
+        "note1-Splash0": [
+            "0xFF00FFFF",
+            "0xFFFFFFFF",
+            "0xFF1542B7"
+        ],
+        "note1-Splash1": [
+            "0xFF00FFFF",
+            "0xFFFFFFFF",
+            "0xFF1542B7"
+        ],
+        "note2-Splash0": [
+            "0xFF12FA05",
+            "0xFFFFFFFF",
+            "0xFF0A4447"
+        ],
+        "note2-Splash1": [
+            "0xFF12FA05",
+            "0xFFFFFFFF",
+            "0xFF0A4447"
+        ],
+        "note3-Splash0": [
+            "0xFFF9393F",
+            "0xFFFFFFFF",
+            "0xFF651038"
+        ],
+        "note3-Splash1": [
+            "0xFFF9393F",
+            "0xFFFFFFFF",
+            "0xFF651038"
+        ]
+    },
     "props": {
         "name": "Splash",
         "path": "default",
@@ -10,7 +52,7 @@
             1,
             1
         ],
-        "alpha": 1,
+        "alpha": 0.6,
         "visible": true,
         "flipX": false,
         "flipY": false,

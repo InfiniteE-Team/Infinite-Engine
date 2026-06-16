@@ -81,6 +81,10 @@ class InputController {
 				bestNote.wasGoodHit = true;
 				bestNote.kill();
 				charStrums[i].playAnim('confirm' + i, true);
+
+				if (ratingType.splash)
+					noteController.spawnSplash(charStrums[i], i, bestNote.noteType);
+
 				return bestNote;
 			} else {
 				charStrums[i].playAnim('press' + i, true);
