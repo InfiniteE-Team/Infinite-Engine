@@ -209,7 +209,7 @@ class FunkinSprite extends FlxAnimate {
 
 	public function activeOffsets(off:Point)
 		offset.set(0 - off.x, 0 - off.y);
-
+	
 	override public function destroy() {
 		super.destroy();
 		offsets = null;

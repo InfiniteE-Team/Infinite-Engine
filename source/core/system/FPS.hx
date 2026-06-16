@@ -1,4 +1,5 @@
 package core.system;
+
 #if cpp
 import cpp.vm.Gc;
 #end
@@ -9,35 +10,44 @@ import openfl.filters.GlowFilter;
 import flixel.util.FlxColor;
 import openfl.filters.BitmapFilterQuality;
 
-class FPS extends openfl.display.FPS
-{
+class FPS extends openfl.display.FPS {
 	public var glowColor:FlxColor = FlxColor.fromString('#00ccff');
 
-    public function new(x:Float, y:Float, color:Int) {
-		super(x,y,color);
+	public function new(x:Float, y:Float, color:Int) {
+		super(x, y, color);
 		autoSize = TextFieldAutoSize.LEFT;
-		defaultTextFormat = new openfl.text.TextFormat(Paths.getPath("5by7_b.ttf","font"), 12, color);
+		defaultTextFormat = new openfl.text.TextFormat(Paths.getPath("5by7_b.ttf", "font"), 12, color);
 		var glow = new openfl.filters.GlowFilter(glowColor, 1.0, 6, 6, 100, BitmapFilterQuality.MEDIUM);
 		filters = [glow];
-    }
-    
-    @:noCompletion
+	}
+
+	@:noCompletion
 	override private function __enterFrame(e:Float):Void {
 		super.__enterFrame(e);
 		infoFPS();
 	}
 
-    public function infoFPS() {
+	public function infoFPS() {
 		var mem:Float = formatRam(System.totalMemory);
-		#if cpp
-		var memGC:Float = formatRam(Gc.memUsage());
-		text = 'FPS: $currentFPS - [MEM: $mem MB / GC: $memGC MB]';
-		#else
-		text = 'FPS: $currentFPS - [MEM: $mem MB]';
-		#end
-    }
 
-	public function formatRam(r:Float):Float{
+		if (!core.ConfigMain.globalData.developerMode) {
+			#if cpp
+			var memGC:Float = formatRam(Gc.memUsage());
+			text = 'FPS: $currentFPS - [MEM: $mem MB / GC: $memGC MB]';
+			#else
+			text = 'FPS: $currentFPS - [MEM: $mem MB]';
+			#end
+		} else {
+			#if cpp
+			var memGC:Float = formatRam(Gc.memUsage());
+			text = 'FPS: $currentFPS - [MEM: $mem MB / GC: $memGC MB]\n\nDeveloper Mode';
+			#else
+			text = 'FPS: $currentFPS - [MEM: $mem MB]\n\nDeveloper Mode';
+			#end
+		}
+	}
+
+	public function formatRam(r:Float):Float {
 		var ram = Math.round(r / 1024 / 1024 * 100) / 100;
 		return ram;
 	}

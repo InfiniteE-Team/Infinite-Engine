@@ -13,4 +13,6 @@ typedef RatingDataType = {
     var health:Float;
     var ?window:Float;
     var ?miss:Bool;
+
+    var ?splash:Bool;
 }

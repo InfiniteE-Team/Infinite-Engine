@@ -42,11 +42,9 @@
 	<set name="BUILD_DIR" value="export" />
 	<source path="source" />
 
-	<assets path="engine" exclude="*.ogg" if="web"/>
-	<assets path="engine" exclude="*.mp3" unless="web"/>
+	<assets path="engine" exclude="*.ogg"/>
 	
-	<assets path="assets" exclude="*.ogg" if="web"/>
-	<assets path="assets" exclude="*.mp3" unless="web"/>
+	<assets path="assets" exclude="*.ogg"/>
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
