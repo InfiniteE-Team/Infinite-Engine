@@ -325,12 +325,12 @@ class NoteController {
 			splash = pool.pop();
 			splash.revive();
 		} else {
-			splash = new NoteSplash(keys, strum.x + strum.offset.x, strum.y + strum.offset.y, splashesSkinData, noteSkin, direction, noteType);
+			splash = new NoteSplash(keys, strum.x, strum.y, splashesSkinData, noteSkin, direction, noteType);
 		}
 
 		splash.random = Std.int(Math.random() * 2);
 		splash.direction = direction;
-		splash.setPosition(strum.x + strum.offset.x, strum.y + strum.offset.y);
+		splash.setPosition(strum.x, strum.y);
 		splash.loadSprite(splashesSkinData);
 		splashes.add(splash);
 	}
