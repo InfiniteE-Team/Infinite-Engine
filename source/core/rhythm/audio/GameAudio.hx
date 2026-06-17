@@ -24,9 +24,10 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 		inst = null;
 		vocals = null;
 		for (miss in soundMisses) {
-            miss.destroy();
-        }
-        soundMisses = [];
+			FlxG.sound.list.remove(miss, true);
+			miss.destroy();
+		}
+		soundMisses = [];
 
 		inst = audio('Inst', onfinish);
 		if (inst != null)
@@ -39,11 +40,11 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 		}
 
 		for (i in 1...3) {
-            var miss = new FlxSound();
-            miss.loadEmbedded(Paths.getPath('gameplay/misses/missnote' + i,"sound"), false, false, null);
-            FlxG.sound.list.add(miss);
-            soundMisses.push(miss);
-        }
+			var miss = new FlxSound();
+			miss.loadEmbedded(Paths.getPath('gameplay/misses/missnote' + i, "sound"), false, false, null);
+			FlxG.sound.list.add(miss);
+			soundMisses.push(miss);
+		}
 	}
 
 	public function audio(path:String, onfinish:() -> Void):FlxSound {
@@ -69,7 +70,8 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 	}
 
 	public function volumenVocs(SONG:SongConfig, isMiss:Bool, elapsed:Float) {
-		if (vocals == null) return;
+		if (vocals == null)
+			return;
 
 		if (!SONG.vocSeparated || SONG.needVoices) {
 			if (isMiss)
@@ -80,16 +82,16 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 	}
 
 	public function onMiss():Void {
-        if (vocals != null) {
-            vocals.volume = 0;
-        }
-        
-        if (soundMisses.length > 0) {
-            var randomMiss = FlxG.random.getObject(soundMisses);
+		if (vocals != null) {
+			vocals.volume = 0;
+		}
+
+		if (soundMisses.length > 0) {
+			var randomMiss = FlxG.random.getObject(soundMisses);
 			randomMiss.volume = FlxG.random.float(0.1, 0.2);
-            randomMiss.play(true);
-        }
-    }
+			randomMiss.play(true);
+		}
+	}
 
 	public function pauseAll():Void {
 		forEachAlive(function(s:FlxSound) s.pause());
@@ -120,8 +122,8 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 		inst = null;
 		vocals = null;
 		for (miss in soundMisses) {
-            miss.destroy();
-        }
-        soundMisses = null;
+			miss.destroy();
+		}
+		soundMisses = null;
 	}
 }

@@ -31,7 +31,6 @@ class NoteController {
 	public var noteSkinData:NoteSkinData;
 	public var splashesSkinData:NoteSkinData;
 
-
 	public var noteSkin:String = 'default';
 
 	public var noteType:String = 'normal';
@@ -112,9 +111,6 @@ class NoteController {
 		var noteDataPath:String = 'noteskins/$noteSkin/strumnotes';
 		noteSkinData = UtilsData.readJson(Paths.getPath('data/$noteDataPath', "json"));
 
-		var splashesDataPath:String = 'noteskins/$noteSkin/splashes';
-		splashesSkinData = UtilsData.readJson(Paths.getPath('data/$splashesDataPath', "json"));
-
 		var ratingPath = Paths.getPath('data/ratings', 'json');
 		ratingData = UtilsData.readJson(ratingPath);
 		if (ratingData == null || ratingData.ratings == null)
@@ -132,6 +128,9 @@ class NoteController {
 		scrollSpeed = daSong.speed ?? 1.2;
 
 		// splashes
+
+		var splashesDataPath:String = 'noteskins/$noteSkin/splashes';
+		splashesSkinData = UtilsData.readJson(Paths.getPath('data/$splashesDataPath', "json"));
 
 		// hold splashes
 
@@ -330,14 +329,26 @@ class NoteController {
 
 		splash.random = Std.int(Math.random() * 2);
 		splash.direction = direction;
+		splash.noteControl = this;
 		splash.setPosition(strum.x, strum.y);
 		splash.loadSprite(splashesSkinData);
 		splashes.add(splash);
 	}
 
+	public function recycleSplash(splash:NoteSplash):Void {
+		splashes.remove(splash, true);
+		splash.kill();
+		splash.noteControl = null;
+		if (!_splashPool.exists(splash.noteSkin))
+			_splashPool.set(splash.noteSkin, []);
+		_splashPool.get(splash.noteSkin).push(splash);
+	}
+
 	public function update(songTime:Float) {
 		updateNotes(songTime);
 	}
+
+	var toDestroy:Array<Note> = [];
 
 	public function updateNotes(songTime:Float) {
 		#if HSCRIPT_ALLOWED
@@ -357,7 +368,7 @@ class NoteController {
 				break;
 		}
 
-		var toDestroy:Array<Note> = [];
+		toDestroy.resize(0);
 
 		for (note in notes.members) {
 			if (note == null)

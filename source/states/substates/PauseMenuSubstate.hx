@@ -3,6 +3,7 @@ package states.substates;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
+import flixel.sound.FlxSound;
 
 class PauseMenuSubstate extends MusicBeatSubstate {
 	var bg:FlxSprite;
@@ -15,6 +16,8 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 
 	var texts:Array<FlxText> = [];
 
+	public var pauseMenuMusic:FlxSound;
+
 	override public function create() {
 		super.create();
 
@@ -23,6 +26,16 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		script.executeAll();
 		script.call("onCreate", []);
 		#end
+
+		if (pauseMenuMusic == null) {
+			pauseMenuMusic = new FlxSound();
+			pauseMenuMusic.loadEmbedded(Paths.getPath('pauseInfinite', "music"), true, false, null);
+
+			FlxG.sound.list.add(pauseMenuMusic);
+		}
+
+		pauseMenuMusic.volume = 0.7;
+		pauseMenuMusic.play();
 
 		this.camera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 
@@ -84,6 +97,10 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 			game.PlayState.instance.paused = false;
 			game.PlayState.instance.windowMod.resumeWindow();
 		}
+		
+		if (pauseMenuMusic != null) {
+			pauseMenuMusic.pause();
+		}
 	}
 
 	public function changeCur() {
@@ -103,5 +120,15 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		for (i in 0...texts.length) {
 			texts[i].alpha = (i == curSelect) ? 1.0 : 0.4;
 		}
+	}
+
+	override function destroy() {
+		bg = null;
+		text = null;
+		texts = null;
+
+		pauseMenuMusic.destroy();
+		pauseMenuMusic = null;
+		super.destroy();
 	}
 }

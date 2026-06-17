@@ -78,7 +78,6 @@ function onCreate() {
 }
 
 function postUpdate(elapsed:Float) {
-	// _updateHealthBar();
 	updateScore();
 	_updateLosingAnim();
 	_updateIconPositions();
@@ -90,7 +89,7 @@ function updateScore() {
 	scoreText.text = 'Score: $scoreFinal - Misses: ${playStateConfig.misses}';
 }
 
-function onBeatHit(beat:Float) {
+function postBeatHit(beat:Float) {
 	if (playerIcon != null && playerIcon.bumpInBeats) {
 		var tempo = playerIcon.stepTempo > 0 ? playerIcon.stepTempo : 1;
 		if (beat % tempo == 0)
@@ -123,6 +122,10 @@ function onNoteHitPlayer() {
     onRatingPopup(playStateConfig.rating, playStateConfig.combo);
 }
 
+function onNoteHitMiss() {
+	onMissPopup();
+}
+
 function onRatingPopup(ratingName, combo) {
 	var pixelPart1 = 'normal/score/';
 	var pixelPart2 = '';
@@ -141,8 +144,8 @@ function onRatingPopup(ratingName, combo) {
 
 	ratingSprite.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + ratingName + pixelPart2,'image'));
 
-	ratingSprite.x = FlxG.width * 0.55;
-	ratingSprite.y = FlxG.height * 0.5 - 80;
+	ratingSprite.x = FlxG.width * 0.55 - 160;
+	ratingSprite.y = FlxG.height * 0.5 - 90;
 
 	if (!isPixel) {
 		ratingSprite.setGraphicSize(Std.int(ratingSprite.width * 0.7));
@@ -188,7 +191,7 @@ function _showComboNumbers(combo, pixelPart1, pixelPart2) {
 		numScore.visible = true;
 		numScore.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + 'nums/num' + Std.int(i) + pixelPart2,'image'));
 
-		numScore.x = FlxG.width * 0.55 + (43 * daLoop) - 90 + 140;
+		numScore.x = FlxG.width * 0.55 + (43 * daLoop) - 90 + 20;
 		numScore.y = FlxG.height * 0.5 + 20;
 
 		if (!isPixel) {
@@ -279,10 +282,12 @@ function _getFromPool(pool) {
 		}
 	}
 
-	var newSprite = makeSprite();
-	pool.push(newSprite);
-	uiAdd(newSprite);
-	return newSprite;
+	var newSprite = new FlxSprite();
+    newSprite.cameras = [camHUD];
+    newSprite.scrollFactor.set(0, 0);
+    pool.push(newSprite);
+    add(newSprite);
+    return newSprite;
 }
 
 function _updateLosingAnim() {

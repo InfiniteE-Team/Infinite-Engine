@@ -112,8 +112,7 @@ class Paths {
 		}
 
 		if (folder != null && FileSystem.exists('$folder/Animation.json'))
-			result = FlxAnimateFrames.fromAnimate(folder); 
-		else
+			result = FlxAnimateFrames.fromAnimate(folder); else
 			tryLib('.xml', p -> FlxAtlasFrames.fromSparrow(imagePath, p))
 			|| tryLib('.txt', p -> FlxAtlasFrames.fromLibGdx(imagePath, p))
 			|| tryLib('.json', p -> FlxAtlasFrames.fromTexturePackerJson(imagePath, p))
@@ -121,6 +120,10 @@ class Paths {
 
 		if (result != null)
 			cache.set(fileName, result);
+
+		var g = FlxG.bitmap.get(fileName);
+		if (g != null && g.bitmap != null)
+			g.bitmap.disposeImage();
 
 		return result;
 	}

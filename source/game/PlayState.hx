@@ -248,6 +248,7 @@ class PlayState extends MusicBeatState {
 	}
 
 	override function onFocusLost():Void {
+		FlxG.sound.pause();
 		gameAudio.pauseAll();
 		#if HSCRIPT_ALLOWED
 		script.call('onFocusLost', []);
@@ -258,6 +259,7 @@ class PlayState extends MusicBeatState {
 		#if HSCRIPT_ALLOWED
 		script.call('onFocusGained', []);
 		#end
+		FlxG.sound.resume();
 		if (!paused)
 			gameAudio.playAll();
 		#if HSCRIPT_ALLOWED

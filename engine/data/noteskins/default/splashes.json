@@ -80,7 +80,7 @@
                 "flipY": false,
                 "offsets": [
                     -55,
-                    -55
+                    -60
                 ]
             },
             {
@@ -98,7 +98,7 @@
                 "flipY": false,
                 "offsets": [
                     -55,
-                    -55
+                    -60
                 ]
             },
             {
@@ -115,8 +115,8 @@
                 "flipX": false,
                 "flipY": false,
                 "offsets": [
-                    -50,
-                    -50
+                    -55,
+                    -60
                 ]
             },
             {
@@ -134,7 +134,7 @@
                 "flipY": false,
                 "offsets": [
                     -55,
-                    -55
+                    -60
                 ]
             },
             {
@@ -152,7 +152,7 @@
                 "flipY": false,
                 "offsets": [
                     -55,
-                    -55
+                    -60
                 ]
             },
             {
@@ -170,7 +170,7 @@
                 "flipY": false,
                 "offsets": [
                     -55,
-                    -55
+                    -60
                 ]
             },
             {
@@ -188,7 +188,7 @@
                 "flipY": false,
                 "offsets": [
                     -55,
-                    -55
+                    -60
                 ]
             },
             {
@@ -206,7 +206,7 @@
                 "flipY": false,
                 "offsets": [
                     -55,
-                    -55
+                    -60
                 ]
             }
         ]

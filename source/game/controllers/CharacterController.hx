@@ -172,13 +172,12 @@ class CharacterController extends FunkinObjectRegistry {
 				continue;
 			char.playAnim('${Character.getCharAnim(note.direction)}-miss', true);
 			char.isMiss = true;
+			#if HSCRIPT_ALLOWED
+			var charScript = scriptMap.get(char.id);
+			if (charScript != null)
+				charScript.call("onNoteHitMiss", []);
+			#end
 		}
-
-		#if HSCRIPT_ALLOWED
-		var charScript = scriptMap.get(char.id);
-		if (charScript != null)
-			charScript.call("onNoteHitMiss", []);
-		#end
 	}
 
 	public function danceAll():Void {
