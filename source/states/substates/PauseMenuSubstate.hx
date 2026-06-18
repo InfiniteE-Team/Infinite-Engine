@@ -27,10 +27,10 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		script.call("onCreate", []);
 		#end
 
+		pauseMenuMusic = FlxG.sound.list.members.find(s -> s != null && Std.string(s).contains('pauseInfinite'));
 		if (pauseMenuMusic == null) {
 			pauseMenuMusic = new FlxSound();
 			pauseMenuMusic.loadEmbedded(Paths.getPath('pauseInfinite', "music"), true, false, null);
-
 			FlxG.sound.list.add(pauseMenuMusic);
 		}
 
@@ -97,7 +97,7 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 			game.PlayState.instance.paused = false;
 			game.PlayState.instance.windowMod.resumeWindow();
 		}
-		
+
 		if (pauseMenuMusic != null) {
 			pauseMenuMusic.pause();
 		}
@@ -123,14 +123,15 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 	}
 
 	override function destroy() {
-		bg.destroy();
-		bg = null;
-		text.destroy();
-		text = null;
+		for (t in texts)
+			t.destroy();
 		texts = null;
+		text = null;
 
-		pauseMenuMusic.destroy();
-		pauseMenuMusic = null;
+		if (pauseMenuMusic != null) {
+			pauseMenuMusic.stop();
+		}
+
 		super.destroy();
 	}
 }

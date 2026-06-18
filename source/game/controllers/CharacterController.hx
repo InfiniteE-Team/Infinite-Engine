@@ -111,13 +111,28 @@ class CharacterController extends FunkinObjectRegistry {
 	}
 
 	public function isSinging(noteController:NoteController) {
+		var songPos = core.rhythm.RhythmCore.songPosition;
 		for (char in opponentChars) {
 			var strums = noteController.getCharStrums(char.id);
 			for (i in 0...strums.length) {
 				var note = noteController.getHittableNote(char.id, i, false);
-				if (note != null)
+				if (note != null) {
 					setSing(char, note.direction);
-				else
+					continue;
+				}
+
+				var holdingActive = false;
+				for (sustain in noteController.sustains.members) {
+					if (sustain == null || !sustain.alive || sustain.mustPress || sustain.strum != strums[i])
+						continue;
+					if (songPos >= sustain.strumTime && songPos <= sustain.strumTime + sustain.length) {
+						setSing(char, sustain.direction);
+						holdingActive = true;
+						break;
+					}
+				}
+
+				if (!holdingActive)
 					strums[i].playAnim('static' + i, true);
 			}
 		}
@@ -128,7 +143,7 @@ class CharacterController extends FunkinObjectRegistry {
 
 		#if HSCRIPT_ALLOWED
 		var charScript = scriptMap.get(char.id);
-		if (charScript != null){
+		if (charScript != null) {
 			if (hitNote != null)
 				charScript.call("onNoteHitPlayer", []);
 		}

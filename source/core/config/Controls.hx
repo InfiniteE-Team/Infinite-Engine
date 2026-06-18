@@ -2,8 +2,6 @@ package core.config;
 
 import flixel.input.keyboard.FlxKey;
 
-using Lambda;
-
 class Controls {
 	public var keyGroups:Map<String, Array<Array<FlxKey>>> = new Map();
 

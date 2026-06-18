@@ -53,6 +53,10 @@ class ScriptGlobals {
 
 		// modchart
 		root['WindowModManager'] = windowmodcharting.WindowModManager;
+
+		// bpm
+		root['FlxRhythmConductorUtil'] = flixel.addons.sound.FlxRhythmConductorUtil;
+		//root['MusicTimeChangeData'] = flixel.addons.sound.MusicTimeChangeEvent.MusicTimeChangeData;
 	}
 
 	public static function initLua():Void {
@@ -87,6 +91,9 @@ class ScriptGlobals {
 			"File" => sys.io.File,
 			// modchart
 			"WindowModManager" => windowmodcharting.WindowModManager,
+			// bpm
+			"FlxRhythmConductorUtil" => flixel.addons.sound.FlxRhythmConductorUtil,
+			//"MusicTimeChangeData" => flixel.addons.sound.MusicTimeChangeEvent.MusicTimeChangeData,
 		];
 	}
 }

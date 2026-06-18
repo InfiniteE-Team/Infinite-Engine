@@ -70,7 +70,7 @@ class PlayState extends MusicBeatState {
 
 		DiffsUtils.getDifficulty(curSong);
 		SONG.configSong(curSong, DiffsUtils.difficulties[curDifficulty]);
-		RhythmCore.changeBPM(SONG.bpmSong);
+		//RhythmCore.changeBPM(SONG.bpmSong);
 
 		buildStageandChars();
 
@@ -192,7 +192,10 @@ class PlayState extends MusicBeatState {
 
 		gameAudio.playAll();
 
-		tracker.reset();
+		RhythmCore.conductor.target = gameAudio.inst;
+
+    	RhythmCore.conductor.update(0.0);
+		//RhythmCore.reset();
 	}
 
 	public function endSong() {
@@ -306,6 +309,7 @@ class PlayState extends MusicBeatState {
 		playStateConfig = new PlayStateConfig();
 
 		RhythmCore.reset(SONG.bpmSong);
+		RhythmCore.conductor.target = gameAudio.inst;
 
 		if (chars != null)
 			chars.danceAll();
@@ -335,7 +339,7 @@ class PlayState extends MusicBeatState {
 		if (!paused || !startCount) {
 			cameraController.update(elapsed);
 
-			noteController.update(RhythmCore.songPosition);
+			noteController.update(RhythmCore.conductor.frameMusicPosition);
 
 			if (playStateConfig.health <= 0)
 				isDeath();

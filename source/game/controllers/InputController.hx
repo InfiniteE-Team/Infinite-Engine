@@ -22,6 +22,8 @@ class InputController {
 		var justPress = control.justPressed("noteKeys", i);
 
 		if (isPressed) {
+			var hasActiveSustain = false;
+			var songPos = core.rhythm.RhythmCore.songPosition;
 			for (sustain in noteController.sustains.members) {
 				if (sustain == null || !sustain.alive || !sustain.mustPress)
 					continue;
@@ -29,11 +31,11 @@ class InputController {
 					continue;
 				if (sustain.isSustainEnd)
 					continue;
-
-				var songPos = core.rhythm.RhythmCore.songPosition;
+				
 				var canHold = songPos >= sustain.strumTime - 50 && songPos <= sustain.strumTime + sustain.length;
 				if (canHold) {
 					sustain.isHeld = true;
+					hasActiveSustain = true;
 					charStrums[i].playAnim('confirm' + i, true);
 				}
 			}
@@ -86,7 +88,7 @@ class InputController {
 					noteController.spawnSplash(charStrums[i], i, bestNote.noteType);
 
 				return bestNote;
-			} else {
+			} else if (!hasActiveSustain) {
 				charStrums[i].playAnim('press' + i, true);
 				if (!isGhostTapping) {
 					playStateConfig.misses++;

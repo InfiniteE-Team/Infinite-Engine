@@ -1,6 +1,7 @@
 package states.substates;
 
-import core.rhythm.TrackBeat;
+import core.rhythm.RhythmCore;
+import flixel.addons.sound.FlxRhythmConductor;
 import core.json.JsonWatcher;
 import utils.InfoHelpDebug;
 #if HSCRIPT_ALLOWED
@@ -9,7 +10,6 @@ import core.scripting.ScriptHandler;
 import game.controllers.InputController;
 
 class MusicBeatSubstate extends flixel.FlxSubState {
-	var tracker:TrackBeat = new TrackBeat();
 	#if HSCRIPT_ALLOWED
 	var script:ScriptHandler;
 	#end
@@ -22,9 +22,12 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 		#if HSCRIPT_ALLOWED
 		if (script == null)
 			initScript();
-		// script.call("onCreate", []);
 		#end
 		super.create();
+
+		FlxRhythmConductor.instance.onStepHit.add(_onStepHit);
+        FlxRhythmConductor.instance.onBeatHit.add(_onBeatHit);
+        FlxRhythmConductor.instance.onMeasureHit.add(_onMeasureHit);
 
 		if (core.ConfigMain.globalData.developerMode) {
 			infoHelp = new InfoHelpDebug(FlxG.width - 300, 0, 0);
@@ -56,18 +59,19 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 			if (FlxG.keys.justPressed.F4)
 				infoHelp.openUI();
 		}
-		tracker.update();
-		tracker.check(stepHit, beatHit);
 	}
-/*
-	public static function resetState():Void {
-		if (core.ConfigMain.globalData.developerMode)
-			JsonWatcher.updateSwitch();
-		var parent = _parentState;
-		var cls = Type.getClass(this);
-		close();
-		parent.openSubState(Type.createInstance(cls, []));
-	}*/
+
+	function _onStepHit(step:Int, backward:Bool):Void {
+        if (!backward) stepHit(step);
+    }
+
+    function _onBeatHit(beat:Int, backward:Bool):Void {
+        if (!backward) beatHit(beat);
+    }
+
+    function _onMeasureHit(measure:Int, backward:Bool):Void {
+        if (!backward) measureHit(measure);
+    }
 
 	public function stepHit(step:Int):Void {
 		#if HSCRIPT_ALLOWED
@@ -81,8 +85,13 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 		#end
 	}
 
+	public function measureHit(measure:Int):Void {}
+
 	override function destroy():Void {
-		// core.assets.Paths.clearCache(); fuck me
+		FlxRhythmConductor.instance.onStepHit.remove(_onStepHit);
+        FlxRhythmConductor.instance.onBeatHit.remove(_onBeatHit);
+        FlxRhythmConductor.instance.onMeasureHit.remove(_onMeasureHit);
+		
 		JsonWatcher.clear();
 		#if HSCRIPT_ALLOWED
 		script.call("onDestroy", []);

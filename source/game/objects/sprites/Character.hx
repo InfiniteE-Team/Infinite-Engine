@@ -91,8 +91,9 @@ class Character extends FunkinObjectRegistry {
 		if (isSing || isMiss)
 			singCountTime += elapsed;
 
-		if (layers != null && layers.length > 0) {
-			if (idleAfterSing && ((isMiss || isSing) && layers[0].animation.finished)) {
+		if (idleAfterSing && (isSing || isMiss)) {
+			var beatLengthSecs = core.rhythm.RhythmCore.crochet / 1000.0;
+			if (singCountTime >= singTime * beatLengthSecs) {
 				isSing = false;
 				isMiss = false;
 				singCountTime = 0;
@@ -141,10 +142,9 @@ class Character extends FunkinObjectRegistry {
 		if (charScript.callCancellable('onDance', []))
 			return;
 		#end
-		if ((isSing || isMiss) && singCountTime > singTime) {
-			singCountTime = 0;
+
+		if (isSing || isMiss)
 			return;
-		}
 
 		if (existsAnim('danceLeft') && existsAnim('danceRight')) {
 			isDancing = !isDancing;

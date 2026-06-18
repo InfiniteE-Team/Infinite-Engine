@@ -20,8 +20,6 @@ import game.graphics.shaders.hardcode.RGBShader;
 import core.scripting.ScriptHandler;
 #end
 
-using Lambda;
-
 class NoteController {
 	public var isMiss:Bool = false;
 

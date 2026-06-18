@@ -1,16 +1,69 @@
 package core.rhythm;
 
-class RhythmCore {
-	public static var bpm:Float = 100.0;
-	public static var crochet:Float = 600.0;
-	public static var stepInMs:Float = 150;
+import flixel.addons.sound.FlxRhythmConductor;
+import flixel.addons.sound.MusicTimeChangeEvent;
 
-	public static var songPosition:Float = 0;
+class RhythmCore {
+	public static var conductor(get, never):FlxRhythmConductor;
+
+	static inline function get_conductor():FlxRhythmConductor
+		return FlxRhythmConductor.instance;
+
+	public static var bpm(get, never):Float;
+
+	static inline function get_bpm():Float
+		return conductor.currentBpm;
+
+	public static var crochet(get, never):Float;
+
+	static inline function get_crochet():Float
+		return conductor.beatLengthMs;
+
+	public static var stepInMs(get, never):Float;
+
+	static inline function get_stepInMs():Float
+		return conductor.stepLengthMs;
+
+	public static var onStepHit(get, never):flixel.util.FlxSignal.FlxTypedSignal<(Int, Bool) -> Void>;
+
+	static inline function get_onStepHit()
+		return FlxRhythmConductor.stepHit;
+
+	public static var onBeatHit(get, never):flixel.util.FlxSignal.FlxTypedSignal<(Int, Bool) -> Void>;
+
+	static inline function get_onBeatHit()
+		return FlxRhythmConductor.beatHit;
+
+	public static var onMeasureHit(get, never):flixel.util.FlxSignal.FlxTypedSignal<(Int, Bool) -> Void>;
+
+	static inline function get_onMeasureHit()
+		return FlxRhythmConductor.measureHit;
+
+	public static var onBpmChange(get, never):flixel.util.FlxSignal.FlxTypedSignal<Float->Void>;
+
+	static inline function get_onBpmChange()
+		return FlxRhythmConductor.bpmChange;
 
 	public static function changeBPM(newBPM:Float):Void {
-		bpm = newBPM;
-		crochet = 60000.0 / bpm;
-		stepInMs = crochet * 0.25;
+		setupTimeChanges([new MusicTimeChangeEvent(0.0, newBPM)]);
+	}
+
+	public static function setupTimeChanges(timeChanges:Array<MusicTimeChangeEvent>):Void {
+		conductor.setupTimeChanges(timeChanges);
+	}
+
+	public static function setTarget(sound:flixel.sound.FlxSound):Void {
+		conductor.target = sound;
+	}
+
+	public static var songPosition(get, set):Float;
+
+	static inline function get_songPosition():Float
+		return conductor.musicPosition;
+
+	static function set_songPosition(value:Float):Float {
+		conductor.update(value);
+		return value;
 	}
 
 	public static function pause(gameAudio:core.rhythm.audio.GameAudio, windowMod):Void {
@@ -36,9 +89,8 @@ class RhythmCore {
 			windowMod.resumeWindow();
 	}
 
-    public static function reset(bpm:Float)
-    {
-        songPosition = 0;
+	public static function reset(bpm:Float):Void {
 		changeBPM(bpm);
-    }
+		conductor.update(0.0);
+	}
 }
