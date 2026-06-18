@@ -121,10 +121,11 @@ class Paths {
 		if (result != null)
 			cache.set(fileName, result);
 
-		var g = FlxG.bitmap.get(fileName);
-		if (g != null && g.bitmap != null)
-			g.bitmap.disposeImage();
-
+		if ((result is FlxFramesCollection)) {
+			var fc:FlxFramesCollection = cast result;
+			if (fc.parent != null && fc.parent.bitmap != null)
+				fc.parent.bitmap.disposeImage();
+		}
 		return result;
 	}
 
@@ -183,6 +184,7 @@ class Paths {
 					// UPLOAD IN OPENFL
 					var graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, fileName);
 					graphic.persist = true;
+					bmp.disposeImage();
 
 					switch (formatDetected) {
 						case "animate":

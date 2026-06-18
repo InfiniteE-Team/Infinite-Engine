@@ -123,7 +123,9 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 	}
 
 	override function destroy() {
+		bg.destroy();
 		bg = null;
+		text.destroy();
 		text = null;
 		texts = null;
 

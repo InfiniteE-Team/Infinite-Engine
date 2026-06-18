@@ -230,48 +230,39 @@ class NoteController {
 				var pool = _sustainPool.get(skinForChar);
 
 				var totalLength:Float = data.length;
-				var curLength:Float = 0;
 				var lastSustain:NoteSustain = null;
 
-				while (curLength < totalLength) {
-					var isEndSegment = (curLength + RhythmCore.stepInMs >= totalLength);
-					var segmentLength = isEndSegment ? (totalLength - curLength) : RhythmCore.stepInMs;
-					var sustainTime = data.time + curLength;
-
-					var sustain:NoteSustain;
-					if (pool != null && pool.length > 0) {
-						sustain = pool.pop();
-						sustain.revive();
-						sustain.reinitSustain(sustainTime, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, segmentLength, data.type, false);
-					} else {
-						sustain = new NoteSustain(sustainTime, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, segmentLength, data.type, false);
-					}
-
-					sustain.ID = globalLane;
-					sustain.direction = globalLane;
-					sustain.strumTime = sustainTime;
-					sustain.mustPress = CharacterController.namesPlayer.contains(charData.role);
-					sustain.noteControl = this;
-					sustain.strum = strum;
-					sustain.noteType = data.type;
-					if (isDownscroll)
-						sustain.flipY = true;
-					if (!daSong.strumsVisible)
-						sustain.visible = false;
-
-					sustain.origin.y = 0;
-					var scaledHeight = (sustain.length * scrollSpeed) + 1;
-					sustain.scale.y = scaledHeight / sustain.frameHeight;
-
-					#if HSCRIPT_ALLOWED
-					scriptNC.call("onGenerateSustain", []);
-					#end
-
-					unspawnNotes.push(sustain);
-					lastSustain = sustain;
-
-					curLength += RhythmCore.stepInMs;
+				var sustain:NoteSustain;
+				if (pool != null && pool.length > 0) {
+					sustain = pool.pop();
+					sustain.revive();
+					sustain.reinitSustain(data.time, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, totalLength, data.type, false);
+				} else {
+					sustain = new NoteSustain(data.time, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, totalLength, data.type, false);
 				}
+
+				sustain.ID = globalLane;
+				sustain.direction = globalLane;
+				sustain.strumTime = data.time;
+				sustain.mustPress = CharacterController.namesPlayer.contains(charData.role);
+				sustain.noteControl = this;
+				sustain.strum = strum;
+				sustain.noteType = data.type;
+				if (isDownscroll)
+					sustain.flipY = true;
+				if (!daSong.strumsVisible)
+					sustain.visible = false;
+
+				sustain.origin.y = 0;
+				var scaledHeight = (totalLength * scrollSpeed) + 1;
+				sustain.scale.y = scaledHeight / sustain.frameHeight;
+
+				#if HSCRIPT_ALLOWED
+				scriptNC.call("onGenerateSustain", []);
+				#end
+
+				unspawnNotes.push(sustain);
+				lastSustain = sustain;
 
 				// end
 				if (lastSustain != null) {
@@ -416,37 +407,32 @@ class NoteController {
 			final strumCenterX = sustain.strum.x - sustain.strum.offset.x + sustain.strum.frameWidth * sustain.strum.scale.x * 0.5;
 			sustain.x = strumCenterX - sustain.frameWidth * sustain.scale.x * 0.5;
 
-			var scaledHeight = (sustain.length * scrollSpeed) + 1;
+			var scaledHeight:Float;
+			var strumMid = sustain.strum.y + (sustain.strum.frameHeight * 0.5) - sustain.strum.offset.y;
 
-			var strumY = isDownscroll ? sustain.strum.y - ((sustain.strumTime - songTime) * scrollSpeed) : sustain.strum.y
-				+ ((sustain.strumTime - songTime) * scrollSpeed);
-			var targetY = strumY + sustain.strum.frameHeight * 0.5;
-
-			if (isDownscroll) {
-				sustain.y = targetY - scaledHeight;
+			if (sustain.isHeld && sustain.strumTime <= songTime) {
+				var remaining = Math.max(0, (sustain.strumTime + sustain.length) - songTime);
+				scaledHeight = (remaining * scrollSpeed) + 1;
+				sustain.scale.y = scaledHeight / sustain.frameHeight;
+				if (isDownscroll) {
+					sustain.y = strumMid - scaledHeight;
+				} else {
+					sustain.y = strumMid;
+				}
 			} else {
-				sustain.y = targetY;
+				scaledHeight = (sustain.length * scrollSpeed) + 1;
+				sustain.scale.y = scaledHeight / sustain.frameHeight;
+				var strumY = isDownscroll ? sustain.strum.y - ((sustain.strumTime - songTime) * scrollSpeed) : sustain.strum.y
+					+ ((sustain.strumTime - songTime) * scrollSpeed);
+				var targetY = strumY + sustain.strum.frameHeight * 0.5;
+				if (isDownscroll) {
+					sustain.y = targetY - scaledHeight;
+				} else {
+					sustain.y = targetY;
+				}
 			}
 			sustain.offset.y = 0;
-
-			// clipping
-			if (sustain.isHeld && sustain.strumTime <= songTime) {
-				var strumMidScreen = sustain.strum.y + (sustain.strum.frameHeight * 0.5) - sustain.strum.offset.y;
-				var clipY:Float;
-
-				if (isDownscroll) {
-					clipY = (strumMidScreen - sustain.y) / sustain.scale.y;
-					clipY = Math.max(0, Math.min(sustain.frameHeight, clipY));
-					_clipRect.set(0, 0, sustain.frameWidth, clipY);
-				} else {
-					clipY = (strumMidScreen - sustain.y) / sustain.scale.y;
-					clipY = Math.max(0, clipY);
-					_clipRect.set(0, clipY, sustain.frameWidth, sustain.frameHeight - clipY);
-				}
-				sustain.clipRect = _clipRect;
-			} else {
-				sustain.clipRect = null;
-			}
+			sustain.clipRect = null;
 
 			#if HSCRIPT_ALLOWED
 			scriptNC.call("onSustainMovement", [sustain, songTime]);
