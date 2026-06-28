@@ -34,7 +34,7 @@ class FunkinSprite extends FlxAnimate {
 			return;
 		}
 
-		var isSimpleImage = (loaded is String);
+		var isSimpleImage = (loaded is String) || (loaded is flixel.graphics.FlxGraphic);
 		var isAnimate = false;
 
 		if (isSimpleImage) {

@@ -6,8 +6,31 @@ class Controls {
 	public var keyGroups:Map<String, Array<Array<FlxKey>>> = new Map();
 
 	public function new() {
-		loadGroup("noteKeys", SaveData.data.noteKeyPresets?.get("4"));
+		loadGroup("noteKeys", getPreset("4"));
 		loadGroup("uiKeys", SaveData.data.uiKeys);
+	}
+
+	private function getPreset(key:String):Array<Array<String>> {
+		var raw:Dynamic = SaveData.data.noteKeyPresets;
+		if (raw == null)
+			return null;
+		var lanesRaw:Dynamic = Reflect.field(raw, key);
+		if (lanesRaw == null)
+			return null;
+		return coerceLanes(lanesRaw);
+	}
+
+	private function coerceLanes(lanesRaw:Dynamic):Array<Array<String>> {
+		var lanes:Array<Dynamic> = lanesRaw;
+		var result:Array<Array<String>> = [];
+		for (laneRaw in lanes) {
+			var lane:Array<Dynamic> = laneRaw;
+			var stringLane:Array<String> = [];
+			for (k in lane)
+				stringLane.push(Std.string(k));
+			result.push(stringLane);
+		}
+		return result;
 	}
 
 	private function loadGroup(groupName:String, savedKeys:Array<Array<String>>):Void {

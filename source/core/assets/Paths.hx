@@ -102,29 +102,48 @@ class Paths {
 		var folder = findLib('images/$fileName');
 		var result:Dynamic = null;
 
-		inline function tryLib(ext:String, build:String->Dynamic):Bool {
+		var graphic:flixel.graphics.FlxGraphic = null;
+		if (imagePath != null) {
+			graphic = FlxG.bitmap.get(fileName);
+			if (graphic == null) {
+				var bmp = openfl.display.BitmapData.fromFile(imagePath);
+				graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, fileName);
+				graphic.persist = true;
+
+				@:privateAccess
+				graphic.bitmap.getTexture(FlxG.stage.context3D);
+				graphic.bitmap.disposeImage();
+			}
+		}
+
+		inline function tryLib(ext:String, build:flixel.graphics.FlxGraphic->String->Dynamic):Bool {
 			var path = findLib('images/$fileName$ext');
-			if (path != null) {
-				result = build(path);
+			if (path != null && graphic != null) {
+				result = build(graphic, path);
 				return true;
 			}
 			return false;
 		}
 
-		if (folder != null && FileSystem.exists('$folder/Animation.json'))
-			result = FlxAnimateFrames.fromAnimate(folder); else
-			tryLib('.xml', p -> FlxAtlasFrames.fromSparrow(imagePath, p))
-			|| tryLib('.txt', p -> FlxAtlasFrames.fromLibGdx(imagePath, p))
-			|| tryLib('.json', p -> FlxAtlasFrames.fromTexturePackerJson(imagePath, p))
-			|| (result = imagePath) != null;
+		if (folder != null && FileSystem.exists('$folder/Animation.json')) {
+			result = FlxAnimateFrames.fromAnimate(folder);
+		} else {
+			tryLib('.xml', (g, p) -> FlxAtlasFrames.fromSparrow(g, p))
+			|| tryLib('.txt', (g, p) -> FlxAtlasFrames.fromLibGdx(g, p))
+			|| tryLib('.json', (g, p) -> FlxAtlasFrames.fromTexturePackerJson(g, p))
+			|| (result = graphic) != null;
+		}
 
 		if (result != null)
 			cache.set(fileName, result);
 
 		if ((result is FlxFramesCollection)) {
 			var fc:FlxFramesCollection = cast result;
-			if (fc.parent != null && fc.parent.bitmap != null)
+			if (fc.parent != null && fc.parent.bitmap != null) {
+				@:privateAccess
+				fc.parent.bitmap.getTexture(FlxG.stage.context3D);
 				fc.parent.bitmap.disposeImage();
+			}
 		}
 		return result;
 	}
@@ -146,7 +165,7 @@ class Paths {
 
 		// CPU / RAM
 		Thread.create(function() {
-			var bmp = openfl.display.BitmapData.fromFile(imagePath);
+			var img = lime.graphics.Image.fromFile(imagePath);
 
 			var formatDetected = "image";
 			var rawData:String = null;
@@ -180,11 +199,18 @@ class Paths {
 			haxe.MainLoop.runInMainThread(function() {
 				var finalAsset:Dynamic = null;
 
-				if (bmp != null && !cache.exists(fileName)) {
+				if (img != null && !cache.exists(fileName)) {
 					// UPLOAD IN OPENFL
+					var bmp = openfl.display.BitmapData.fromImage(img);
 					var graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, fileName);
 					graphic.persist = true;
-					bmp.disposeImage();
+
+					@:privateAccess
+					graphic.bitmap.getTexture(FlxG.stage.context3D);
+
+					graphic.bitmap.disposeImage();
+					img.buffer = null;
+                    img = null;
 
 					switch (formatDetected) {
 						case "animate":
@@ -202,8 +228,9 @@ class Paths {
 					if (finalAsset != null) {
 						cache.set(fileName, finalAsset);
 					}
-				} else if (bmp != null) {
-					bmp.dispose();
+				} else if (img != null) {
+					img.buffer = null;
+                    img = null;
 				}
 
 				if (onComplete != null) {

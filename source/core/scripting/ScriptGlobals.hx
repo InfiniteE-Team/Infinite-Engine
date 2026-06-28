@@ -52,11 +52,33 @@ class ScriptGlobals {
 		root['File'] = sys.io.File;
 
 		// modchart
+		root['ModchartSystem'] = game.modchart.ModchartSystem;
+		// modifiers
+		root['DrunkModifier'] = game.modchart.modifiers.Modifiers.DrunkModifier;
+		root['TornadoModifier'] = game.modchart.modifiers.Modifiers.TornadoModifier;
+		root['TipsyModifier'] = game.modchart.modifiers.Modifiers.TipsyModifier;
+		root['TipsyZModifier'] = game.modchart.modifiers.Modifiers.TipsyZModifier;
+		root['ReverseModifier'] = game.modchart.modifiers.Modifiers.ReverseModifier;
+		root['FlipModifier'] = game.modchart.modifiers.Modifiers.FlipModifier;
+		root['ConfusionModifier'] = game.modchart.modifiers.Modifiers.ConfusionModifier;
+		root['MiniModifier'] = game.modchart.modifiers.Modifiers.MiniModifier;
+		root['StealthModifier'] = game.modchart.modifiers.Modifiers.StealthModifier;
+		root['ZModifier'] = game.modchart.modifiers.Modifiers.ZModifier;
+		root['SpeedModifier'] = game.modchart.modifiers.Modifiers.SpeedModifier;
+		root['ConfusionOffsetModifier'] = game.modchart.modifiers.Modifiers.ConfusionOffsetModifier;
+		root['TwirlModifier'] = game.modchart.modifiers.Modifiers.TwirlModifier;
+		root['ShakyModifier'] = game.modchart.modifiers.Modifiers.ShakyModifier;
+		root['PulseModifier'] = game.modchart.modifiers.Modifiers.PulseModifier;
+		root['BlinkModifier'] = game.modchart.modifiers.Modifiers.BlinkModifier;
+		root['TanDrunkModifier'] = game.modchart.modifiers.Modifiers.TanDrunkModifier;
+		root['BeatXModifier'] = game.modchart.modifiers.Modifiers.BeatXModifier;
+		root['ShrinkXModifier'] = game.modchart.modifiers.Modifiers.ShrinkXModifier;
+
 		root['WindowModManager'] = windowmodcharting.WindowModManager;
 
 		// bpm
 		root['FlxRhythmConductorUtil'] = flixel.addons.sound.FlxRhythmConductorUtil;
-		//root['MusicTimeChangeData'] = flixel.addons.sound.MusicTimeChangeEvent.MusicTimeChangeData;
+		// root['MusicTimeChangeData'] = flixel.addons.sound.MusicTimeChangeEvent.MusicTimeChangeData;
 	}
 
 	public static function initLua():Void {
@@ -90,10 +112,31 @@ class ScriptGlobals {
 			"FileSystem" => sys.FileSystem,
 			"File" => sys.io.File,
 			// modchart
+			"ModchartSystem" => game.modchart.ModchartSystem,
+			// modifiers
+			"DrunkModifier" => game.modchart.modifiers.Modifiers.DrunkModifier,
+			"TornadoModifier" => game.modchart.modifiers.Modifiers.TornadoModifier,
+			"TipsyModifier" => game.modchart.modifiers.Modifiers.TipsyModifier,
+			"TipsyZModifier" => game.modchart.modifiers.Modifiers.TipsyZModifier,
+			"ReverseModifier" => game.modchart.modifiers.Modifiers.ReverseModifier,
+			"FlipModifier" => game.modchart.modifiers.Modifiers.FlipModifier,
+			"ConfusionModifier" => game.modchart.modifiers.Modifiers.ConfusionModifier,
+			"MiniModifier" => game.modchart.modifiers.Modifiers.MiniModifier,
+			"StealthModifier" => game.modchart.modifiers.Modifiers.StealthModifier,
+			"ZModifier" => game.modchart.modifiers.Modifiers.ZModifier,
+			"SpeedModifier" => game.modchart.modifiers.Modifiers.SpeedModifier,
+			"ConfusionOffsetModifier" => game.modchart.modifiers.Modifiers.ConfusionOffsetModifier,
+			"TwirlModifier" => game.modchart.modifiers.Modifiers.TwirlModifier,
+			"ShakyModifier" => game.modchart.modifiers.Modifiers.ShakyModifier,
+			"PulseModifier" => game.modchart.modifiers.Modifiers.PulseModifier,
+			"BlinkModifier" => game.modchart.modifiers.Modifiers.BlinkModifier,
+			"ShrinkXModifier" => game.modchart.modifiers.Modifiers.ShrinkXModifier,
+			"BeatXModifier" => game.modchart.modifiers.Modifiers.BeatXModifier,
+			"TanDrunkModifier" => game.modchart.modifiers.Modifiers.TanDrunkModifier,
 			"WindowModManager" => windowmodcharting.WindowModManager,
 			// bpm
 			"FlxRhythmConductorUtil" => flixel.addons.sound.FlxRhythmConductorUtil,
-			//"MusicTimeChangeData" => flixel.addons.sound.MusicTimeChangeEvent.MusicTimeChangeData,
+			// "MusicTimeChangeData" => flixel.addons.sound.MusicTimeChangeEvent.MusicTimeChangeData,
 		];
 	}
 }

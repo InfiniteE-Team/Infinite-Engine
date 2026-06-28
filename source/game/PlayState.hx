@@ -35,10 +35,12 @@ class PlayState extends MusicBeatState {
 
 	public var curDifficulty:Int = 0;
 
+	// notes
 	public var gameAudio:GameAudio = new GameAudio();
 	public var events:EventManager = new EventManager();
 	public var noteController:NoteController;
-	public var modCharts:game.modchart.ModChartHelp;
+	public var modchartSystem:game.modchart.ModchartSystem;
+	public var sustainRenderer:game.modchart.SustainRenderer;
 
 	public var windowMod:WindowModManager = null;
 
@@ -70,7 +72,7 @@ class PlayState extends MusicBeatState {
 
 		DiffsUtils.getDifficulty(curSong);
 		SONG.configSong(curSong, DiffsUtils.difficulties[curDifficulty]);
-		//RhythmCore.changeBPM(SONG.bpmSong);
+		// RhythmCore.changeBPM(SONG.bpmSong);
 
 		buildStageandChars();
 
@@ -81,9 +83,15 @@ class PlayState extends MusicBeatState {
 
 		FlxG.mouse.visible = false;
 
-		modCharts = new game.modchart.ModChartHelp(this);
-
 		buildStrumsandNotes();
+
+		modchartSystem = new game.modchart.ModchartSystem(noteController);
+		add(modchartSystem);
+		modchartSystem.cacheStrumBase();
+/*
+		sustainRenderer = new game.modchart.SustainRenderer(noteController, modchartSystem);
+		sustainRenderer.cameras = [camHUD];
+		add(sustainRenderer);*/
 
 		windowMod = new WindowModManager();
 		add(windowMod);
@@ -165,8 +173,7 @@ class PlayState extends MusicBeatState {
 		add(noteController.notes);
 		add(noteController.splashes);
 
-		if (modCharts != null)
-			modCharts.cacheStrumBase();
+		//NoteController.meshSustainsActive = true;
 	}
 
 	// Code Song
@@ -194,8 +201,8 @@ class PlayState extends MusicBeatState {
 
 		RhythmCore.conductor.target = gameAudio.inst;
 
-    	RhythmCore.conductor.update(0.0);
-		//RhythmCore.reset();
+		RhythmCore.conductor.update(0.0);
+		// RhythmCore.reset();
 	}
 
 	public function endSong() {
@@ -221,7 +228,7 @@ class PlayState extends MusicBeatState {
 		persistentDraw = true;
 		paused = true;
 
-		RhythmCore.pause(gameAudio,windowMod);
+		RhythmCore.pause(gameAudio, windowMod);
 
 		#if HSCRIPT_ALLOWED
 		script.call('onPauseMenu', []);
@@ -247,7 +254,7 @@ class PlayState extends MusicBeatState {
 	override public function closeSubState():Void {
 		super.closeSubState();
 		paused = false;
-		RhythmCore.resume(gameAudio,windowMod);
+		RhythmCore.resume(gameAudio, windowMod);
 	}
 
 	override function onFocusLost():Void {
@@ -291,6 +298,7 @@ class PlayState extends MusicBeatState {
 		#end
 
 		gameAudio.stopAll();
+
 		if (noteController != null) {
 			remove(noteController.strums);
 			remove(noteController.sustains);
@@ -313,6 +321,15 @@ class PlayState extends MusicBeatState {
 
 		if (chars != null)
 			chars.danceAll();
+
+		if (modchartSystem != null) {
+			modchartSystem.clearAll();
+		}
+
+		if (sustainRenderer != null) {
+			sustainRenderer.destroy();
+			sustainRenderer = null;
+		}
 
 		buildStrumsandNotes();
 		startCountdown();
@@ -402,6 +419,16 @@ class PlayState extends MusicBeatState {
 			gameAudio.destroy();
 		if (chars != null)
 			chars.destroy();
+
+		if (modchartSystem != null) {
+			modchartSystem.destroy();
+			modchartSystem = null;
+		}
+
+		if (sustainRenderer != null) {
+			sustainRenderer.destroy();
+			sustainRenderer = null;
+		}
 
 		if (noteController != null)
 			noteController.destroy();

@@ -13,7 +13,11 @@ class LuaScript {
 
 	static var _current:LuaScript = null;
 
-	static var _stateMap:Map<Int, LuaScript> = [];
+	static var _stateMap:Map<String, LuaScript> = [];
+
+	static inline function stateKey(L:State):String {
+		return Std.string(L);
+	}
 
 	public function new(path:String, owner:Dynamic) {
 		this.path = path;
@@ -26,7 +30,7 @@ class LuaScript {
 		registerCoreFunctions();
 		registerClasses();
 		registerOwner();
-		_stateMap.set(cast(L, Int), this);
+		_stateMap.set(stateKey(L), this);
 		var err = LuaL.dofile(L, path);
 		if (err != 0)
 			traceError('dofile');
@@ -71,7 +75,7 @@ class LuaScript {
 		}
 	}
 
-	function registerOwner():Void {
+	public function registerOwner():Void {
 		// superInstance RuleScript but in Lua
 		for (field in Reflect.fields(owner)) {
 			var val = Reflect.field(owner, field);
@@ -314,7 +318,7 @@ class LuaScript {
 	}
 
 	static function _hxIndexCallback(L:State):Int {
-		var self = _stateMap.get(cast(L, Int));
+		var self = _stateMap.get(stateKey(L));
 		if (self == null) {
 			Lua.pushnil(L);
 			return 1;
@@ -374,6 +378,24 @@ class LuaScript {
 		Lua.setglobal(L, uniqueName);
 	}
 
+	function pushHaxeFunction(fn:Dynamic):Void {
+		var uniqueName = '__hxfn_${_metaCounter++}';
+		var self = this;
+		var wrapper = function(L:State, _:String):Int {
+			var args = self.readArgs(L);
+			var ret:Dynamic = Reflect.callMethod(null, fn, args);
+			if (ret != null) {
+				self.pushValue(ret);
+				return 1;
+			}
+			return 0;
+		};
+		Lua_helper.add_callback(L, uniqueName, wrapper);
+		Lua.getglobal(L, uniqueName);
+		Lua.pushnil(L);
+		Lua.setglobal(L, uniqueName);
+	}
+
 	static var objectPool:Array<Dynamic> = [];
 	static var poolFreeIds:Array<Int> = [];
 
@@ -404,6 +426,8 @@ class LuaScript {
 			Lua.pushnumber(L, v);
 		} else if (Std.isOfType(v, String)) {
 			Lua.pushstring(L, v);
+		} else if (Reflect.isFunction(v)) {
+			pushHaxeFunction(v);
 		} else if (Std.isOfType(v, Array)) {
 			// array Haxe
 			var arr:Array<Dynamic> = v;
@@ -448,6 +472,22 @@ class LuaScript {
 					}
 					map;
 				}
+			case Lua.LUA_TFUNCTION:
+				final fnName = '__hxluafn_${_metaCounter++}';
+				Lua.pushvalue(L, idx);
+				Lua.setglobal(L, fnName);
+				final self = this;
+				(function():Dynamic {
+					Lua.getglobal(self.L, fnName);
+					if (Lua.pcall(self.L, 0, 1, 0) != 0) {
+						self.traceError(fnName);
+						Lua.pop(self.L, 1);
+						return null;
+					}
+					var ret = self.readValue(self.L, -1);
+					Lua.pop(self.L, 1);
+					return ret;
+				});
 			case _: null;
 		}
 	}
@@ -466,7 +506,7 @@ class LuaScript {
 		var ret:Dynamic = Reflect.callMethod(null, cbf, args);
 
 		if (ret != null) {
-			var self = _stateMap.get(cast(L, Int));
+			var self = _stateMap.get(stateKey(L));
 			if (self != null)
 				self.pushValue(ret);
 			else
@@ -538,7 +578,7 @@ class LuaScript {
 	public function destroy():Void {
 		if (L != null) {
 			Lua.close(L);
-			_stateMap.remove(cast(L, Int));
+			_stateMap.remove(stateKey(L));
 			L = null;
 		}
 		_requireCache = null;

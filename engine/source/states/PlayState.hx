@@ -1,7 +1,7 @@
 
 function onCreate()
 {
-	curSong = 'GHOST';
+	curSong = 'crystallized';
 }
 
 function postCreate()

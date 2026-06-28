@@ -69,6 +69,10 @@ class ScriptHandler {
 	public function call(name:String, args:Array<Dynamic>):Dynamic {
 		if (scripts == null)
 			return null;
+		if (name == "postCreate") {
+			for (script in luaScripts)
+				script.registerOwner();
+		}
 		var result:Dynamic = null;
 		for (script in scripts)
 			result = script.access.callFunction(name, args);

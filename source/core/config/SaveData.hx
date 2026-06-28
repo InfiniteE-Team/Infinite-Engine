@@ -51,14 +51,22 @@ class SaveData {
 			SaveData.data.ghosttaping = true;
 
 		if (SaveData.data.noteKeyPresets == null){
-			SaveData.data.noteKeyPresets = {
-				"4": [["A", "LEFT"], ["S", "DOWN"], ["W", "UP"], ["D", "RIGHT"]],
-				"5": [["A"],["S"], ["SPACE"], ["W"], ["D"]],
-				"6": [["A"], ["S"], ["D"], ["H"], ["J"], ["K"]],
-				"7": [["A"], ["S"], ["D"], ["SPACE"], ["H"], ["J"], ["K"]],
-				"8": [["A"], ["S"], ["D"], ["F"], ["H"], ["J"], ["K"], ["L"]],
-				"9": [["A"], ["S"], ["D"], ["F"], ["SPACE"], ["H"], ["J"], ["K"], ["L"]]
-			};
+			var presets:haxe.DynamicAccess<Array<Array<String>>> = {};
+			var keys4:Array<Array<String>> = [["A", "LEFT"], ["S", "DOWN"], ["W", "UP"], ["D", "RIGHT"]];
+			var keys5:Array<Array<String>> = [["A"], ["S"], ["SPACE"], ["W"], ["D"]];
+			var keys6:Array<Array<String>> = [["A"], ["S"], ["D"], ["H"], ["J"], ["K"]];
+			var keys7:Array<Array<String>> = [["A"], ["S"], ["D"], ["SPACE"], ["H"], ["J"], ["K"]];
+			var keys8:Array<Array<String>> = [["A"], ["S"], ["D"], ["F"], ["H"], ["J"], ["K"], ["L"]];
+			var keys9:Array<Array<String>> = [["A"], ["S"], ["D"], ["F"], ["SPACE"], ["H"], ["J"], ["K"], ["L"]];
+
+			presets.set("4", keys4);
+			presets.set("5", keys5);
+			presets.set("6", keys6);
+			presets.set("7", keys7);
+			presets.set("8", keys8);
+			presets.set("9", keys9);
+
+			SaveData.data.noteKeyPresets = presets;
 		}
 
 		if (SaveData.data.uiKeys == null)

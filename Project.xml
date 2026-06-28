@@ -42,8 +42,8 @@
 	<set name="BUILD_DIR" value="export" />
 	<source path="source" />
 
-	<assets path="assets" embed="false"/>
-	<assets path="engine" embed="false"/>
+	<assets path="assets"/>
+	<assets path="engine"/>
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
