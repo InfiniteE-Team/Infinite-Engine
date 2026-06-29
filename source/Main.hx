@@ -22,5 +22,11 @@ class Main extends Sprite {
 		if (e.keyCode == flash.ui.Keyboard.F11) {
 			FlxG.fullscreen = !FlxG.fullscreen;
 		}
+
+		#if DEBUG_CONSOLE
+		if (e.keyCode == flash.ui.Keyboard.F2) {
+			core.system.WinConsole.toggle();
+		}
+		#end
 	}
 }

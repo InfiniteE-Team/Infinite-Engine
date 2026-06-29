@@ -15,8 +15,16 @@ var numberPool = [];
 var comboPool = [];
 var missPool = [];
 
-function onCreate() {
+function postCreate() {
 	var healthBarY = SaveData.data.downscroll ? FlxG.height * 0.1 : FlxG.height * 0.88;
+
+	scoreText = new FlxText(0, healthBarY + 30, FlxG.width, "Score: 0 - Misses: 0");
+	scoreText.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFFFFFFFF, "center");
+	scoreText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+	scoreText.antialiasing = true;
+	scoreText.scrollFactor.set(0, 0);
+	scoreText.cameras = [camHUD];
+	add(scoreText);
 
 	healthBarBG = new FlxSprite(0, healthBarY);
 	healthBarBG.loadGraphic(Paths.getPath('game/hud/healthBar', 'image'));
@@ -25,14 +33,6 @@ function onCreate() {
 	healthBarBG.x = (FlxG.width - healthBarBG.width) * 0.5;
 	healthBarBG.antialiasing = true;
 	add(healthBarBG);
-
-	scoreText = new FlxText(0, healthBarBG.y + 30, FlxG.width, "Score: 0 - Misses: 0");
-	scoreText.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFFFFFFFF, "center");
-	scoreText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
-	scoreText.antialiasing = true;
-	scoreText.scrollFactor.set(0, 0);
-	scoreText.cameras = [camHUD];
-	add(scoreText);
 
 	healthBarFill = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, LEFT_TO_RIGHT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8),
 		playStateConfig, 'health', 0, 2);
@@ -119,7 +119,7 @@ var PIXEL_ZOOM = 6;
 var isPixel = false;
 
 function onNoteHitPlayer() {
-    onRatingPopup(playStateConfig.rating, playStateConfig.combo);
+	onRatingPopup(playStateConfig.rating, playStateConfig.combo);
 }
 
 function onNoteHitMiss() {
@@ -142,7 +142,7 @@ function onRatingPopup(ratingName, combo) {
 	ratingSprite.alpha = 1;
 	ratingSprite.visible = true;
 
-	ratingSprite.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + ratingName + pixelPart2,'image'));
+	ratingSprite.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + ratingName + pixelPart2, 'image'));
 
 	ratingSprite.x = FlxG.width * 0.55 - 160;
 	ratingSprite.y = FlxG.height * 0.5 - 90;
@@ -189,7 +189,7 @@ function _showComboNumbers(combo, pixelPart1, pixelPart2) {
 		var numScore = _getFromPool(numberPool);
 		numScore.alpha = 1;
 		numScore.visible = true;
-		numScore.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + 'nums/num' + Std.int(i) + pixelPart2,'image'));
+		numScore.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + 'nums/num' + Std.int(i) + pixelPart2, 'image'));
 
 		numScore.x = FlxG.width * 0.55 + (43 * daLoop) - 90 + 20;
 		numScore.y = FlxG.height * 0.5 + 20;
@@ -229,9 +229,9 @@ function onMissPopup() {
 	rating.visible = true;
 
 	if (isPixel)
-		rating.loadGraphic(Paths.getPath('game/hud/pixel/score/miss-pixel','image'));
+		rating.loadGraphic(Paths.getPath('game/hud/pixel/score/miss-pixel', 'image'));
 	else
-		rating.loadGraphic(Paths.getPath('game/hud/normal/score/miss','image'));
+		rating.loadGraphic(Paths.getPath('game/hud/normal/score/miss', 'image'));
 
 	rating.x = FlxG.width * 0.55 - 40;
 	rating.y = FlxG.height * 0.5 - 90;
@@ -283,11 +283,11 @@ function _getFromPool(pool) {
 	}
 
 	var newSprite = new FlxSprite();
-    newSprite.cameras = [camHUD];
-    newSprite.scrollFactor.set(0, 0);
-    pool.push(newSprite);
-    add(newSprite);
-    return newSprite;
+	newSprite.cameras = [camHUD];
+	newSprite.scrollFactor.set(0, 0);
+	pool.push(newSprite);
+	add(newSprite);
+	return newSprite;
 }
 
 function _updateLosingAnim() {

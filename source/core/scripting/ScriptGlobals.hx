@@ -40,6 +40,8 @@ class ScriptGlobals {
 
 		root['SaveData'] = core.config.SaveData;
 
+		root['Trace'] = Trace;
+
 		#if windows
 		root['WindowsAPI'] = winapi.WindowsAPI;
 		root['WindowsGDI'] = winapi.gdi.WindowsGDI;
@@ -104,6 +106,7 @@ class ScriptGlobals {
 			"FunkinSprite" => core.assets.FunkinSprite,
 			"RhythmCore" => core.rhythm.RhythmCore,
 			"SaveData" => core.config.SaveData,
+			"Trace" => Trace,
 			#if windows
 			"WindowsAPI" => winapi.WindowsAPI, "WindowsGDI" => winapi.gdi.WindowsGDI, "WindowsGDIThread" => winapi.gdi.WindowsGDIThread,
 			#end

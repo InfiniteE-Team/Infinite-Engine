@@ -79,6 +79,8 @@
 
 	<haxedef name="HXCPP_DEBUG_LINK"/>
 
+	<haxedef name="DEBUG_CONSOLE" />
+
 	<!-- _______________________________Compiler Flags _______________________________ -->
 	<compilerflag name="-D HXCPP_M64" if="cpp" />
 

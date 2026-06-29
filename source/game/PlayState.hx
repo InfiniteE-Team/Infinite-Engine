@@ -72,7 +72,6 @@ class PlayState extends MusicBeatState {
 
 		DiffsUtils.getDifficulty(curSong);
 		SONG.configSong(curSong, DiffsUtils.difficulties[curDifficulty]);
-		// RhythmCore.changeBPM(SONG.bpmSong);
 
 		buildStageandChars();
 
