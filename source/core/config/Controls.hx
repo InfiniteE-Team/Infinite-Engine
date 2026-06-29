@@ -54,7 +54,7 @@ class Controls {
 		if (!keyGroups.exists(groupName))
 			return false;
 		var keys = keyGroups.get(groupName);
-		var actions = ["down", "up", "left", "right", "accept", "escape"];
+		var actions = ["left", "down", "up", "right", "accept", "escape"];
 		var index = actions.indexOf(actionName.toLowerCase());
 		if (index == -1 || index >= keys.length)
 			return false;

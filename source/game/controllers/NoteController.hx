@@ -388,9 +388,25 @@ class NoteController {
 				toDestroy.push(note);
 
 			if (note.y + note.frameHeight * note.scale.y < 0 && !isDownscroll)
+			{
+				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
+					note.wasMissed = true;
+					note.alpha = 0.4;
+					if (onMiss != null)
+						onMiss();
+				}
 				toDestroy.push(note);
+			}
 			else if (note.y > FlxG.height && isDownscroll)
+			{
+				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
+					note.wasMissed = true;
+					note.alpha = 0.4;
+					if (onMiss != null)
+						onMiss();
+				}
 				toDestroy.push(note);
+			}
 		}
 
 		for (sustain in sustains.members) {
