@@ -108,13 +108,14 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 	public function resyncVocals():Void {
 		if (vocals == null || !vocals.playing || inst == null)
 			return;
-		if (Math.abs(vocals.time - inst.time) < 20)
-			return;
 
-		inst.pause();
-		vocals.time = inst.time;
-		inst.play();
-		vocals.play();
+		if (Math.abs(vocals.time - inst.time) > 20) {
+			vocals.time = inst.time;
+
+			if (!vocals.playing) {
+				vocals.play();
+			}
+		}
 	}
 
 	override public function destroy():Void {

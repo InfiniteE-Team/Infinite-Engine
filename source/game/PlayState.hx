@@ -87,10 +87,10 @@ class PlayState extends MusicBeatState {
 		modchartSystem = new game.modchart.ModchartSystem(noteController);
 		add(modchartSystem);
 		modchartSystem.cacheStrumBase();
-/*
-		sustainRenderer = new game.modchart.SustainRenderer(noteController, modchartSystem);
-		sustainRenderer.cameras = [camHUD];
-		add(sustainRenderer);*/
+		/*
+			sustainRenderer = new game.modchart.SustainRenderer(noteController, modchartSystem);
+			sustainRenderer.cameras = [camHUD];
+			add(sustainRenderer); */
 
 		windowMod = new WindowModManager();
 		add(windowMod);
@@ -172,7 +172,7 @@ class PlayState extends MusicBeatState {
 		add(noteController.notes);
 		add(noteController.splashes);
 
-		//NoteController.meshSustainsActive = true;
+		// NoteController.meshSustainsActive = true;
 	}
 
 	// Code Song
@@ -199,9 +199,7 @@ class PlayState extends MusicBeatState {
 		gameAudio.playAll();
 
 		RhythmCore.conductor.target = gameAudio.inst;
-
 		RhythmCore.conductor.update(0.0);
-		// RhythmCore.reset();
 	}
 
 	public function endSong() {
@@ -254,6 +252,7 @@ class PlayState extends MusicBeatState {
 		super.closeSubState();
 		paused = false;
 		RhythmCore.resume(gameAudio, windowMod);
+		gameAudio.resyncVocals();
 	}
 
 	override function onFocusLost():Void {
@@ -269,8 +268,10 @@ class PlayState extends MusicBeatState {
 		script.call('onFocusGained', []);
 		#end
 		FlxG.sound.resume();
-		if (!paused)
+		if (!paused) {
 			gameAudio.playAll();
+			gameAudio.resyncVocals();
+		}
 		#if HSCRIPT_ALLOWED
 		script.call('postFocusGained', []);
 		#end
@@ -347,8 +348,6 @@ class PlayState extends MusicBeatState {
 
 		if (gameAudio.inst != null)
 			RhythmCore.songPosition = gameAudio.inst.time;
-
-		gameAudio.resyncVocals();
 
 		gameAudio.volumenVocs(SONG, chars.isPlayerMissing(), elapsed);
 
