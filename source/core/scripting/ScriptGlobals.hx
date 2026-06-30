@@ -26,6 +26,7 @@ class ScriptGlobals {
 
 		// Engine
 		root['PlayState'] = game.PlayState;
+		root['MenuState'] = states.MenuState;
 		root['Character'] = game.objects.sprites.Character;
 		root['Stage'] = game.objects.sprites.Stage;
 		root['Paths'] = core.assets.Paths;
@@ -100,6 +101,7 @@ class ScriptGlobals {
 			"FlxBar" => flixel.ui.FlxBar,
 			// Engine
 			"PlayState" => game.PlayState,
+			"MenuState" => states.MenuState,
 			"Character" => game.objects.sprites.Character,
 			"Stage" => game.objects.sprites.Stage,
 			"Paths" => core.assets.Paths,

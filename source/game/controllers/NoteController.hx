@@ -387,8 +387,7 @@ class NoteController {
 			if (!note.mustPress && note.wasGoodHit && !note.alive)
 				toDestroy.push(note);
 
-			if (note.y + note.frameHeight * note.scale.y < 0 && !isDownscroll)
-			{
+			if (note.y + note.frameHeight * note.scale.y < 0 && !isDownscroll) {
 				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
 					note.wasMissed = true;
 					note.alpha = 0.4;
@@ -396,9 +395,7 @@ class NoteController {
 						onMiss();
 				}
 				toDestroy.push(note);
-			}
-			else if (note.y > FlxG.height && isDownscroll)
-			{
+			} else if (note.y > FlxG.height && isDownscroll) {
 				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
 					note.wasMissed = true;
 					note.alpha = 0.4;
@@ -612,7 +609,19 @@ class NoteController {
 		return null;
 	}
 
+	var _charStrumsCache:Map<String, Array<StrumNote>> = new Map();
+
 	public function destroy():Void {
+		for (pool in _notePool)
+			for (n in pool)
+				n.destroy();
+		for (pool in _sustainPool)
+			for (n in pool)
+				n.destroy();
+		_notePool = null;
+		_sustainPool = null;
+		_charStrumsCache = null;
+
 		strums.destroy();
 		notes.destroy();
 		sustains.destroy();
@@ -621,11 +630,8 @@ class NoteController {
 		strums = null;
 		notes = null;
 		sustains = null;
-
 		splashes = null;
 	}
-
-	var _charStrumsCache:Map<String, Array<StrumNote>> = new Map();
 
 	public function getCharStrums(charId:String):Array<StrumNote> {
 		#if HSCRIPT_ALLOWED

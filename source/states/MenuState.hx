@@ -6,7 +6,7 @@ import core.assets.FunkinSprite;
 // menu data
 import core.json.engine.MenuData;
 import core.json.engine.MenuData.Element;
-import core.json.engine.MenuData.ElementType;
+import core.enums.ElementType;
 // audio data
 import core.json.extensions.AudioData;
 // tweens
@@ -16,24 +16,27 @@ import flixel.tweens.FlxEase;
 class MenuState extends MusicBeatState {
 	public var menuData:MenuData;
 
-	var _elementMap:Map<String, FlxBasic> = new Map();
+	var _elementMap:Map<String, flixel.FlxBasic> = new Map();
 
 	// input to keyboard or idk
 	var _focusables:Array<Element> = [];
 	var _focusIndex:Int = 0;
 
 	public var menu:String = 'mainmenustate';
+	public var menu_folder:String;
 
-	final menu_folder:String = 'menus/$menu';
+	var parentween:FlxGroup;
 
-	public function new() {
+	override public function new(menu:String) {
 		super();
+		this.menu = menu;
+		this.menu_folder = 'menus/$menu';
 	}
 
 	override public function create():Void {
 		super.create();
 
-		menuData = UtilsData.readJson(Paths.getPath('data/$menu_folder', 'json'));
+		menuData = utils.UtilsData.readJson(Paths.getPath('data/$menu_folder', 'json'));
 		if (menuData == null || menuData.elements == null) {
 			Trace.traceOnce('MenuState: not found $menu_folder', true);
 			return;
@@ -47,7 +50,7 @@ class MenuState extends MusicBeatState {
 	}
 
 	function buildElement(el:Element, parent:FlxGroup):Void {
-		var obj:FlxBasic = null;
+		var obj:flixel.FlxBasic = null;
 
 		switch (el.type) {
 			case Sprite | Animated | Character:
@@ -86,9 +89,11 @@ class MenuState extends MusicBeatState {
 		if (el.focusable == true)
 			_focusables.push(el);
 
-		if (parent != null)
-			parent.add(obj);
-		else
+		if (parent != null) {
+			if (parentween == null)
+				parentween = new FlxGroup();
+			parentween.add(obj);
+		} else
 			add(obj);
 
 		if (el.tweenIn != null)
@@ -99,7 +104,7 @@ class MenuState extends MusicBeatState {
 		var spr = new FunkinSprite(0, 0);
 
 		if (el.props != null)
-			spr.loadProps(el.props, MENU_PATH);
+			spr.loadProps(el.props, menu);
 
 		applyAnchor(spr, el);
 
@@ -138,7 +143,7 @@ class MenuState extends MusicBeatState {
 		return group;
 	}
 
-	function buildCustomClass(el:Element):FlxBasic {
+	function buildCustomClass(el:Element):flixel.FlxBasic {
 		return buildSprite(el);
 	}
 
@@ -149,11 +154,11 @@ class MenuState extends MusicBeatState {
 		var isMusic = audio.channel == 'music' || audio.looped == true;
 
 		if (isMusic) {
-			FlxG.sound.playMusic(Paths.music(audio.path), audio.volume ?? 1.0, audio.looped ?? true);
+			FlxG.sound.playMusic(Paths.getPath(audio.path, 'music'), audio.volume ?? 1.0, audio.looped ?? true);
 			if (audio.fadeIn != null)
 				FlxG.sound.music.fadeIn(audio.fadeIn, 0, audio.volume ?? 1.0);
 		} else {
-			var sfx = FlxG.sound.play(Paths.sound(audio.path), audio.volume ?? 1.0, audio.looped ?? false);
+			var sfx = FlxG.sound.play(Paths.getPath(audio.path, 'sound'), audio.volume ?? 1.0, audio.looped ?? false);
 			if (sfx != null && audio.pitch != null)
 				sfx.pitch = audio.pitch;
 		}
@@ -167,43 +172,43 @@ class MenuState extends MusicBeatState {
 		spr.y -= spr.height * ay;
 	}
 
-	function applyTweenIn(obj:FlxBasic, el:Element):Void {
+	function applyTweenIn(obj:flixel.FlxBasic, el:Element):Void {
 		var tween = el.tweenIn;
-		var delay = (el.startDelay ?? 0) + (t.delay ?? 0);
-		var ease = utils.InfiniteUtil.resolveEase(t.ease);
+		var delay = (el.startDelay ?? 0) + (tween.delay ?? 0);
+		var ease = utils.InfiniteUtil.resolveEase(tween.ease);
 		var spr:Dynamic = cast obj;
 
 		switch (tween.type) {
 			case 'fadeIn':
 				spr.alpha = 0;
-				FlxTween.tween(spr, {alpha: el.props?.alpha ?? 1.0}, t.duration, {ease: ease, startDelay: delay});
+				FlxTween.tween(spr, {alpha: el.props?.alpha ?? 1.0}, tween.duration, {ease: ease, startDelay: delay});
 
 			case 'fadeOut':
-				FlxTween.tween(spr, {alpha: 0}, t.duration, {ease: ease, startDelay: delay});
+				FlxTween.tween(spr, {alpha: 0}, tween.duration, {ease: ease, startDelay: delay});
 
 			case 'slideUp':
 				var targetY = spr.y;
 				spr.y += 80;
 				spr.alpha = 0;
-				FlxTween.tween(spr, {y: targetY, alpha: 1.0}, t.duration, {ease: ease, startDelay: delay});
+				FlxTween.tween(spr, {y: targetY, alpha: 1.0}, tween.duration, {ease: ease, startDelay: delay});
 
 			case 'slideDown':
 				var targetY = spr.y;
 				spr.y -= 80;
 				spr.alpha = 0;
-				FlxTween.tween(spr, {y: targetY, alpha: 1.0}, t.duration, {ease: ease, startDelay: delay});
+				FlxTween.tween(spr, {y: targetY, alpha: 1.0}, tween.duration, {ease: ease, startDelay: delay});
 
 			case 'slideLeft':
 				var targetX = spr.x;
 				spr.x += 80;
 				spr.alpha = 0;
-				FlxTween.tween(spr, {x: targetX, alpha: 1.0}, t.duration, {ease: ease, startDelay: delay});
+				FlxTween.tween(spr, {x: targetX, alpha: 1.0}, tween.duration, {ease: ease, startDelay: delay});
 
 			case 'slideRight':
 				var targetX = spr.x;
 				spr.x -= 80;
 				spr.alpha = 0;
-				FlxTween.tween(spr, {x: targetX, alpha: 1.0}, t.duration, {ease: ease, startDelay: delay});
+				FlxTween.tween(spr, {x: targetX, alpha: 1.0}, tween.duration, {ease: ease, startDelay: delay});
 
 			case 'scale':
 				spr.scale.set(0, 0);
@@ -212,15 +217,15 @@ class MenuState extends MusicBeatState {
 					x: el.props?.scale[0] ?? 1.0,
 					y: el.props?.scale[1] ?? 1.0
 				};
-				FlxTween.tween(spr.scale, targetScale, t.duration, {ease: ease, startDelay: delay});
-				FlxTween.tween(spr, {alpha: 1.0}, t.duration * 0.5, {ease: ease, startDelay: delay});
+				FlxTween.tween(spr.scale, targetScale, tween.duration, {ease: ease, startDelay: delay});
+				FlxTween.tween(spr, {alpha: 1.0}, tween.duration * 0.5, {ease: ease, startDelay: delay});
 
 			case _:
 				Trace.traceOnce('MenuState: unknown tween type "${el.type}"', true);
 		}
 	}
 
-	function applyLoopAnim(spr:FunkinSprite, loop:LoopAnimData):Void {
+	function applyLoopAnim(spr:FunkinSprite, loop:core.json.extensions.TweenData.LoopAnimData):Void {
 		switch (loop.type) {
 			case 'floatY':
 				var baseY = spr.y;
@@ -250,11 +255,11 @@ class MenuState extends MusicBeatState {
 		}
 	}
 
-	function assignCamera(obj:FlxBasic, camName:String):Void {
+	function assignCamera(obj:flixel.FlxBasic, camName:String):Void {
 		// ex: if (camName == 'hud') obj.cameras = [camHUD];
 	}
 
-	public function getElementById(id:String):Null<FlxBasic>
+	public function getElementById(id:String):Null<flixel.FlxBasic>
 		return _elementMap.get(id);
 
 	// sprite registred cast
@@ -284,13 +289,13 @@ class MenuState extends MusicBeatState {
 			return;
 
 		if (el.tweenOut != null) {
-			var t = el.tweenOut;
-			var ease = resolveEase(t.ease);
+			var tween = el.tweenOut;
+			var ease = utils.InfiniteUtil.resolveEase(tween.ease);
 			var spr:Dynamic = cast obj;
 
-			switch (t.type) {
+			switch (tween.type) {
 				case 'fadeOut':
-					FlxTween.tween(spr, {alpha: 0}, t.duration, {ease: ease, onComplete: _ -> spr.visible = false});
+					FlxTween.tween(spr, {alpha: 0}, tween.duration, {ease: ease, onComplete: _ -> spr.visible = false});
 				case _:
 					spr.visible = false;
 			}
@@ -347,17 +352,35 @@ class MenuState extends MusicBeatState {
 	// action
 
 	function callAction(action:String, el:Element):Void {
+		switch (action) {
+			case 'PlayState':
+				MusicBeatState.switchState(new game.PlayState());
+			default:
+				core.scripting.ScriptedState.switchState(action);
+		}
 		// ex:
 		// switch (action) {
 		//     case 'onPlayPressed':  FlxG.switchState(new PlayState());
-		//     case 'onButtonHover':  FlxG.sound.play(Paths.sound('hover'));
+		//     case 'onButtonHover':  FlxG.sound.play(Paths.getPath('hover','sound));
 		// }
 		Trace.traceOnce('MenuState: action not handler -> "$action"');
 	}
 
 	override public function destroy():Void {
+		cancelAllTweens(this);
 		_elementMap = null;
 		_focusables = null;
 		super.destroy();
+	}
+
+	function cancelAllTweens(group:FlxGroup):Void {
+		for (member in group.members) {
+			if (member == null)
+				continue;
+			if ((member is FlxGroup))
+				cancelAllTweens(cast member);
+			else
+				FlxTween.cancelTweensOf(member);
+		}
 	}
 }

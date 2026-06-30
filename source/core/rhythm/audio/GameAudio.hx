@@ -122,6 +122,7 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 		inst = null;
 		vocals = null;
 		for (miss in soundMisses) {
+			FlxG.sound.list.remove(miss, true);
 			miss.destroy();
 		}
 		soundMisses = null;

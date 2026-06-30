@@ -18,6 +18,8 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 
 	public var pauseMenuMusic:FlxSound;
 
+	static var _cachedPauseMusic:FlxSound;
+
 	override public function create() {
 		super.create();
 
@@ -27,11 +29,13 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		script.call("onCreate", []);
 		#end
 
-		pauseMenuMusic = FlxG.sound.list.members.find(s -> s != null && Std.string(s).contains('pauseInfinite'));
-		if (pauseMenuMusic == null) {
+		if (_cachedPauseMusic == null) {
 			pauseMenuMusic = new FlxSound();
 			pauseMenuMusic.loadEmbedded(Paths.getPath('pauseInfinite', "music"), true, false, null);
 			FlxG.sound.list.add(pauseMenuMusic);
+			_cachedPauseMusic = pauseMenuMusic;
+		} else {
+			pauseMenuMusic = _cachedPauseMusic;
 		}
 
 		pauseMenuMusic.volume = 0.7;
