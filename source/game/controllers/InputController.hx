@@ -31,7 +31,7 @@ class InputController {
 					continue;
 				if (sustain.isSustainEnd)
 					continue;
-				
+
 				var canHold = songPos >= sustain.strumTime - 50 && songPos <= sustain.strumTime + sustain.length;
 				if (canHold) {
 					sustain.isHeld = true;
@@ -91,19 +91,21 @@ class InputController {
 			} else if (!hasActiveSustain) {
 				charStrums[i].playAnim('press' + i, true);
 				if (!isGhostTapping) {
-					playStateConfig.misses++;
-					playStateConfig.score += noteController.getMissScore();
-					gameAudio.onMiss();
-					playStateConfig.health += noteController.getHealthDrain(null);
-					playStateConfig.combo = 0;
+					isMiss(playStateConfig, noteController, gameAudio);
 				}
 			}
 		} else { // release key
 			for (sustain in noteController.sustains.members) {
-				if (sustain == null || !sustain.alive || !sustain.mustPress)
+				if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != charStrums[i] || sustain.isSustainEnd)
 					continue;
-				if (sustain.strum != charStrums[i])
-					continue;
+
+				var songPos = core.rhythm.RhythmCore.songPosition;
+				if (sustain.isHeld && songPos < (sustain.strumTime + sustain.length)) {
+					sustain.wasMissed = true;
+					sustain.canBeHit = false;
+					isMiss(playStateConfig, noteController, gameAudio);
+				}
+
 				sustain.isHeld = false;
 			}
 
@@ -116,17 +118,22 @@ class InputController {
 				note.wasMissed = true;
 				note.canBeHit = false;
 				note.alpha = 0.4;
-				gameAudio.onMiss();
-				playStateConfig.health += noteController.getHealthDrain(null);
-				playStateConfig.score += noteController.getMissScore();
-				playStateConfig.misses++;
-				playStateConfig.combo = 0;
+
+				isMiss(playStateConfig, noteController, gameAudio);
 			}
 
 			charStrums[i].playAnim('static' + i, true);
 		}
 
 		return null;
+	}
+
+	function isMiss(playStateConfig:PlayStateConfig, noteController:NoteController, gameAudio:GameAudio) {
+		gameAudio.onMiss();
+		playStateConfig.health += noteController.getHealthDrain(null);
+		playStateConfig.score += noteController.getMissScore();
+		playStateConfig.misses++;
+		playStateConfig.combo = 0;
 	}
 
 	public function isCPUHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, noteController:NoteController, charId:String, i:Int) {

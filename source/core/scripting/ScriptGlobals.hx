@@ -27,6 +27,7 @@ class ScriptGlobals {
 		// Engine
 		root['PlayState'] = game.PlayState;
 		root['MenuState'] = states.MenuState;
+		root['Alphabet'] = utils.Alphabet;
 		root['Character'] = game.objects.sprites.Character;
 		root['Stage'] = game.objects.sprites.Stage;
 		root['Paths'] = core.assets.Paths;
@@ -102,6 +103,7 @@ class ScriptGlobals {
 			// Engine
 			"PlayState" => game.PlayState,
 			"MenuState" => states.MenuState,
+			"Alphabet" => utils.Alphabet,
 			"Character" => game.objects.sprites.Character,
 			"Stage" => game.objects.sprites.Stage,
 			"Paths" => core.assets.Paths,
