@@ -96,7 +96,7 @@ class InputController {
 			}
 		} else { // release key
 			for (sustain in noteController.sustains.members) {
-				if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != charStrums[i] || sustain.isSustainEnd)
+				if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != charStrums[i])
 					continue;
 
 				var songPos = core.rhythm.RhythmCore.songPosition;

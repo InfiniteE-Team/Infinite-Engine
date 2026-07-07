@@ -23,6 +23,7 @@ class ScriptGlobals {
 		root['FlxEase'] = flixel.tweens.FlxEase;
 		root['FlxMath'] = flixel.math.FlxMath;
 		root['FlxBar'] = flixel.ui.FlxBar;
+		root['FlxBarFillDirection'] = flixel.ui.FlxBar.FlxBarFillDirection;
 
 		// Engine
 		root['PlayState'] = game.PlayState;
@@ -79,10 +80,6 @@ class ScriptGlobals {
 		root['ShrinkXModifier'] = game.modchart.modifiers.Modifiers.ShrinkXModifier;
 
 		root['WindowModManager'] = windowmodcharting.WindowModManager;
-
-		// bpm
-		root['FlxRhythmConductorUtil'] = flixel.addons.sound.FlxRhythmConductorUtil;
-		// root['MusicTimeChangeData'] = flixel.addons.sound.MusicTimeChangeEvent.MusicTimeChangeData;
 	}
 
 	public static function initLua():Void {
@@ -140,10 +137,7 @@ class ScriptGlobals {
 			"ShrinkXModifier" => game.modchart.modifiers.Modifiers.ShrinkXModifier,
 			"BeatXModifier" => game.modchart.modifiers.Modifiers.BeatXModifier,
 			"TanDrunkModifier" => game.modchart.modifiers.Modifiers.TanDrunkModifier,
-			"WindowModManager" => windowmodcharting.WindowModManager,
-			// bpm
-			"FlxRhythmConductorUtil" => flixel.addons.sound.FlxRhythmConductorUtil,
-			// "MusicTimeChangeData" => flixel.addons.sound.MusicTimeChangeEvent.MusicTimeChangeData,
+			"WindowModManager" => windowmodcharting.WindowModManager
 		];
 	}
 }

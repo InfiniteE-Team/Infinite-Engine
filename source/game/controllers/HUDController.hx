@@ -1,6 +1,3 @@
 package game.controllers;
 
-class HUDController
-{
-    
-}
+class HUDController {}

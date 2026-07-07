@@ -7,7 +7,6 @@ The infinite engine is an FNF engine written from scratch in HaxeFlixel.
 
 
 **Currently, this engine uses libraries such as:**
-- [FlxRhythmConductor](https://github.com/PurSnake/FlxRhythmConductor) by PurSnake
 - [RuleScript](https://github.com/Kriptel/RuleScript) by Kriptel
 - [flixel-animate](https://github.com/MaybeMaru/flixel-animate) by MaybeMaru
 - [SL-Windows-API](https://github.com/Slushi-Github/SL-Windows-API) by Slushi

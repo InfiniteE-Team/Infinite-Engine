@@ -34,6 +34,8 @@ typedef ObjectData = {
 	var ?firstAnim:String;
 
 	var ?frameScale:Array<Int>;
+
+	var ?bopAnimations:Array<String>;
 }
 
 // Data for anims

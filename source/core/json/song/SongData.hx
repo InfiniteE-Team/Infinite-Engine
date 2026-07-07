@@ -2,8 +2,6 @@ package core.json.song;
 
 import utils.UtilsData;
 import core.rhythm.RhythmCore;
-import flixel.addons.sound.FlxRhythmConductorUtil;
-import flixel.addons.sound.MusicTimeChangeEvent.MusicTimeChangeData;
 
 typedef SongData = {
 	var meta:MetaData;
@@ -18,8 +16,6 @@ typedef MetaData = {
 	var ?stage:String;
 	var ?needVoices:Bool;
 	var ?vocSeparated:Bool;
-
-	var ?timeChanges:Array<MusicTimeChangeData>;
 }
 
 typedef GameplayData = {
@@ -130,7 +126,7 @@ class SongConfig {
 			noteTime = note.time ?? 0;
 		}
 
-		_setupConductor();
+		RhythmCore.changeBPM(bpmSong);
 
 		chars = songData.gameplay.chars;
 
@@ -139,15 +135,4 @@ class SongConfig {
 			strumsVisible = chars[i].strumsVisible ?? true;
 		}
 	}
-
-	function _setupConductor():Void {
-        var rawChanges = songData?.meta?.timeChanges;
-
-        if (rawChanges != null && rawChanges.length > 0) {
-            var parsed = FlxRhythmConductorUtil.parseTimeChanges(rawChanges);
-            RhythmCore.setupTimeChanges(parsed);
-        } else {
-            RhythmCore.changeBPM(bpmSong);
-        }
-    }
 }

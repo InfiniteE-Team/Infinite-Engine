@@ -198,8 +198,7 @@ class PlayState extends MusicBeatState {
 
 		gameAudio.playAll();
 
-		RhythmCore.conductor.target = gameAudio.inst;
-		RhythmCore.conductor.update(0.0);
+		tracker.reset();
 	}
 
 	public function endSong() {
@@ -225,7 +224,9 @@ class PlayState extends MusicBeatState {
 		persistentDraw = true;
 		paused = true;
 
-		RhythmCore.pause(gameAudio, windowMod);
+		RhythmCore.pause(gameAudio);
+		if (windowMod != null)
+			windowMod.pauseWindow();
 
 		#if HSCRIPT_ALLOWED
 		script.call('onPauseMenu', []);
@@ -251,7 +252,9 @@ class PlayState extends MusicBeatState {
 	override public function closeSubState():Void {
 		super.closeSubState();
 		paused = false;
-		RhythmCore.resume(gameAudio, windowMod);
+		RhythmCore.resume(gameAudio);
+		if (windowMod != null)
+			windowMod.resumeWindow();
 		gameAudio.resyncVocals();
 	}
 
@@ -317,7 +320,6 @@ class PlayState extends MusicBeatState {
 		playStateConfig = new PlayStateConfig();
 
 		RhythmCore.reset(SONG.bpmSong);
-		RhythmCore.conductor.target = gameAudio.inst;
 
 		if (chars != null)
 			chars.danceAll();
@@ -354,7 +356,7 @@ class PlayState extends MusicBeatState {
 		if (!paused || !startCount) {
 			cameraController.update(elapsed);
 
-			noteController.update(RhythmCore.conductor.frameMusicPosition);
+			noteController.update(RhythmCore.songPosition);
 
 			if (playStateConfig.health <= 0)
 				isDeath();

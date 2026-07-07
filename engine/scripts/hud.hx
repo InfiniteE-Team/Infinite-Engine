@@ -1,6 +1,7 @@
 import core.assets.Paths;
 import flixel.util.FlxStringUtil;
 import flixel.text.FlxTextBorderStyle;
+import flixel.ui.FlxBar.FlxBarFillDirection;
 
 var playerIcon = null;
 var opponentIcon = null;
