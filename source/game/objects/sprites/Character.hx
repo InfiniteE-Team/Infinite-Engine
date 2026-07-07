@@ -136,6 +136,7 @@ class Character extends FunkinObjectRegistry {
 	}
 
 	var isDancing:Bool = false;
+	var bopAnimExists:Bool = false;
 
 	override public function dance() {
 		#if HSCRIPT_ALLOWED
@@ -146,10 +147,22 @@ class Character extends FunkinObjectRegistry {
 		if (isSing || isMiss)
 			return;
 
+		for (layer in characterData.render.layers) {
+			if (layer.bopAnims != null) {
+				if (existsAnim(layer.bopAnims[0])) {
+					bopAnimExists = true;
+					playAnim(layer.bopAnims[0]);
+				}
+			}
+		}
+
+		if (bopAnimExists)
+			return;
+
 		if (existsAnim('danceLeft') && existsAnim('danceRight')) {
 			isDancing = !isDancing;
 			playAnim(isDancing ? 'danceLeft' : 'danceRight', false);
-		} else
+		} else if (existsAnim('idle'))
 			playAnim('idle', false);
 	}
 

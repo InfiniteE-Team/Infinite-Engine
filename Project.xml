@@ -15,6 +15,7 @@
 
 	<!-- ____________________________ Defines ___________________________ -->
 
+	<define name="CRASH_HANDLER" if="desktop" />
 	<define name="HSCRIPT_ALLOWED" if="desktop" />
 	<define name="LUA_ALLOWED" if="desktop" />
 	<define name="DISCORD_ALLOWED" if="desktop"/>
@@ -78,6 +79,9 @@
 	<haxedef name="HXCPP_DEBUG_LINK"/>
 
 	<haxedef name="DEBUG_CONSOLE" />
+
+	<haxedef name="HXCPP_CHECK_POINTER" if="desktop" />
+    <haxedef name="HXCPP_STACK_LINE" if="desktop" />
 
 	<!-- _______________________________Compiler Flags _______________________________ -->
 	<compilerflag name="-D HXCPP_M64" if="cpp" />

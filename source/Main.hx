@@ -2,6 +2,10 @@ package;
 
 import core.system.FPSCounter;
 import openfl.display.Sprite;
+// crash handler
+import haxe.CallStack;
+import openfl.events.UncaughtErrorEvent;
+import core.system.warnings.TroubleShooter;
 
 class Main extends Sprite {
 	public var fps:FPSCounter = new FPSCounter(5, 5, 0xFFFFFF);
@@ -11,6 +15,9 @@ class Main extends Sprite {
 		mainGame();
 
 		stage.addEventListener(openfl.events.KeyboardEvent.KEY_DOWN, onKeyDown);
+		#if CRASH_HANDLER
+		openfl.Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrashHandler);
+		#end
 	}
 
 	function mainGame() {
@@ -29,4 +36,18 @@ class Main extends Sprite {
 		}
 		#end
 	}
+
+	#if CRASH_HANDLER
+	private function onCrashHandler(event:UncaughtErrorEvent):Void {
+        event.preventDefault(); 
+
+        var erroryep = CallStack.exceptionStack(true);
+        var details:String = CallStack.toString(erroryep);
+
+        var crash:String = Std.string(event.error) + "\n\n--- ERROR ---\n" + details;
+
+        var crashHandler = new core.system.warnings.TroubleShooter();
+        crashHandler.launchCrash(crash);
+    }
+	#end
 }
