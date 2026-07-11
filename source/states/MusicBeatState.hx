@@ -99,7 +99,6 @@ class MusicBeatState extends flixel.FlxState {
 		}
 		#end
 		infoHelp = null;
-		core.assets.FunkinGlobalObjectReg.clear();
 		super.destroy();
 	}
 }

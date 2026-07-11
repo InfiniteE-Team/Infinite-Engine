@@ -1,7 +1,7 @@
 
 function onCreate()
 {
-	curSong = 'crystallized';
+	curSong = 'fresh';
 }
 
 function postCreate()
@@ -14,19 +14,3 @@ function onUpdate(elapsed)
     if (FlxG.keys.justPressed.ENTER)
         pauseMenu();
 }
-
-/*
-function onFocusLost()
-{
-    if (paused) {
-        persistentUpdate = false;
-		persistentDraw = true;
-		paused = true;
-
-		FlxG.sound.pause();
-		if (gameAudio.inst != null)
-			gameAudio.inst.pause();
-		if (gameAudio.vocals != null)
-			gameAudio.vocals.pause();
-    }
-}*/

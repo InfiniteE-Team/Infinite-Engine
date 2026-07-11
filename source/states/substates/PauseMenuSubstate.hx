@@ -10,7 +10,7 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 
 	var text:FlxText;
 
-	var options:Array<String> = ['Resume', 'Restart Song', 'Exit to Menu'];
+	var options:Array<String> = ['Resume', 'Restart Song', 'Options', 'Exit to Menu'];
 
 	var curSelect:Int = 0;
 
@@ -75,15 +75,17 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		if (input.control.justPressedAction("uiKeys", 'accept')) {
 			switch (options[curSelect]) {
 				case "Resume":
-					reanudeFunction();
+					resumeFunction();
 					close();
 				case "Restart Song":
-					reanudeFunction();
+					resumeFunction();
 					if (game.PlayState.instance != null)
 						game.PlayState.instance.rewindSong();
 					close();
+				case "Options":
+					openSubState(new states.substates.OptionsMenuSubstate());
 				case "Exit to Menu":
-					reanudeFunction();
+					resumeFunction();
 					#if HSCRIPT_ALLOWED
 					script.call("ExitMenu", []);
 					#end
@@ -96,15 +98,17 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		#end
 	}
 
-	function reanudeFunction() {
+	function resumeFunction() {
 		if (game.PlayState.instance != null) {
 			game.PlayState.instance.paused = false;
 			game.PlayState.instance.windowMod.resumeWindow();
 		}
-
 		if (pauseMenuMusic != null) {
 			pauseMenuMusic.pause();
 		}
+		#if HSCRIPT_ALLOWED
+		script.call("onResumePause", []);
+		#end
 	}
 
 	public function changeCur() {

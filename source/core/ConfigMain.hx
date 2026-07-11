@@ -6,6 +6,7 @@ import core.config.Controls;
 import core.config.SaveData;
 import windowmodcharting.engineImplementation.ConductorImplementation;
 import core.scripting.ScriptGlobals;
+import core.scripting.ScriptResolver;
 //
 #if windows
 import winapi.WindowsAPI;
@@ -49,6 +50,7 @@ class ConfigMain extends flixel.FlxState {
 
 		#if HSCRIPT_ALLOWED
 		ScriptGlobals.init();
+		ScriptResolver.init();
 		#end
 
 		cursor = new CursorConfig();

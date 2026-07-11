@@ -386,7 +386,7 @@ class NoteController {
 
 			if (!note.mustPress && note.wasGoodHit && !note.alive)
 				toDestroy.push(note);
-
+			
 			if (note.y + note.frameHeight * note.scale.y < 0 && !isDownscroll) {
 				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
 					note.wasMissed = true;

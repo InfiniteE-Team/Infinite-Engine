@@ -1,14 +1,6 @@
 package game.objects;
 
-import flixel.FlxCamera;
-import flixel.graphics.frames.FlxFrame;
-import openfl.display.BitmapData;
-import flixel.math.FlxMatrix;
-import openfl.geom.ColorTransform;
-import openfl.display.BlendMode;
-import flixel.system.FlxAssets.FlxShader;
-
-class Camera extends FlxCamera {
+class Camera extends flixel.FlxCamera {
 	public function new(?x:Float = 0.0, ?y:Float = 0.0, ?width:Int = 0, ?height:Int = 0, ?zoom:Float = 0.0) {
 		super(x, y, width, height, zoom);
 		pruneEmptyFilters();
@@ -25,11 +17,11 @@ class Camera extends FlxCamera {
     }
 
 	override function set_angle(val:Float):Float {
-		return super.set_angle(val);
+		return angle = val;
 	}
 
-	override public function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode,
-			?smoothing:Bool = false, ?shader:FlxShader):Void {
+	override public function drawPixels(?frame:flixel.graphics.frames.FlxFrame, ?pixels:openfl.display.BitmapData, matrix:flixel.math.FlxMatrix, ?transform:openfl.geom.ColorTransform, ?blend:openfl.display.BlendMode,
+			?smoothing:Bool = false, ?shader:flixel.system.FlxAssets.FlxShader):Void {
 		if (!FlxG.renderBlit && angle != 0) {
 			matrix.translate(-width / 2, -height / 2);
 

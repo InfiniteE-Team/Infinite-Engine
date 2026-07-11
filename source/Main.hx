@@ -44,7 +44,7 @@ class Main extends Sprite {
         var erroryep = CallStack.exceptionStack(true);
         var details:String = CallStack.toString(erroryep);
 
-        var crash:String = Std.string(event.error) + "\n\n--- ERROR ---\n" + details;
+        var crash:String = Std.string(event.error) + "\n" + details;
 
         var crashHandler = new core.system.warnings.TroubleShooter();
         crashHandler.launchCrash(crash);

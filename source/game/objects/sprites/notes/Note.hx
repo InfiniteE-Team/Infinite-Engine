@@ -55,7 +55,7 @@ class Note extends FunkinSprite {
 		this.noteSkin = noteSkin;
 		this.noteSkinData = noteSkinData;
 
-		// reset estado
+		// reset state
 		wasGoodHit = false;
 		canBeHit = false;
 		mustPress = false;

@@ -80,7 +80,6 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 		script = null;
 		#end
 		infoHelp = null;
-		core.assets.FunkinGlobalObjectReg.clear();
 		super.destroy();
 	}
 }
