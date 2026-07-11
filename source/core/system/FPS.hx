@@ -1,8 +1,6 @@
 package core.system;
 
-#if cpp
 import cpp.vm.Gc;
-#end
 import openfl.system.System;
 import openfl.text.TextFieldAutoSize;
 // filters
@@ -31,19 +29,11 @@ class FPS extends openfl.display.FPS {
 		var mem:Float = formatRam(System.totalMemory);
 
 		if (!core.ConfigMain.globalData.developerMode) {
-			#if cpp
 			var memGC:Float = formatRam(Gc.memUsage());
 			text = 'FPS: $currentFPS - [MEM: $mem MB / GC: $memGC MB]';
-			#else
-			text = 'FPS: $currentFPS - [MEM: $mem MB]';
-			#end
 		} else {
-			#if cpp
 			var memGC:Float = formatRam(Gc.memUsage());
 			text = 'FPS: $currentFPS - [MEM: $mem MB / GC: $memGC MB]\n\nDeveloper Mode';
-			#else
-			text = 'FPS: $currentFPS - [MEM: $mem MB]\n\nDeveloper Mode';
-			#end
 		}
 	}
 

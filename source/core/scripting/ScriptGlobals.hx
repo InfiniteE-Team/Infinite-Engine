@@ -22,10 +22,9 @@ class ScriptGlobals {
 		root['FlxTimer'] = flixel.util.FlxTimer;
 		root['FlxEase'] = flixel.tweens.FlxEase;
 		root['FlxMath'] = flixel.math.FlxMath;
-		root['FlxBar'] = flixel.ui.FlxBar;
-		root['FlxBarFillDirection'] = flixel.ui.FlxBar.FlxBarFillDirection;
 
 		// Engine
+		root['Bar'] = game.objects.Bar;
 		root['PlayState'] = game.PlayState;
 		root['MenuState'] = states.MenuState;
 		root['Alphabet'] = utils.Alphabet;
@@ -96,8 +95,8 @@ class ScriptGlobals {
 			"FlxTimer" => flixel.util.FlxTimer,
 			"FlxEase" => flixel.tweens.FlxEase,
 			"FlxMath" => flixel.math.FlxMath,
-			"FlxBar" => flixel.ui.FlxBar,
 			// Engine
+			"Bar" => game.objects.Bar,
 			"PlayState" => game.PlayState,
 			"MenuState" => states.MenuState,
 			"Alphabet" => utils.Alphabet,

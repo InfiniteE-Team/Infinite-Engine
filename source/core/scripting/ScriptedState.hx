@@ -7,7 +7,7 @@ class ScriptedState {
 	// example load: ScriptedState.load('customClass');
 	// customClass.hx or .hxc in assets/states/
 	public static function switchState(className:String, ?args:Array<Dynamic>):Void {
-		MusicBeatState.switchState(load(className, args));
+		MusicBeatState.switchState(() -> load(className, args));
 	}
 
 	public static function load(className:String, ?args:Array<Dynamic>):MusicBeatState {

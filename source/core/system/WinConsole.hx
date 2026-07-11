@@ -1,6 +1,6 @@
 package core.system;
 
-#if (cpp && windows && DEBUG_CONSOLE)
+#if (windows && DEBUG_CONSOLE)
 import cpp.Lib;
 
 @:cppFileCode('

@@ -201,10 +201,12 @@ class LoadingState extends MusicBeatState {
 			return;
 		_readyToGo = true;
 
-		var ps = new game.PlayState();
-		ps.curSong = _curSong;
-		ps.curDifficulty = _curDifficulty;
-		MusicBeatState.switchState(ps);
+		MusicBeatState.switchState(() -> {
+			var ps = new game.PlayState();
+			ps.curSong = _curSong;
+			ps.curDifficulty = _curDifficulty;
+			return ps;
+		});
 	}
 
 	override public function update(elapsed:Float) {

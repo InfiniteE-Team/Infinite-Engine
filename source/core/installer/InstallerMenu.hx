@@ -132,7 +132,7 @@ class InstallerMenu extends MusicBeatState {
 
 	function afterInstall():Void {
 		var targetState = core.ConfigMain.globalData.startState;
-		MusicBeatState.switchState(Type.createInstance(targetState, []));
+		MusicBeatState.switchState(() -> Type.createInstance(targetState, []));
 	}
 
 	public function changeSection():Void {}

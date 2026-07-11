@@ -16,16 +16,10 @@ class Trace {
 	static final DURATION:Float = 7.0;
 
 	public static function init() {
-		if (textGroup != null) {
-			if (!FlxG.state.members.contains(textGroup)) {
-				textGroup.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-				FlxG.state.add(textGroup);
-			}
-			return;
-		}
 		textGroup = new FlxSpriteGroup();
 		textGroup.scrollFactor.set(0, 0);
-		FlxG.state.add(textGroup);
+		if (textGroup != null || FlxG.state != null)
+			FlxG.state.add(textGroup);
 	}
 
 	public static function traceOnce(text:String, ?isError:Bool = false) {

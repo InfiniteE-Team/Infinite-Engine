@@ -67,10 +67,10 @@ class MusicBeatState extends flixel.FlxState {
 		FlxG.resetState();
 	}
 
-	public static function switchState(state:MusicBeatState):Void {
+	public static function switchState(state:() -> MusicBeatState):Void {
 		if (core.ConfigMain.globalData.developerMode)
 			JsonWatcher.updateSwitch();
-		FlxG.switchState(() -> state);
+		FlxG.switchState(state);
 	}
 
 	public function stepHit(step:Int) {

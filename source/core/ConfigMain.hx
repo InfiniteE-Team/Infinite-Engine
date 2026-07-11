@@ -7,10 +7,6 @@ import core.config.SaveData;
 import windowmodcharting.engineImplementation.ConductorImplementation;
 import core.scripting.ScriptGlobals;
 import core.scripting.ScriptResolver;
-//
-#if windows
-import winapi.WindowsAPI;
-#end
 
 class ConfigMain extends flixel.FlxState {
 	public var mainState:Class<MusicBeatState> = game.PlayState;
@@ -57,9 +53,10 @@ class ConfigMain extends flixel.FlxState {
 		cursor.loadCursor();
 
 		#if windows
-		WindowsAPI.reDefineMainWindowTitle(lime.app.Application.current.window.title);
-		WindowsAPI.windowDarkMode(true);
+		core.api.WindowAPI.init();
 		#end
+
+		core.api.WindowAPI.resizeGame(1280, 720);
 
 		ConductorImplementation.custom_songPosition = () -> core.rhythm.RhythmCore.songPosition;
 		ConductorImplementation.custom_crochet = () -> core.rhythm.RhythmCore.crochet;
@@ -68,9 +65,9 @@ class ConfigMain extends flixel.FlxState {
 			Trace.init();
 
 		if (!core.installer.InstallerMenu.hasAssetFiles('assets')) {
-			MusicBeatState.switchState(new core.installer.InstallerMenu());
+			MusicBeatState.switchState(() -> new core.installer.InstallerMenu());
 		} else {
-			MusicBeatState.switchState(Type.createInstance(mainState, []));
+			MusicBeatState.switchState(() -> Type.createInstance(mainState, []));
 		}
 	}
 }

@@ -1,7 +1,6 @@
 import core.assets.Paths;
 import flixel.util.FlxStringUtil;
 import flixel.text.FlxTextBorderStyle;
-import flixel.ui.FlxBar.FlxBarFillDirection;
 
 var playerIcon = null;
 var opponentIcon = null;
@@ -35,10 +34,8 @@ function postCreate() {
 	healthBarBG.antialiasing = true;
 	add(healthBarBG);
 
-	healthBarFill = new FlxBar(healthBarBG.x + 4, healthBarBG.y + 4, LEFT_TO_RIGHT, Std.int(healthBarBG.width - 8), Std.int(healthBarBG.height - 8),
-		playStateConfig, 'health', 0, 2);
+	healthBarFill = new Bar(healthBarBG.x + 4, healthBarBG.y + 4, playStateConfig.health, LEFT_TO_RIGHT, 2);
 	healthBarFill.scrollFactor.set(0, 0);
-	healthBarFill.flipX = true;
 	healthBarFill.cameras = [camHUD];
 
 	var dadColor = 0xFFFF0000;
@@ -54,7 +51,7 @@ function postCreate() {
 		if (isOpponent && char.charData.healthBarColor != null)
 			dadColor = char.charData.healthBarColor;
 	}
-	healthBarFill.createFilledBar(dadColor, bfColor);
+	healthBarFill.createFilledBar([dadColor, bfColor]);
 	add(healthBarFill);
 
 	for (charData in PlayState.SONG.chars) {
