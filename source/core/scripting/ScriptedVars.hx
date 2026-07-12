@@ -15,5 +15,6 @@ class ScriptedVars {
 		script.expose('healthBarY', game.controllerHUD.healthBarY);
 		script.expose('iconP1', game.controllerHUD.iconP1);
 		script.expose('iconP2', game.controllerHUD.iconP2);
+		script.expose('skipCountdown', game.countDown.skipCountdown);
 	}
 }

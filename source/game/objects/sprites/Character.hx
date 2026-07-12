@@ -1,6 +1,5 @@
 package game.objects.sprites;
 
-import utils.UtilsData;
 import core.assets.FunkinSprite;
 import core.json.objects.CharacterData;
 import core.assets.FunkinObjectRegistry;
@@ -59,9 +58,10 @@ class Character extends FunkinObjectRegistry {
 
 	public function loadSprite() {
 		switch (curCharacter) {
+			// case 'bf':  hardcoder reference!1
 			default:
 				var charData:String = Paths.getPath('data/characters/' + curCharacter, "json");
-				characterData = UtilsData.readJson(charData);
+				characterData = FormatJson.readJson(charData);
 				idleAfterSing = characterData.gameplay.idleAfterSing ?? true;
 				singTime = characterData.gameplay.singTime ?? 4;
 				cameraOffset = {

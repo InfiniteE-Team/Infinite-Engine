@@ -36,7 +36,7 @@ class InputController {
 				if (canHold) {
 					sustain.isHeld = true;
 					hasActiveSustain = true;
-					charStrums[i].playAnim('confirm' + i, true);
+					charStrums[i].playAnim('confirm' + i, false);
 				}
 			}
 
@@ -82,7 +82,7 @@ class InputController {
 
 				bestNote.wasGoodHit = true;
 				bestNote.kill();
-				charStrums[i].playAnim('confirm' + i, true);
+				charStrums[i].playAnim('confirm' + i, false);
 
 				if (ratingType.splash)
 					noteController.spawnSplash(charStrums[i], i, bestNote.noteType);
@@ -140,7 +140,7 @@ class InputController {
 		var note = noteController.getHittableNote(charId, i, false);
 
 		if (note != null) {
-			charStrums[i].playAnim('confirm' + i, true);
+			charStrums[i].playAnim('confirm' + i, false);
 			note.wasGoodHit = true;
 			note.kill();
 		}

@@ -1,6 +1,5 @@
 package game.controllers;
 
-import utils.UtilsData;
 import game.PlayStateConfig;
 import flixel.tweens.FlxTween;
 // song
@@ -95,6 +94,12 @@ class NoteController {
 			var strumPos = daSong.chars[i].strumPos;
 			loadGenerateStrums(strumPos != null ? strumPos[0] : 0, strumPos != null ? strumPos[1] : 0);
 		}
+
+		strums.visible = daSong.strumsVisible;
+		notes.visible = daSong.strumsVisible;
+		sustains.visible = daSong.strumsVisible;
+		splashes.visible = daSong.strumsVisible;
+
 		Trace.traceOnce("Created Strums");
 	}
 
@@ -107,10 +112,10 @@ class NoteController {
 
 		// strumnotes
 		var noteDataPath:String = 'noteskins/$noteSkin/strumnotes';
-		noteSkinData = UtilsData.readJson(Paths.getPath('data/$noteDataPath', "json"));
+		noteSkinData = FormatJson.readJson(Paths.getPath('data/$noteDataPath', "json"));
 
 		var ratingPath = Paths.getPath('data/ratings', 'json');
-		ratingData = UtilsData.readJson(ratingPath);
+		ratingData = FormatJson.readJson(ratingPath);
 		if (ratingData == null || ratingData.ratings == null)
 			trace("WARNING: ratings.json not found or invalid");
 		else {
@@ -128,7 +133,7 @@ class NoteController {
 		// splashes
 
 		var splashesDataPath:String = 'noteskins/$noteSkin/splashes';
-		splashesSkinData = UtilsData.readJson(Paths.getPath('data/$splashesDataPath', "json"));
+		splashesSkinData = FormatJson.readJson(Paths.getPath('data/$splashesDataPath', "json"));
 
 		// hold splashes
 
@@ -143,8 +148,6 @@ class NoteController {
 			var strum = new StrumNote(x + i * (112 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props, noteSkin);
 			strum.playAnim('static' + i);
 			strum.applyShader(noteSkinData);
-			if (!daSong.strumsVisible)
-				strum.visible = false;
 			if (isDownscroll)
 				strum.y += 500;
 

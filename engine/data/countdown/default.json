@@ -1,0 +1,79 @@
+{
+    "countdown": [
+        {
+            "sound": {
+                "name": "one",
+                "path": "intro1"
+            }
+        },
+        {
+            "props": {
+                "name": "ready",
+                "path": "ready",
+                "position": [
+                    0,
+                    0
+                ],
+                "scale": [
+                    1,
+                    1
+                ],
+                "alpha": 1.0,
+                "visible": true,
+                "flipX": false,
+                "flipY": false,
+                "antialiasing": true
+            },
+            "sound": {
+                "name": "two",
+                "path": "intro2"
+            }
+        },
+        {
+            "props": {
+                "name": "set",
+                "path": "set",
+                "position": [
+                    0,
+                    0
+                ],
+                "scale": [
+                    1,
+                    1
+                ],
+                "alpha": 1.0,
+                "visible": true,
+                "flipX": false,
+                "flipY": false,
+                "antialiasing": true
+            },
+            "sound": {
+                "name": "three",
+                "path": "intro3"
+            }
+        },
+        {
+            "props": {
+                "name": "go",
+                "path": "go",
+                "position": [
+                    0,
+                    0
+                ],
+                "scale": [
+                    1,
+                    1
+                ],
+                "alpha": 1.0,
+                "visible": true,
+                "flipX": false,
+                "flipY": false,
+                "antialiasing": true
+            },
+            "sound": {
+                "name": "go",
+                "path": "introGo"
+            }
+        }
+    ]
+}

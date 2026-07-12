@@ -1,10 +1,10 @@
-package utils;
+package core.json;
 import sys.FileSystem;
 import core.json.JsonWatcher;
 import ale.json.Json as AleJson;
 import ale.json.Config;
 
-class UtilsData {
+class FormatJson {
 	public static var _configured:Bool = false;
 
 	public static function _configure() {

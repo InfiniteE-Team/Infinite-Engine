@@ -10,75 +10,81 @@ class ScriptGlobals {
 			return;
 		initialized = true;
 
-		var root = RuleScript.defaultImports[''];
+		var roots = RuleScript.defaultImports[''];
 
 		// Flixel
-		root['FlxG'] = flixel.FlxG;
-		root['FlxSprite'] = flixel.FlxSprite;
-		root['FlxText'] = flixel.text.FlxText;
-		root['FlxSound'] = flixel.sound.FlxSound;
-		root['FlxCamera'] = flixel.FlxCamera;
-		root['FlxTween'] = flixel.tweens.FlxTween;
-		root['FlxTimer'] = flixel.util.FlxTimer;
-		root['FlxEase'] = flixel.tweens.FlxEase;
-		root['FlxMath'] = flixel.math.FlxMath;
+		roots['FlxG'] = flixel.FlxG;
+		roots['FlxSprite'] = flixel.FlxSprite;
+		roots['FlxText'] = flixel.text.FlxText;
+		roots['FlxSound'] = flixel.sound.FlxSound;
+		roots['FlxCamera'] = flixel.FlxCamera;
+		roots['FlxTween'] = flixel.tweens.FlxTween;
+		roots['FlxTimer'] = flixel.util.FlxTimer;
+		roots['FlxEase'] = flixel.tweens.FlxEase;
+		roots['FlxMath'] = flixel.math.FlxMath;
 
 		// Engine
-		root['Bar'] = game.objects.Bar;
-		root['PlayState'] = game.PlayState;
-		root['MenuState'] = states.MenuState;
-		root['Alphabet'] = utils.Alphabet;
-		root['Character'] = game.objects.sprites.Character;
-		root['Stage'] = game.objects.sprites.Stage;
-		root['Paths'] = core.assets.Paths;
-		root['FunkinSprite'] = core.assets.FunkinSprite;
-		root['RhythmCore'] = core.rhythm.RhythmCore;
-		root['ScriptHandler'] = core.scripting.ScriptHandler;
+		roots['Bar'] = game.objects.Bar;
+		roots['PlayState'] = game.PlayState;
+		roots['MenuState'] = states.MenuState;
+		roots['Alphabet'] = utils.Alphabet;
+		roots['Character'] = game.objects.sprites.Character;
+		roots['Stage'] = game.objects.sprites.Stage;
+		roots['Paths'] = core.assets.Paths;
+		roots['FunkinSprite'] = core.assets.FunkinSprite;
+		roots['RhythmCore'] = core.rhythm.RhythmCore;
+		roots['ScriptHandler'] = core.scripting.ScriptHandler;
 
-		root['ScriptedStateBase'] = core.scripting.interfaces.ScriptStateBase;
-		root['ScriptSubstateBase'] = core.scripting.interfaces.ScriptSubstateBase;
+		roots['ScriptedStateBase'] = core.scripting.interfaces.ScriptStateBase;
+		roots['ScriptSubstateBase'] = core.scripting.interfaces.ScriptSubstateBase;
 
-		root['ScriptedState'] = core.scripting.ScriptedState;
+		roots['ScriptedState'] = core.scripting.ScriptedState;
 
-		root['SaveData'] = core.config.SaveData;
+		// Json Formatters Engine
+		roots['Json'] = haxe.Json;
+		roots['FormatJson'] = FormatJson;
 
-		root['Trace'] = Trace;
+		// Save Content Game
+		roots['SaveScore'] = core.config.SaveScore;
+		roots['SaveData'] = core.config.SaveData;
+
+		// Utils
+		roots['Trace'] = Trace;
 
 		#if windows
-		root['WindowsAPI'] = winapi.WindowsAPI;
-		root['WindowsGDI'] = winapi.gdi.WindowsGDI;
-		root['WindowsGDIThread'] = winapi.gdi.WindowsGDIThread;
+		roots['WindowsAPI'] = winapi.WindowsAPI;
+		roots['WindowsGDI'] = winapi.gdi.WindowsGDI;
+		roots['WindowsGDIThread'] = winapi.gdi.WindowsGDIThread;
 		#end
 
 		// Haxe std extra
-		root['Json'] = haxe.Json;
-		root['FileSystem'] = sys.FileSystem;
-		root['File'] = sys.io.File;
+		roots['FileSystem'] = sys.FileSystem;
+		roots['File'] = sys.io.File;
 
 		// modchart
-		root['ModchartSystem'] = game.modchart.ModchartSystem;
+		roots['ModchartSystem'] = game.modchart.ModchartSystem;
 		// modifiers
-		root['DrunkModifier'] = game.modchart.modifiers.Modifiers.DrunkModifier;
-		root['TornadoModifier'] = game.modchart.modifiers.Modifiers.TornadoModifier;
-		root['TipsyModifier'] = game.modchart.modifiers.Modifiers.TipsyModifier;
-		root['TipsyZModifier'] = game.modchart.modifiers.Modifiers.TipsyZModifier;
-		root['ReverseModifier'] = game.modchart.modifiers.Modifiers.ReverseModifier;
-		root['FlipModifier'] = game.modchart.modifiers.Modifiers.FlipModifier;
-		root['ConfusionModifier'] = game.modchart.modifiers.Modifiers.ConfusionModifier;
-		root['MiniModifier'] = game.modchart.modifiers.Modifiers.MiniModifier;
-		root['StealthModifier'] = game.modchart.modifiers.Modifiers.StealthModifier;
-		root['ZModifier'] = game.modchart.modifiers.Modifiers.ZModifier;
-		root['SpeedModifier'] = game.modchart.modifiers.Modifiers.SpeedModifier;
-		root['ConfusionOffsetModifier'] = game.modchart.modifiers.Modifiers.ConfusionOffsetModifier;
-		root['TwirlModifier'] = game.modchart.modifiers.Modifiers.TwirlModifier;
-		root['ShakyModifier'] = game.modchart.modifiers.Modifiers.ShakyModifier;
-		root['PulseModifier'] = game.modchart.modifiers.Modifiers.PulseModifier;
-		root['BlinkModifier'] = game.modchart.modifiers.Modifiers.BlinkModifier;
-		root['TanDrunkModifier'] = game.modchart.modifiers.Modifiers.TanDrunkModifier;
-		root['BeatXModifier'] = game.modchart.modifiers.Modifiers.BeatXModifier;
-		root['ShrinkXModifier'] = game.modchart.modifiers.Modifiers.ShrinkXModifier;
+		roots['DrunkModifier'] = game.modchart.modifiers.Modifiers.DrunkModifier;
+		roots['TornadoModifier'] = game.modchart.modifiers.Modifiers.TornadoModifier;
+		roots['TipsyModifier'] = game.modchart.modifiers.Modifiers.TipsyModifier;
+		roots['TipsyZModifier'] = game.modchart.modifiers.Modifiers.TipsyZModifier;
+		roots['ReverseModifier'] = game.modchart.modifiers.Modifiers.ReverseModifier;
+		roots['FlipModifier'] = game.modchart.modifiers.Modifiers.FlipModifier;
+		roots['ConfusionModifier'] = game.modchart.modifiers.Modifiers.ConfusionModifier;
+		roots['MiniModifier'] = game.modchart.modifiers.Modifiers.MiniModifier;
+		roots['StealthModifier'] = game.modchart.modifiers.Modifiers.StealthModifier;
+		roots['ZModifier'] = game.modchart.modifiers.Modifiers.ZModifier;
+		roots['SpeedModifier'] = game.modchart.modifiers.Modifiers.SpeedModifier;
+		roots['ConfusionOffsetModifier'] = game.modchart.modifiers.Modifiers.ConfusionOffsetModifier;
+		roots['TwirlModifier'] = game.modchart.modifiers.Modifiers.TwirlModifier;
+		roots['ShakyModifier'] = game.modchart.modifiers.Modifiers.ShakyModifier;
+		roots['PulseModifier'] = game.modchart.modifiers.Modifiers.PulseModifier;
+		roots['BlinkModifier'] = game.modchart.modifiers.Modifiers.BlinkModifier;
+		roots['TanDrunkModifier'] = game.modchart.modifiers.Modifiers.TanDrunkModifier;
+		roots['BeatXModifier'] = game.modchart.modifiers.Modifiers.BeatXModifier;
+		roots['ShrinkXModifier'] = game.modchart.modifiers.Modifiers.ShrinkXModifier;
 
-		root['WindowModManager'] = windowmodcharting.WindowModManager;
+		roots['WindowModManager'] = windowmodcharting.WindowModManager;
 	}
 
 	public static function initLua():Void {
@@ -105,13 +111,18 @@ class ScriptGlobals {
 			"Paths" => core.assets.Paths,
 			"FunkinSprite" => core.assets.FunkinSprite,
 			"RhythmCore" => core.rhythm.RhythmCore,
+			// Json
+			"Json" => haxe.Json,
+			"FormatJson" => FormatJson,
+			// Save Config Game
+			"SaveScore" => core.config.SaveScore,
 			"SaveData" => core.config.SaveData,
+			// Utils
 			"Trace" => Trace,
 			#if windows
 			"WindowsAPI" => winapi.WindowsAPI, "WindowsGDI" => winapi.gdi.WindowsGDI, "WindowsGDIThread" => winapi.gdi.WindowsGDIThread,
 			#end
 			// Std
-			"Json" => haxe.Json,
 			"FileSystem" => sys.FileSystem,
 			"File" => sys.io.File,
 			// modchart

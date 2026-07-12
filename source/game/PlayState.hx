@@ -16,6 +16,8 @@ import core.rhythm.RhythmCore;
 import core.rhythm.audio.GameAudio;
 import core.json.song.SongData.SongConfig;
 import game.controllers.events.EventManager;
+import game.objects.Countdown;
+// window
 import windowmodcharting.WindowModManager;
 
 class PlayState extends MusicBeatState {
@@ -27,11 +29,13 @@ class PlayState extends MusicBeatState {
 	public var cameraController:CameraController;
 
 	// Song
-	public var curSong:String = 'fresh';
+	public var curSong:String = '4score';
 
 	public static var SONG:SongConfig = new SongConfig();
 
 	public var curDifficulty:Int = 0;
+
+	public var countDown:Countdown;
 
 	// notes
 	public var gameAudio:GameAudio = new GameAudio();
@@ -70,6 +74,7 @@ class PlayState extends MusicBeatState {
 		#end
 
 		DiffsUtils.getDifficulty(curSong);
+
 		SONG.configSong(curSong, DiffsUtils.difficulties[curDifficulty]);
 
 		buildStageandChars();
@@ -101,7 +106,7 @@ class PlayState extends MusicBeatState {
 		super.create();
 
 		#if HSCRIPT_ALLOWED
-		core.scripting.ScriptedVars.gameplayVars(script,this);
+		core.scripting.ScriptedVars.gameplayVars(script, this);
 		script.call("postCreate", []);
 		#end
 	}
@@ -126,7 +131,6 @@ class PlayState extends MusicBeatState {
 		stage.cameras = [camGame];
 
 		cameraController.defaultZoom = stage.defaultZoom;
-		cameraController.resolveZoom();
 		if (!osuMode)
 			add(stage);
 
@@ -148,7 +152,7 @@ class PlayState extends MusicBeatState {
 
 		var opponentData = Lambda.find(SONG.chars, c -> CharacterController.namesOpponent.contains(c.role)) ?? (SONG.chars.length > 0 ? SONG.chars[0] : null);
 		if (opponentData != null)
-			cameraController.followChar = cast(chars.get(opponentData.id), game.objects.sprites.Character);
+			cameraController.char = cast(chars.get(opponentData.id), game.objects.sprites.Character);
 
 		#if HSCRIPT_ALLOWED
 		script.call("postBuildStage", []);
@@ -179,20 +183,30 @@ class PlayState extends MusicBeatState {
 
 	// Code Song
 	public function loadSong() {
+		gameAudio.loadSong(SONG.needVoices, endSong);
+
 		noteController.generateNotes(0, SONG);
 
 		if (SONG.songData.gameplay.events != null)
 			events.loadEvents(SONG.songData.gameplay.events);
-
-		gameAudio.loadSong(SONG.needVoices, endSong);
 	}
 
 	public function startCountdown() {
-		loadSong();
-
 		startCount = true;
 
-		initSong();
+		countDown = new Countdown(0, 0, SONG.countdown);
+		countDown.cameras = [camHUD];
+		add(countDown);
+
+		countDown.onComplete = function() {
+			loadSong();
+			initSong();
+		}
+
+		if (!countDown.skipCountdown)
+			countDown.onCountdown();
+		else
+			countDown.onComplete();
 	}
 
 	public function initSong() {
@@ -374,7 +388,7 @@ class PlayState extends MusicBeatState {
 				if (!cameraController.existsCamEvents) {
 					var singing = chars.getActiveSingingChar();
 					if (singing != null)
-						cameraController.followChar = singing;
+						cameraController.char = singing;
 				}
 			}
 		}
@@ -396,7 +410,7 @@ class PlayState extends MusicBeatState {
 		if (beat % 4 == 0)
 			cameraController.bumpZoom();
 
-		controllerHUD.onBeatHit(beat);
+		controllerHUD.beatHit(beat);
 
 		if (!osuMode || !paused)
 			chars.danceAll();

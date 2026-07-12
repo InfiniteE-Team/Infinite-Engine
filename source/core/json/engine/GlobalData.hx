@@ -1,5 +1,4 @@
 package core.json.engine;
-import utils.UtilsData;
 
 typedef GlobalData = {
 	var ?developerMode:Bool;
@@ -18,7 +17,7 @@ class GlobalConfig {
 	public function new() {}
 
 	public function configGlobal() {
-		globalData = UtilsData.readJson(Paths.getPath('data/global', 'json'));
+		globalData = FormatJson.readJson(Paths.getPath('data/global', 'json'));
 		if (globalData == null)
 			return;
 

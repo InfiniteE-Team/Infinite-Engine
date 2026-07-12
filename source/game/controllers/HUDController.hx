@@ -12,11 +12,6 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 	public var healthBar:Bar;
 	public var healthBarY:Float = 0;
 
-	// utils
-	var playerBumpScale = 1.0;
-	var opponentBumpScale = 1.0;
-	var BUMP_SCALE = 1.2;
-
 	public function new() {
 		super();
 		createHUD();
@@ -77,9 +72,15 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 		if (healthBar != null)
 			healthBar.argument = PlayState.instance.playStateConfig.health;
 
+		for (icon in [iconP1, iconP2]) {
+			if (icon.scale.x > 1.0) {
+				icon.scale.x = flixel.math.FlxMath.lerp(icon.scale.x, 1.0, elapsed * 12);
+				icon.scale.y = flixel.math.FlxMath.lerp(icon.scale.y, 1.0, elapsed * 12);
+			}
+		}
+
 		_updateLosingAnim();
 		_updateIconPositions();
-		_lerpBumpScale(elapsed);
 	}
 
 	function _updateLosingAnim() {
@@ -112,34 +113,10 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 		}
 	}
 
-	function _lerpBumpScale(elapsed:Float) {
-		var speed = elapsed * 12;
-
-		playerBumpScale = playerBumpScale + (1.0 - playerBumpScale) * speed;
-		opponentBumpScale = opponentBumpScale + (1.0 - opponentBumpScale) * speed;
-
-		if (iconP1 != null) {
-			iconP1.scale.set(playerBumpScale, playerBumpScale);
-			iconP1.updateHitbox();
-		}
-
-		if (iconP2 != null) {
-			iconP2.scale.set(opponentBumpScale, opponentBumpScale);
-			iconP2.updateHitbox();
-		}
-	}
-
-	public function onBeatHit(beat:Float) {
-		if (iconP1 != null && iconP1.bumpInBeats) {
-			var tempo = iconP1.stepTempo > 0 ? iconP1.stepTempo : 1;
-			if (beat % tempo == 0)
-				playerBumpScale = BUMP_SCALE;
-		}
-
-		if (iconP2 != null && iconP2.bumpInBeats) {
-			var tempo = iconP2.stepTempo > 0 ? iconP2.stepTempo : 1;
-			if (beat % tempo == 0)
-				opponentBumpScale = BUMP_SCALE;
+	public function beatHit(beat:Float) {
+		for (icon in [iconP1, iconP2]) {
+			if (icon.bumpInBeats && Math.floor(beat % icon.stepTempo) == 0)
+				icon.scale.set(1.2, 1.2);
 		}
 	}
 

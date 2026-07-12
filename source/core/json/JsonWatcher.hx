@@ -23,7 +23,7 @@ class JsonWatcher {
 
 	public static function watchAndRead<T>(path:String, ?callback:Void->Void):Null<T> {
 		watch(path, callback);
-		return utils.UtilsData.readJson(path);
+		return FormatJson.readJson(path);
 	}
 
     public static function updateSwitch():Void {

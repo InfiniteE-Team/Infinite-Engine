@@ -45,13 +45,14 @@ class EventManager {
 	function handleEvent(event:EventsData) {
 		switch (event.name) {
 			case 'Camera Follow':
+				PlayState.instance.cameraController.existsCamEvents = true;
 				var charId:String = Reflect.field(event.arguments, 'char');
 				var char = PlayState.instance.chars.get(charId);
 				if (char == null) {
-					trace('Camera Follow char "$charId" not found');
+					Trace.traceOnce('Camera Follow char "$charId" not found');
 					return;
 				}
-				PlayState.instance.cameraController.followChar = cast(char, Character);
+				PlayState.instance.cameraController.char = cast(char, Character);
 		}
 
 		#if HSCRIPT_ALLOWED

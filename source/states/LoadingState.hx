@@ -6,7 +6,6 @@ import core.json.song.SongData.SongConfig;
 import core.json.objects.CharacterData;
 import core.json.objects.StageData;
 import core.json.objects.NoteSkinData;
-import utils.UtilsData;
 import flixel.ui.FlxBar;
 import flixel.text.FlxText;
 import flixel.FlxSprite;
@@ -100,7 +99,7 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function collectStageAssets(stageName:String) {
-		var stageData:StageData = UtilsData.readJson(Paths.getPath('data/stages/$stageName', 'json'));
+		var stageData:StageData = FormatJson.readJson(Paths.getPath('data/stages/$stageName', 'json'));
 		if (stageData == null)
 			return;
 
@@ -112,7 +111,7 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function collectCharAssets(charName:String) {
-		var charData:CharacterData = UtilsData.readJson(Paths.getPath('data/characters/$charName', 'json'));
+		var charData:CharacterData = FormatJson.readJson(Paths.getPath('data/characters/$charName', 'json'));
 		if (charData == null)
 			return;
 
@@ -135,7 +134,7 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function collectNoteSkinAssets(skinName:String) {
-		var noteSkinData:NoteSkinData = UtilsData.readJson(Paths.getPath('data/noteskins/$skinName/strumnotes', "json"));
+		var noteSkinData:NoteSkinData = FormatJson.readJson(Paths.getPath('data/noteskins/$skinName/strumnotes', "json"));
 		if (noteSkinData != null && noteSkinData.props != null && noteSkinData.props.path != null)
 			enqueue('game/noteskins/$skinName/strumnotes/${noteSkinData.props.path}');
 	}

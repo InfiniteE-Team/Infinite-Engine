@@ -1,6 +1,5 @@
 package core.config;
 
-import utils.UtilsData;
 import core.json.extensions.SpriteData.ObjectData;
 import core.json.extensions.SpriteData.AnimData;
 import core.assets.FunkinSprite;
@@ -16,7 +15,7 @@ class CursorConfig extends FunkinSprite {
 	}
 
 	public function loadCursor() {
-		cursorProps = UtilsData.readJson(Paths.getPath('data/cursorConfig', "json"));
+		cursorProps = FormatJson.readJson(Paths.getPath('data/cursorConfig', "json"));
 		loadProps(cursorProps, 'cursor');
 
 		if (this.graphic == null || this.graphic.bitmap == null) {

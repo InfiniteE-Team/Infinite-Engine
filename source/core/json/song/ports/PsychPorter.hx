@@ -1,42 +1,59 @@
 package core.json.song.ports;
+
 import core.json.song.SongData.EventsData;
 import core.json.song.SongData.NoteData;
 
 class PsychPorter implements FormatChartConverter {
-    public function new () {}
+	public function new() {}
+
 	public function detect(raw:Dynamic):Bool {
-		var s = raw.song;
-		return s != null && s.notes != null && (s.events != null || s.player3 != null || s.gfVersion != null);
+		var song = raw.song;
+		return song != null && song.notes != null && (song.events != null || song.player3 != null || song.gfVersion != null);
 	}
 
 	public function convert(raw:Dynamic):SongData {
-		var s = raw.song;
-		var p1:String = s.player1 ?? 'bf';
-		var p2:String = s.player2 ?? 'dad';
-		var p3:String = s.player3 ?? s.gfVersion ?? 'gf';
+		var song = raw.song;
+		var p1:String = song.player1 ?? 'bf';
+		var p2:String = song.player2 ?? 'dad';
+		var p3:String = song.player3 ?? song.gfVersion ?? 'gf';
+
+		var events:Array<EventsData> = [];
 
 		var notes:Array<NoteData> = [];
-		for (section in (s.notes : Array<Dynamic>)) {
+		for (section in (song.notes : Array<Dynamic>)) {
 			var mustHit:Bool = section.mustHitSection ?? true;
-			for (n in (section.sectionNotes : Array<Array<Float>>)) {
-				var lane = Std.int(n[1]);
+			var sectionNotes:Array<Array<Float>> = section.sectionNotes;
+			var sectionStart:Null<Float> = null;
+
+			for (note in sectionNotes) {
+				var lane = Std.int(note[1]);
 				var over = lane > 3;
 				notes.push({
-					char: (!over ? mustHit : !mustHit) ? p1 : p2,
+					char: over ? p2 : p1,
 					lane: over ? lane - 4 : lane,
-					time: n[0],
+					time: note[0],
 					type: 'normal',
-					length: n[2]
+					length: note[2]
+				});
+
+				if (sectionStart == null || note[0] < sectionStart)
+					sectionStart = note[0];
+			}
+
+			if (sectionStart != null) {
+				events.push({
+					time: sectionStart,
+					name: 'Camera Follow',
+					arguments: {char: mustHit ? p1 : p2}
 				});
 			}
 		}
 		notes.sort((a, b) -> a.time < b.time ? -1 : 1);
 
-		var events:Array<EventsData> = [];
-		if (s.events != null) {
-			for (ev in (s.events : Array<Dynamic>)) {
-				var time:Float = ev[0];
-				for (action in (ev[1] : Array<Dynamic>)) {
+		if (song.events != null) {
+			for (event in (song.events : Array<Dynamic>)) {
+				var time:Float = event[0];
+				for (action in (event[1] : Array<Dynamic>)) {
 					events.push({
 						time: time,
 						name: Std.string(action[0]),
@@ -48,19 +65,26 @@ class PsychPorter implements FormatChartConverter {
 
 		return {
 			meta: {
-				song: s.song ?? 'Unknown',
-				bpm: s.bpm ?? 120,
-				speed: s.speed ?? 1.0,
-				needVoices: s.needsVoices ?? true,
-				stage: s.stage ?? 'stage'
+				song: song.song ?? 'Unknown',
+				bpm: song.bpm ?? 120,
+				speed: song.speed ?? 1.0,
+				needVoices: song.needsVoices ?? true,
+				stage: song.stage ?? 'stage'
 			},
 			gameplay: {
 				chars: [
 					{
+						id: p3,
+						name: p3,
+						role: 'gf',
+						strumPos: [0, 0],
+						strumsVisible: false
+					},
+					{
 						id: p1,
 						name: p1,
 						role: 'player',
-						strumPos: [650, 0]
+						strumPos: [720, 0]
 					},
 					{
 						id: p2,
@@ -68,12 +92,6 @@ class PsychPorter implements FormatChartConverter {
 						role: 'opponent',
 						strumPos: [50, 0]
 					},
-					{
-						id: p3,
-						name: p3,
-						role: 'gf',
-						strumPos: [0, 0]
-					}
 				],
 				events: events
 			},

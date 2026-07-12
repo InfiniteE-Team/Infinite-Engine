@@ -10,6 +10,7 @@ class WindowAPI {
 		#if windows
 		WindowsAPI.reDefineMainWindowTitle(lime.app.Application.current.window.title);
 		WindowsAPI.windowDarkMode(true);
+        WindowsAPI.setProgramDPIAware();
 		#end
 	}
 

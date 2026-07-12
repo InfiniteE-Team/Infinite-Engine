@@ -1,6 +1,5 @@
 package core.json.song;
 
-import utils.UtilsData;
 import core.rhythm.RhythmCore;
 
 typedef SongData = {
@@ -14,6 +13,7 @@ typedef MetaData = {
 	var bpm:Float;
 	var speed:Float;
 	var ?stage:String;
+	var ?countdown:String;
 	var ?needVoices:Bool;
 	var ?vocSeparated:Bool;
 }
@@ -63,11 +63,12 @@ typedef NoteData = {
 class SongConfig {
 	public var songData:SongData;
 
-	public var songName:String = 'Fresh';
+	public var songName:String = 'fresh';
 	public var bpmSong:Float = 120;
 	public var speed:Float = 1.2;
 	public var needVoices:Bool = true;
 	public var stage:String = 'stage';
+	public var countdown:String = 'default';
 
 	public var chars:Array<CharDataJson> = [];
 
@@ -102,7 +103,7 @@ class SongConfig {
 		}
 
 		if (songData == null) {
-			var raw:Dynamic = UtilsData.readJson(Paths.getPath(baseFile, 'json'));
+			var raw:Dynamic = FormatJson.readJson(Paths.getPath(baseFile, 'json'));
 			if (raw == null)
 				return;
 			var converted = ChartPorter.tryConvert(raw);
@@ -114,11 +115,12 @@ class SongConfig {
 		if (songData == null)
 			return;
 
-		songName = songData.meta.song ?? 'Fresh';
+		songName = songData.meta.song ?? 'fresh';
 		bpmSong = songData.meta.bpm ?? 120;
 		speed = songData.meta.speed ?? 1.2;
 		needVoices = songData.meta.needVoices ?? true;
 		stage = songData.meta.stage ?? 'stage';
+		countdown = songData.meta.countdown ?? 'default';
 		vocSeparated = songData.meta.vocSeparated ?? false;
 
 		for (note in songData.notes) {

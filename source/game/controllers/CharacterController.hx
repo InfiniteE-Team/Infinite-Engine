@@ -94,7 +94,7 @@ class CharacterController extends FunkinObjectRegistry {
 							continue;
 						if (sustain.mustPress == false && songPos >= sustain.strumTime && songPos <= sustain.strumTime + sustain.length) {
 							sustain.isHeld = true;
-							strums[i].playAnim('confirm' + i, true);
+							strums[i].playAnim('confirm' + i, false);
 							holdingActive = true;
 							break;
 						}

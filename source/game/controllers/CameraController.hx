@@ -12,10 +12,10 @@ class CameraController {
 	public var defaultZoom:Float = 1.0;
 
 	public var camPoint:FlxObject;
+	
+	public var char:Character = null;
 
 	public var zoomEnabled:Bool = true;
-
-	public var followChar:Character = null;
 
 	public var existsCamEvents:Bool = false;
 
@@ -29,21 +29,21 @@ class CameraController {
 		camPoint = new FlxObject(0, 0, 1, 1);
 		camGame.follow(camPoint, LOCKON, lerp);
 
-		resolveZoom();
-	}
-
-	public function resolveZoom() {
 		camGame.zoom = defaultZoom;
 	}
 
 	public function update(elapsed:Float):Void {
-		if (!existsCamEvents){
-			if (followChar != null) {
-				var pos = followChar.getCamPosition();
-				moveCameraTo(pos.x, pos.y);
-			}
+		if (!existsCamEvents) {
+			followChar(char);
 		}
 		lerpZoom(elapsed);
+	}
+
+	public function followChar(char:Character) {
+		if (char != null) {
+			var pos = char.getCamPosition();
+			moveCameraTo(pos.x, pos.y);
+		}
 	}
 
 	public function lerpZoom(elapsed:Float):Void {

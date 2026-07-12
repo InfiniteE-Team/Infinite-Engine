@@ -8,7 +8,7 @@ import core.scripting.ScriptHandler;
 #end
 import game.controllers.InputController;
 
-class MusicBeatState extends flixel.FlxState {
+class MusicBeatState extends State {
 	var tracker:TrackBeat = new TrackBeat();
 
 	#if HSCRIPT_ALLOWED

@@ -36,7 +36,7 @@ class MenuState extends MusicBeatState {
 	override public function create():Void {
 		super.create();
 
-		menuData = utils.UtilsData.readJson(Paths.getPath('data/$menu_folder', 'json'));
+		menuData = FormatJson.readJson(Paths.getPath('data/$menu_folder', 'json'));
 		if (menuData == null || menuData.elements == null) {
 			Trace.traceOnce('MenuState: not found $menu_folder', true);
 			return;
@@ -63,7 +63,7 @@ class MenuState extends MusicBeatState {
 				obj = buildGroup(el);
 
 			case Sound:
-				playElementAudio(el.audio);
+				AudioConfig.playElementAudio(el.audio);
 				return;
 
 			case CustomClass:
@@ -117,7 +117,7 @@ class MenuState extends MusicBeatState {
 			applyLoopAnim(spr, el.loopAnim);
 
 		if (el.audio != null)
-			playElementAudio(el.audio);
+			AudioConfig.playElementAudio(el.audio, 'menus/');
 
 		return spr;
 	}
@@ -145,23 +145,6 @@ class MenuState extends MusicBeatState {
 
 	function buildCustomClass(el:Element):flixel.FlxBasic {
 		return buildSprite(el);
-	}
-
-	function playElementAudio(audio:AudioData):Void {
-		if (audio == null)
-			return;
-
-		var isMusic = audio.channel == 'music' || audio.looped == true;
-
-		if (isMusic) {
-			FlxG.sound.playMusic(Paths.getPath(audio.path, 'music'), audio.volume ?? 1.0, audio.looped ?? true);
-			if (audio.fadeIn != null)
-				FlxG.sound.music.fadeIn(audio.fadeIn, 0, audio.volume ?? 1.0);
-		} else {
-			var sfx = FlxG.sound.play(Paths.getPath(audio.path, 'sound'), audio.volume ?? 1.0, audio.looped ?? false);
-			if (sfx != null && audio.pitch != null)
-				sfx.pitch = audio.pitch;
-		}
 	}
 
 	function applyAnchor(spr:FunkinSprite, el:Element):Void {

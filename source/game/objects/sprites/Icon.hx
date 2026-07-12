@@ -1,5 +1,6 @@
 package game.objects.sprites;
 
+import core.rhythm.TrackBeat;
 import core.json.objects.CharacterData;
 
 class Icon extends core.assets.FunkinSprite {
