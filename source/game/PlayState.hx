@@ -8,6 +8,7 @@ import game.controllers.NoteController;
 // visuals
 import core.assets.FunkinSprite;
 import game.controllers.CharacterController;
+import game.controllers.HUDController;
 import game.objects.sprites.Stage;
 // songs
 import core.rhythm.DiffsUtils;
@@ -16,8 +17,6 @@ import core.rhythm.audio.GameAudio;
 import core.json.song.SongData.SongConfig;
 import game.controllers.events.EventManager;
 import windowmodcharting.WindowModManager;
-// saves
-import core.config.SaveData;
 
 class PlayState extends MusicBeatState {
 	public static var instance:PlayState;
@@ -25,7 +24,6 @@ class PlayState extends MusicBeatState {
 	// cameras
 	public var camGame:Camera;
 	public var camHUD:Camera;
-
 	public var cameraController:CameraController;
 
 	// Song
@@ -47,6 +45,7 @@ class PlayState extends MusicBeatState {
 	// visuals
 	public var chars:CharacterController;
 	public var stage:Stage;
+	public var controllerHUD:HUDController;
 
 	// configs
 	public var playStateConfig:PlayStateConfig = new PlayStateConfig(); // data for health, strum line, etc
@@ -80,7 +79,9 @@ class PlayState extends MusicBeatState {
 		FlxG.signals.focusLost.add(onFocusLost);
 		FlxG.signals.focusGained.add(onFocusGained);
 
-		FlxG.mouse.visible = false;
+		controllerHUD = new HUDController();
+		controllerHUD.cameras = [camHUD];
+		add(controllerHUD);
 
 		buildStrumsandNotes();
 
@@ -100,6 +101,7 @@ class PlayState extends MusicBeatState {
 		super.create();
 
 		#if HSCRIPT_ALLOWED
+		core.scripting.ScriptedVars.gameplayVars(script,this);
 		script.call("postCreate", []);
 		#end
 	}
@@ -285,9 +287,6 @@ class PlayState extends MusicBeatState {
 		script.loadFolder('songs/$curSong/scripts');
 		script.load(Paths.getPath('hud', 'script'));
 		script.executeAll();
-
-		script.expose('SONG', PlayState.SONG);
-		script.expose('instance', PlayState.instance);
 	}
 
 	public function rewindSong():Void {
@@ -396,6 +395,8 @@ class PlayState extends MusicBeatState {
 
 		if (beat % 4 == 0)
 			cameraController.bumpZoom();
+
+		controllerHUD.onBeatHit(beat);
 
 		if (!osuMode || !paused)
 			chars.danceAll();

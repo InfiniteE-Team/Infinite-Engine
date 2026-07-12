@@ -6,7 +6,7 @@ import sys.FileSystem;
 
 class LuaScript {
 	var L:State;
-	var owner:Dynamic;
+	var superInstance:Dynamic;
 	var path:String;
 
 	public static var globalClasses:Map<String, Dynamic> = null;
@@ -19,9 +19,9 @@ class LuaScript {
 		return Std.string(L);
 	}
 
-	public function new(path:String, owner:Dynamic) {
+	public function new(path:String, superInstance:Dynamic) {
 		this.path = path;
-		this.owner = owner;
+		this.superInstance = superInstance;
 		L = LuaL.newstate();
 		LuaL.openlibs(L);
 		Lua.init_callbacks(L);
@@ -29,7 +29,7 @@ class LuaScript {
 		ScriptGlobals.initLua();
 		registerCoreFunctions();
 		registerClasses();
-		registerOwner();
+		registersuperInstance();
 		_stateMap.set(stateKey(L), this);
 		var err = LuaL.dofile(L, path);
 		if (err != 0)
@@ -75,17 +75,17 @@ class LuaScript {
 		}
 	}
 
-	public function registerOwner():Void {
+	public function registersuperInstance():Void {
 		// superInstance RuleScript but in Lua
-		for (field in Reflect.fields(owner)) {
-			var val = Reflect.field(owner, field);
+		for (field in Reflect.fields(superInstance)) {
+			var val = Reflect.field(superInstance, field);
 			pushValue(val);
 			Lua.setglobal(L, field);
 		}
-		var cls = Type.getClass(owner);
+		var cls = Type.getClass(superInstance);
 		if (cls != null) {
 			for (field in Type.getInstanceFields(cls)) {
-				var val = Reflect.getProperty(owner, field);
+				var val = Reflect.getProperty(superInstance, field);
 				if (val != null) {
 					pushValue(val);
 					Lua.setglobal(L, field);
@@ -161,18 +161,18 @@ class LuaScript {
 		});
 
 		luaFunction("getProperty", function(p:String):Dynamic {
-			return resolvePath(owner, p);
+			return resolvePath(superInstance, p);
 		});
 
 		luaFunction("setProperty", function(p:String, val:Dynamic):Dynamic {
-			setPath(owner, p, val);
+			setPath(superInstance, p, val);
 			return null;
 		});
 
 		luaFunction("callMethod", function(p:String, args:Dynamic):Dynamic {
 			var parts = p.split('.');
 			var methodName = parts.pop();
-			var obj = parts.length > 0 ? resolvePath(owner, parts.join('.')) : owner;
+			var obj = parts.length > 0 ? resolvePath(superInstance, parts.join('.')) : superInstance;
 			if (obj == null)
 				return null;
 			var fn = Reflect.field(obj, methodName);
@@ -524,7 +524,7 @@ class LuaScript {
 		return args;
 	}
 
-	// resolvePath(owner, "noteController.scrollSpeed") → value
+	// resolvePath(superInstance, "noteController.scrollSpeed") → value
 	static function resolvePath(root:Dynamic, path:String):Dynamic {
 		var parts = path.split('.');
 		var cur:Dynamic = root;
@@ -539,7 +539,7 @@ class LuaScript {
 		return cur;
 	}
 
-	// setPath(owner, "noteController.scrollSpeed", 2.5)
+	// setPath(superInstance, "noteController.scrollSpeed", 2.5)
 	static function setPath(root:Dynamic, path:String, value:Dynamic):Void {
 		var parts = path.split('.');
 		var last = parts.pop();
@@ -582,6 +582,6 @@ class LuaScript {
 			L = null;
 		}
 		_requireCache = null;
-		owner = null;
+		superInstance = null;
 	}
 }

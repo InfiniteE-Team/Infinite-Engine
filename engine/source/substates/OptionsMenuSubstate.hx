@@ -7,7 +7,7 @@ function onCreate() {
 		var text:FlxText = new FlxText(100 + (i * 60), 100, FlxG.width, options[i]);
 		text.setFormat(Paths.getPath('Funkin.otf', 'font'), 34, 0xFFFFFFFF, "center");
 		text.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
-		text.antialiasing = true;
+		text.antialiasing = SaveData.data.antialiasing;
 		text.scrollFactor.set(0, 0);
 		optionsGroup.push(text);
 		add(text);

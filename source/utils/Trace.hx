@@ -18,6 +18,7 @@ class Trace {
 	public static function init() {
 		textGroup = new FlxSpriteGroup();
 		textGroup.scrollFactor.set(0, 0);
+		textGroup.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 		if (textGroup != null || FlxG.state != null)
 			FlxG.state.add(textGroup);
 	}

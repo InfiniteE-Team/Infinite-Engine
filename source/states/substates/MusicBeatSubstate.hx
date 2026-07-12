@@ -36,7 +36,7 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 		script = new ScriptHandler(this);
 		var theclass = Type.getClass(this);
 		var className = Type.getClassName(theclass).split('.').pop();
-		script.load(Paths.getPath(className, 'states'));
+		script.load(Paths.getPath(className, 'substates'));
 		script.exposeStatics(theclass);
 	}
 	#end
@@ -48,10 +48,7 @@ class MusicBeatSubstate extends flixel.FlxSubState {
 			#if HSCRIPT_ALLOWED
 			script.hotReload();
 			#end
-/*
-			if (FlxG.keys.justPressed.F5) {
-				MusicBeatSubstate.resetState();
-			}*/
+			
 			if (FlxG.keys.justPressed.F4)
 				infoHelp.openUI();
 		}

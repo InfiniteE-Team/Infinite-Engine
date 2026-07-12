@@ -34,7 +34,7 @@ class InstallerMenu extends MusicBeatState {
 		// Code to generate the installer menu based on MenuData
 		bg.loadGraphic(Paths.getPath('installer/BG_installer', 'image'));
 		bg.screenCenter();
-		bg.antialiasing = true;
+		bg.antialiasing = SaveData.data.antialiasing;
 		bg.scrollFactor.set(0, 0);
 		add(bg);
 
@@ -42,7 +42,7 @@ class InstallerMenu extends MusicBeatState {
 		configMenu.frames = Paths.getAnimated('installer/config_window');
 		configMenu.anim.addBySymbol('Clp', 'Clp', 24, false);
 		configMenu.playAnim('Clp');
-		configMenu.antialiasing = true;
+		configMenu.antialiasing = SaveData.data.antialiasing;
 		configMenu.scale.set(0.94, 0.94);
 		configMenu.updateHitbox();
 		add(configMenu);
@@ -50,7 +50,7 @@ class InstallerMenu extends MusicBeatState {
 		files.frames = Paths.getPath('installer/images_yep', 'animated');
 		files.animation.addByPrefix('idle', 'files', 24, false);
 		files.animation.play('idle');
-		files.antialiasing = true;
+		files.antialiasing = SaveData.data.antialiasing;
 		files.screenCenter();
 		files.x += 190;
 		files.scrollFactor.set(0, 0);

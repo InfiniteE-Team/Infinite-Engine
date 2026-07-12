@@ -175,7 +175,7 @@
         {
           "name": "losing",
           "indices": [
-            0
+            1
           ],
           "offsets": [
             0,
@@ -187,7 +187,7 @@
         {
           "name": "normal",
           "indices": [
-            1
+            0
           ],
           "offsets": [
             0,

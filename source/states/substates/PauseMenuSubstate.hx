@@ -44,7 +44,7 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		this.camera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 
 		bg = new FlxSprite().makeGraphic(1280, 720, FlxColor.BLACK);
-		bg.antialiasing = true;
+		bg.antialiasing = SaveData.data.antialiasing;
 		bg.alpha = 0.6;
 		bg.scrollFactor.set(0, 0);
 		bg.screenCenter();
@@ -54,7 +54,7 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 			text = new FlxText(100, 100 + (i * 60), FlxG.width, options[i]);
 			text.setFormat(Paths.getPath('Funkin.otf', 'font'), 34, 0xFFFFFFFF, "left");
 			text.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
-			text.antialiasing = true;
+			text.antialiasing = SaveData.data.antialiasing;
 			text.scrollFactor.set(0, 0);
 			texts.push(text);
 			add(text);
@@ -71,6 +71,11 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		#end
 
 		changeCur();
+
+		if (FlxG.keys.justPressed.ESCAPE) {
+			resumeFunction();
+			#if HSCRIPT_ALLOWED script.call("ExitMenu", []); #end
+		}
 
 		if (input.control.justPressedAction("uiKeys", 'accept')) {
 			switch (options[curSelect]) {
@@ -91,6 +96,7 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 					#end
 			}
 		}
+
 		super.update(elapsed);
 
 		#if HSCRIPT_ALLOWED

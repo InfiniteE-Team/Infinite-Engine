@@ -2,7 +2,7 @@ package game.objects.sprites;
 
 import core.json.objects.CharacterData;
 
-class Icon extends FunkinSprite {
+class Icon extends core.assets.FunkinSprite {
 	public var bumpInBeats:Bool = true;
 	public var stepTempo:Float = 1;
 
@@ -22,5 +22,9 @@ class Icon extends FunkinSprite {
 			setPosition(characterData.icon.props.position[0], characterData.icon.props.position[1]);
 
 		loadProps(characterData.icon.props, 'game/icons');
+
+		flipX = isPlayer;
+
+		antialiasing = SaveData.data.antialiasing;
 	}
 }

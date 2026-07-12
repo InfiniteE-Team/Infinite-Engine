@@ -23,7 +23,7 @@ class Bar extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite> 
 
 	public function new(x:Float, y:Float, argument:Float, ?assignment:AssignementsBar = 'LEFT_TO_RIGHT', ?numberBars:Int = 1, ?isSpriteSheet:Bool = false,
 			?spriteSheetPath:String = '') {
-		super(x,y);
+		super(x, y);
 		this.numberBars = numberBars;
 		this.isSpriteSheet = isSpriteSheet;
 		this.spriteSheetPath = spriteSheetPath;
@@ -45,10 +45,11 @@ class Bar extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite> 
 			if (isSpriteSheet)
 				bar.loadGraphic(Paths.getPath(spriteSheetPath, 'image'));
 			else
-				bar.makeGraphic(592, 11, FlxColor.RED);
-			bar.ID = i;/*
-			if (numberBars > 1)
-				bar.x += i * (bar.width + 4);*/
+				bar.makeGraphic(592, 11, FlxColor.WHITE);
+			bar.ID = i;
+			/*
+				if (numberBars > 1)
+					bar.x += i * (bar.width + 4); */
 			barMaxWidth = bar.width;
 			barHeight = bar.height;
 			bars.push(bar);
@@ -73,11 +74,12 @@ class Bar extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite> 
 					var width:Float = barMaxWidth * percent;
 					if (bars[0].clipRect == null)
 						bars[0].clipRect = new FlxRect(0, 0, width, barHeight);
-					else
+					else {
 						bars[0].clipRect.set(0, 0, width, barHeight);
+						bars[0].clipRect = bars[0].clipRect;
+					}
 				} else if (numberBars == 2 && bars.length >= 2) {
 					var totalWidth:Float = barMaxWidth;
-
 					var width0:Float = totalWidth * (1 - percent);
 					var width1:Float = totalWidth * percent;
 
@@ -94,8 +96,8 @@ class Bar extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite> 
 					bars[0].clipRect = bars[0].clipRect;
 					bars[1].clipRect = bars[1].clipRect;
 
-					bars[0].x = 0;
-					bars[1].x =  width0;
+					bars[0].x = bars[0].x; // CPU
+					bars[1].x = bars[0].x + width0; // PLAYER
 				}
 			case 'RIGHT_TO_LEFT':
 				// wip
@@ -103,11 +105,12 @@ class Bar extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite> 
 					var width:Float = barMaxWidth * percent;
 					if (bars[0].clipRect == null)
 						bars[0].clipRect = new FlxRect(barMaxWidth - width, 0, width, barHeight);
-					else
+					else {
 						bars[0].clipRect.set(barMaxWidth - width, 0, width, barHeight);
+						bars[0].clipRect = bars[0].clipRect;
+					}
 				} else if (numberBars == 2 && bars.length >= 2) {
 					var totalWidth:Float = barMaxWidth;
-
 					var width0:Float = totalWidth * (1 - percent);
 					var width1:Float = totalWidth * percent;
 
@@ -124,8 +127,8 @@ class Bar extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite> 
 					bars[0].clipRect = bars[0].clipRect;
 					bars[1].clipRect = bars[1].clipRect;
 
-					bars[1].x = 0;
-					bars[0].x = width1;
+					bars[1].x = bars[1].x; // CPU
+					bars[0].x = bars[0].x + width1; // PLAYER
 				}
 		}
 	}

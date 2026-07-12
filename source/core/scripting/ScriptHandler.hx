@@ -14,12 +14,12 @@ class ScriptHandler {
 	var pendingPaths:Array<String> = [];
 
 	// this in scripts.
-	var owner:Dynamic;
+	var superInstance:Dynamic;
 
 	var extraVars:Map<String, Dynamic> = [];
 
-	public function new(owner:Dynamic) {
-		this.owner = owner;
+	public function new(superInstance:Dynamic) {
+		this.superInstance = superInstance;
 	}
 
 	public function expose(name:String, value:Dynamic):Void {
@@ -34,14 +34,14 @@ class ScriptHandler {
 			return;
 
 		if (haxe.io.Path.extension(path) == 'lua') {
-			var script = new core.scripting.lua.LuaScript(path, owner);
+			var script = new core.scripting.lua.LuaScript(path, superInstance);
 			luaScripts.push(script);
 			for (name => value in extraVars)
 				script.expose(name, value);
 			return;
 		}
 		pendingPaths.push(path);
-		Trace.traceOnce('[ScriptHandler] enqueued: $path');
+		Trace.traceOnce('[ScriptHandler] find: $path');
 	}
 
 	public function loadFolder(folder:String):Void {
@@ -71,7 +71,7 @@ class ScriptHandler {
 			return null;
 		if (name == "postCreate") {
 			for (script in luaScripts)
-				script.registerOwner();
+				script.registersuperInstance();
 		}
 		var result:Dynamic = null;
 		for (script in scripts)
@@ -120,13 +120,13 @@ class ScriptHandler {
 		parser.allowAll();
 		var script = new RuleScript(null, parser, globalContext);
 		setupScript(script);
-		script.errorHandler = (e) -> Trace.traceOnce('[ScriptHandler ERROR] $path → ${e.details()}');
+		script.errorHandler = (error:haxe.Exception) -> Trace.traceOnce('[RuleScript Error] -> ${error.message}');
 		script.tryExecute(sys.io.File.getContent(path));
 		return script;
 	}
 
 	function setupScript(script:RuleScript):Void {
-		script.superInstance = owner;
+		script.superInstance = superInstance;
 
 		for (name => value in extraVars)
 			script.access.setVariable(name, value);
@@ -151,7 +151,7 @@ class ScriptHandler {
 		paths = null;
 		modifiedTimes = null;
 		extraVars = null;
-		owner = null;
+		superInstance = null;
 		for (script in luaScripts)
 			script.destroy();
 		luaScripts = null;

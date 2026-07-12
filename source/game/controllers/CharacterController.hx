@@ -40,9 +40,9 @@ class CharacterController extends FunkinObjectRegistry {
 		control = core.ConfigMain.controls;
 	}
 
-	public function loadCharacter(id:String, name:String, role:String, targetGroup:FlxTypedGroup<flixel.FlxBasic>, script:ScriptHandler):FunkinSprite {
+	public function loadCharacter(id:String, name:String, role:String, targetGroup:FlxTypedGroup<flixel.FlxBasic>, script:ScriptHandler):Character {
 		if (existsId(id)) {
-			return get(id);
+			return cast(get(id), Character);
 		}
 		chars = new Character(id, name);
 
@@ -61,7 +61,7 @@ class CharacterController extends FunkinObjectRegistry {
 
 		return chars;
 	}
-
+	
 	public function processInput(noteController:NoteController, gameAudio:GameAudio, playStateConfig:PlayStateConfig) {
 		input.isGhostTapping = core.config.SaveData.data.ghosttaping;
 		for (char in playerChars) {

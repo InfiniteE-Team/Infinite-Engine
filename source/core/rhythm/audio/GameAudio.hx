@@ -110,6 +110,7 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 			return;
 
 		if (Math.abs(vocals.time - inst.time) > 20) {
+			Trace.traceOnce('Resync Vocals yep: ' + Std.string(vocals.time - inst.time));
 			vocals.time = inst.time;
 
 			if (!vocals.playing) {

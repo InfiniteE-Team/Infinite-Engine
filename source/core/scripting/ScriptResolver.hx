@@ -4,7 +4,6 @@ import rulescript.types.ScriptedTypeUtil;
 import rulescript.scriptedClass.RuleScriptedClassUtil;
 
 class ScriptResolver {
-
     static var initialized:Bool = false;
     public static var searchPaths:Array<{prefix:String, type:String}> = [
 		{prefix: 'classes/', type: 'script'}, // scripts/classes/Name.hx  <- put shared classes here

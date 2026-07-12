@@ -9,6 +9,8 @@ import core.scripting.ScriptHandler;
 #end
 
 class Character extends FunkinObjectRegistry {
+	public static var parent:Character;
+
 	public var curCharacter:String = 'bf';
 
 	public var characterData:CharacterData;
@@ -38,6 +40,7 @@ class Character extends FunkinObjectRegistry {
 
 	public function new(id:String, ?curCharacter:String = 'bf', ?x:Float = 0, ?y:Float = 0) {
 		super(id, x, y);
+		parent = this;
 		this.curCharacter = curCharacter;
 		loadSprite();
 		#if HSCRIPT_ALLOWED

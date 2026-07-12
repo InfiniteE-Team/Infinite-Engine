@@ -1,3 +1,153 @@
 package game.controllers;
 
-class HUDController {}
+import game.PlayState;
+import game.objects.Bar;
+import core.assets.FunkinSprite;
+import game.objects.sprites.Icon;
+
+class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic> {
+	public var iconP1:Icon;
+	public var iconP2:Icon;
+	public var healthBarBG:FunkinSprite;
+	public var healthBar:Bar;
+	public var healthBarY:Float = 0;
+
+	// utils
+	var playerBumpScale = 1.0;
+	var opponentBumpScale = 1.0;
+	var BUMP_SCALE = 1.2;
+
+	public function new() {
+		super();
+		createHUD();
+	}
+
+	public function createHUD() {
+		healthBarY = core.config.SaveData.data.downscroll ? FlxG.height * 0.1 : FlxG.height * 0.88;
+
+		healthBarBG = new FunkinSprite(0, healthBarY);
+		healthBarBG.loadGraphic(Paths.getPath('game/hud/healthBar', 'image'));
+		healthBarBG.scrollFactor.set(0, 0);
+		healthBarBG.x = (FlxG.width - healthBarBG.width) * 0.5;
+		healthBarBG.antialiasing = SaveData.data.antialiasing;
+		add(healthBarBG);
+
+		healthBar = new Bar(healthBarBG.x + 4, healthBarBG.y + 4, PlayState.instance.playStateConfig.health, 'LEFT_TO_RIGHT', 2);
+		healthBar.scrollFactor.set(0, 0);
+
+		var dadColor = 0xFFFF0000;
+		var bfColor = 0xFF66FF33;
+		for (charData in PlayState.SONG.chars) {
+			var char = cast(PlayState.instance.chars.get(charData.id));
+			if (char == null)
+				continue;
+			var isPlayer = game.controllers.CharacterController.namesPlayer.contains(charData.role);
+			var isOpponent = game.controllers.CharacterController.namesOpponent.contains(charData.role);
+			if (isPlayer && char.characterData.healthBarColor != null)
+				bfColor = char.characterData.healthBarColor;
+			if (isOpponent && char.characterData.healthBarColor != null)
+				dadColor = char.characterData.healthBarColor;
+		}
+		healthBar.createFilledBar([dadColor, bfColor]);
+		add(healthBar);
+
+		for (charData in PlayState.SONG.chars) {
+			var char = cast(PlayState.instance.chars.get(charData.id));
+			if (char == null)
+				continue;
+			var isPlayer = game.controllers.CharacterController.namesPlayer.contains(charData.role);
+			var isOpponent = game.controllers.CharacterController.namesOpponent.contains(charData.role);
+			if (!isPlayer && !isOpponent)
+				continue;
+			var icon = new game.objects.sprites.Icon(isPlayer, char.characterData);
+			icon.scrollFactor.set(0, 0);
+			add(icon);
+
+			if (isPlayer)
+				iconP1 = icon;
+			else
+				iconP2 = icon;
+		}
+		_updateIconPositions();
+	}
+
+	override public function update(elapsed:Float) {
+		super.update(elapsed);
+
+		if (healthBar != null)
+			healthBar.argument = PlayState.instance.playStateConfig.health;
+
+		_updateLosingAnim();
+		_updateIconPositions();
+		_lerpBumpScale(elapsed);
+	}
+
+	function _updateLosingAnim() {
+		if (iconP1 != null) {
+			var losing = PlayState.instance.playStateConfig.health < 0.4;
+			iconP1.playAnim(losing ? 'losing' : 'normal');
+		}
+
+		if (iconP2 != null) {
+			var losing = PlayState.instance.playStateConfig.health > 1.6;
+			iconP2.playAnim(losing ? 'losing' : 'normal');
+		}
+	}
+
+	function _updateIconPositions() {
+		if (healthBarBG == null)
+			return;
+
+		var ratio = 1.0 - Math.max(0, Math.min(PlayState.instance.playStateConfig.health / 2.0, 1.0));
+		var barCenterX = healthBarBG.x + healthBarBG.width * ratio;
+
+		if (iconP1 != null) {
+			iconP1.x = barCenterX - iconP1.width * 0.5 + 55;
+			iconP1.y = healthBarBG.y - iconP1.height * 0.5;
+		}
+
+		if (iconP2 != null) {
+			iconP2.x = barCenterX - iconP2.width * 0.5 - 55;
+			iconP2.y = healthBarBG.y - iconP2.height * 0.5;
+		}
+	}
+
+	function _lerpBumpScale(elapsed:Float) {
+		var speed = elapsed * 12;
+
+		playerBumpScale = playerBumpScale + (1.0 - playerBumpScale) * speed;
+		opponentBumpScale = opponentBumpScale + (1.0 - opponentBumpScale) * speed;
+
+		if (iconP1 != null) {
+			iconP1.scale.set(playerBumpScale, playerBumpScale);
+			iconP1.updateHitbox();
+		}
+
+		if (iconP2 != null) {
+			iconP2.scale.set(opponentBumpScale, opponentBumpScale);
+			iconP2.updateHitbox();
+		}
+	}
+
+	public function onBeatHit(beat:Float) {
+		if (iconP1 != null && iconP1.bumpInBeats) {
+			var tempo = iconP1.stepTempo > 0 ? iconP1.stepTempo : 1;
+			if (beat % tempo == 0)
+				playerBumpScale = BUMP_SCALE;
+		}
+
+		if (iconP2 != null && iconP2.bumpInBeats) {
+			var tempo = iconP2.stepTempo > 0 ? iconP2.stepTempo : 1;
+			if (beat % tempo == 0)
+				opponentBumpScale = BUMP_SCALE;
+		}
+	}
+
+	override function destroy() {
+		super.destroy();
+		iconP1 = null;
+		iconP2 = null;
+		healthBarBG = null;
+		healthBar = null;
+	}
+}
