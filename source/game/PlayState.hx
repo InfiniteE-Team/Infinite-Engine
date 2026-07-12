@@ -62,7 +62,7 @@ class PlayState extends MusicBeatState {
 
 	override public function create() {
 		instance = this;
-
+		
 		#if HSCRIPT_ALLOWED
 		startScript();
 		#end
@@ -93,10 +93,6 @@ class PlayState extends MusicBeatState {
 		modchartSystem = new game.modchart.ModchartSystem(noteController);
 		add(modchartSystem);
 		modchartSystem.cacheStrumBase();
-		/*
-			sustainRenderer = new game.modchart.SustainRenderer(noteController, modchartSystem);
-			sustainRenderer.cameras = [camHUD];
-			add(sustainRenderer); */
 
 		windowMod = new WindowModManager();
 		add(windowMod);
@@ -160,23 +156,17 @@ class PlayState extends MusicBeatState {
 	}
 
 	function buildStrumsandNotes() {
-		noteController = new NoteController(SONG, SaveData.data.downscroll, SaveData.data.ghosttaping, script, playStateConfig);
-		noteController.onMiss = () -> {
-			playStateConfig.misses++;
-			playStateConfig.health += noteController.getHealthDrain(null);
-			playStateConfig.score += noteController.getMissScore();
-			playStateConfig.combo = 0;
-			gameAudio.onMiss();
-		};
+		noteController = new NoteController(SONG, SaveData.data.downscroll, SaveData.data.ghosttaping, script, playStateConfig, gameAudio);
 		core.ConfigMain.controls.loadPreset(noteController.keys);
-		noteController.strums.cameras = [camHUD];
-		noteController.sustains.cameras = [camHUD];
-		noteController.notes.cameras = [camHUD];
-		noteController.splashes.cameras = [camHUD];
-		add(noteController.strums);
-		add(noteController.sustains);
-		add(noteController.notes);
-		add(noteController.splashes);
+		for (noteControl in [
+			noteController.strums,
+			noteController.sustains,
+			noteController.notes,
+			noteController.splashes
+		]) {
+			noteControl.cameras = [camHUD];
+			add(noteControl);
+		}
 
 		// NoteController.meshSustainsActive = true;
 	}

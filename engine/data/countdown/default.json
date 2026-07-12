@@ -2,8 +2,8 @@
     "countdown": [
         {
             "sound": {
-                "name": "one",
-                "path": "intro1"
+                "name": "three",
+                "path": "intro3"
             }
         },
         {
@@ -48,8 +48,8 @@
                 "antialiasing": true
             },
             "sound": {
-                "name": "three",
-                "path": "intro3"
+                "name": "one",
+                "path": "intro1"
             }
         },
         {

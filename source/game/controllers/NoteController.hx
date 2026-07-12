@@ -56,8 +56,6 @@ class NoteController {
 
 	var input:InputController = new InputController();
 
-	public var onMiss:Void->Void = null;
-
 	// sustains limit clipping rect
 	var _clipRect:flixel.math.FlxRect = new flixel.math.FlxRect();
 
@@ -76,11 +74,15 @@ class NoteController {
 
 	public var playStateConfig:PlayStateConfig;
 
-	public function new(daSong:SongConfig, isDownscroll:Bool, isGhostTapping:Bool, script:ScriptHandler, playStateConfig:PlayStateConfig) {
+	public var gameAudio:core.rhythm.audio.GameAudio;
+
+	public function new(daSong:SongConfig, isDownscroll:Bool, isGhostTapping:Bool, script:ScriptHandler, playStateConfig:PlayStateConfig,
+			gameAudio:core.rhythm.audio.GameAudio) {
 		this.daSong = daSong;
 		this.isDownscroll = isDownscroll;
 		input.isGhostTapping = isGhostTapping;
 		this.playStateConfig = playStateConfig;
+		this.gameAudio = gameAudio;
 		loadJson();
 
 		#if HSCRIPT_ALLOWED
@@ -383,27 +385,24 @@ class NoteController {
 			if (note.tooLate && !note.wasMissed && !note.wasGoodHit) {
 				note.wasMissed = true;
 				note.alpha = 0.4;
-				if (onMiss != null)
-					onMiss();
+				input.onMiss(playStateConfig, this, gameAudio);
 			}
 
 			if (!note.mustPress && note.wasGoodHit && !note.alive)
 				toDestroy.push(note);
-			
+
 			if (note.y + note.frameHeight * note.scale.y < 0 && !isDownscroll) {
 				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
 					note.wasMissed = true;
 					note.alpha = 0.4;
-					if (onMiss != null)
-						onMiss();
+					input.onMiss(playStateConfig, this, gameAudio);
 				}
 				toDestroy.push(note);
 			} else if (note.y > FlxG.height && isDownscroll) {
 				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
 					note.wasMissed = true;
 					note.alpha = 0.4;
-					if (onMiss != null)
-						onMiss();
+					input.onMiss(playStateConfig, this, gameAudio);
 				}
 				toDestroy.push(note);
 			}

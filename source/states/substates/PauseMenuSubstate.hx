@@ -63,6 +63,8 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		#if HSCRIPT_ALLOWED
 		script.call("postCreate", []);
 		#end
+
+		changeCur(0);
 	}
 
 	override public function update(elapsed:Float) {
@@ -70,11 +72,16 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		script.call("onUpdate", [elapsed]);
 		#end
 
-		changeCur();
-
 		if (FlxG.keys.justPressed.ESCAPE) {
 			resumeFunction();
 			#if HSCRIPT_ALLOWED script.call("ExitMenu", []); #end
+		}
+
+		if (options.length > 0) {
+			if (input.control.justPressedAction("uiKeys", "up"))
+				changeCur(1);
+			else if (input.control.justPressedAction("uiKeys", "down"))
+				changeCur(-1);
 		}
 
 		if (input.control.justPressedAction("uiKeys", 'accept')) {
@@ -117,14 +124,11 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		#end
 	}
 
-	public function changeCur() {
-		if (input.control.justPressedAction("uiKeys", "up") && options.length > 0) {
+	public function changeCur(change:Int) {
+		curSelect += change;
+
+		if (change != 0)
 			FlxG.sound.play(Paths.getPath('scrollMenu', 'sound'), 0.7);
-			curSelect += 1;
-		} else if (input.control.justPressedAction("uiKeys", "down") && options.length > 0) {
-			FlxG.sound.play(Paths.getPath('scrollMenu', 'sound'), 0.7);
-			curSelect -= 1;
-		}
 
 		if (curSelect >= options.length)
 			curSelect = 0;
@@ -144,6 +148,10 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 
 		if (pauseMenuMusic != null) {
 			pauseMenuMusic.stop();
+			FlxG.sound.list.remove(pauseMenuMusic, true);
+			pauseMenuMusic.destroy();
+			pauseMenuMusic = null;
+			_cachedPauseMusic = null;
 		}
 
 		super.destroy();

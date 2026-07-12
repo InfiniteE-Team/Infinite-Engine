@@ -91,7 +91,7 @@ class InputController {
 			} else if (!hasActiveSustain) {
 				charStrums[i].playAnim('press' + i, true);
 				if (!isGhostTapping) {
-					isMiss(playStateConfig, noteController, gameAudio);
+					onMiss(playStateConfig, noteController, gameAudio);
 				}
 			}
 		} else { // release key
@@ -103,7 +103,7 @@ class InputController {
 				if (sustain.isHeld && songPos < (sustain.strumTime + sustain.length)) {
 					sustain.wasMissed = true;
 					sustain.canBeHit = false;
-					isMiss(playStateConfig, noteController, gameAudio);
+					onMiss(playStateConfig, noteController, gameAudio);
 				}
 
 				sustain.isHeld = false;
@@ -119,7 +119,7 @@ class InputController {
 				note.canBeHit = false;
 				note.alpha = 0.4;
 
-				isMiss(playStateConfig, noteController, gameAudio);
+				onMiss(playStateConfig, noteController, gameAudio);
 			}
 
 			charStrums[i].playAnim('static' + i, true);
@@ -128,7 +128,7 @@ class InputController {
 		return null;
 	}
 
-	function isMiss(playStateConfig:PlayStateConfig, noteController:NoteController, gameAudio:GameAudio) {
+	public function onMiss(playStateConfig:PlayStateConfig, noteController:NoteController, gameAudio:GameAudio) {
 		gameAudio.onMiss();
 		playStateConfig.health += noteController.getHealthDrain(null);
 		playStateConfig.score += noteController.getMissScore();
