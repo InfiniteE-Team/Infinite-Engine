@@ -53,11 +53,11 @@ class ConfigMain extends flixel.FlxState {
 		cursor = new CursorConfig();
 		cursor.loadCursor();
 
+		flixel.FlxSprite.defaultAntialiasing = true;
+
 		#if windows
 		core.api.WindowAPI.init();
 		#end
-
-		core.api.WindowAPI.resizeGame(1280, 720);
 
 		ConductorImplementation.custom_songPosition = () -> core.rhythm.RhythmCore.songPosition;
 		ConductorImplementation.custom_crochet = () -> core.rhythm.RhythmCore.crochet;
