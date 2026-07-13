@@ -61,7 +61,7 @@ class CharacterController extends FunkinObjectRegistry {
 
 		return chars;
 	}
-	
+
 	public function processInput(noteController:NoteController, gameAudio:GameAudio, playStateConfig:PlayStateConfig) {
 		input.isGhostTapping = core.config.SaveData.data.ghosttaping;
 		for (char in playerChars) {
@@ -196,12 +196,10 @@ class CharacterController extends FunkinObjectRegistry {
 	}
 
 	public function danceAll():Void {
-		for (c in playerChars)
-			c.dance();
-		for (c in opponentChars)
-			c.dance();
-		for (c in gfChars)
-			c.dance();
+		for (chars in [playerChars, opponentChars, gfChars]) {
+			for (char in chars)
+				char.dance();
+		}
 	}
 
 	public function removeChar(id:String):Void {

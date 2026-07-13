@@ -12,15 +12,14 @@ class CameraController {
 	public var defaultZoom:Float = 1.0;
 
 	public var camPoint:FlxObject;
-	
+
 	public var char:Character = null;
 
 	public var zoomEnabled:Bool = true;
 
 	public var existsCamEvents:Bool = false;
 
-	// === CAMERA ===
-	public var lerp:Float = 0.04;
+	public var lerp:Float = 0.06;
 
 	public function new(camGame:Camera, camHUD:Camera) {
 		this.camGame = camGame;
@@ -33,9 +32,8 @@ class CameraController {
 	}
 
 	public function update(elapsed:Float):Void {
-		if (!existsCamEvents) {
-			followChar(char);
-		}
+		followChar(char);
+
 		lerpZoom(elapsed);
 	}
 

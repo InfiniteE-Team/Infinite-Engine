@@ -62,7 +62,7 @@ class PlayState extends MusicBeatState {
 
 	override public function create() {
 		instance = this;
-		
+
 		#if HSCRIPT_ALLOWED
 		startScript();
 		#end
@@ -133,6 +133,7 @@ class PlayState extends MusicBeatState {
 		chars = new CharacterController();
 		if (!osuMode)
 			stage.charLayer.add(chars);
+
 		for (data in SONG.chars) {
 			chars.loadCharacter(data.id, data.name, data.role, stage.charLayer, script);
 			stage.applyCharProps(chars.get(data.id), data.id);
@@ -147,8 +148,10 @@ class PlayState extends MusicBeatState {
 		}
 
 		var opponentData = Lambda.find(SONG.chars, c -> CharacterController.namesOpponent.contains(c.role)) ?? (SONG.chars.length > 0 ? SONG.chars[0] : null);
-		if (opponentData != null)
-			cameraController.char = cast(chars.get(opponentData.id), game.objects.sprites.Character);
+		if (!cameraController.existsCamEvents) {
+			if (opponentData != null)
+				cameraController.char = cast(chars.get(opponentData.id), game.objects.sprites.Character);
+		}
 
 		#if HSCRIPT_ALLOWED
 		script.call("postBuildStage", []);

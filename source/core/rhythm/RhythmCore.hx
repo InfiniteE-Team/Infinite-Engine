@@ -7,7 +7,9 @@ class RhythmCore {
 
 	public static var songPosition:Float = 0;
 
-	public static var timeSignatures:Array<Float> = [];
+	public static var bpmChanges:Array<Float> = [];
+
+	public static var timeSignatures:Array<Int> = [];
 
 	public static function changeBPM(newBPM:Float):Void {
 		bpm = newBPM;

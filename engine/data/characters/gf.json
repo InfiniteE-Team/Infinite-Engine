@@ -11,7 +11,7 @@
 			0.0,
 			0.0
 		],
-		"idleAfterSing": false,
+		"idleAfterSing": true,
 		"singTime": 8.0
 	},
 	"render": {

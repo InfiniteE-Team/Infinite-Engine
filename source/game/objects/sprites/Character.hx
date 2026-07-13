@@ -94,13 +94,12 @@ class Character extends FunkinObjectRegistry {
 		if (isSing || isMiss)
 			singCountTime += elapsed;
 
-		if (idleAfterSing && (isSing || isMiss)) {
+		if (isSing || isMiss) {
 			var beatLengthSecs = core.rhythm.RhythmCore.crochet / 1000.0;
 			if (singCountTime >= singTime * beatLengthSecs) {
 				isSing = false;
 				isMiss = false;
 				singCountTime = 0;
-				dance();
 			}
 		}
 
@@ -142,13 +141,16 @@ class Character extends FunkinObjectRegistry {
 	var bopAnimExists:Bool = false;
 
 	override public function dance() {
+		if (!idleAfterSing || isSing || isMiss)
+			return;
+
+		if (singCountTime > 0)
+			return;
+		
 		#if HSCRIPT_ALLOWED
 		if (charScript.callCancellable('onDance', []))
 			return;
 		#end
-
-		if (isSing || isMiss)
-			return;
 
 		for (layer in characterData.render.layers) {
 			if (layer.bopAnims != null) {
