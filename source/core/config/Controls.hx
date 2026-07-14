@@ -5,6 +5,8 @@ import flixel.input.keyboard.FlxKey;
 class Controls {
 	public var keyGroups:Map<String, Array<Array<FlxKey>>> = new Map();
 
+	var reverseMaps:Map<String, Map<Int, Array<Int>>> = new Map();
+
 	public function new() {
 		loadGroup("noteKeys", getPreset("4"));
 		loadGroup("uiKeys", SaveData.data.uiKeys);
@@ -38,6 +40,36 @@ class Controls {
 			return;
 		var keys = [for (lane in savedKeys) [for (k in lane) FlxKey.fromString(k)]];
 		keyGroups.set(groupName, keys);
+		rebuildReverseMap(groupName);
+	}
+
+	function rebuildReverseMap(groupName:String):Void {
+		var keys = keyGroups.get(groupName);
+		if (keys == null)
+			return;
+
+		var map = new Map<Int, Array<Int>>();
+		for (laneIndex in 0...keys.length) {
+			for (k in keys[laneIndex]) {
+				var code:Int = k;
+				if (!map.exists(code))
+					map.set(code, []);
+				map.get(code).push(laneIndex);
+			}
+		}
+		reverseMaps.set(groupName, map);
+	}
+
+	public function getLanesForKey(groupName:String, keyCode:Int):Array<Int> {
+		var map = reverseMaps.get(groupName);
+		if (map == null)
+			return [];
+		return map.get(keyCode) ?? [];
+	}
+
+	public function justPressedKeyCode(keyCode:Int):Bool {
+		@:privateAccess
+		return FlxG.keys.justPressed.check(cast keyCode);
 	}
 
 	public function getGroupInput(groupName:String):Array<Bool> {
@@ -92,6 +124,7 @@ class Controls {
 			return;
 
 		keys[laneIndex][keyIndex] = key;
+		rebuildReverseMap(groupName);
 
 		var keyStrings = [for (lane in keys) [for (k in lane) k.toString()]];
 		if (groupName == "noteKeys")

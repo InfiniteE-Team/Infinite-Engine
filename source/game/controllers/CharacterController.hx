@@ -31,6 +31,10 @@ class CharacterController extends FunkinObjectRegistry {
 
 	var input:InputController = new InputController();
 
+	var _noteController:NoteController;
+	var _gameAudio:GameAudio;
+	var _playStateConfig:PlayStateConfig;
+
 	#if HSCRIPT_ALLOWED
 	var scriptMap:Map<String, ScriptHandler> = [];
 	#end
@@ -38,6 +42,7 @@ class CharacterController extends FunkinObjectRegistry {
 	public function new(?id:String, ?x:Float = 0, ?y:Float = 0) {
 		super(id, x, y);
 		control = core.ConfigMain.controls;
+		FlxG.stage.addEventListener(openfl.events.KeyboardEvent.KEY_DOWN, onStageKeyDown);
 	}
 
 	public function loadCharacter(id:String, name:String, role:String, targetGroup:FlxTypedGroup<flixel.FlxBasic>, script:ScriptHandler):Character {
@@ -63,6 +68,10 @@ class CharacterController extends FunkinObjectRegistry {
 	}
 
 	public function processInput(noteController:NoteController, gameAudio:GameAudio, playStateConfig:PlayStateConfig) {
+		_noteController = noteController;
+		_gameAudio = gameAudio;
+		_playStateConfig = playStateConfig;
+
 		input.isGhostTapping = core.config.SaveData.data.ghosttaping;
 		for (char in playerChars) {
 			var strums = noteController.getCharStrums(char.id);
@@ -108,6 +117,13 @@ class CharacterController extends FunkinObjectRegistry {
 				}
 			}
 		}
+		input.isMiss = function() {
+			for (char in playerChars) {
+				var strums = noteController.getCharStrums(char.id);
+				for (i in 0...strums.length)
+					getCharMiss(char, noteController, strums, i);
+			}
+		}
 	}
 
 	public function isSinging(noteController:NoteController) {
@@ -138,28 +154,53 @@ class CharacterController extends FunkinObjectRegistry {
 		}
 	}
 
-	function updatePlayerLane(char:Character, strums, i:Int, nc:NoteController, audio:GameAudio, cfg:PlayStateConfig) {
-		var hitNote = input.isPlayerHit(strums, char.id, nc, audio, cfg, i);
+	function onStageKeyDown(e:openfl.events.KeyboardEvent):Void {
+		if (PlayState.instance == null || PlayState.instance.paused)
+			return;
+		if (_noteController == null)
+			return;
+		if (!control.justPressedKeyCode(e.keyCode))
+			return;
 
-		#if HSCRIPT_ALLOWED
-		var charScript = scriptMap.get(char.id);
-		if (charScript != null) {
-			if (hitNote != null)
-				charScript.call("onNoteHitPlayer", []);
-		}
-		#end
+		for (i in control.getLanesForKey("noteKeys", e.keyCode))
+			onLaneKeyDown(i);
+	}
 
-		if (input.control.getGroupInput("noteKeys")[i]) {
+	function onLaneKeyDown(i:Int):Void {
+		for (char in playerChars) {
+			var strums = _noteController.getCharStrums(char.id);
+			if (i >= strums.length)
+				continue;
+
+			var hitNote = input.attemptHit(strums, char.id, _noteController, _gameAudio, _playStateConfig, i);
+
+			#if HSCRIPT_ALLOWED
+			var charScript = scriptMap.get(char.id);
+			#end
+
 			if (hitNote != null) {
 				setSing(char, hitNote.direction);
 				char.isMiss = false;
-			} else if (input.control.justPressed("noteKeys", i) && !input.isGhostTapping) {
+				#if HSCRIPT_ALLOWED
+				if (charScript != null)
+					charScript.call("onNoteHitPlayer", []);
+				#end
+			} else if (!input.isGhostTapping) {
 				char.playAnim('${Character.getCharAnim(i)}-miss', true);
 				char.isMiss = true;
 			}
-		} else {
-			getCharMiss(char, nc, strums, i);
 		}
+	}
+
+	function updatePlayerLane(char:Character, strums, i:Int, nc:NoteController, audio:GameAudio, cfg:PlayStateConfig) {
+		input.isPlayerHit(strums, char.id, nc, audio, cfg, i);
+
+		#if HSCRIPT_ALLOWED
+		var charScript = scriptMap.get(char.id);
+		#end
+
+		if (!input.control.getGroupInput("noteKeys")[i])
+			getCharMiss(char, nc, strums, i);
 
 		var songPos = core.rhythm.RhythmCore.songPosition;
 		for (sustain in nc.sustains.members) {
@@ -180,13 +221,13 @@ class CharacterController extends FunkinObjectRegistry {
 	}
 
 	public function getCharMiss(char:Character, noteController:NoteController, strums, i:Int):Void {
-		char.isSing = false;
-		char.isMiss = false;
 		for (note in noteController.notes.members) {
 			if (note == null || !note.alive || !note.mustPress || note.strum != strums[i] || !note.tooLate)
 				continue;
 			char.playAnim('${Character.getCharAnim(note.direction)}-miss', true);
+			char.isSing = false;
 			char.isMiss = true;
+			char.singCountTime = 0;
 			#if HSCRIPT_ALLOWED
 			var charScript = scriptMap.get(char.id);
 			if (charScript != null)
@@ -252,8 +293,12 @@ class CharacterController extends FunkinObjectRegistry {
 	//
 
 	override public function destroy():Void {
+		FlxG.stage.removeEventListener(openfl.events.KeyboardEvent.KEY_DOWN, onStageKeyDown);
 		playerChars = null;
 		opponentChars = null;
+		_noteController = null;
+		_gameAudio = null;
+		_playStateConfig = null;
 		gfChars = null;
 		#if HSCRIPT_ALLOWED
 		scriptMap = null;
