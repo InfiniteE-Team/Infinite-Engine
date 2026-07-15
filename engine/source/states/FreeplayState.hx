@@ -1,15 +1,13 @@
-import core.scripting.ScriptStateBase;
+import core.scripting.interfaces.ScriptedStateBase;
 
-class FreeplayState extends ScriptStateBase
-{
-    var songs:Array<FreeplayData> = [];
-    public function new()
-    {
-        super();
-    }
+class FreeplayState extends ScriptedStateBase {
+	var songs:Array<FreeplayData> = [];
 
-    override public function create()
-    {
-        super.create();
-    }
+	public function new() {
+		super();
+	}
+
+	override public function create() {
+		super.create();
+	}
 }

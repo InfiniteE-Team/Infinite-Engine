@@ -395,6 +395,8 @@ class PlayState extends MusicBeatState {
 
 	override public function stepHit(step:Int) {
 		super.stepHit(step);
+
+		gameAudio.resyncVocals();
 	}
 
 	override public function beatHit(beat:Float) {

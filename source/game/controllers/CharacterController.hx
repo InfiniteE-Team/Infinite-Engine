@@ -187,7 +187,9 @@ class CharacterController extends FunkinObjectRegistry {
 				#end
 			} else if (!input.isGhostTapping) {
 				char.playAnim('${Character.getCharAnim(i)}-miss', true);
+				char.isSing = false;
 				char.isMiss = true;
+				char.singCountTime = 0;
 			}
 		}
 	}

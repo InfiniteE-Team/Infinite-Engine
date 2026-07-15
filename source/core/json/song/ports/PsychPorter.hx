@@ -77,8 +77,8 @@ class PsychPorter implements FormatChartConverter {
 						id: p3,
 						name: p3,
 						role: 'gf',
-						strumPos: [0, 0],
-						strumsVisible: false
+						strumsVisible: false,
+						strumPos: [0, 0]
 					},
 					{
 						id: p1,

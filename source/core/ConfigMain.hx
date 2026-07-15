@@ -67,6 +67,8 @@ class ConfigMain extends flixel.FlxState {
 
 		if (!core.installer.InstallerMenu.hasAssetFiles('assets')) {
 			MusicBeatState.switchState(() -> new core.installer.InstallerMenu());
+		} else if (globalData.startStateScript != null) {
+			core.scripting.ScriptedState.switchState(globalData.startStateScript);
 		} else {
 			MusicBeatState.switchState(() -> Type.createInstance(mainState, []));
 		}

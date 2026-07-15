@@ -13,6 +13,7 @@ class GlobalConfig {
 	public var noteSkin:String = 'default';
 	public var hud:String = 'default';
 	public var startState:Class<MusicBeatState> = game.PlayState;
+	public var startStateScript:String = null;
 
 	public function new() {}
 
@@ -29,6 +30,9 @@ class GlobalConfig {
 			var cls:Class<MusicBeatState> = cast(Type.resolveClass(stateStr) ?? Type.resolveClass('states.$stateStr'));
 			if (cls != null)
 				startState = cls;
+			else {
+				startStateScript = stateStr;
+			}
 		}
 	}
 }

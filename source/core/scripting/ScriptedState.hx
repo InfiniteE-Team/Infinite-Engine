@@ -5,7 +5,7 @@ import states.substates.MusicBeatSubstate;
 
 class ScriptedState {
 	// example load: ScriptedState.load('customClass');
-	// customClass.hx or .hxc in assets/states/
+	// customClass.hx or .hxc in assets/source/states/
 	public static function switchState(className:String, ?args:Array<Dynamic>):Void {
 		MusicBeatState.switchState(() -> load(className, args));
 	}
