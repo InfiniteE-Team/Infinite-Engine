@@ -22,8 +22,7 @@
         },
         {
             "name": "flixel-animate",
-            "type": "git",
-            "url": "https://github.com/MaybeMaru/flixel-animate"
+            "type": "haxelib"
         },
         {
             "name": "hscript",
@@ -41,6 +40,20 @@
             "name": "ale-json",
             "type": "haxelib",
             "version": "1.0.0"
+        },
+        {
+            "name": "hxcpp",
+            "type": "git",
+            "dir": null,
+            "ref": "main",
+            "url": "https://github.com/ALE-Psych-Crew/hxcpp"
+        },
+        {
+            "name": "hmm",
+            "type": "git",
+            "dir": null,
+            "ref": "main",
+            "url": "https://github.com/ALE-Psych-Crew/hmm"
         },
         {
             "name": "hxvlc",

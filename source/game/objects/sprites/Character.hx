@@ -141,12 +141,9 @@ class Character extends FunkinObjectRegistry {
 	var bopAnimExists:Bool = false;
 
 	override public function dance() {
-		if (!idleAfterSing || isSing || isMiss)
+		if (isMiss || (!idleAfterSing || isSing) || singCountTime > 0)
 			return;
 
-		if (singCountTime > 0)
-			return;
-		
 		#if HSCRIPT_ALLOWED
 		if (charScript.callCancellable('onDance', []))
 			return;

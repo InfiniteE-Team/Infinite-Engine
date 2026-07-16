@@ -3,6 +3,7 @@ package core.api;
 #if windows
 import winapi.WindowsAPI;
 #end
+import openfl.Lib;
 import flixel.system.scaleModes.RatioScaleMode;
 
 class WindowAPI {
@@ -10,8 +11,15 @@ class WindowAPI {
 		#if windows
 		WindowsAPI.reDefineMainWindowTitle(lime.app.Application.current.window.title);
 		WindowsAPI.windowDarkMode(true);
-		WindowsAPI.setProgramDPIAware();
+		scaleWindow();
 		#end
+	}
+
+	public static function scaleWindow() {
+		WindowsAPI.setProgramDPIAware();
+
+		Lib.application.window.x = Std.int((Lib.application.window.display.bounds.width - Lib.application.window.width) / 2);
+		Lib.application.window.y = Std.int((Lib.application.window.display.bounds.height - Lib.application.window.height) / 2);
 	}
 
 	public static function resizeGame() {

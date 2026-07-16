@@ -12,10 +12,9 @@ enum abstract AssetType(String) from String to String {
     var XML = "xml";
     var SONG_SCRIPT = "songScript";
     var SHADERS = "shaders";
-    var STATE = "state";
     var STATES = "states";
-    var SUBSTATE = "substate";
     var SUBSTATES = "substates";
+    var TYPEDEFS = "typedefs";
     var SCRIPT = "script";
     var DEFAULT = "default";
 }

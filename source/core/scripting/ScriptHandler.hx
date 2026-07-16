@@ -7,6 +7,8 @@ class ScriptHandler {
 	public static var globalContext:rulescript.Context = new rulescript.Context();
 
 	var scripts:Array<RuleScript> = [];
+	var typedefs:Map<String, core.scripting.types.ScriptedTypeDef> = [];
+
 	var luaScripts:Array<core.scripting.lua.LuaScript> = [];
 
 	var paths:Array<String> = [];
@@ -51,6 +53,21 @@ class ScriptHandler {
 		for (file in sys.FileSystem.readDirectory(resolved)) {
 			if (file.endsWith('.hx') || file.endsWith('.lua') || file.endsWith('.hxc'))
 				load('$resolved/$file');
+		}
+	}
+
+	public function loadTypedef(name:String):Void {
+		var td = core.scripting.types.ScriptedTypeDef.loadTypedef(name);
+		if (td != null) {
+			typedefs.set(name, td);
+			for (script in scripts) {
+				var data = td.resolve(script.access.execute);
+				if (data != null) {
+					script.access.setVariable(name, data);
+				} else {
+					Trace.traceOnce("Error typedef not find the content ideal");
+				}
+			}
 		}
 	}
 
@@ -130,6 +147,13 @@ class ScriptHandler {
 
 		for (name => value in extraVars)
 			script.access.setVariable(name, value);
+
+		for (name => td in typedefs) {
+			var data = td.resolve(script.access.execute);
+			if (data != null) {
+				script.access.setVariable(name, data);
+			}
+		}
 	}
 
 	function setVar(name:String, value:Dynamic):Void {

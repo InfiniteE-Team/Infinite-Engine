@@ -40,10 +40,12 @@ class Paths {
 				case SHADERS:
 					return findLib('shaders/$fileName.frag');
 				// scripting
-				case STATE, STATES:
+				case STATES:
 					return findLib(resolveScript('source/states/$fileName'));
-				case SUBSTATES, SUBSTATE:
+				case SUBSTATES:
 					return findLib(resolveScript('source/substates/$fileName'));
+				case TYPEDEFS:
+					return findLib(resolveScript('source/typedefs/$fileName'));
 				case SCRIPT:
 					return findLib(resolveScript('scripts/$fileName'));
 				default:

@@ -38,7 +38,9 @@ class ScriptGlobals {
 		roots['ScriptedStateBase'] = core.scripting.interfaces.ScriptStateBase;
 		roots['ScriptSubstateBase'] = core.scripting.interfaces.ScriptSubstateBase;
 
-		roots['ScriptedState'] = core.scripting.ScriptedState;
+		roots['ScriptedState'] = core.scripting.types.ScriptedState;
+
+		roots['ScriptedTypeDef'] = core.scripting.types.ScriptedTypeDef;
 
 		// Json Formatters Engine
 		roots['Json'] = haxe.Json;

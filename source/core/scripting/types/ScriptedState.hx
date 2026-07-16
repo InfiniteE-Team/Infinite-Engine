@@ -1,7 +1,8 @@
-package core.scripting;
+package core.scripting.types;
 
 import rulescript.RuleScript;
 import states.substates.MusicBeatSubstate;
+import core.scripting.ScriptHandler;
 
 class ScriptedState {
 	// example load: ScriptedState.load('customClass');
@@ -57,12 +58,6 @@ class ScriptedState {
 		}
 
 		var ctx = ScriptHandler.globalContext;
-		/*
-			var parser = new rulescript.parsers.HxParser();
-			parser.allowAll();
-			var script = new RuleScript(null, parser, ctx);
-			script.scriptName = className;
-			script.errorHandler = (e) -> Trace.traceOnce('ScriptedState: $className → ${e.details()}', true); */
 		var content = sys.io.File.getContent(path);
 		var parser = new rulescript.parsers.HxParser();
 		parser.allowAll();

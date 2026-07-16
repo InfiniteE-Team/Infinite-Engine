@@ -41,6 +41,9 @@ class SaveData {
 		if (SaveData.data.antialiasing == null)
 			SaveData.data.antialiasing = true;
 
+		if (SaveData.data.shaders == null)
+			SaveData.data.shaders = true;
+
 		if (SaveData.data.downscroll == null)
 			SaveData.data.downscroll = false;
 
