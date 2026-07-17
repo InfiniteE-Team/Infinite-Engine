@@ -68,7 +68,6 @@ class Paths {
 				return foundPath;
 			}
 		}
-		pathCache.set(file, null);
 		return null;
 	}
 

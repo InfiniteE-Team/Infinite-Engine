@@ -257,7 +257,7 @@ class NoteController {
 					sustain.visible = false;
 
 				sustain.origin.y = 0;
-				var scaledHeight = (totalLength * scrollSpeed) + 1;
+				var scaledHeight = (totalLength * 0.45 * scrollSpeed) + 1;
 				sustain.scale.y = scaledHeight / sustain.frameHeight;
 
 				#if HSCRIPT_ALLOWED
@@ -374,7 +374,7 @@ class NoteController {
 			#end
 
 			note.x = note.strum.x;
-			note.y = isDownscroll ? note.strum.y - ((note.strumTime - songTime) * scrollSpeed) : note.strum.y + ((note.strumTime - songTime) * scrollSpeed);
+			note.y = isDownscroll ? note.strum.y - ((note.strumTime - songTime) * (0.45 * scrollSpeed)) : note.strum.y + ((note.strumTime - songTime) * (0.45 * scrollSpeed));
 
 			// note.alpha = 0.3;
 
@@ -425,7 +425,7 @@ class NoteController {
 
 			if (sustain.isHeld && sustain.strumTime <= songTime) {
 				var remaining = Math.max(0, (sustain.strumTime + sustain.length) - songTime);
-				scaledHeight = (remaining * scrollSpeed) + 1;
+				scaledHeight = (remaining * 0.45 * scrollSpeed) + 1;
 				sustain.scale.y = scaledHeight / sustain.frameHeight;
 				if (isDownscroll) {
 					sustain.y = strumMid - scaledHeight;
@@ -433,10 +433,10 @@ class NoteController {
 					sustain.y = strumMid;
 				}
 			} else {
-				scaledHeight = (sustain.length * scrollSpeed) + 1;
+				scaledHeight = (sustain.length * 0.45 * scrollSpeed) + 1;
 				sustain.scale.y = scaledHeight / sustain.frameHeight;
-				var strumY = isDownscroll ? sustain.strum.y - ((sustain.strumTime - songTime) * scrollSpeed) : sustain.strum.y
-					+ ((sustain.strumTime - songTime) * scrollSpeed);
+				var strumY = isDownscroll ? sustain.strum.y - ((sustain.strumTime - songTime) * (0.45 * scrollSpeed)) : sustain.strum.y
+					+ ((sustain.strumTime - songTime) * (0.45 * scrollSpeed));
 				var targetY = strumY + sustain.strum.frameHeight * 0.5;
 				if (isDownscroll) {
 					sustain.y = targetY - scaledHeight;

@@ -1,0 +1,16 @@
+{
+    "songData": [
+        {
+            "song": "4score",
+            "bpm": "178",
+            "icon": "dad",
+            "artist": "VGMComposer"
+        },
+        {
+            "song": "fresh",
+            "bpm": "120",
+            "icon": "dad",
+            "artist": "KawaiSprite"
+        }
+    ]
+}

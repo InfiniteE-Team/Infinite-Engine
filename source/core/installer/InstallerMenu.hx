@@ -32,14 +32,14 @@ class InstallerMenu extends MusicBeatState {
 
 	public function generateMenu():Void {
 		// Code to generate the installer menu based on MenuData
-		bg.loadGraphic(Paths.getPath('installer/BG_installer', 'image'));
+		bg.loadGraphic(Paths.getPath('menus/installer/BG_installer', 'image'));
 		bg.screenCenter();
 		bg.antialiasing = SaveData.data.antialiasing;
 		bg.scrollFactor.set(0, 0);
 		add(bg);
 
 		configMenu = new FunkinSprite(70, 40);
-		configMenu.frames = Paths.getAnimated('installer/config_window');
+		configMenu.frames = Paths.getAnimated('menus/installer/config_window');
 		configMenu.anim.addBySymbol('Clp', 'Clp', 24, false);
 		configMenu.playAnim('Clp');
 		configMenu.antialiasing = SaveData.data.antialiasing;
@@ -47,7 +47,7 @@ class InstallerMenu extends MusicBeatState {
 		configMenu.updateHitbox();
 		add(configMenu);
 
-		files.frames = Paths.getPath('installer/images_yep', 'animated');
+		files.frames = Paths.getPath('menus/installer/images_yep', 'animated');
 		files.animation.addByPrefix('idle', 'files', 24, false);
 		files.animation.play('idle');
 		files.antialiasing = SaveData.data.antialiasing;
