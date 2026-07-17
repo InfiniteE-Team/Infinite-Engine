@@ -59,7 +59,10 @@ class NoteController {
 	// sustains limit clipping rect
 	var _clipRect:flixel.math.FlxRect = new flixel.math.FlxRect();
 
+	// scrollspeed
 	public var scrollSpeed:Float = 1.0;
+	public var targetScrollSpeed:Float = 1.0;
+	public var lerpSpeed:Float = 5.0;
 
 	// configs
 	public var isDownscroll:Bool = false;
@@ -131,6 +134,7 @@ class NoteController {
 		keys = noteSkinData.keys ?? 4;
 		spacing = noteSkinData.spacing ?? 0;
 		scrollSpeed = daSong.speed ?? 1.2;
+		targetScrollSpeed = scrollSpeed;
 
 		// splashes
 
@@ -339,6 +343,7 @@ class NoteController {
 	}
 
 	public function update(songTime:Float) {
+		scrollSpeed = flixel.math.FlxMath.lerp(scrollSpeed, targetScrollSpeed, flixel.FlxG.elapsed * lerpSpeed);
 		updateNotes(songTime);
 	}
 
@@ -374,7 +379,8 @@ class NoteController {
 			#end
 
 			note.x = note.strum.x;
-			note.y = isDownscroll ? note.strum.y - ((note.strumTime - songTime) * (0.45 * scrollSpeed)) : note.strum.y + ((note.strumTime - songTime) * (0.45 * scrollSpeed));
+			note.y = isDownscroll ? note.strum.y - ((note.strumTime - songTime) * (0.45 * scrollSpeed)) : note.strum.y
+				+ ((note.strumTime - songTime) * (0.45 * scrollSpeed));
 
 			// note.alpha = 0.3;
 

@@ -21,8 +21,9 @@ class EventManager {
 	public function initEventScript(events:Array<EventsData>):Void {
 		eventScript = new ScriptHandler(this);
 		var loadedScripts:Array<String> = [];
-		for (event in events){
-			if (loadedScripts.contains(event.name)) continue;
+		for (event in events) {
+			if (loadedScripts.contains(event.name))
+				continue;
 			eventScript.load(Paths.getPath('events/' + event.name, 'script'));
 			loadedScripts.push(event.name);
 		}
@@ -53,6 +54,12 @@ class EventManager {
 					return;
 				}
 				PlayState.instance.cameraController.char = cast(char, Character);
+			case 'Change Scroll Speed':
+				var newSpeed:Float = Std.parseFloat(event.arguments[0]);
+
+				if (!Math.isNaN(newSpeed)) {
+					PlayState.instance.noteController.targetScrollSpeed = newSpeed;
+				}
 		}
 
 		#if HSCRIPT_ALLOWED

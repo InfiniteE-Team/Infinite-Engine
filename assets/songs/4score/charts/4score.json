@@ -1,7 +1,43 @@
 {
 	"song": {
 		"player1": "bf",
-		"events": [],
+		"events": [
+			[
+				0,
+				[
+					[
+						"customCamProperties",
+						"quart,Out,0.25,0,0",
+						"0.7,false,0.04,false"
+					]
+				]
+			],
+			[
+				8089.88764044944,
+				[
+					[
+						"resetCamProperties",
+						"0.04",
+						""
+					],
+					[
+						"Camera Zoom",
+						"true,1,camGame,8",
+						"circ,Out,direct,false"
+					]
+				]
+			],
+			[
+				34382.0224719101,
+				[
+					[
+						"Change Scroll Speed",
+						"3.5",
+						"0.34"
+					]
+				]
+			]
+		],
 		"gfVersion": "gf",
 		"player2": "dad",
 		"notes": [
