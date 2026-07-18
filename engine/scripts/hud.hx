@@ -26,12 +26,19 @@ function updateScore() {
 	scoreText.text = 'Score: $scoreFinal - Misses: ${playStateConfig.misses}';
 }
 
+function onRewind() {
+	ratingPool = [];
+	comboPool = [];
+	numberPool = [];
+	missPool = [];
+}
+
 function onDestroy() {
 	ratingPool = [];
 	comboPool = [];
 	numberPool = [];
 	missPool = [];
-	scoreText = null;
+	scoreText.destroy();
 }
 
 var PIXEL_ZOOM = 6;

@@ -298,14 +298,10 @@ class PlayState extends MusicBeatState {
 
 	public function rewindSong():Void {
 		#if HSCRIPT_ALLOWED
-		if (script != null) {
-			script.call("onDestroy", []);
-			script.destroy();
-			script = null;
-		}
-
-		startScript();
-		#end
+        if (script != null) {
+            script.call("onRewind", []);
+        }
+        #end
 
 		gameAudio.stopAll();
 
@@ -345,7 +341,7 @@ class PlayState extends MusicBeatState {
 		startCountdown();
 
 		#if HSCRIPT_ALLOWED
-		script.call('onRewind', []);
+		script.call('onRewindPost', []);
 		#end
 	}
 
