@@ -1,4 +1,3 @@
-import core.assets.Paths;
 import flixel.util.FlxStringUtil;
 import flixel.text.FlxTextBorderStyle;
 
@@ -32,6 +31,7 @@ function onDestroy() {
 	comboPool = [];
 	numberPool = [];
 	missPool = [];
+	scoreText = null;
 }
 
 var PIXEL_ZOOM = 6;

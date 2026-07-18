@@ -90,10 +90,6 @@ class PlayState extends MusicBeatState {
 
 		buildStrumsandNotes();
 
-		modchartSystem = new game.modchart.ModchartSystem(noteController);
-		add(modchartSystem);
-		modchartSystem.cacheStrumBase();
-
 		windowMod = new WindowModManager();
 		add(windowMod);
 
@@ -170,6 +166,10 @@ class PlayState extends MusicBeatState {
 			noteControl.cameras = [camHUD];
 			add(noteControl);
 		}
+
+		modchartSystem = new game.modchart.ModchartSystem(noteController);
+		add(modchartSystem);
+		modchartSystem.cacheStrumBase();
 
 		// NoteController.meshSustainsActive = true;
 	}
@@ -303,10 +303,20 @@ class PlayState extends MusicBeatState {
 			script.destroy();
 			script = null;
 		}
+
 		startScript();
 		#end
 
 		gameAudio.stopAll();
+
+		if (modchartSystem != null) {
+			modchartSystem.destroy();
+		}
+
+		if (sustainRenderer != null) {
+			sustainRenderer.destroy();
+			sustainRenderer = null;
+		}
 
 		if (noteController != null) {
 			remove(noteController.strums);
@@ -323,22 +333,14 @@ class PlayState extends MusicBeatState {
 			events = new EventManager();
 		}
 
-		playStateConfig = new PlayStateConfig();
-
 		RhythmCore.reset(SONG.bpmSong);
 
 		if (chars != null)
 			chars.danceAll();
 
-		if (modchartSystem != null) {
-			modchartSystem.clearAll();
-		}
-
-		if (sustainRenderer != null) {
-			sustainRenderer.destroy();
-			sustainRenderer = null;
-		}
-
+		if (playStateConfig != null)
+			playStateConfig.reset();
+		
 		buildStrumsandNotes();
 		startCountdown();
 

@@ -237,7 +237,6 @@ class NoteController {
 				var pool = _sustainPool.get(skinForChar);
 
 				var totalLength:Float = data.length;
-				var lastSustain:NoteSustain = null;
 
 				var sustain:NoteSustain;
 				if (pool != null && pool.length > 0) {
@@ -269,10 +268,9 @@ class NoteController {
 				#end
 
 				unspawnNotes.push(sustain);
-				lastSustain = sustain;
 
 				// end
-				if (lastSustain != null) {
+				if (sustain != null) {
 					var sustainEnd:NoteSustain;
 					if (pool != null && pool.length > 0) {
 						sustainEnd = pool.pop();
@@ -288,7 +286,7 @@ class NoteController {
 					sustainEnd.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
 					sustainEnd.noteControl = this;
 					sustainEnd.strum = strum;
-					sustainEnd.parentNote = lastSustain;
+					sustainEnd.parentNote = sustain;
 					sustainEnd.noteType = data.type;
 					if (isDownscroll)
 						sustainEnd.flipY = true;
@@ -357,7 +355,12 @@ class NoteController {
 		while (unspawnNotes.length > 0) {
 			var note = unspawnNotes[0];
 
-			if (note.strumTime - songTime < 2000) {
+			var spawnTime = note.strumTime;
+			if (Std.isOfType(note, NoteSustain) && cast(note, NoteSustain).isSustainEnd && cast(note, NoteSustain).parentNote != null) {
+				spawnTime = cast(note, NoteSustain).parentNote.strumTime;
+			}
+
+			if (spawnTime - songTime < 2000) {
 				if (Std.isOfType(note, NoteSustain))
 					sustains.add(cast note);
 				else

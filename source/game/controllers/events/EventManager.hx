@@ -56,7 +56,6 @@ class EventManager {
 				PlayState.instance.cameraController.char = cast(char, Character);
 			case 'Change Scroll Speed':
 				var newSpeed:Float = Std.parseFloat(event.arguments[0]);
-
 				if (!Math.isNaN(newSpeed)) {
 					PlayState.instance.noteController.targetScrollSpeed = newSpeed;
 				}

@@ -61,7 +61,6 @@ class InputController {
 
 				note.wasMissed = true;
 				note.canBeHit = false;
-				note.alpha = 0.4;
 
 				onMiss(playStateConfig, noteController, gameAudio);
 			}
@@ -149,7 +148,6 @@ class InputController {
 
 	public function isCPUHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, noteController:NoteController, charId:String, i:Int) {
 		var note = noteController.getHittableNote(charId, i, false);
-
 		if (note != null) {
 			charStrums[i].playAnim('confirm' + i, false);
 			note.wasGoodHit = true;

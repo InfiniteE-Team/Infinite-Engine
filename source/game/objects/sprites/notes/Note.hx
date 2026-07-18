@@ -83,6 +83,11 @@ class Note extends FunkinSprite {
 		if (currentAnim != null && currentAnim != '')
 			RGBShader.applyByAnimation(this, noteSkinData, currentAnim);
 
+		if (wasMissed){
+			alpha = 0.6;
+			mustPress = false;
+		}
+
 		if (!mustPress) {
 			canBeHit = false;
 			if (strumTime <= RhythmCore.songPosition)
@@ -90,7 +95,6 @@ class Note extends FunkinSprite {
 		} else if (mustPress && !wasGoodHit && !tooLate && !wasMissed) {
 			canBeHit = (RhythmCore.songPosition >= strumTime - noteControl.worstWindow
 				&& RhythmCore.songPosition <= strumTime + noteControl.worstWindow);
-
 			if (RhythmCore.songPosition > strumTime + noteControl.worstWindow)
 				tooLate = true;
 		}
