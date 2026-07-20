@@ -3,7 +3,6 @@ package game.controllers;
 import game.objects.sprites.notes.Note;
 import game.controllers.NoteController;
 import core.rhythm.audio.GameAudio;
-import core.config.Controls;
 
 class InputController {
 	public var isGood:Bool = false;

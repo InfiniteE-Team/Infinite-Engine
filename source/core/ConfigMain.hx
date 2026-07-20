@@ -2,7 +2,6 @@ package core;
 
 import core.config.CursorConfig;
 import core.json.engine.GlobalData.GlobalConfig;
-import core.config.Controls;
 import windowmodcharting.engineImplementation.ConductorImplementation;
 import core.scripting.ScriptGlobals;
 import core.scripting.ScriptResolver;
@@ -27,9 +26,11 @@ class ConfigMain extends flixel.FlxState {
 		SaveData.init();
 		SaveData.initSave();
 
-		FlxG.mouse.visible = false;
-
 		controls = new Controls();
+
+		Controls.init();
+
+		FlxG.mouse.visible = false;
 
 		globalData.configGlobal();
 

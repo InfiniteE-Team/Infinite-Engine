@@ -3,6 +3,57 @@ package core.config;
 import flixel.input.keyboard.FlxKey;
 
 class Controls {
+	public static var instance:Controls;
+
+	public static function init():Void {
+		if (instance == null) {
+			instance = new Controls();
+		}
+	}
+
+	public static var UI_LEFT(get, never):Bool;
+
+	static inline function get_UI_LEFT()
+		return instance.justPressedAction("uiKeys", "left");
+
+	public static var UI_DOWN(get, never):Bool;
+
+	static inline function get_UI_DOWN()
+		return instance.justPressedAction("uiKeys", "down");
+
+	public static var UI_UP(get, never):Bool;
+
+	static inline function get_UI_UP()
+		return instance.justPressedAction("uiKeys", "up");
+
+	public static var UI_RIGHT(get, never):Bool;
+
+	static inline function get_UI_RIGHT()
+		return instance.justPressedAction("uiKeys", "right");
+
+	public static var ACCEPT(get, never):Bool;
+
+	static inline function get_ACCEPT()
+		return instance.justPressedAction("uiKeys", "accept");
+
+	public static var ESCAPE(get, never):Bool;
+
+	static inline function get_ESCAPE()
+		return instance.justPressedAction("uiKeys", "escape");
+
+	public static inline function noteJustPressed(lane:Int):Bool {
+		return instance.justPressed("noteKeys", lane);
+	}
+
+	public static inline function notePressed(lane:Int):Bool {
+		var inputs = instance.getGroupInput("noteKeys");
+		return inputs.length > lane ? inputs[lane] : false;
+	}
+
+	public static inline function noteJustReleased(lane:Int):Bool {
+		return instance.justReleased("noteKeys", lane);
+	}
+
 	public var keyGroups:Map<String, Array<Array<FlxKey>>> = new Map();
 
 	var reverseMaps:Map<String, Map<Int, Array<Int>>> = new Map();

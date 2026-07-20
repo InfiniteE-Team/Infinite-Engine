@@ -1,0 +1,86 @@
+{
+    "meta": {
+        "isPlayer": true
+    },
+    "gameplay": {
+        "position": [
+            0,
+            0
+        ],
+        "cameraOffset": [
+            0,
+            0
+        ],
+        "death": {
+            "character": null,
+            "sound": null,
+            "endAnim": null
+        },
+        "idleAfterSing": true
+    },
+    "render": {
+        "layers": [
+            {
+                "name": "char",
+                "path": "bf/dead",
+                "position": [
+                    0,
+                    0
+                ],
+                "scale": [
+                    1,
+                    1
+                ],
+                "alpha": 1.0,
+                "visible": true,
+                "flipX": false,
+                "flipY": false,
+                "antialiasing": true,
+                "anims": [
+                    {
+                        "name": "firstDeath",
+                        "prefix": "BF dies",
+                        "offsets": [
+                            0,
+                            0
+                        ],
+                        "framerate": 24,
+                        "looped": false
+                    },
+                    {
+                        "name": "deathLoop",
+                        "prefix": "BF Dead Loop",
+                        "offsets": [
+                            0,
+                            0
+                        ],
+                        "framerate": 24,
+                        "looped": true
+                    },
+                    {
+                        "name": "deathConfirm",
+                        "prefix": "BF Dead confirm",
+                        "offsets": [
+                            0,
+                            0
+                        ],
+                        "framerate": 24,
+                        "looped": false
+                    },
+                    {
+                        "filePath": "bf/bfFakeOut",
+                        "name": "fakeoutDeath",
+                        "prefix": "fake out death BF",
+                        "offsets": [
+                            3,
+                            65
+                        ],
+                        "framerate": 24,
+                        "looped": false
+                    }
+                ]
+            }
+        ]
+    },
+    "icon": null
+}

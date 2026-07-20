@@ -62,6 +62,11 @@ class Character extends FunkinObjectRegistry {
 			default:
 				var charData:String = Paths.getPath('data/characters/' + curCharacter, "json");
 				characterData = FormatJson.readJson(charData);
+				if (characterData == null) {
+					Trace.traceOnce('[Character] WARNING: no character data found for "$curCharacter" (expected at $charData)');
+					return;
+				}
+
 				idleAfterSing = characterData.gameplay.idleAfterSing ?? true;
 				singTime = characterData.gameplay.singTime ?? 4;
 				cameraOffset = {

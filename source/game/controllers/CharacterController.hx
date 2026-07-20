@@ -6,7 +6,6 @@ import game.objects.sprites.Character;
 import core.assets.FunkinSprite;
 import core.assets.FunkinObjectRegistry;
 import game.controllers.NoteController;
-import core.config.Controls;
 import game.objects.sprites.notes.Note;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import core.rhythm.audio.GameAudio;

@@ -315,7 +315,7 @@ class MenuState extends MusicBeatState {
 			moveFocus(1);
 		else if (FlxG.keys.justPressed.UP || FlxG.keys.justPressed.W)
 			moveFocus(-1);
-		else if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.SPACE)
+		else if (Controls.ACCEPT || FlxG.keys.justPressed.SPACE)
 			confirmFocus();
 	}
 

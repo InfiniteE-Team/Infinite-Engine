@@ -7,8 +7,8 @@ import core.json.song.SongData.SongConfig;
 
 class GameAudio extends FlxTypedGroup<FlxSound> {
 	// Class for the game audio manager
-	public var inst:FlxSound;
-	public var vocals:FlxSound;
+	public var inst:Sound;
+	public var vocals:Sound;
 	public var soundMisses:Array<FlxSound> = [];
 
 	public function new() {
@@ -47,14 +47,12 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 		}
 	}
 
-	public function audio(path:String, onfinish:() -> Void):FlxSound {
-		var resolvedPath = Paths.getPath(path, 'songAudio');
-		if (resolvedPath == null) {
-			trace('GameAudio path not found for "$path"');
-			return null;
+	public function audio(path:String, onfinish:() -> Void):Sound {
+		var sound = new Sound(MUSIC, Paths.getPath(path, 'songAudio'));
+		if (onfinish != null) {
+			sound.onComplete = onfinish;
 		}
-		var sound = new FlxSound();
-		sound.loadEmbedded(resolvedPath, false, false, onfinish);
+
 		sound.volume = 1.0;
 		return sound;
 	}

@@ -215,8 +215,13 @@ class PlayState extends MusicBeatState {
 		if (script.callCancellable('onEndSong', []))
 			return;
 		#end
+
 		// idk what to do here, maybe go to score screen or something? for now just reset the state
-		MusicBeatState.resetState();
+		flixel.tweens.FlxTween.tween(cameraController.camPoint, {y: camGame.y + 200}, 1, {ease:flixel.tweens.FlxEase.quadOut});
+
+		new flixel.util.FlxTimer().start(1, (_) -> {
+			MusicBeatState.resetState();
+		});
 	}
 
 	// Other screens idk
@@ -253,9 +258,15 @@ class PlayState extends MusicBeatState {
 		if (script.callCancellable('onDeath', []))
 			return;
 		#end
-		Trace.traceOnce("isDeath is being called! This should be overridden in a subclass if you want to use it.");
 
-		rewindSong();
+		persistentUpdate = false;
+		persistentDraw = false;
+		paused = true;
+
+		FlxG.sound.music?.stop();
+		gameAudio.stopAll();
+
+		openSubState(new states.substates.GameOverSubstate());
 	}
 
 	override public function closeSubState():Void {
@@ -298,10 +309,10 @@ class PlayState extends MusicBeatState {
 
 	public function rewindSong():Void {
 		#if HSCRIPT_ALLOWED
-        if (script != null) {
-            script.call("onRewind", []);
-        }
-        #end
+		if (script != null) {
+			script.call("onRewind", []);
+		}
+		#end
 
 		gameAudio.stopAll();
 
@@ -336,7 +347,7 @@ class PlayState extends MusicBeatState {
 
 		if (playStateConfig != null)
 			playStateConfig.reset();
-		
+
 		buildStrumsandNotes();
 		startCountdown();
 
