@@ -5,7 +5,7 @@ import openfl.events.Event;
 
 class FPSCounter extends Sprite {
 	var bg = new Shape();
-    var fps = new core.system.FPS(0,0,0xFFFFFF);
+    var fps = new core.system.FPS(2,2,0xFFFFFF);
 
 	public function new(x:Float, y:Float, color:Int) {
 		super();
@@ -29,8 +29,8 @@ class FPSCounter extends Sprite {
 
 	public function drawBackground() {
         // bg black
-		var w = fps.textWidth + 6 * 2;
-        var h = fps.textHeight + 6 * 2;
+		var w = fps.textWidth + 8 * 2;
+        var h = fps.textHeight + 8 * 2;
 
 		if (w != lastW || h != lastH){
 			bg.graphics.clear();

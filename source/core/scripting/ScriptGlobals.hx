@@ -86,7 +86,7 @@ class ScriptGlobals {
 		roots['BeatXModifier'] = game.modchart.modifiers.Modifiers.BeatXModifier;
 		roots['ShrinkXModifier'] = game.modchart.modifiers.Modifiers.ShrinkXModifier;
 
-		roots['WindowModManager'] = windowmodcharting.WindowModManager;
+		//roots['WindowModManager'] = windowmodcharting.WindowModManager;
 	}
 
 	public static function initLua():Void {
@@ -149,7 +149,7 @@ class ScriptGlobals {
 			"ShrinkXModifier" => game.modchart.modifiers.Modifiers.ShrinkXModifier,
 			"BeatXModifier" => game.modchart.modifiers.Modifiers.BeatXModifier,
 			"TanDrunkModifier" => game.modchart.modifiers.Modifiers.TanDrunkModifier,
-			"WindowModManager" => windowmodcharting.WindowModManager
+			//"WindowModManager" => windowmodcharting.WindowModManager
 		];
 	}
 }

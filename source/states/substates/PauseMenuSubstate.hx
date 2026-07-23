@@ -31,7 +31,8 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 
 		if (_cachedPauseMusic == null) {
 			pauseMenuMusic = new FlxSound();
-			pauseMenuMusic.loadEmbedded(Paths.getPath('pauseInfinite', "music"), true, false, null);
+			pauseMenuMusic.load(Paths.getPath('pauseInfinite', "music"), false);
+			pauseMenuMusic.looped = true;
 			FlxG.sound.list.add(pauseMenuMusic);
 			_cachedPauseMusic = pauseMenuMusic;
 		} else {
@@ -72,19 +73,19 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		script.call("onUpdate", [elapsed]);
 		#end
 
-		if (FlxG.keys.justPressed.ESCAPE) {
+		if (Controls.BACK) {
 			resumeFunction();
 			#if HSCRIPT_ALLOWED script.call("ExitMenu", []); #end
 		}
 
 		if (options.length > 0) {
-			if (input.control.justPressedAction("uiKeys", "up"))
+			if (Controls.UI_UP)
 				changeCur(1);
-			else if (input.control.justPressedAction("uiKeys", "down"))
+			else if (Controls.UI_DOWN)
 				changeCur(-1);
 		}
 
-		if (input.control.justPressedAction("uiKeys", 'accept')) {
+		if (Controls.ACCEPT) {
 			switch (options[curSelect]) {
 				case "Resume":
 					resumeFunction();
@@ -114,7 +115,7 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 	function resumeFunction() {
 		if (game.PlayState.instance != null) {
 			game.PlayState.instance.paused = false;
-			game.PlayState.instance.windowMod.resumeWindow();
+			//game.PlayState.instance.windowMod.resumeWindow();
 		}
 		if (pauseMenuMusic != null) {
 			pauseMenuMusic.pause();

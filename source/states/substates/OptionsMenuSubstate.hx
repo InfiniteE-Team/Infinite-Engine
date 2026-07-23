@@ -22,7 +22,7 @@ class OptionsMenuSubstate extends MusicBeatSubstate {
 		script.call("onUpdate", [elapsed]);
 		#end
 
-        if (input.control.justPressedAction("uiKeys", 'escape'))
+        if (Controls.BACK)
             close();
 
 		super.update(elapsed);

@@ -18,7 +18,7 @@ import core.json.song.SongData.SongConfig;
 import game.controllers.events.EventManager;
 import game.objects.Countdown;
 // window
-import windowmodcharting.WindowModManager;
+//import windowmodcharting.WindowModManager;
 
 class PlayState extends MusicBeatState {
 	public static var instance:PlayState;
@@ -44,7 +44,7 @@ class PlayState extends MusicBeatState {
 	public var modchartSystem:game.modchart.ModchartSystem;
 	public var sustainRenderer:game.modchart.SustainRenderer;
 
-	public var windowMod:WindowModManager = null;
+	//public var windowMod:WindowModManager = null;
 
 	// visuals
 	public var chars:CharacterController;
@@ -59,6 +59,8 @@ class PlayState extends MusicBeatState {
 	public var paused:Bool = false;
 
 	public var startCount:Bool = false;
+
+	public var startTime:Float = 0;
 
 	override public function create() {
 		instance = this;
@@ -89,9 +91,9 @@ class PlayState extends MusicBeatState {
 		add(controllerHUD);
 
 		buildStrumsandNotes();
-
+/*
 		windowMod = new WindowModManager();
-		add(windowMod);
+		add(windowMod);*/
 
 		startCountdown();
 
@@ -176,7 +178,7 @@ class PlayState extends MusicBeatState {
 
 	// Code Song
 	public function loadSong() {
-		gameAudio.loadSong(SONG.needVoices, endSong);
+		gameAudio.loadSong(SONG, SONG.needVoices, endSong);
 
 		noteController.generateNotes(0, SONG);
 
@@ -238,9 +240,9 @@ class PlayState extends MusicBeatState {
 		persistentDraw = true;
 		paused = true;
 
-		RhythmCore.pause(gameAudio);
+		RhythmCore.pause(gameAudio);/*
 		if (windowMod != null)
-			windowMod.pauseWindow();
+			windowMod.pauseWindow();*/
 
 		#if HSCRIPT_ALLOWED
 		script.call('onPauseMenu', []);
@@ -272,9 +274,9 @@ class PlayState extends MusicBeatState {
 	override public function closeSubState():Void {
 		super.closeSubState();
 		paused = false;
-		RhythmCore.resume(gameAudio);
+		RhythmCore.resume(gameAudio);/*
 		if (windowMod != null)
-			windowMod.resumeWindow();
+			windowMod.resumeWindow();*/
 		gameAudio.resyncVocals();
 	}
 

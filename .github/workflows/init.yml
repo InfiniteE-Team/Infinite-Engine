@@ -33,10 +33,7 @@ jobs:
 
       - name: Install dependencies via hmm
         run: haxelib run hmm install
-
-      - name: Install hxcpp
-        run: haxelib install hxcpp --quiet
-
+        
       - name: Install LuaJIT (Linux)
         if: matrix.target == 'linux'
         run: |

@@ -36,9 +36,9 @@ class Controls {
 	static inline function get_ACCEPT()
 		return instance.justPressedAction("uiKeys", "accept");
 
-	public static var ESCAPE(get, never):Bool;
+	public static var BACK(get, never):Bool;
 
-	static inline function get_ESCAPE()
+	static inline function get_BACK()
 		return instance.justPressedAction("uiKeys", "escape");
 
 	public static inline function noteJustPressed(lane:Int):Bool {

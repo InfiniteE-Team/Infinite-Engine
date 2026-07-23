@@ -60,7 +60,7 @@ class GameOverSubstate extends MusicBeatSubstate {
 		if (char.isFinished('firstDeath') && !char.currentAnim.startsWith('firstDeath'))
 			char.playAnim('deathLoop', true);
 
-		if (input.control.justPressedAction("uiKeys", 'accept'))
+		if (Controls.ACCEPT)
 			char.playAnim('deathConfirm', true);
 	}
 }

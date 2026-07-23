@@ -2,7 +2,6 @@ package core;
 
 import core.config.CursorConfig;
 import core.json.engine.GlobalData.GlobalConfig;
-import windowmodcharting.engineImplementation.ConductorImplementation;
 import core.scripting.ScriptGlobals;
 import core.scripting.ScriptResolver;
 
@@ -59,9 +58,9 @@ class ConfigMain extends flixel.FlxState {
 		#if windows
 		core.api.WindowAPI.init();
 		#end
-
+/*
 		ConductorImplementation.custom_songPosition = () -> core.rhythm.RhythmCore.songPosition;
-		ConductorImplementation.custom_crochet = () -> core.rhythm.RhythmCore.crochet;
+		ConductorImplementation.custom_crochet = () -> core.rhythm.RhythmCore.crochet;*/
 
 		if (globalData.developerMode)
 			Trace.init();

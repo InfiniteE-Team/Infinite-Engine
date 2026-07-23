@@ -14,7 +14,7 @@ class FPS extends openfl.display.FPS {
 	public function new(x:Float, y:Float, color:Int) {
 		super(x, y, color);
 		autoSize = TextFieldAutoSize.LEFT;
-		defaultTextFormat = new openfl.text.TextFormat(Paths.getPath("5by7_b.ttf", "font"), 12, color);
+		defaultTextFormat = new openfl.text.TextFormat(Paths.getPath("5by7_b.ttf", "font"), 14, color);
 		var glow = new openfl.filters.GlowFilter(glowColor, 1.0, 6, 6, 100, BitmapFilterQuality.MEDIUM);
 		filters = [glow];
 	}

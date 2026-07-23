@@ -2,20 +2,22 @@ package core.rhythm.audio;
 
 import core.assets.Paths;
 import flixel.sound.FlxSound;
-import flixel.group.FlxGroup.FlxTypedGroup;
 import core.json.song.SongData.SongConfig;
 
-class GameAudio extends FlxTypedGroup<FlxSound> {
+class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 	// Class for the game audio manager
 	public var inst:Sound;
 	public var vocals:Sound;
+	public var vocalsGroup:Array<Sound> = [];
+	public var vocalsMap:Map<String, Sound> = new Map();
+
 	public var soundMisses:Array<FlxSound> = [];
 
 	public function new() {
 		super();
 	}
 
-	public function loadSong(needVoices:Bool = true, onfinish:() -> Void):Void {
+	public function loadSong(SONG:SongConfig, needVoices:Bool = true, onfinish:() -> Void):Void {
 		forEachAlive(function(s:FlxSound) {
 			s.stop();
 			s.destroy();
@@ -33,17 +35,45 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 		if (inst != null)
 			add(inst);
 
-		if (needVoices) {
-			vocals = audio('Voices', onfinish);
-			if (vocals != null)
-				add(vocals);
-		}
+		if (needVoices)
+			vocalsSeparated(SONG, onfinish);
 
 		for (i in 1...3) {
 			var miss = new FlxSound();
-			miss.loadEmbedded(Paths.getPath('gameplay/misses/missnote' + i, "sound"), false, false, null);
+			miss.load(Paths.getPath('gameplay/misses/missnote' + i, "sound"), false);
+			miss.looped = false;
 			FlxG.sound.list.add(miss);
 			soundMisses.push(miss);
+		}
+	}
+
+	function vocalsSeparated(SONG:SongConfig, onfinish:() -> Void) {
+		if (SONG == null)
+			return;
+
+		if (!SONG.vocSeparated) {
+			vocals = audio('Voices', onfinish);
+			if (vocals != null) {
+				vocalsGroup.push(vocals);
+				vocalsMap.set('default', vocals);
+				add(vocals);
+			}
+			return;
+		}
+
+		if (SONG.chars != null) {
+			for (i in 0...SONG.chars.length) {
+				var charName = SONG.chars[i];
+				var charVoc = audio('Voices-' + charName, onfinish);
+
+				if (charVoc != null) {
+					vocalsGroup.push(charVoc);
+					vocalsMap.set(Std.string(charName), charVoc);
+					add(charVoc);
+				}
+			}
+			if (vocalsGroup.length > 0)
+				vocals = vocalsGroup[0];
 		}
 	}
 
@@ -68,20 +98,42 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 	}
 
 	public function volumenVocs(SONG:SongConfig, isMiss:Bool, elapsed:Float) {
-		if (vocals == null)
+		if (vocalsGroup.length == 0)
 			return;
 
-		if (!SONG.vocSeparated || SONG.needVoices) {
-			if (isMiss)
-				vocals.volume = 0;
-			else if (vocals.volume < 1)
-				vocals.volume = Math.min(1, vocals.volume + elapsed);
+		for (voice in vocalsGroup) {
+			if (voice == null)
+				continue;
+
+			if (!SONG.vocSeparated || SONG.needVoices) {
+				if (isMiss)
+					voice.volume = 0;
+				else if (voice.volume < 1)
+					voice.volume = Math.min(1, voice.volume + elapsed);
+			}
+		}
+	}
+
+	public function resyncVocals():Void {
+		if (inst == null)
+			return;
+
+		for (voice in vocalsGroup) {
+			if (vocals == null || !vocals.playing)
+				continue;
+
+			if (Math.abs(voice.time - inst.time) > 20) {
+				voice.time = inst.time;
+				if (!voice.playing)
+					voice.play();
+			}
 		}
 	}
 
 	public function onMiss():Void {
-		if (vocals != null) {
-			vocals.volume = 0;
+		for (voice in vocalsGroup) {
+			if (voice != null)
+				voice.volume = 0;
 		}
 
 		if (soundMisses.length > 0) {
@@ -103,17 +155,18 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 		forEachAlive(function(s:FlxSound) s.stop());
 	}
 
-	public function resyncVocals():Void {
-		if (vocals == null || !vocals.playing || inst == null)
-			return;
+	public function setVocalVolumeByName(charName:String, vol:Float):Void {
+		if (vocalsMap.exists(charName)) {
+			vocalsMap.get(charName).volume = vol;
+		}
+	}
 
-		if (Math.abs(vocals.time - inst.time) > 20) {
-			// Trace.traceOnce('Resync Vocals yep: ' + Std.string(vocals.time - inst.time));
-			vocals.time = inst.time;
-
-			if (!vocals.playing) {
-				vocals.play();
-			}
+	public function setTime(time:Float):Void {
+		if (inst != null)
+			inst.time = time;
+		for (v in vocalsGroup) {
+			if (v != null)
+				v.time = time;
 		}
 	}
 
@@ -121,6 +174,9 @@ class GameAudio extends FlxTypedGroup<FlxSound> {
 		super.destroy();
 		inst = null;
 		vocals = null;
+		vocalsGroup = null;
+		vocalsMap = null;
+
 		for (miss in soundMisses) {
 			FlxG.sound.list.remove(miss, true);
 			miss.destroy();

@@ -17,8 +17,6 @@ class MusicBeatState extends State {
 
 	var infoHelp:InfoHelpDebug;
 
-	var input:InputController = new InputController();
-
 	override function create():Void {
 		#if HSCRIPT_ALLOWED
 		if (script == null)
