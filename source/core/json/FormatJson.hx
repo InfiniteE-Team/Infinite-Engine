@@ -29,4 +29,20 @@ class FormatJson {
 
 		return cast AleJson.parse(data);
 	}
+
+	public static function getIconDataPlaceholder(?customData:core.json.objects.CharacterData.IconData):core.json.objects.CharacterData.IconData {
+        if (customData == null) {
+            return {
+                props: null,
+                bumpInBeats: true,
+                stepTempo: 4.0
+            };
+        }
+
+        return {
+            props: customData.props != null ? customData.props : null,
+            bumpInBeats: customData.bumpInBeats != null ? customData.bumpInBeats : true,
+            stepTempo: customData.stepTempo != null ? customData.stepTempo : 4.0
+        };
+    }
 }

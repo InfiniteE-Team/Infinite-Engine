@@ -14,4 +14,8 @@ typedef SaveDataFields = {
 	// controls
 	var ?noteKeyPresets:haxe.DynamicAccess<Array<Array<String>>>;
 	var ?uiKeys:Array<Array<String>>;
+
+	// mods
+	var onMod:Null<Bool>;
+	var currentMod:Null<String>;
 }

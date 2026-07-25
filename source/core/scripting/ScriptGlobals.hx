@@ -34,11 +34,17 @@ class ScriptGlobals {
 		roots['FunkinSprite'] = core.assets.FunkinSprite;
 		roots['RhythmCore'] = core.rhythm.RhythmCore;
 		roots['ScriptHandler'] = core.scripting.ScriptHandler;
+		roots['Controls'] = core.config.Controls;
 
-		roots['ScriptedStateBase'] = core.scripting.interfaces.ScriptStateBase;
-		roots['ScriptSubstateBase'] = core.scripting.interfaces.ScriptSubstateBase;
+		// Sound
+		roots['Sound'] = core.rhythm.audio.Sound;
+		roots['MasterAudio'] = core.rhythm.audio.MasterAudio;
+		roots['GameAudio'] = core.rhythm.audio.GameAudio;
 
-		roots['ScriptedState'] = core.scripting.types.ScriptedState;
+		roots['ScriptState'] = core.scripting.interfaces.ScriptState;
+		roots['ScriptSubstate'] = core.scripting.interfaces.ScriptSubstate;
+
+		roots['ScriptClass'] = core.scripting.types.ScriptClass;
 
 		roots['ScriptedTypeDef'] = core.scripting.types.ScriptedTypeDef;
 

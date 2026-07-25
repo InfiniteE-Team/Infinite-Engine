@@ -13,7 +13,7 @@ class DiffsUtils {
 
 	public static function getDifficulty(curSong:String) {
 		difficulties = [];
-		var diffsDir = Paths.findLib('songs/$curSong/charts/');
+		var diffsDir = core.assets.Library.findLib('songs/$curSong/charts/');
 
 		if (FileSystem.exists(diffsDir)) {
 			for (file in sys.FileSystem.readDirectory(diffsDir)) {

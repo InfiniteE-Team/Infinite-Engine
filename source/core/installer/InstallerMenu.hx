@@ -80,7 +80,7 @@ class InstallerMenu extends MusicBeatState {
 	}
 
 	public function installFiles(folder:String):Void {
-		var resolved = Paths.findLib(folder);
+		var resolved = core.assets.Library.findLib(folder);
 		if (resolved == null || !FileSystem.exists(resolved))
 			return;
 

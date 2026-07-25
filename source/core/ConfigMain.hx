@@ -3,7 +3,6 @@ package core;
 import core.config.CursorConfig;
 import core.json.engine.GlobalData.GlobalConfig;
 import core.scripting.ScriptGlobals;
-import core.scripting.ScriptResolver;
 
 class ConfigMain extends flixel.FlxState {
 	public var mainState:Class<MusicBeatState> = game.PlayState;
@@ -47,7 +46,6 @@ class ConfigMain extends flixel.FlxState {
 
 		#if HSCRIPT_ALLOWED
 		ScriptGlobals.init();
-		ScriptResolver.init();
 		#end
 
 		cursor = new CursorConfig();
@@ -65,10 +63,12 @@ class ConfigMain extends flixel.FlxState {
 		if (globalData.developerMode)
 			Trace.init();
 
+		core.assets.Library.reloadMods();
+
 		if (!core.installer.InstallerMenu.hasAssetFiles('assets')) {
 			MusicBeatState.switchState(() -> new core.installer.InstallerMenu());
 		} else if (globalData.startStateScript != null) {
-			core.scripting.types.ScriptedState.switchState(globalData.startStateScript);
+			core.scripting.types.ScriptClass.switchState(globalData.startStateScript);
 		} else {
 			MusicBeatState.switchState(() -> Type.createInstance(mainState, []));
 		}

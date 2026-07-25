@@ -25,7 +25,7 @@
 	<define name="HX_WINDOWS" if="windows cpp"/>
 
 	<!-- ____________________________ Template Settings ___________________________ -->
-	<template path="engine/alsoft.ini" />
+	<template path="assets/alsoft.ini" />
 
 	<!-- ____________________________ Window Settings ___________________________ -->
 
@@ -44,7 +44,7 @@
 	<source path="source" />
 
 	<assets path="assets"/>
-	<assets path="engine"/>
+	<assets path="mods"/>
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
@@ -87,5 +87,5 @@
 	<compilerflag name="-D HXCPP_M64" if="cpp" />
 
 	<!-- Place custom nodes like icons here -->
-	<icon path="engine/icon.png" />
+	<icon path="assets/icon.png" />
 </project>

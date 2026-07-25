@@ -4,4 +4,4 @@ import rulescript.scriptedClass.RuleScriptedClass;
 
 @:keepSub
 @:strictScriptedConstructor  
-class ScriptStateBase implements RuleScriptedClass extends MusicBeatState {}
+class ScriptState implements RuleScriptedClass extends MusicBeatState {}

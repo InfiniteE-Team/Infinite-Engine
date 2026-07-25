@@ -31,7 +31,7 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 
 		if (_cachedPauseMusic == null) {
 			pauseMenuMusic = new FlxSound();
-			pauseMenuMusic.load(Paths.getPath('pauseInfinite', "music"), false);
+			pauseMenuMusic.load(Paths.getPath('menus/pauseInfinite', "music"), false);
 			pauseMenuMusic.looped = true;
 			FlxG.sound.list.add(pauseMenuMusic);
 			_cachedPauseMusic = pauseMenuMusic;
@@ -129,7 +129,7 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 		curSelect += change;
 
 		if (change != 0)
-			FlxG.sound.play(Paths.getPath('scrollMenu', 'sound'), 0.7);
+			FlxG.sound.play(Paths.getPath('menus/scrollMenu', 'sound'), 0.7);
 
 		if (curSelect >= options.length)
 			curSelect = 0;

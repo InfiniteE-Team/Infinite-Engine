@@ -4,8 +4,9 @@ import core.assets.Paths;
 import flixel.sound.FlxSound;
 import core.json.song.SongData.SongConfig;
 
+// Class for the gameplay audio
+
 class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
-	// Class for the game audio manager
 	public var inst:Sound;
 	public var vocals:Sound;
 	public var vocalsGroup:Array<Sound> = [];
@@ -77,16 +78,6 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 		}
 	}
 
-	public function audio(path:String, onfinish:() -> Void):Sound {
-		var sound = new Sound(MUSIC, Paths.getPath(path, 'songAudio'));
-		if (onfinish != null) {
-			sound.onComplete = onfinish;
-		}
-
-		sound.volume = 1.0;
-		return sound;
-	}
-
 	public function playAll():Void {
 		if (inst == null)
 			return;
@@ -141,6 +132,16 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 			randomMiss.volume = FlxG.random.float(0.1, 0.2);
 			randomMiss.play(true);
 		}
+	}
+
+	public function audio(path:String, onfinish:() -> Void):Sound {
+		var sound = new Sound(MUSIC, Paths.getPath(path, 'songAudio'));
+		if (onfinish != null) {
+			sound.onComplete = onfinish;
+		}
+
+		sound.volume = 1.0;
+		return sound;
 	}
 
 	public function pauseAll():Void {

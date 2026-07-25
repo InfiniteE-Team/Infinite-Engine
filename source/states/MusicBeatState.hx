@@ -1,5 +1,6 @@
 package states;
 
+import states.LoadingState;
 import core.rhythm.TrackBeat;
 import core.json.JsonWatcher;
 import utils.InfoHelpDebug;

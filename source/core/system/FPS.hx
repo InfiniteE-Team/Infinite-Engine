@@ -25,6 +25,8 @@ class FPS extends openfl.display.FPS {
 		infoFPS();
 	}
 
+	var mods:String = '';
+
 	public function infoFPS() {
 		var mem:Float = formatRam(System.totalMemory);
 
@@ -33,7 +35,10 @@ class FPS extends openfl.display.FPS {
 			text = 'FPS: $currentFPS - [MEM: $mem MB / GC: $memGC MB]';
 		} else {
 			var memGC:Float = formatRam(Gc.memUsage());
-			text = 'FPS: $currentFPS - [MEM: $mem MB / GC: $memGC MB]\n\nDeveloper Mode';
+			if (core.assets.mods.ModsRegistry.onMod)
+				mods = ' - ' + core.assets.mods.ModsRegistry.currentMod;
+
+			text = 'FPS: $currentFPS - [MEM: $mem MB / GC: $memGC MB]\n\nDeveloper Mode' + mods;
 		}
 	}
 

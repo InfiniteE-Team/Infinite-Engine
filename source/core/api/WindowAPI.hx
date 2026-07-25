@@ -5,6 +5,9 @@ import winapi.WindowsAPI;
 #end
 import openfl.Lib;
 import flixel.system.scaleModes.RatioScaleMode;
+import sys.FileSystem;
+import sys.io.Process;
+import flash.system.System;
 
 class WindowAPI {
 	public static function init() {
@@ -24,5 +27,14 @@ class WindowAPI {
 
 	public static function resizeGame() {
 		FlxG.scaleMode = new RatioScaleMode();
+	}
+
+	public static function restartApp():Void {
+		var exePath:String = Sys.programPath();
+		var args:Array<String> = Sys.args();
+
+		new Process(exePath, args);
+
+		System.exit(0);
 	}
 }

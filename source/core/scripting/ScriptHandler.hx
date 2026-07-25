@@ -47,7 +47,7 @@ class ScriptHandler {
 	}
 
 	public function loadFolder(folder:String):Void {
-		var resolved = Paths.findLib(folder);
+		var resolved = core.assets.Library.findLib(folder);
 		if (resolved == null || !sys.FileSystem.exists(resolved))
 			return;
 		for (file in sys.FileSystem.readDirectory(resolved)) {

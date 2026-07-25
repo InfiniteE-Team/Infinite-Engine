@@ -2,12 +2,8 @@ package game.objects.sprites;
 
 import core.assets.FunkinSprite;
 import core.json.objects.CharacterData;
-import core.assets.FunkinObjectRegistry;
-#if HSCRIPT_ALLOWED
-import core.scripting.ScriptHandler;
-#end
 
-class Character extends FunkinObjectRegistry {
+class Character extends core.scripting.types.sprites.ScriptedSpriteGroup {
 	public static var parent:Character;
 
 	public var curCharacter:String = 'bf';
@@ -29,10 +25,6 @@ class Character extends FunkinObjectRegistry {
 
 	static final CHAR_ANIMS:Array<String> = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
 
-	#if HSCRIPT_ALLOWED
-	public var charScript:ScriptHandler;
-	#end
-
 	public static function getCharAnim(direction:Int):String {
 		return CHAR_ANIMS[direction % CHAR_ANIMS.length];
 	}
@@ -41,22 +33,18 @@ class Character extends FunkinObjectRegistry {
 		super(id, x, y);
 		parent = this;
 		this.curCharacter = curCharacter;
-		loadSprite();
 		#if HSCRIPT_ALLOWED
-		initCharScript();
+		initScript('characters/$curCharacter');
 		#end
+		loadSprite();
 	}
-
-	#if HSCRIPT_ALLOWED
-	public function initCharScript():Void {
-		charScript = new ScriptHandler(this);
-		charScript.load(Paths.getPath('characters/$curCharacter', 'script'));
-		charScript.executeAll();
-		charScript.call('onCreate', []);
-	}
-	#end
 
 	public function loadSprite() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable('onCreateSprite', []))
+			return;
+		#end
+
 		switch (curCharacter) {
 			// case 'bf':  hardcoder reference!1
 			default:
@@ -83,13 +71,14 @@ class Character extends FunkinObjectRegistry {
 					layers.push(sprite);
 				}
 		}
+
+		#if HSCRIPT_ALLOWED
+		script.call('postCreate', []);
+		#end
 	}
 
 	override public function update(elapsed:Float):Void {
 		super.update(elapsed);
-		#if HSCRIPT_ALLOWED
-		charScript.call('onUpdate', [elapsed]);
-		#end
 
 		for (i in 0...layers.length) {
 			layers[i].setPosition(x + (characterData.render.layers[i].position ?? [0.0, 0.0])[0],
@@ -109,13 +98,13 @@ class Character extends FunkinObjectRegistry {
 		}
 
 		#if HSCRIPT_ALLOWED
-		charScript.call('postUpdate', [elapsed]);
+		script.call('postUpdate', [elapsed]);
 		#end
 	}
 
 	override public function playAnim(name:String, ?force:Bool = true) {
 		#if HSCRIPT_ALLOWED
-		if (charScript.callCancellable('onPlayAnim', [name, force]))
+		if (script.callCancellable('onPlayAnim', [name, force]))
 			return;
 		#end
 		for (layer in layers)
@@ -150,7 +139,7 @@ class Character extends FunkinObjectRegistry {
 			return;
 
 		#if HSCRIPT_ALLOWED
-		if (charScript.callCancellable('onDance', []))
+		if (script.callCancellable('onDance', []))
 			return;
 		#end
 
@@ -180,11 +169,6 @@ class Character extends FunkinObjectRegistry {
 	}
 
 	override public function destroy() {
-		#if HSCRIPT_ALLOWED
-		charScript.call('onDestroy', []);
-		charScript.destroy();
-		charScript = null;
-		#end
 		for (layer in layers)
 			layer.destroy();
 		layers = [];

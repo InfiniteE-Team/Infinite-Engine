@@ -52,13 +52,6 @@
             "url": "https://github.com/ALE-Psych-Crew/hxcpp"
         },
         {
-            "name": "hmm",
-            "type": "git",
-            "dir": null,
-            "ref": "main",
-            "url": "https://github.com/ALE-Psych-Crew/hmm"
-        },
-        {
             "name": "hxvlc",
             "type": "haxelib",
             "version": "2.2.6"

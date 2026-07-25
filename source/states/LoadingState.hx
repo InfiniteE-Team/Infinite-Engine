@@ -1,7 +1,6 @@
 package states;
 
-import core.assets.Paths;
-import core.assets.FunkinSprite;
+import game.PlayState;
 import core.json.song.SongData.SongConfig;
 import core.json.objects.CharacterData;
 import core.json.objects.StageData;
@@ -44,6 +43,8 @@ class LoadingState extends MusicBeatState {
 
 	override public function create() {
 		super.create();
+
+		FlxG.sound.music.stop();
 
 		buildUI();
 		collectQueue();
@@ -199,13 +200,8 @@ class LoadingState extends MusicBeatState {
 		if (_readyToGo)
 			return;
 		_readyToGo = true;
-
-		MusicBeatState.switchState(() -> {
-			var ps = new game.PlayState();
-			ps.curSong = _curSong;
-			ps.curDifficulty = _curDifficulty;
-			return ps;
-		});
+		
+		MusicBeatState.switchState(() -> new PlayState(_curSong, _curDifficulty));
 	}
 
 	override public function update(elapsed:Float) {

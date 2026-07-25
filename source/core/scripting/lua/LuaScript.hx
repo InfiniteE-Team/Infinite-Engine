@@ -128,8 +128,8 @@ class LuaScript {
 			var luaName = name.split('.').join('/') + '.lua';
 			var candidates = [
 				haxe.io.Path.directory(path) + '/' + luaName,
-				core.assets.Paths.findLib('scripts/$luaName'),
-				core.assets.Paths.findLib(luaName),
+				core.assets.Library.findLib('scripts/$luaName'),
+				core.assets.Library.findLib(luaName),
 			];
 			for (candidate in candidates) {
 				if (candidate != null && sys.FileSystem.exists(candidate)) {

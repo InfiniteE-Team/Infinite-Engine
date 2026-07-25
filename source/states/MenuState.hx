@@ -337,9 +337,9 @@ class MenuState extends MusicBeatState {
 	function callAction(action:String, el:Element):Void {
 		switch (action) {
 			case 'PlayState':
-				MusicBeatState.switchState(() -> new game.PlayState());
+				//MusicBeatState.switchState(() -> new states.LoadingState());
 			default:
-				core.scripting.types.ScriptedState.switchState(action);
+				core.scripting.types.ScriptClass.switchState(action);
 		}
 		// ex:
 		// switch (action) {

@@ -17,9 +17,9 @@ import core.rhythm.audio.GameAudio;
 import core.json.song.SongData.SongConfig;
 import game.controllers.events.EventManager;
 import game.objects.Countdown;
-// window
-//import windowmodcharting.WindowModManager;
 
+// window
+// import windowmodcharting.WindowModManager;
 class PlayState extends MusicBeatState {
 	public static var instance:PlayState;
 
@@ -44,8 +44,7 @@ class PlayState extends MusicBeatState {
 	public var modchartSystem:game.modchart.ModchartSystem;
 	public var sustainRenderer:game.modchart.SustainRenderer;
 
-	//public var windowMod:WindowModManager = null;
-
+	// public var windowMod:WindowModManager = null;
 	// visuals
 	public var chars:CharacterController;
 	public var stage:Stage;
@@ -61,6 +60,12 @@ class PlayState extends MusicBeatState {
 	public var startCount:Bool = false;
 
 	public var startTime:Float = 0;
+
+	public function new(curSong:String, ?curDifficulty:Int = 0) {
+		super();
+		this.curSong = curSong;
+		this.curDifficulty = curDifficulty;
+	}
 
 	override public function create() {
 		instance = this;
@@ -91,9 +96,9 @@ class PlayState extends MusicBeatState {
 		add(controllerHUD);
 
 		buildStrumsandNotes();
-/*
-		windowMod = new WindowModManager();
-		add(windowMod);*/
+		/*
+			windowMod = new WindowModManager();
+			add(windowMod); */
 
 		startCountdown();
 
@@ -219,7 +224,7 @@ class PlayState extends MusicBeatState {
 		#end
 
 		// idk what to do here, maybe go to score screen or something? for now just reset the state
-		flixel.tweens.FlxTween.tween(cameraController.camPoint, {y: camGame.y + 200}, 1, {ease:flixel.tweens.FlxEase.quadOut});
+		flixel.tweens.FlxTween.tween(cameraController.camPoint, {y: camGame.y + 200}, 1, {ease: flixel.tweens.FlxEase.quadOut});
 
 		new flixel.util.FlxTimer().start(1, (_) -> {
 			MusicBeatState.resetState();
@@ -240,9 +245,10 @@ class PlayState extends MusicBeatState {
 		persistentDraw = true;
 		paused = true;
 
-		RhythmCore.pause(gameAudio);/*
-		if (windowMod != null)
-			windowMod.pauseWindow();*/
+		RhythmCore.pause(gameAudio);
+		/*
+			if (windowMod != null)
+				windowMod.pauseWindow(); */
 
 		#if HSCRIPT_ALLOWED
 		script.call('onPauseMenu', []);
@@ -274,9 +280,10 @@ class PlayState extends MusicBeatState {
 	override public function closeSubState():Void {
 		super.closeSubState();
 		paused = false;
-		RhythmCore.resume(gameAudio);/*
-		if (windowMod != null)
-			windowMod.resumeWindow();*/
+		RhythmCore.resume(gameAudio);
+		/*
+			if (windowMod != null)
+				windowMod.resumeWindow(); */
 		gameAudio.resyncVocals();
 	}
 

@@ -75,6 +75,12 @@ class SaveData {
 		if (SaveData.data.uiKeys == null)
 			SaveData.data.uiKeys = [['LEFT','A'], ['UP','W'], ['DOWN','S'], ['RIGHT','D'], ['ENTER'], ['ESCAPE']];
 
+		if (SaveData.data.onMod == null)
+			SaveData.data.onMod = false;
+
+		if (SaveData.data.currentMod == null)
+			SaveData.data.currentMod = '';
+
 		flush();
 	}
 }

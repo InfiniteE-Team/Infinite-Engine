@@ -1,5 +1,6 @@
 package;
 
+import core.EngineData;
 import core.system.FPSCounter;
 import openfl.display.Sprite;
 // crash handler
