@@ -31,7 +31,7 @@ class PlayState extends MusicBeatState {
 	// Song
 	public var curSong:String = '4score';
 
-	public static var SONG:SongConfig = new SongConfig();
+	public static var SONG:SongConfig;
 
 	public var curDifficulty:Int = 0;
 
@@ -82,6 +82,7 @@ class PlayState extends MusicBeatState {
 
 		DiffsUtils.getDifficulty(curSong);
 
+		SONG = new SongConfig();
 		SONG.configSong(curSong, DiffsUtils.difficulties[curDifficulty]);
 
 		buildStageandChars();
@@ -245,6 +246,8 @@ class PlayState extends MusicBeatState {
 		persistentDraw = true;
 		paused = true;
 
+		FlxG.sound.pause();
+		gameAudio.pauseAll();
 		RhythmCore.pause(gameAudio);
 		/*
 			if (windowMod != null)

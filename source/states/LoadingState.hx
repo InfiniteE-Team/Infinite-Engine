@@ -59,16 +59,20 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function buildUI() {
-		_bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		_bg = new FlxSprite().loadGraphic(Paths.getPath('menus/installer/BG_installer', 'image'));
+		_bg.screenCenter();
+		_bg.antialiasing = SaveData.data.antialiasing;
+		_bg.scrollFactor.set(0, 0);
 		add(_bg);
 
 		_iconAnim = new FlxSprite(FlxG.width * 0.5 - 20, FlxG.height * 0.38);
 		_iconAnim.makeGraphic(40, 40, 0xFFFFFFFF);
 		_iconAnim.alpha = 0.15;
-		add(_iconAnim);
+		//add(_iconAnim);
 
 		_songLabel = new FlxText(0, FlxG.height * 0.45, FlxG.width, _curSong.toUpperCase());
-		_songLabel.setFormat(null, 28, FlxColor.WHITE, CENTER);
+		_songLabel.setFormat(Paths.getPath('Funkin.otf', 'font'), 28, FlxColor.WHITE, CENTER);
+		_songLabel.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 		_songLabel.alpha = 0.9;
 		add(_songLabel);
 
@@ -200,7 +204,7 @@ class LoadingState extends MusicBeatState {
 		if (_readyToGo)
 			return;
 		_readyToGo = true;
-		
+
 		MusicBeatState.switchState(() -> new PlayState(_curSong, _curDifficulty));
 	}
 
