@@ -1,6 +1,7 @@
 package;
 
 import states.LoadingState;
+import game.PlayStateConfig;
 import states.MusicBeatState;
 import game.objects.sprites.Icon;
 import flixel.tweens.FlxTween.FlxTweenType;
@@ -88,6 +89,8 @@ class FreeplayState extends ScriptState {
 			FlxG.camera.flash(0xFFFFFFFF, 0.4);
 
 			var songSelected:String = freeplayData.songData[curSelected].song;
+
+			PlayStateConfig.isStoryMode = false;
 
 			new FlxTimer().start(1, function() {
 				MusicBeatState.switchState(() -> new LoadingState(songSelected, 0));

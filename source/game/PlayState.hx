@@ -29,7 +29,7 @@ class PlayState extends MusicBeatState {
 	public var cameraController:CameraController;
 
 	// Song
-	public var curSong:String = '4score';
+	public var curSong:String = 'default';
 
 	public static var SONG:SongConfig;
 
@@ -88,9 +88,6 @@ class PlayState extends MusicBeatState {
 		buildStageandChars();
 
 		add(gameAudio);
-
-		FlxG.signals.focusLost.add(onFocusLost);
-		FlxG.signals.focusGained.add(onFocusGained);
 
 		controllerHUD = new HUDController();
 		controllerHUD.cameras = [camHUD];
@@ -220,16 +217,18 @@ class PlayState extends MusicBeatState {
 
 	public function endSong() {
 		#if HSCRIPT_ALLOWED
-		if (script.callCancellable('onEndSong', []))
+		if (script.callCancellable('onEndSongCancel', []))
 			return;
 		#end
 
 		// idk what to do here, maybe go to score screen or something? for now just reset the state
 		flixel.tweens.FlxTween.tween(cameraController.camPoint, {y: camGame.y + 200}, 1, {ease: flixel.tweens.FlxEase.quadOut});
 
-		new flixel.util.FlxTimer().start(1, (_) -> {
-			MusicBeatState.resetState();
-		});
+		#if HSCRIPT_ALLOWED
+		script.call('postEndSong', []);
+		#end
+
+		
 	}
 
 	// Other screens idk
@@ -245,6 +244,8 @@ class PlayState extends MusicBeatState {
 		persistentUpdate = false;
 		persistentDraw = true;
 		paused = true;
+
+		countDown.pause();
 
 		FlxG.sound.pause();
 		gameAudio.pauseAll();
@@ -291,18 +292,16 @@ class PlayState extends MusicBeatState {
 	}
 
 	override function onFocusLost():Void {
-		FlxG.sound.pause();
 		gameAudio.pauseAll();
 		#if HSCRIPT_ALLOWED
 		script.call('onFocusLost', []);
 		#end
 	}
 
-	function onFocusGained():Void {
+	override function onFocusGained():Void {
 		#if HSCRIPT_ALLOWED
 		script.call('onFocusGained', []);
 		#end
-		FlxG.sound.resume();
 		if (!paused) {
 			gameAudio.playAll();
 			gameAudio.resyncVocals();
@@ -437,9 +436,6 @@ class PlayState extends MusicBeatState {
 	}
 
 	override public function destroy() {
-		FlxG.signals.focusLost.remove(onFocusLost);
-		FlxG.signals.focusGained.remove(onFocusGained);
-
 		if (camGame != null)
 			camGame.destroy();
 		if (camHUD != null)
@@ -450,6 +446,9 @@ class PlayState extends MusicBeatState {
 			gameAudio.destroy();
 		if (chars != null)
 			chars.destroy();
+
+		if (countDown != null)
+			countDown.destroy();
 
 		if (modchartSystem != null) {
 			modchartSystem.destroy();

@@ -13,6 +13,7 @@ class Countdown extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSp
 	public var onComplete:Void->Void;
 
 	var timer:FlxTimer;
+	var activeTween:FlxTween;
 
 	// the countdown for playstate
 	public function new(x:Float = 0, y:Float = 0, curCountdown:String = 'default') {
@@ -51,9 +52,10 @@ class Countdown extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSp
 			sprite.screenCenter();
 			add(sprite);
 
-			FlxTween.tween(sprite, {alpha: 0}, core.rhythm.RhythmCore.crochet / 1000, {
+			activeTween = FlxTween.tween(sprite, {alpha: 0}, core.rhythm.RhythmCore.crochet / 1000, {
 				ease: flixel.tweens.FlxEase.cubeInOut,
 				onComplete: function(twn:FlxTween) {
+					activeTween = null;
 					sprite.destroy();
 				}
 			});
@@ -62,10 +64,32 @@ class Countdown extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSp
 		timer = new FlxTimer().start(core.rhythm.RhythmCore.crochet / 1000, function(_) onCountdown());
 	}
 
+	public function pause() {
+		if (timer != null && !timer.finished) {
+			timer.active = false;
+		}
+		if (activeTween != null && activeTween.active) {
+			activeTween.active = false;
+		}
+	}
+
+	public function resume() {
+		if (timer != null && !timer.finished) {
+			timer.active = true;
+		}
+		if (activeTween != null) {
+			activeTween.active = true;
+		}
+	}
+
 	override public function destroy() {
 		if (timer != null) {
 			timer.cancel();
 			timer = null;
+		}
+		if (activeTween != null) {
+			activeTween.cancel();
+			activeTween = null;
 		}
 		super.destroy();
 	}

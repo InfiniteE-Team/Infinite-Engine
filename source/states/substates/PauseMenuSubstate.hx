@@ -115,7 +115,7 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 	function resumeFunction() {
 		if (game.PlayState.instance != null) {
 			game.PlayState.instance.paused = false;
-			//game.PlayState.instance.windowMod.resumeWindow();
+			game.PlayState.instance.countDown.resume();
 		}
 		if (pauseMenuMusic != null) {
 			pauseMenuMusic.pause();

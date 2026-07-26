@@ -157,7 +157,7 @@ class NoteController {
 			if (isDownscroll)
 				strum.y += 500;
 
-			if (!playStateConfig.isStoryMode) {
+			if (!PlayStateConfig.isStoryMode) {
 				strum.alpha = 0;
 				FlxTween.tween(strum, {alpha: 1}, 0.5, {startDelay: 0.5 + (0.2 * i)});
 			}

@@ -20,7 +20,7 @@ class PlayStateConfig {
 
 	public var rating:String = "N/A";
 
-	public var isStoryMode:Bool = false;
+	public static var isStoryMode:Bool = false;
 
 	public var isBotplay:Bool = false;
 	

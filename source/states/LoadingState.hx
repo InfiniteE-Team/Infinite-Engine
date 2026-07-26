@@ -30,7 +30,6 @@ class LoadingState extends MusicBeatState {
 	var _barBg:FlxSprite;
 	var _label:FlxText;
 	var _songLabel:FlxText;
-	var _iconAnim:FlxSprite;
 
 	static inline var BAR_W:Int = 640;
 	static inline var BAR_H:Int = 10;
@@ -65,18 +64,13 @@ class LoadingState extends MusicBeatState {
 		_bg.scrollFactor.set(0, 0);
 		add(_bg);
 
-		_iconAnim = new FlxSprite(FlxG.width * 0.5 - 20, FlxG.height * 0.38);
-		_iconAnim.makeGraphic(40, 40, 0xFFFFFFFF);
-		_iconAnim.alpha = 0.15;
-		//add(_iconAnim);
-
-		_songLabel = new FlxText(0, FlxG.height * 0.45, FlxG.width, _curSong.toUpperCase());
+		_songLabel = new FlxText(0, FlxG.height * 0.85, FlxG.width, _curSong.toUpperCase());
 		_songLabel.setFormat(Paths.getPath('Funkin.otf', 'font'), 28, FlxColor.WHITE, CENTER);
 		_songLabel.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 		_songLabel.alpha = 0.9;
 		add(_songLabel);
 
-		_barBg = new FlxSprite((FlxG.width - BAR_W) / 2, FlxG.height * 0.56).makeGraphic(BAR_W, BAR_H, 0xFF333333);
+		_barBg = new FlxSprite((FlxG.width - BAR_W) / 2, FlxG.height * 0.9).makeGraphic(BAR_W, BAR_H, 0xFF333333);
 		add(_barBg);
 
 		_bar = new FlxBar(_barBg.x, _barBg.y, LEFT_TO_RIGHT, BAR_W, BAR_H, this, '_loaded', 0, 1);
@@ -186,18 +180,16 @@ class LoadingState extends MusicBeatState {
 	function onAllLoaded() {
 		_label.text = "¡Done!";
 
-		FlxTween.tween(_bg, {alpha: 0}, 0.35, {ease: FlxEase.quadIn});
-		FlxTween.tween(_songLabel, {alpha: 0}, 0.25);
-		FlxTween.tween(_bar, {alpha: 0}, 0.25);
-		FlxTween.tween(_barBg, {alpha: 0}, 0.25);
-		FlxTween.tween(_label, {alpha: 0}, 0.2);
-
-		FlxTween.tween(_iconAnim, {alpha: 0}, 0.35, {
+		FlxTween.tween(_bg, {alpha: 0}, 0.35, {
 			ease: FlxEase.quadIn,
 			onComplete: function(_) {
 				launchPlayState();
 			}
 		});
+		FlxTween.tween(_songLabel, {alpha: 0}, 0.25);
+		FlxTween.tween(_bar, {alpha: 0}, 0.25);
+		FlxTween.tween(_barBg, {alpha: 0}, 0.25);
+		FlxTween.tween(_label, {alpha: 0}, 0.2);
 	}
 
 	function launchPlayState() {
@@ -212,7 +204,15 @@ class LoadingState extends MusicBeatState {
 		super.update(elapsed);
 
 		var t = haxe.Timer.stamp();
-		_iconAnim.scale.set(1.0 + 0.06 * Math.sin(t * 3.0), 1.0 + 0.06 * Math.sin(t * 3.0));
-		_iconAnim.updateHitbox();
+	}
+
+	override public function destroy() {
+		super.destroy();
+
+		_bg = null;
+		_bar = null;
+		_barBg = null;
+		_label = null;
+		_songLabel = null;
 	}
 }
