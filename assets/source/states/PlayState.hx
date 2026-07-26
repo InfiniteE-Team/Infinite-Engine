@@ -8,6 +8,9 @@ function postCreate() {
 function onUpdate(elapsed) {
 	if (Controls.ACCEPT)
 		pauseMenu();
+
+    if (FlxG.keys.justPressed.R && !startCount)
+        isDeath();
 }
 
 function postEndSong() {

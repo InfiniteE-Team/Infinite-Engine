@@ -69,8 +69,14 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 	override public function update(elapsed:Float) {
 		super.update(elapsed);
 
+		if (PlayState.instance == null || PlayState.instance.playStateConfig == null)
+			return;
+
 		if (healthBar != null)
 			healthBar.argument = PlayState.instance.playStateConfig.health;
+
+		if (iconP1 == null && iconP2 == null)
+			return;
 
 		for (icon in [iconP1, iconP2]) {
 			if (icon.scale.x > 1.0) {
@@ -114,6 +120,8 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 	}
 
 	public function beatHit(beat:Float) {
+		if (iconP1 == null && iconP2 == null)
+			return;
 		for (icon in [iconP1, iconP2]) {
 			if (icon.bumpInBeats && Math.floor(beat % icon.stepTempo) == 0)
 				icon.scale.set(1.2, 1.2);

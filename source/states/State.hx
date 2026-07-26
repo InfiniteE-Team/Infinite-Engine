@@ -4,8 +4,8 @@ import cpp.vm.Gc;
 import core.rhythm.audio.Sound;
 
 class State extends flixel.FlxState {
-	private var tweenManager:flixel.tweens.FlxTween.FlxTweenManager = new flixel.tweens.FlxTween.FlxTweenManager();
-	private var timerManager:flixel.util.FlxTimer.FlxTimerManager = new flixel.util.FlxTimer.FlxTimerManager();
+	private var tweenManager:flixel.tweens.FlxTween.FlxTweenManager;
+	private var timerManager:flixel.util.FlxTimer.FlxTimerManager;
 
 	public function new() {
 		super();
@@ -13,8 +13,11 @@ class State extends flixel.FlxState {
 
 	override public function create() {
 		super.create();
-		FlxG.plugins.addPlugin(tweenManager);
-		FlxG.plugins.addPlugin(timerManager);
+		tweenManager = new flixel.tweens.FlxTween.FlxTweenManager();
+        timerManager = new flixel.util.FlxTimer.FlxTimerManager();
+
+		add(tweenManager);
+        add(timerManager);
 
 		FlxG.signals.focusLost.add(onFocusLost);
 		FlxG.signals.focusGained.add(onFocusGained);
@@ -58,13 +61,15 @@ class State extends flixel.FlxState {
 		FlxG.signals.focusGained.remove(onFocusGained);
 
 		if (tweenManager != null) {
-			FlxG.plugins.remove(tweenManager);
-			tweenManager = null;
-		}
-		if (timerManager != null) {
-			FlxG.plugins.remove(timerManager);
-			timerManager = null;
-		}
+            tweenManager.clear();
+            tweenManager.destroy();
+            tweenManager = null;
+        }
+        if (timerManager != null) {
+            timerManager.clear();
+            timerManager.destroy();
+            timerManager = null;
+        }
 
 		Sound.clearGlobalCache();
 	}

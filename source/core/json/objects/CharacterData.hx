@@ -26,7 +26,8 @@ typedef GameplayData = {
 typedef CharDeath = {
 	var character:String;
 	var sound:String;
-	var endAnim:String;
+	var music:String;
+	var endSound:String;
 }
 
 // render for chars

@@ -209,12 +209,6 @@ class FunkinSprite extends FlxAnimate {
 
 	public function activeOffsets(off:Point)
 		offset.set(0 - off.x, 0 - off.y);
-	
-	override public function destroy() {
-		super.destroy();
-		offsets = null;
-		_registeredAnims = null;
-	}
 
 	override public function draw():Void {
 		if (isAnimate && (timeline == null || timeline.layers == null || timeline.layers.length == 0))
@@ -223,4 +217,24 @@ class FunkinSprite extends FlxAnimate {
 	}
 
 	public function dance() {}
+
+	override public function destroy() {
+		if (anim != null) {
+			anim.pause();
+		}
+
+		if (isAnimate && (timeline == null || anim == null)) {
+			frames = null;
+		}
+
+		try {
+			super.destroy();
+		} catch (e:Dynamic) {
+			Trace.traceOnce('Warning: Destroy FunkinSprite: $e');
+		}
+
+		offsets = null;
+		_suffixes = null;
+		_registeredAnims = null;
+	}
 }

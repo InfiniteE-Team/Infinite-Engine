@@ -13,8 +13,9 @@
     ],
     "death": {
       "character": "bf-death",
-      "sound": "gameplay/gameover/fnf_loss_sfx",
-      "endAnim": "gameplay/gameOverEnd"
+      "sound": "default/fnf_loss_sfx",
+      "music": "default/gameOver",
+      "endSound": "default/gameOverEnd"
     },
     "idleAfterSing": true
   },

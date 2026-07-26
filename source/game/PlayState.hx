@@ -61,7 +61,7 @@ class PlayState extends MusicBeatState {
 
 	public var startTime:Float = 0;
 
-	public function new(curSong:String, ?curDifficulty:Int = 0) {
+	public function new(?curSong:String, ?curDifficulty:Int = 0) {
 		super();
 		this.curSong = curSong;
 		this.curDifficulty = curDifficulty;
@@ -181,6 +181,9 @@ class PlayState extends MusicBeatState {
 
 	// Code Song
 	public function loadSong() {
+		if (SONG == null || SONG.songData == null)
+			return;
+
 		gameAudio.loadSong(SONG, SONG.needVoices, endSong);
 
 		noteController.generateNotes(0, SONG);
@@ -227,8 +230,6 @@ class PlayState extends MusicBeatState {
 		#if HSCRIPT_ALLOWED
 		script.call('postEndSong', []);
 		#end
-
-		
 	}
 
 	// Other screens idk
@@ -276,7 +277,9 @@ class PlayState extends MusicBeatState {
 		paused = true;
 
 		FlxG.sound.music?.stop();
-		gameAudio.stopAll();
+		if (gameAudio != null)
+			gameAudio.stopAll();
+		RhythmCore.pause(gameAudio);
 
 		openSubState(new states.substates.GameOverSubstate());
 	}
@@ -371,37 +374,43 @@ class PlayState extends MusicBeatState {
 
 	override public function update(elapsed:Float) {
 		#if HSCRIPT_ALLOWED
-		script.call("onUpdate", [elapsed]);
+		if (script != null)
+			script.call("onUpdate", [elapsed]);
 		#end
 
-		if (gameAudio.inst != null)
+		if (gameAudio != null && gameAudio.inst != null)
 			RhythmCore.songPosition = gameAudio.inst.time;
 
-		gameAudio.volumenVocs(SONG, chars.isPlayerMissing(), elapsed);
+		if (gameAudio != null && chars != null && SONG != null)
+			gameAudio.volumenVocs(SONG, chars.isPlayerMissing(), elapsed);
 
 		if (!paused || !startCount) {
-			cameraController.update(elapsed);
+			if (cameraController != null)
+				cameraController.update(elapsed);
 
-			noteController.update(RhythmCore.songPosition);
+			if (noteController != null)
+				noteController.update(RhythmCore.songPosition);
 
-			if (playStateConfig.health <= 0)
+			if (playStateConfig != null && playStateConfig.health <= 0)
 				isDeath();
 
-			if (SONG.songData.gameplay.events != null) {
-				events.updateEvents(RhythmCore.songPosition);
+			if (SONG != null && SONG.songData != null && SONG.songData.gameplay != null && SONG.songData.gameplay.events != null) {
+				if (events != null)
+					events.updateEvents(RhythmCore.songPosition);
 			}
 
-			if (!osuMode || chars != null)
-				chars.isSinging(noteController);
+			if (chars != null) {
+				if (!osuMode)
+					chars.isSinging(noteController);
 
-			if (chars != null)
 				chars.processInput(noteController, gameAudio, playStateConfig);
 
-			if (!osuMode) {
-				if (!cameraController.existsCamEvents) {
-					var singing = chars.getActiveSingingChar();
-					if (singing != null)
-						cameraController.char = singing;
+				if (!osuMode && cameraController != null) {
+					if (!cameraController.existsCamEvents) {
+						var singing = chars.getActiveSingingChar();
+						if (singing != null)
+							cameraController.char = singing;
+					}
 				}
 			}
 		}
@@ -409,7 +418,8 @@ class PlayState extends MusicBeatState {
 		super.update(elapsed);
 
 		#if HSCRIPT_ALLOWED
-		script.call("postUpdate", [elapsed]);
+		if (script != null)
+			script.call("postUpdate", [elapsed]);
 		#end
 	}
 
