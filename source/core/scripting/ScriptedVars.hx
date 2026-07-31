@@ -18,6 +18,5 @@ class ScriptedVars {
 		script.expose('skipCountdown', game.countDown.skipCountdown);
 
 		script.expose('strumsByChar', game.noteController.strumsByChar);
-
 	}
 }

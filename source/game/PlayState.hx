@@ -211,6 +211,8 @@ class PlayState extends MusicBeatState {
 
 		if (!countDown.skipCountdown) {
 			countDown.onCountdown();
+			if (chars != null)
+				chars.danceAll();
 		} else {
 			RhythmCore.songPosition = 0;
 			countDown.onComplete();
@@ -320,7 +322,7 @@ class PlayState extends MusicBeatState {
 		#if HSCRIPT_ALLOWED
 		script.call('onFocusGained', []);
 		#end
-		if (!paused) {
+		if (!paused && !startCount) {
 			gameAudio.playAll();
 			gameAudio.resyncVocals();
 		}
