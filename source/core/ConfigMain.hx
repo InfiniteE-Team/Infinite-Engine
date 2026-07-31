@@ -19,9 +19,6 @@ class ConfigMain extends flixel.FlxState {
 	}
 
 	override public function create() {
-		FlxG.save.bind("InfiniteEngine", "InfiniteTeam");
-
-		SaveData.init();
 		SaveData.initSave();
 
 		controls = new Controls();

@@ -20,10 +20,14 @@ class PlayStateConfig {
 
 	public var rating:String = "N/A";
 
-	public static var isStoryMode:Bool = false;
+	public static var isPlaying:Bool = false;
 
 	public var isBotplay:Bool = false;
-	
+
+	// storymode
+	public static var isStoryMode:Bool = false;
+	public static var curWeek:Int = 0;
+
 	//
 
 	public function new() {}
@@ -35,7 +39,7 @@ class PlayStateConfig {
 		accuracy = 0.0;
 		rating = "N/A";
 		totalNotesHit = 0;
-        totalAccuracyWeight = 0.0;
+		totalAccuracyWeight = 0.0;
 		combo = 0;
 	}
 

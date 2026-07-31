@@ -1,7 +1,6 @@
 package core.assets;
 
 import flixel.math.FlxPoint;
-import animate.FlxAnimate;
 import animate.FlxAnimateFrames;
 import core.json.extensions.SpriteData.ObjectData;
 import core.json.extensions.SpriteData.AnimData;
@@ -10,7 +9,7 @@ import flixel.graphics.frames.FlxTileFrames;
 import flixel.graphics.frames.FlxAtlasFrames;
 import game.graphics.shaders.CustomShader;
 
-class FunkinSprite extends FlxAnimate {
+class FunkinSprite extends animate.FlxAnimate {
 	public var offsets:Map<String, Point> = new Map();
 
 	public static var cacheOffsets = new Map<String, Map<String, Int>>();

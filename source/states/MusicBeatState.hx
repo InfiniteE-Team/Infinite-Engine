@@ -10,6 +10,9 @@ import core.scripting.ScriptHandler;
 import game.controllers.InputController;
 
 class MusicBeatState extends State {
+	public static var skipNextTransIn:Bool = false;
+    public static var skipNextTransOut:Bool = false;
+
 	var tracker:TrackBeat = new TrackBeat();
 
 	#if HSCRIPT_ALLOWED
@@ -30,6 +33,16 @@ class MusicBeatState extends State {
 			infoHelp = new InfoHelpDebug(FlxG.width - 300, 0, 0);
 			add(infoHelp);
 		}
+
+		var isGlobalSkip = core.ConfigMain.globalData != null && core.ConfigMain.globalData.skipTrans == true;
+        var skipIn = skipNextTransIn || isGlobalSkip;
+
+		if (skipIn) {
+            skipNextTransIn = false;
+            return;
+        }
+
+		openSubState(new states.custom.CustomTransition(true, 0.45));
 	}
 
 	#if HSCRIPT_ALLOWED
@@ -69,7 +82,25 @@ class MusicBeatState extends State {
 	public static function switchState(state:() -> MusicBeatState):Void {
 		if (core.ConfigMain.globalData.developerMode)
 			JsonWatcher.updateSwitch();
-		FlxG.switchState(state);
+
+		var currentState = FlxG.state;
+
+		var isGlobalSkip = core.ConfigMain.globalData != null && core.ConfigMain.globalData.skipTrans == true;
+        var skipOut = skipNextTransOut || isGlobalSkip;
+
+		if (skipOut) {
+            skipNextTransOut = false;
+            FlxG.switchState(state);
+            return;
+        }
+
+        if (currentState != null) {
+            currentState.openSubState(new states.custom.CustomTransition(false, 0.45, function() {
+                FlxG.switchState(state);
+            }));
+        } else {
+            FlxG.switchState(state);
+        }
 	}
 
 	public function stepHit(step:Int) {

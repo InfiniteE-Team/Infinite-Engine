@@ -1,7 +1,7 @@
 package;
 
 import core.EngineData;
-import states.substates.OptionsMenuSubstate;
+import states.substates.menus.OptionsMenuSubstate;
 import flixel.text.FlxTextBorderStyle;
 
 class MainMenuState extends ScriptState {
@@ -62,26 +62,27 @@ class MainMenuState extends ScriptState {
 		var accept = Controls.ACCEPT;
 
 		if (downP)
-			change(-1);
-		if (upP)
 			change(1);
+		if (upP)
+			change(-1);
 
 		if (FlxG.keys.justPressed.TAB)
 			ScriptClass.openSubstate('ModsSubstate');
 
 		if (accept) {
-			acceptOption = true;
 			FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
-			FlxG.camera.flash(0xFFFFFFFF,0.4);
+			FlxG.camera.flash(0xFFFFFFFF, 0.4);
 			new FlxTimer().start(1, function() {
 				switch (menuOptions[curSelected]) {
 					case 'storymode':
+						acceptOption = true;
 						trace("In Story Mode");
 					case 'freeplay':
+						acceptOption = true;
 						ScriptClass.switchState('FreeplayState');
 					case 'credits':
+						acceptOption = true;
 						trace("In Credits");
-
 					case 'options':
 						openSubState(new OptionsMenuSubstate());
 				}

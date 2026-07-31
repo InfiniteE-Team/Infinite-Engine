@@ -32,17 +32,19 @@ typedef CharDataJson = {
 	// song
 	var ?vocals:String;
 
-	// strums song
-	var ?strumPos:Array<Float>;
-	var ?strumScale:Array<Float>;
-
 	// stages
 	var ?position:Array<Float>;
 	var ?camPos:Array<Float>;
 
-	var ?noteSkin:String;
+	// strums song
+	var strums:StrumsData;
+}
 
-	var ?strumsVisible:Bool;
+typedef StrumsData = {
+	var ?noteSkin:String;
+	var ?position:Array<Float>;
+	var ?scale:Array<Float>;
+	var ?visible:Bool;
 }
 
 typedef EventsData = {
@@ -86,8 +88,8 @@ class SongConfig {
 
 	public function configSong(curSong:String, diff:String) {
 		var osuPath:String = null;
-		var baseFile = 'songs/$curSong/charts/$curSong$diff';
-		for (lib in ['assets', 'engine']) {
+		var baseFile = 'songs/$curSong/charts/$diff';
+		for (lib in ['assets', 'mods']) {
 			var candidate = '$lib/$baseFile.osu';
 			if (sys.FileSystem.exists(candidate)) {
 				osuPath = candidate;
@@ -133,8 +135,8 @@ class SongConfig {
 		chars = songData.gameplay.chars;
 
 		for (i in 0...chars.length) {
-			noteSkin = chars[i].noteSkin ?? 'default';
-			strumsVisible = chars[i].strumsVisible ?? true;
+			noteSkin = chars[i].strums.noteSkin ?? 'default';
+			strumsVisible = chars[i].strums.visible ?? true;
 		}
 	}
 }

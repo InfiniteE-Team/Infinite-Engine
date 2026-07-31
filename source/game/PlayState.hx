@@ -70,6 +70,8 @@ class PlayState extends MusicBeatState {
 	override public function create() {
 		instance = this;
 
+		PlayStateConfig.isPlaying = true;
+
 		#if HSCRIPT_ALLOWED
 		startScript();
 		#end
@@ -98,6 +100,8 @@ class PlayState extends MusicBeatState {
 			windowMod = new WindowModManager();
 			add(windowMod); */
 
+		loadSong();
+
 		startCountdown();
 
 		super.create();
@@ -125,8 +129,6 @@ class PlayState extends MusicBeatState {
 		#end
 
 		stage = new Stage(SONG.stage);
-		stage.cameras = [camGame];
-
 		cameraController.defaultZoom = stage.defaultZoom;
 		if (!osuMode)
 			add(stage);
@@ -185,6 +187,8 @@ class PlayState extends MusicBeatState {
 			return;
 
 		gameAudio.loadSong(SONG, SONG.needVoices, endSong);
+		gameAudio.pauseAll();
+		RhythmCore.pause(gameAudio);
 
 		noteController.generateNotes(0, SONG);
 
@@ -194,26 +198,30 @@ class PlayState extends MusicBeatState {
 
 	public function startCountdown() {
 		startCount = true;
+		var crochet:Float = (60 / SONG.bpmSong) * 1000;
+		RhythmCore.songPosition = -crochet * 4;
 
 		countDown = new Countdown(0, 0, SONG.countdown);
 		countDown.cameras = [camHUD];
 		add(countDown);
 
 		countDown.onComplete = function() {
-			loadSong();
 			initSong();
 		}
 
-		if (!countDown.skipCountdown)
+		if (!countDown.skipCountdown) {
 			countDown.onCountdown();
-		else
+		} else {
+			RhythmCore.songPosition = 0;
 			countDown.onComplete();
+		}
 	}
 
 	public function initSong() {
 		startCount = false;
 
 		gameAudio.playAll();
+		RhythmCore.resume(gameAudio);
 
 		tracker.reset();
 	}
@@ -223,6 +231,13 @@ class PlayState extends MusicBeatState {
 		if (script.callCancellable('onEndSongCancel', []))
 			return;
 		#end
+
+		if (!PlayStateConfig.isStoryMode)
+			core.config.SaveScore.saveSong(curSong, playStateConfig.score, curDifficulty);
+		else {
+			// WIP
+			core.config.SaveScore.saveWeek(curSong, playStateConfig.score, curDifficulty);
+		}
 
 		// idk what to do here, maybe go to score screen or something? for now just reset the state
 		flixel.tweens.FlxTween.tween(cameraController.camPoint, {y: camGame.y + 200}, 1, {ease: flixel.tweens.FlxEase.quadOut});
@@ -259,7 +274,7 @@ class PlayState extends MusicBeatState {
 		script.call('onPauseMenu', []);
 		#end
 
-		openSubState(new states.substates.PauseMenuSubstate());
+		openSubState(new states.substates.menus.PauseMenuSubstate());
 
 		#if HSCRIPT_ALLOWED
 		script.call('postPauseMenu', []);
@@ -378,13 +393,20 @@ class PlayState extends MusicBeatState {
 			script.call("onUpdate", [elapsed]);
 		#end
 
-		if (gameAudio != null && gameAudio.inst != null)
-			RhythmCore.songPosition = gameAudio.inst.time;
+		if (startCount && !paused) {
+			RhythmCore.songPosition += elapsed * 1000;
+		} else if (gameAudio != null && gameAudio.inst != null) {
+			if (gameAudio.inst.playing && gameAudio.inst.time > 0) {
+				RhythmCore.songPosition = gameAudio.inst.time;
+			} else if (!paused) {
+				RhythmCore.songPosition += elapsed * 1000;
+			}
+		}
 
 		if (gameAudio != null && chars != null && SONG != null)
 			gameAudio.volumenVocs(SONG, chars.isPlayerMissing(), elapsed);
 
-		if (!paused || !startCount) {
+		if (!paused) {
 			if (cameraController != null)
 				cameraController.update(elapsed);
 
@@ -446,6 +468,8 @@ class PlayState extends MusicBeatState {
 	}
 
 	override public function destroy() {
+		PlayStateConfig.isPlaying = false;
+
 		if (camGame != null)
 			camGame.destroy();
 		if (camHUD != null)

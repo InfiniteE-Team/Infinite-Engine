@@ -17,13 +17,15 @@ class ScriptGlobals {
 		roots['FlxSprite'] = flixel.FlxSprite;
 		roots['FlxText'] = flixel.text.FlxText;
 		roots['FlxSound'] = flixel.sound.FlxSound;
-		roots['FlxCamera'] = flixel.FlxCamera;
+		roots['Camera'] = game.objects.Camera;
 		roots['FlxTween'] = flixel.tweens.FlxTween;
 		roots['FlxTimer'] = flixel.util.FlxTimer;
 		roots['FlxEase'] = flixel.tweens.FlxEase;
 		roots['FlxMath'] = flixel.math.FlxMath;
 
 		// Engine
+		roots['GlobalConfig'] = core.json.engine.GlobalData.GlobalConfig;
+
 		roots['Bar'] = game.objects.Bar;
 		roots['PlayState'] = game.PlayState;
 		roots['MenuState'] = states.MenuState;
@@ -35,6 +37,8 @@ class ScriptGlobals {
 		roots['RhythmCore'] = core.rhythm.RhythmCore;
 		roots['ScriptHandler'] = core.scripting.ScriptHandler;
 		roots['Controls'] = core.config.Controls;
+
+		roots['MusicBeatState'] = states.MusicBeatState;
 
 		// Sound
 		roots['Sound'] = core.rhythm.audio.Sound;
@@ -54,6 +58,7 @@ class ScriptGlobals {
 
 		// Save Content Game
 		roots['SaveScore'] = core.config.SaveScore;
+		roots['OptionType'] = core.enums.OptionType;
 		roots['SaveData'] = core.config.SaveData;
 
 		// Utils
@@ -104,7 +109,7 @@ class ScriptGlobals {
 			"FlxSprite" => flixel.FlxSprite,
 			"FlxText" => flixel.text.FlxText,
 			"FlxSound" => flixel.sound.FlxSound,
-			"FlxCamera" => flixel.FlxCamera,
+			"Camera" => game.objects.Camera,
 			"FlxTween" => flixel.tweens.FlxTween,
 			"FlxTimer" => flixel.util.FlxTimer,
 			"FlxEase" => flixel.tweens.FlxEase,

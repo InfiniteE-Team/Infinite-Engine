@@ -36,6 +36,7 @@
                 "flipX": false,
                 "flipY": false,
                 "antialiasing": true,
+                "firstAnim": "firstDeath",
                 "anims": [
                     {
                         "name": "firstDeath",

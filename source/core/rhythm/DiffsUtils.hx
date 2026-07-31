@@ -7,7 +7,7 @@ class DiffsUtils {
 
 	public static var diffCurrent:String = '';
 
-	public static var defaultOrder:Array<String> = ["easy", "", "normal", "hard", "erect"];
+	public static var defaultOrder:Array<String> = ["easy", "normal", "hard", "erect"];
 
 	public function new() {}
 
@@ -18,19 +18,9 @@ class DiffsUtils {
 		if (FileSystem.exists(diffsDir)) {
 			for (file in sys.FileSystem.readDirectory(diffsDir)) {
 				var diffName = file.replace('.json', '').replace('.osu', '');
-
-				if (diffName.startsWith(curSong + '-'))
-					diffName = diffName.replace('$curSong-', '');
-				else if (diffName == curSong)
-					diffName = '';
-
 				if (!difficulties.contains(diffName))
 					difficulties.push(diffName);
 			}
-		}
-
-		if (difficulties.length == 0) {
-			difficulties.push(""); // normal diff
 		}
 
 		difficulties.sort(function(a:String, b:String):Int {

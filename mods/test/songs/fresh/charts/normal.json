@@ -11,29 +11,35 @@
                 "id": "gf",
                 "name": "gf",
                 "role": "gf",
-                "strumsVisible": false,
-                "strumPos": [
-                    50,
-                    0
-                ]
+                "strums": {
+                    "position": [
+                        50,
+                        0
+                    ],
+                    "visible": false
+                }
             },
             {
                 "id": "bf",
                 "name": "bf",
                 "role": "player",
-                "strumPos": [
-                    720,
-                    0
-                ]
+                "strums": {
+                    "position": [
+                        720,
+                        0
+                    ]
+                }
             },
             {
                 "id": "dad",
                 "name": "dad",
                 "role": "opponent",
-                "strumPos": [
-                    50,
-                    0
-                ]
+                "strums": {
+                    "position": [
+                        50,
+                        0
+                    ]
+                }
             }
         ],
         "events": [

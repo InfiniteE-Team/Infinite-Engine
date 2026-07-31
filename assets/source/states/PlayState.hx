@@ -14,7 +14,7 @@ function onUpdate(elapsed) {
 }
 
 function postEndSong() {
-	new FlxTimer().start(1, (_) -> {
+	new FlxTimer().start(2, (_) -> {
 		if (!PlayStateConfig.isStoryMode)
 			ScriptClass.switchState('FreeplayState');
 	});

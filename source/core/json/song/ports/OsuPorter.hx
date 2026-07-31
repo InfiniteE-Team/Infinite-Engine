@@ -104,20 +104,26 @@ class OsuPorter implements FormatChartConverter {
 				id: OPPONENT_CHAR,
 				name: OPPONENT_CHAR,
 				role: 'opponent',
-				strumPos: [50, 0]
+				strums: {
+					position: [50, 0]
+				}
 			},
 			{
 				id: PLAYER_CHAR,
 				name: PLAYER_CHAR,
 				role: 'player',
-				strumPos: [720, 0]
+				strums: {
+					position: [720, 0]
+				} 
 			}
 		] : [
 			{
 				id: PLAYER_CHAR,
 				name: PLAYER_CHAR,
 				role: 'player',
-				strumPos: [720, 0]
+				strums: {
+					position: [720, 0]
+				}
 			}
 			];
 

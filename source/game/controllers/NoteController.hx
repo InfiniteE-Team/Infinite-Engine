@@ -29,7 +29,6 @@ class NoteController {
 	public var splashesSkinData:NoteSkinData;
 
 	public var noteSkin:String = 'default';
-
 	public var noteType:String = 'normal';
 
 	public var strums:FlxTypedGroup<StrumNote> = new FlxTypedGroup<StrumNote>();
@@ -37,14 +36,13 @@ class NoteController {
 	public var sustains:FlxTypedGroup<NoteSustain> = new FlxTypedGroup<NoteSustain>();
 	public var splashes:FlxTypedGroup<NoteSplash> = new FlxTypedGroup<NoteSplash>();
 
+	public var strumsByChar:Map<String, FlxTypedGroup<StrumNote>> = new Map();
+
 	var _notePool:Map<String, Array<Note>> = new Map();
-
 	var _sustainPool:Map<String, Array<NoteSustain>> = new Map();
-
 	var _splashPool:Map<String, Array<NoteSplash>> = new Map();
 
 	public var unspawnNotes:Array<Note> = [];
-
 	public var charStrumOffsets:Map<String, Int> = new Map();
 
 	var daSong:SongConfig = new SongConfig();
@@ -53,7 +51,6 @@ class NoteController {
 	public var keys:Int = 4;
 
 	var spacing:Float = 0;
-
 	var input:InputController = new InputController();
 
 	// sustains limit clipping rect
@@ -66,17 +63,19 @@ class NoteController {
 
 	// configs
 	public var isDownscroll:Bool = false;
-
 	public var ratingData:RatingData;
-
 	public var worstWindow:Float = 166.0;
+
+	// CACHED DATA FOR OPTIMIZATION
+	var _cachedRatings:Array<Dynamic> = [];
+	var _cachedMissHealth:Float = -0.04;
+	var _cachedMissScore:Int = -10;
 
 	#if HSCRIPT_ALLOWED
 	var scriptNC:ScriptHandler;
 	#end
 
 	public var playStateConfig:PlayStateConfig;
-
 	public var gameAudio:core.rhythm.audio.GameAudio;
 
 	public function new(daSong:SongConfig, isDownscroll:Bool, isGhostTapping:Bool, script:ScriptHandler, playStateConfig:PlayStateConfig,
@@ -86,6 +85,7 @@ class NoteController {
 		input.isGhostTapping = isGhostTapping;
 		this.playStateConfig = playStateConfig;
 		this.gameAudio = gameAudio;
+
 		loadJson();
 
 		#if HSCRIPT_ALLOWED
@@ -96,14 +96,12 @@ class NoteController {
 		for (i in 0...daSong.chars.length) {
 			charStrumOffsets.set(daSong.chars[i].id, strums.length);
 
-			var strumPos = daSong.chars[i].strumPos;
-			loadGenerateStrums(strumPos != null ? strumPos[0] : 0, strumPos != null ? strumPos[1] : 0);
+			var strumPos = daSong.chars[i].strums.position;
+			var isPlayer = CharacterController.namesPlayer.contains(daSong.chars[i].role);
+			loadGenerateStrums(strumPos != null ? strumPos[0] : 0, strumPos != null ? strumPos[1] : 0, daSong.chars[i].id, isPlayer);
 		}
 
-		strums.visible = daSong.strumsVisible;
-		notes.visible = daSong.strumsVisible;
-		sustains.visible = daSong.strumsVisible;
-		splashes.visible = daSong.strumsVisible;
+		strums.visible = notes.visible = sustains.visible = splashes.visible = daSong.strumsVisible;
 
 		Trace.traceOnce("Created Strums");
 	}
@@ -121,13 +119,31 @@ class NoteController {
 
 		var ratingPath = Paths.getPath('data/ratings', 'json');
 		ratingData = FormatJson.readJson(ratingPath);
-		if (ratingData == null || ratingData.ratings == null)
+
+		if (ratingData == null || ratingData.ratings == null) {
 			trace("WARNING: ratings.json not found or invalid");
-		else {
+		} else {
 			var best = 0.0;
-			for (r in ratingData.ratings)
-				if (r.window != null && r.window > best)
-					best = r.window;
+			_cachedRatings = []; // Reset cached ratings
+
+			for (rating in ratingData.ratings) {
+				// Cache best window
+				if (rating.window != null && rating.window > best)
+					best = rating.window;
+
+				// Cache hit windows array directly for fast checks
+				if (rating.window != null) {
+					_cachedRatings.push(rating);
+				}
+				// Cache misses stats once to avoid Lambda searches on every miss
+				else if (rating.miss == true) {
+					_cachedMissHealth = rating.health;
+					_cachedMissScore = rating.score;
+				}
+			}
+
+			// Sort cached hit ratings once at startup, instead of during gameplay
+			_cachedRatings.sort((a, b) -> (a.window < b.window) ? -1 : (a.window > b.window ? 1 : 0));
 			worstWindow = best > 0 ? best : 166.0;
 		}
 
@@ -137,16 +153,18 @@ class NoteController {
 		targetScrollSpeed = scrollSpeed;
 
 		// splashes
-
 		var splashesDataPath:String = 'noteskins/$noteSkin/splashes';
 		splashesSkinData = FormatJson.readJson(Paths.getPath('data/$splashesDataPath', "json"));
-
-		// hold splashes
 
 		Trace.traceOnce("Note Skin JSON loaded");
 	}
 
-	public function loadGenerateStrums(x:Float, y:Float) {
+	public function loadGenerateStrums(x:Float, y:Float, charId:String, isPlayer:Bool) {
+		if (!strumsByChar.exists(charId)) {
+			strumsByChar.set(charId, new FlxTypedGroup<StrumNote>());
+		}
+		var charGroup = strumsByChar.get(charId);
+
 		for (i in 0...keys) {
 			#if HSCRIPT_ALLOWED
 			scriptNC.call("onBuildStrums", []);
@@ -157,9 +175,17 @@ class NoteController {
 			if (isDownscroll)
 				strum.y += 500;
 
+			if (SaveData.data.middlescroll) {
+				if (isPlayer)
+					strum.x = ((FlxG.width - ((keys * 112) + ((keys - 1) * spacing))) / 2) + i * (112 + spacing);
+				else
+					strum.visible = false;
+			}
+
 			if (!PlayStateConfig.isStoryMode) {
 				strum.alpha = 0;
-				FlxTween.tween(strum, {alpha: 1}, 0.5, {startDelay: 0.5 + (0.2 * i)});
+				strum.y -= 10;
+				FlxTween.tween(strum, {alpha: 1, y: strum.y + 10}, 0.5, {startDelay: 0.5 + (0.2 * i)});
 			}
 
 			#if HSCRIPT_ALLOWED
@@ -167,6 +193,7 @@ class NoteController {
 			#end
 
 			strums.add(strum);
+			charGroup.add(strum);
 
 			#if HSCRIPT_ALLOWED
 			scriptNC.call("postBuildStrums", []);
@@ -185,24 +212,26 @@ class NoteController {
 		scriptNC.call("onGenerateNotes", []);
 		#end
 
+		// FAST LOOKUP: Create a map of characters to avoid Lambda.find in the main loop
+		var charMap:Map<String, Dynamic> = new Map();
+		for (c in daSong.chars) {
+			charMap.set(c.id, c);
+		}
+
 		for (data in daSong.songData.notes) {
-			// char info
-			var charData = Lambda.find(daSong.chars, c -> c.id == data.char);
+			var charData = charMap.get(data.char);
 			if (charData == null)
 				continue;
 
-			// offsets for strums or notes for strums group
 			var offset = charStrumOffsets.get(charData.id);
 			if (offset == null)
 				continue;
 
-			// global Lane for strums groups
 			var globalLane = offset + data.lane;
 			var strum = strums.members[globalLane];
 			if (strum == null)
 				continue;
 
-			// param for Note positions in strum groups
 			var skinForChar = charData.noteSkin ?? noteSkin;
 			var pool = _notePool.get(skinForChar);
 
@@ -223,9 +252,7 @@ class NoteController {
 				note.visible = false;
 
 			note.strum = strum;
-
 			note.noteControl = this;
-
 			note.noteType = data.type;
 
 			#if HSCRIPT_ALLOWED
@@ -233,14 +260,12 @@ class NoteController {
 			#end
 
 			if (data.length > 0) {
-				var skinForChar = charData.noteSkin ?? noteSkin;
-				var pool = _sustainPool.get(skinForChar);
-
+				var sustainPool = _sustainPool.get(skinForChar);
 				var totalLength:Float = data.length;
 
 				var sustain:NoteSustain;
-				if (pool != null && pool.length > 0) {
-					sustain = pool.pop();
+				if (sustainPool != null && sustainPool.length > 0) {
+					sustain = sustainPool.pop();
 					sustain.revive();
 					sustain.reinitSustain(data.time, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, totalLength, data.type, false);
 				} else {
@@ -250,7 +275,7 @@ class NoteController {
 				sustain.ID = globalLane;
 				sustain.direction = globalLane;
 				sustain.strumTime = data.time;
-				sustain.mustPress = CharacterController.namesPlayer.contains(charData.role);
+				sustain.mustPress = note.mustPress;
 				sustain.noteControl = this;
 				sustain.strum = strum;
 				sustain.noteType = data.type;
@@ -260,8 +285,8 @@ class NoteController {
 					sustain.visible = false;
 
 				sustain.origin.y = 0;
-				var scaledHeight = (totalLength * 0.45 * scrollSpeed);
-				sustain.scale.y = scaledHeight / sustain.frameHeight;
+				// Just for initial scale, we will recalculate on update anyway
+				sustain.scale.y = (totalLength * 0.45 * scrollSpeed) / sustain.frameHeight;
 
 				#if HSCRIPT_ALLOWED
 				scriptNC.call("onGenerateSustain", []);
@@ -269,38 +294,35 @@ class NoteController {
 
 				unspawnNotes.push(sustain);
 
-				// end
-				if (sustain != null) {
-					var sustainEnd:NoteSustain;
-					if (pool != null && pool.length > 0) {
-						sustainEnd = pool.pop();
-						sustainEnd.revive();
-						sustainEnd.reinitSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, 0, data.type, true);
-					} else {
-						sustainEnd = new NoteSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, 0, data.type, true);
-					}
-
-					sustainEnd.ID = globalLane;
-					sustainEnd.direction = globalLane;
-					sustainEnd.strumTime = data.time + data.length;
-					sustainEnd.mustPress = CharacterController.namesPlayer.contains(Reflect.field(charData, 'role'));
-					sustainEnd.noteControl = this;
-					sustainEnd.strum = strum;
-					sustainEnd.parentNote = sustain;
-					sustainEnd.noteType = data.type;
-					if (isDownscroll)
-						sustainEnd.flipY = true;
-					if (!daSong.strumsVisible)
-						sustainEnd.visible = false;
-
-					sustainEnd.origin.y = 0;
-
-					#if HSCRIPT_ALLOWED
-					scriptNC.call("onGenerateEndSustain", []);
-					#end
-
-					unspawnNotes.push(sustainEnd);
+				// end sustain
+				var sustainEnd:NoteSustain;
+				if (sustainPool != null && sustainPool.length > 0) {
+					sustainEnd = sustainPool.pop();
+					sustainEnd.revive();
+					sustainEnd.reinitSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, 0, data.type, true);
+				} else {
+					sustainEnd = new NoteSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, 0, data.type, true);
 				}
+
+				sustainEnd.ID = globalLane;
+				sustainEnd.direction = globalLane;
+				sustainEnd.strumTime = data.time + data.length;
+				sustainEnd.mustPress = note.mustPress;
+				sustainEnd.noteControl = this;
+				sustainEnd.strum = strum;
+				sustainEnd.parentNote = sustain;
+				sustainEnd.noteType = data.type;
+				if (isDownscroll)
+					sustainEnd.flipY = true;
+				if (!daSong.strumsVisible)
+					sustainEnd.visible = false;
+				sustainEnd.origin.y = 0;
+
+				#if HSCRIPT_ALLOWED
+				scriptNC.call("onGenerateEndSustain", []);
+				#end
+
+				unspawnNotes.push(sustainEnd);
 			}
 			unspawnNotes.push(note);
 		}
@@ -354,23 +376,28 @@ class NoteController {
 
 		while (unspawnNotes.length > 0) {
 			var note = unspawnNotes[0];
-
+			var isSustain = (note is NoteSustain);
 			var spawnTime = note.strumTime;
-			if (Std.isOfType(note, NoteSustain) && cast(note, NoteSustain).isSustainEnd && cast(note, NoteSustain).parentNote != null) {
+
+			if (isSustain && cast(note, NoteSustain).isSustainEnd && cast(note, NoteSustain).parentNote != null) {
 				spawnTime = cast(note, NoteSustain).parentNote.strumTime;
 			}
 
 			if (spawnTime - songTime < 2000) {
-				if (Std.isOfType(note, NoteSustain))
+				note.visible = daSong.strumsVisible && note.strum.visible;
+				if (isSustain)
 					sustains.add(cast note);
 				else
 					notes.add(note);
 				unspawnNotes.shift();
-			} else
+			} else {
 				break;
+			}
 		}
 
 		toDestroy.resize(0);
+
+		var scrollMult = 0.45 * scrollSpeed;
 
 		for (note in notes.members) {
 			if (note == null)
@@ -382,10 +409,12 @@ class NoteController {
 			#end
 
 			note.x = note.strum.x;
-			note.y = isDownscroll ? note.strum.y - ((note.strumTime - songTime) * (0.45 * scrollSpeed)) : note.strum.y
-				+ ((note.strumTime - songTime) * (0.45 * scrollSpeed));
+			var timeDiff = note.strumTime - songTime;
 
-			// note.alpha = 0.3;
+			if (isDownscroll)
+				note.y = note.strum.y - (timeDiff * scrollMult);
+			else
+				note.y = note.strum.y + (timeDiff * scrollMult);
 
 			#if HSCRIPT_ALLOWED
 			scriptNC.call("onNoteMovement", [note, songTime]);
@@ -397,17 +426,18 @@ class NoteController {
 				input.onMiss(playStateConfig, this, gameAudio);
 			}
 
-			if (!note.mustPress && note.wasGoodHit && !note.alive)
+			if (!note.mustPress && note.wasGoodHit && !note.alive) {
 				toDestroy.push(note);
+			}
 
-			if (note.y + note.frameHeight * note.scale.y < 0 && !isDownscroll) {
+			if (!isDownscroll && note.y + note.frameHeight * note.scale.y < 0) {
 				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
 					note.wasMissed = true;
 					note.alpha = 0.4;
 					input.onMiss(playStateConfig, this, gameAudio);
 				}
 				toDestroy.push(note);
-			} else if (note.y > FlxG.height && isDownscroll) {
+			} else if (isDownscroll && note.y > flixel.FlxG.height) {
 				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
 					note.wasMissed = true;
 					note.alpha = 0.4;
@@ -418,41 +448,77 @@ class NoteController {
 		}
 
 		for (sustain in sustains.members) {
-			if (sustain == null || sustain.isSustainEnd)
+			if (sustain == null)
 				continue;
+			var isEnd = sustain.isSustainEnd;
 
+			// HANDLE SUSTAIN ENDS
+			if (isEnd) {
+				#if HSCRIPT_ALLOWED
+				if (scriptNC.callCancellable('onEndSustainMovementCancel', []))
+					continue;
+				#end
+
+				var body = sustain.parentNote;
+				if (body == null || toDestroy.contains(body)) {
+					toDestroy.push(sustain);
+					continue;
+				}
+
+				sustain.x = body.x;
+				sustain.origin.y = 0;
+
+				var endHeight = sustain.frameHeight * sustain.scale.y;
+				if (isDownscroll) {
+					sustain.flipY = true;
+					sustain.y = body.y - endHeight;
+				} else {
+					sustain.flipY = false;
+					sustain.y = body.y + (body.frameHeight * body.scale.y);
+				}
+
+				var strumMidScreen = sustain.strum.y + (sustain.strum.frameHeight * 0.5) - sustain.strum.offset.y;
+				if (isDownscroll) {
+					sustain.alpha = (sustain.y >= strumMidScreen) ? 0 : 1;
+				} else {
+					sustain.alpha = ((sustain.y + endHeight) <= strumMidScreen) ? 0 : 1;
+				}
+
+				#if HSCRIPT_ALLOWED
+				scriptNC.call("onEndSustainMovement", [songTime]);
+				#end
+				continue;
+			}
+
+			// HANDLE NORMAL SUSTAINS (BODIES)
 			#if HSCRIPT_ALLOWED
 			if (scriptNC.callCancellable('onSustainMovementCancel', []))
 				continue;
 			#end
 
-			final strumCenterX = sustain.strum.x - sustain.strum.offset.x + sustain.strum.frameWidth * sustain.strum.scale.x * 0.5;
+			var strumCenterX = sustain.strum.x - sustain.strum.offset.x + sustain.strum.frameWidth * sustain.strum.scale.x * 0.5;
 			sustain.x = strumCenterX - sustain.frameWidth * sustain.scale.x * 0.5;
 
 			var scaledHeight:Float;
-			final strumMid = sustain.strum.y + (sustain.strum.frameHeight * 0.5) - (sustain.strum.offset.y * 1.45);
+			var strumMid = sustain.strum.y + (sustain.strum.frameHeight * 0.5) - (sustain.strum.offset.y * 1.45);
 
 			if (sustain.isHeld && sustain.strumTime <= songTime) {
 				var remaining = Math.max(0, (sustain.strumTime + sustain.length) - songTime);
-				scaledHeight = (remaining * 0.45 * scrollSpeed);
+				scaledHeight = remaining * scrollMult;
 				sustain.scale.y = scaledHeight / sustain.frameHeight;
-				if (isDownscroll) {
-					sustain.y = strumMid - scaledHeight;
-				} else {
-					sustain.y = strumMid;
-				}
+
+				sustain.y = isDownscroll ? (strumMid - scaledHeight) : strumMid;
 			} else {
-				scaledHeight = (sustain.length * 0.45 * scrollSpeed);
+				scaledHeight = sustain.length * scrollMult;
 				sustain.scale.y = scaledHeight / sustain.frameHeight;
-				var strumY = isDownscroll ? sustain.strum.y - ((sustain.strumTime - songTime) * (0.45 * scrollSpeed)) : sustain.strum.y
-					+ ((sustain.strumTime - songTime) * (0.45 * scrollSpeed));
+
+				var timeDiff = sustain.strumTime - songTime;
+				var strumY = isDownscroll ? (sustain.strum.y - (timeDiff * scrollMult)) : (sustain.strum.y + (timeDiff * scrollMult));
 				var targetY = strumY + sustain.strum.frameHeight * 0.5;
-				if (isDownscroll) {
-					sustain.y = targetY - scaledHeight;
-				} else {
-					sustain.y = targetY;
-				}
+
+				sustain.y = isDownscroll ? (targetY - scaledHeight) : targetY;
 			}
+
 			sustain.offset.y = 0;
 			sustain.clipRect = null;
 
@@ -462,64 +528,15 @@ class NoteController {
 
 			if (sustain.strumTime + sustain.length < songTime)
 				toDestroy.push(sustain);
-			else if (sustain.y + scaledHeight < 0 && !isDownscroll)
+			else if (!isDownscroll && sustain.y + scaledHeight < 0)
 				toDestroy.push(sustain);
-			else if (sustain.y - sustain.offset.y > FlxG.height && isDownscroll)
+			else if (isDownscroll && sustain.y - sustain.offset.y > flixel.FlxG.height)
 				toDestroy.push(sustain);
 		}
 
-		// ends
-		for (sustain in sustains.members) {
-			if (sustain == null || !sustain.isSustainEnd)
-				continue;
-
-			#if HSCRIPT_ALLOWED
-			if (scriptNC.callCancellable('onEndSustainMovementCancel', []))
-				continue;
-			#end
-
-			var body = sustain.parentNote;
-
-			if (body == null || toDestroy.contains(body)) {
-				toDestroy.push(sustain);
-				continue;
-			}
-			sustain.x = body.x;
-			sustain.origin.y = 0;
-			var bodyScaledHeight = body.frameHeight * body.scale.y;
-			var endHeight = sustain.frameHeight * sustain.scale.y;
-			if (isDownscroll) {
-				sustain.flipY = true;
-				sustain.y = body.y - endHeight;
-			} else {
-				sustain.flipY = false;
-				sustain.y = body.y + bodyScaledHeight;
-			}
-
-			var strumMidScreen = sustain.strum.y + (sustain.strum.frameHeight * 0.5) - sustain.strum.offset.y;
-
-			if (isDownscroll) {
-				sustain.alpha = (sustain.y >= strumMidScreen) ? 0 : 1;
-			} else {
-				sustain.alpha = ((sustain.y + endHeight) <= strumMidScreen) ? 0 : 1;
-			}
-
-			#if HSCRIPT_ALLOWED
-			scriptNC.call("onEndSustainMovement", [songTime]);
-			#end
+		for (note in toDestroy) {
+			destroyNotes(note);
 		}
-
-		for (note in toDestroy)
-			if (!(note is NoteSustain))
-				destroyNotes(note);
-		// body sustains
-		for (note in toDestroy)
-			if ((note is NoteSustain) && !cast(note, NoteSustain).isSustainEnd)
-				destroyNotes(note);
-		// ends sustains
-		for (note in toDestroy)
-			if ((note is NoteSustain) && cast(note, NoteSustain).isSustainEnd)
-				destroyNotes(note);
 
 		#if HSCRIPT_ALLOWED
 		scriptNC.call("postNoteUpdate", [songTime]);
@@ -532,7 +549,7 @@ class NoteController {
 			return;
 		#end
 
-		if (Std.isOfType(note, NoteSustain)) {
+		if ((note is NoteSustain)) {
 			sustains.remove(cast note, true);
 			note.kill();
 			if (!_sustainPool.exists(note.noteSkin))
@@ -576,33 +593,23 @@ class NoteController {
 	}
 
 	public function getHealthDrain(note:Note):Float {
-		if (ratingData == null)
-			return -0.04;
-
 		#if HSCRIPT_ALLOWED
 		if (scriptNC.callCancellable('onHealthDrainCancel', []))
 			return 0.0;
 		#end
-
-		var missRating = ratingData.ratings.find(r -> r.miss == true && r.window == null);
-		return missRating != null ? missRating.health : -0.04;
+		return _cachedMissHealth;
 	}
 
 	public function getMissScore():Int {
-		if (ratingData == null)
-			return -10;
-
 		#if HSCRIPT_ALLOWED
 		if (scriptNC.callCancellable('onMissScoreCancel', []))
 			return 0;
 		#end
-
-		var missRating = ratingData.ratings.find(r -> r.miss == true && r.window == null);
-		return missRating != null ? missRating.score : -10;
+		return _cachedMissScore;
 	}
 
-	public function getRatingForDiff(diff:Float):Null<RatingDataType> {
-		if (ratingData == null)
+	public function getRatingForDiff(diff:Float):Null<Dynamic> {
+		if (_cachedRatings.length == 0)
 			return null;
 
 		#if HSCRIPT_ALLOWED
@@ -610,11 +617,9 @@ class NoteController {
 			return null;
 		#end
 
-		var windowed = ratingData.ratings.filter(r -> r.window != null);
-		windowed.sort((a, b) -> Std.int(a.window - b.window));
-
-		for (r in windowed) {
-			if (Math.abs(diff) <= r.window)
+		var absDiff = Math.abs(diff);
+		for (r in _cachedRatings) {
+			if (absDiff <= r.window)
 				return r;
 		}
 		return null;
@@ -629,11 +634,17 @@ class NoteController {
 		for (pool in _sustainPool)
 			for (n in pool)
 				n.destroy();
+
 		_notePool = null;
 		_sustainPool = null;
 		_charStrumsCache = null;
+		_cachedRatings = null;
 
 		strums.destroy();
+		for (group in strumsByChar)
+			group.destroy();
+		strumsByChar = null;
+
 		notes.destroy();
 		sustains.destroy();
 		splashes.destroy();
@@ -671,7 +682,9 @@ class NoteController {
 			if (s != null)
 				result.push(s);
 		}
+
 		_charStrumsCache.set(charId, result);
+
 		#if HSCRIPT_ALLOWED
 		scriptNC.call("postGetCharStrums", []);
 		#end
@@ -684,11 +697,12 @@ class NoteController {
 		scriptNC.call("onSortNotes", []);
 		#end
 
-		var diff = a.strumTime - b.strumTime;
-		var result:Int;
+		var result:Int = 0;
 
-		if (diff != 0)
-			result = Std.int(diff);
+		if (a.strumTime < b.strumTime)
+			result = -1;
+		else if (a.strumTime > b.strumTime)
+			result = 1;
 		else {
 			var aOrder = (a is NoteSustain) ? (cast(a, NoteSustain).isSustainEnd ? 2 : 1) : 0;
 			var bOrder = (b is NoteSustain) ? (cast(b, NoteSustain).isSustainEnd ? 2 : 1) : 0;
@@ -698,6 +712,7 @@ class NoteController {
 		#if HSCRIPT_ALLOWED
 		scriptNC.call("postSortNotes", []);
 		#end
+
 		return result;
 	}
 }

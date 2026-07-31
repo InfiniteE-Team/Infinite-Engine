@@ -3,6 +3,8 @@ package;
 import states.LoadingState;
 import game.PlayStateConfig;
 import states.MusicBeatState;
+import core.config.SaveScore;
+import core.rhythm.DiffsUtils;
 import game.objects.sprites.Icon;
 import flixel.tweens.FlxTween.FlxTweenType;
 import flixel.text.FlxTextBorderStyle;
@@ -12,6 +14,14 @@ class FreeplayState extends ScriptState {
 	var songs:Array<FlxText> = [];
 	var icons:Array<Icon> = [];
 	var freeplayData:core.json.engine.FreeplayData;
+
+	// song score
+	var scoreTxt:FlxText;
+	var songScore:Int = 0;
+
+	// difficulty
+	var curDiff:Int = 0;
+	var diffTxt:FlxText;
 
 	var acceptOption:Bool = false;
 
@@ -67,7 +77,22 @@ class FreeplayState extends ScriptState {
 			FlxTween.tween(noExists, {alpha: 1}, 1, {type: FlxTweenType.PINGPONG});
 		}
 
+		scoreTxt = new FlxText(0, 10, 0, 'SCORE:');
+		scoreTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "right");
+		scoreTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+		scoreTxt.antialiasing = SaveData.data.antialiasing;
+		scoreTxt.scrollFactor.set(0, 0);
+		add(scoreTxt);
+
+		diffTxt = new FlxText(0, scoreTxt.y + scoreTxt.height, 0, 'HARD');
+		diffTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "right");
+		diffTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+		diffTxt.antialiasing = SaveData.data.antialiasing;
+		diffTxt.scrollFactor.set(0, 0);
+		add(diffTxt);
+
 		changeSelection(0);
+		changeDifficulty(0);
 	}
 
 	override public function update(elapsed:Float) {
@@ -78,9 +103,16 @@ class FreeplayState extends ScriptState {
 
 		if (freeplayData.songData.length > 0) {
 			if (Controls.UI_UP)
-				changeSelection(-1);
-			if (Controls.UI_DOWN)
 				changeSelection(1);
+			if (Controls.UI_DOWN)
+				changeSelection(-1);
+		}
+
+		if (DiffsUtils.difficulties.length > 0) {
+			if (Controls.UI_LEFT)
+				changeDifficulty(1);
+			if (Controls.UI_RIGHT)
+				changeDifficulty(-1);
 		}
 
 		if (Controls.ACCEPT) {
@@ -93,7 +125,7 @@ class FreeplayState extends ScriptState {
 			PlayStateConfig.isStoryMode = false;
 
 			new FlxTimer().start(1, function() {
-				MusicBeatState.switchState(() -> new LoadingState(songSelected, 0));
+				MusicBeatState.switchState(() -> new LoadingState(songSelected, curDiff));
 			});
 		}
 
@@ -101,6 +133,20 @@ class FreeplayState extends ScriptState {
 			acceptOption = true;
 			ScriptClass.switchState('MainMenuState');
 		}
+	}
+
+	function changeDifficulty(change:Int = 0):Void {
+		curDiff += change;
+
+		DiffsUtils.getDifficulty(freeplayData.songData[curSelected].song);
+
+		if (curDiff < 0)
+			curDiff = DiffsUtils.difficulties.length - 1;
+		if (curDiff >= DiffsUtils.difficulties.length)
+			curDiff = 0;
+
+		diffTxt.text = '< ' + DiffsUtils.difficulties[curDiff].toUpperCase() + ' >';
+		diffTxt.x = FlxG.width * 0.85 - diffTxt.width;
 	}
 
 	function changeSelection(change:Int = 0):Void {
@@ -120,5 +166,9 @@ class FreeplayState extends ScriptState {
 				item.alpha = 0.6;
 			}
 		}
+
+		songScore = SaveScore.getScore(freeplayData.songData[curSelected].song, curDiff);
+		scoreTxt.text = 'SCORE: $songScore';
+		scoreTxt.x = FlxG.width * 0.83 - scoreTxt.width;
 	}
 }

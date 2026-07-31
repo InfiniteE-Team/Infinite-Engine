@@ -1,6 +1,5 @@
 package core.config;
 
-import sys.FileSystem;
 import core.json.engine.SaveDataFields;
 
 class SaveData {
@@ -9,30 +8,10 @@ class SaveData {
 	static inline function get_data():SaveDataFields
 		return (cast FlxG.save.data : SaveDataFields);
 
-	static var _defaults:Map<String, Dynamic> = [];
-
 	public function new() {}
 
 	public static inline function flush():Void
 		FlxG.save.flush();
-
-	public static function init():Void {
-		var dirty = false;
-		for (key => defaultValue in _defaults) {
-			if (Reflect.field(FlxG.save.data, key) == null) {
-				trace('[SaveData] init: auto-creating "$key" = $defaultValue');
-				Reflect.setField(FlxG.save.data, key, defaultValue);
-				dirty = true;
-			}
-		}
-
-		if (dirty) {
-			flush();
-			trace('[SaveData] init: ${_defaults.keys().hasNext() ? "fields initialized and persisted." : ""}');
-		} else {
-			trace('[SaveData] init: fields had already been initialized.');
-		}
-	}
 
 	public static function initSave():Void {
 		if (SaveData.data.framerate == null)

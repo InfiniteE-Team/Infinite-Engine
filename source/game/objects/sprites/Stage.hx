@@ -30,11 +30,10 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 	public function new(stage:String) {
 		super();
 		this.stage = stage;
-		dataStage();
-		createStage();
 		#if HSCRIPT_ALLOWED
 		initStageScript();
 		#end
+		createStage();
 	}
 
 	#if HSCRIPT_ALLOWED
@@ -46,15 +45,13 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 	}
 	#end
 
-	public function dataStage() {
-		var stageDataPath = Paths.getPath('data/stages/' + stage, "json");
-		stageData = FormatJson.readJson(stageDataPath);
-	}
-
 	public function createStage() {
 		// hardcoder reference!1
 		switch (stage) {
 			default:
+				var stageDataPath = Paths.getPath('data/stages/' + stage, "json");
+				stageData = FormatJson.readJson(stageDataPath);
+
 				if (stageData == null)
 					return;
 
@@ -75,9 +72,6 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 						createElement(element);
 					}
 				}
-
-				if (!charLayerAdded)
-					add(charLayer);
 		}
 	}
 
@@ -87,6 +81,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 			Trace.traceOnce('Not exist chars $id', true);
 			return;
 		}
+
 		if (props.position != null)
 			char.setPosition(char.x + props.position[0], char.y + props.position[1]);
 	}

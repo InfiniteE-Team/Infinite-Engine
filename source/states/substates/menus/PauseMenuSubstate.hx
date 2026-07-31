@@ -1,24 +1,29 @@
-package states.substates;
+package states.substates.menus;
 
 import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.sound.FlxSound;
 
-class PauseMenuSubstate extends MusicBeatSubstate {
+class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 	var bg:FlxSprite;
 
 	var text:FlxText;
 
-	var options:Array<String> = ['Resume', 'Restart Song', 'Options', 'Exit to Menu'];
+	var options:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Options', 'Exit to Menu'];
 
 	var curSelect:Int = 0;
 
 	var texts:Array<FlxText> = [];
 
+	var infoSongs:Array<FlxText> = [];
+
 	public var pauseMenuMusic:FlxSound;
 
 	static var _cachedPauseMusic:FlxSound;
+
+	var nameSong:FlxText;
+	var difficulty:FlxText;
 
 	override public function create() {
 		super.create();
@@ -61,6 +66,24 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 			add(text);
 		}
 
+		var textInfo:Array<String> = [
+			game.PlayState.instance.curSong,
+			'Difficulty: ${core.rhythm.DiffsUtils.diffCurrent.toUpperCase()}'
+		];
+
+		for (i in 0...textInfo.length) {
+			var infoSong = new FlxText(0, 20 + (i * 38), FlxG.width - 20, textInfo[i]);
+			infoSong.setFormat(Paths.getPath('Funkin.otf', 'font'), 32, 0xFFFFFFFF, "right");
+			infoSong.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+			infoSong.antialiasing = SaveData.data.antialiasing;
+			infoSong.scrollFactor.set(0, 0);
+			infoSongs.push(infoSong);
+			add(infoSong);
+		}
+
+		nameSong = infoSongs[0];
+		difficulty = infoSongs[1];
+
 		#if HSCRIPT_ALLOWED
 		script.call("postCreate", []);
 		#end
@@ -80,9 +103,9 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 
 		if (options.length > 0) {
 			if (Controls.UI_UP)
-				changeCur(1);
-			else if (Controls.UI_DOWN)
 				changeCur(-1);
+			else if (Controls.UI_DOWN)
+				changeCur(1);
 		}
 
 		if (Controls.ACCEPT) {
@@ -95,8 +118,10 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 					if (game.PlayState.instance != null)
 						game.PlayState.instance.rewindSong();
 					close();
+				case "Change Difficulty":
+					trace('wip');
 				case "Options":
-					openSubState(new states.substates.OptionsMenuSubstate());
+					openSubState(new states.substates.menus.OptionsMenuSubstate());
 				case "Exit to Menu":
 					resumeFunction();
 					#if HSCRIPT_ALLOWED
@@ -146,6 +171,10 @@ class PauseMenuSubstate extends MusicBeatSubstate {
 			t.destroy();
 		texts = null;
 		text = null;
+
+		for (info in infoSongs)
+			info.destroy();
+		infoSongs = null;
 
 		if (pauseMenuMusic != null) {
 			pauseMenuMusic.stop();

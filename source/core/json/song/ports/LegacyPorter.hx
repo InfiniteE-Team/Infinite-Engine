@@ -55,13 +55,17 @@ class LegacyPorter implements FormatChartConverter {
 						id: p1,
 						name: p1,
 						role: 'player',
-						strumPos: [720, 0]
+						strums: {
+							position: [720, 0]
+						}
 					},
 					{
 						id: p2,
 						name: p2,
 						role: 'opponent',
-						strumPos: [50, 0]
+						strums: {
+							position: [50, 0]
+						}
 					}
 				],
 				events: events
