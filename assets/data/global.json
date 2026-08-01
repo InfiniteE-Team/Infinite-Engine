@@ -1,4 +1,3 @@
 {
-    "startState": "MainMenuState",
-    "skipTrans": true
+    "startState": "MainMenuState"
 }

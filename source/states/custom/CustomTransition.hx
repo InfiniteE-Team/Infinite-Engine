@@ -3,18 +3,16 @@ package states.custom;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
 import flixel.util.FlxColor;
-import flixel.util.FlxGradient;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 
 class CustomTransition extends flixel.FlxSubState {
 	var finishCallback:Void->Void;
-	var transGradient:FlxSprite;
 	var transBlack:FlxSprite;
 	var transIn:Bool = true;
-	var duration:Float = 0.45;
+	var duration:Float = 0.2;
 
-	public function new(transIn:Bool, duration:Float = 0.45, ?callback:Void->Void) {
+	public function new(transIn:Bool, duration:Float = 0.2, ?callback:Void->Void) {
 		super();
 		this.transIn = transIn;
 		this.duration = duration;
@@ -35,40 +33,28 @@ class CustomTransition extends flixel.FlxSubState {
 		var width:Int = FlxG.width;
 		var height:Int = FlxG.height;
 
-		var colors = transIn ? [FlxColor.TRANSPARENT, FlxColor.BLACK] : [FlxColor.BLACK, FlxColor.TRANSPARENT];
-		transGradient = FlxGradient.createGradientFlxSprite(width, height, colors);
-		transGradient.scrollFactor.set();
-		add(transGradient);
-
 		transBlack = new FlxSprite().makeGraphic(width, height, FlxColor.BLACK);
 		transBlack.scrollFactor.set();
+		transBlack.alpha = transIn ? 1 : 0;
 		add(transBlack);
 
-		transGradient.y = -height;
-		updateBlackPosition();
+		var targetAlpha:Float = transIn ? 0 : 1;
 
-		FlxTween.tween(transGradient, {y: height}, duration, {
+		FlxTween.tween(transBlack, {alpha: targetAlpha}, duration, {
 			ease: FlxEase.linear,
-			onUpdate: function(twn:FlxTween) {
-				updateBlackPosition();
-			},
 			onComplete: function(twn:FlxTween) {
+				transBlack.alpha = targetAlpha;
+				
 				if (finishCallback != null) {
 					var cb = finishCallback;
 					finishCallback = null;
 					cb();
 				}
-				close();
+				if (transIn) {
+					close();
+				}
 			}
 		});
-	}
-
-	private function updateBlackPosition():Void {
-		if (transIn) {
-			transBlack.y = transGradient.y + transGradient.height;
-		} else {
-			transBlack.y = transGradient.y - transBlack.height;
-		}
 	}
 
 	override public function destroy() {
