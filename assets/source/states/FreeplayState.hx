@@ -1,5 +1,6 @@
 package;
 
+import utils.InfiniteUtil;
 import states.LoadingState;
 import game.PlayStateConfig;
 import states.MusicBeatState;
@@ -8,6 +9,7 @@ import core.rhythm.DiffsUtils;
 import game.objects.sprites.Icon;
 import flixel.tweens.FlxTween.FlxTweenType;
 import flixel.text.FlxTextBorderStyle;
+import flixel.math.FlxMath;
 
 class FreeplayState extends ScriptState {
 	var curSelected:Int = 0;
@@ -15,9 +17,12 @@ class FreeplayState extends ScriptState {
 	var icons:Array<Icon> = [];
 	var freeplayData:core.json.engine.FreeplayData;
 
-	// song score
+	var album:FunkinSprite;
+
+	// song score & lerp variables
 	var scoreTxt:FlxText;
 	var songScore:Int = 0;
+	var intendedScore:Int = 0;
 
 	// difficulty
 	var curDiff:Int = 0;
@@ -54,7 +59,8 @@ class FreeplayState extends ScriptState {
 				songs.push(song);
 				add(song);
 
-				var icon:Icon = new Icon(false, null, freeplayData.songData[i].icon);
+				var charData = FormatJson.readJson(Paths.getPath('data/characters/' + freeplayData.songData[i].icon, 'json'));
+				var icon:Icon = new Icon(false, charData);
 				if (icon != null) {
 					icon.scale.set(0.85, 0.85);
 					icon.x = song.x + song.width;
@@ -78,18 +84,22 @@ class FreeplayState extends ScriptState {
 		}
 
 		scoreTxt = new FlxText(0, 10, 0, 'SCORE:');
-		scoreTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "right");
+		scoreTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
 		scoreTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 		scoreTxt.antialiasing = SaveData.data.antialiasing;
 		scoreTxt.scrollFactor.set(0, 0);
 		add(scoreTxt);
 
 		diffTxt = new FlxText(0, scoreTxt.y + scoreTxt.height, 0, 'HARD');
-		diffTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "right");
+		diffTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
 		diffTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 		diffTxt.antialiasing = SaveData.data.antialiasing;
 		diffTxt.scrollFactor.set(0, 0);
 		add(diffTxt);
+
+		album = new FunkinSprite(0, 100);
+		album.antialiasing = SaveData.data.antialiasing;
+		add(album);
 
 		changeSelection(0);
 		changeDifficulty(0);
@@ -98,21 +108,26 @@ class FreeplayState extends ScriptState {
 	override public function update(elapsed:Float) {
 		super.update(elapsed);
 
+		songScore = Math.floor(FlxMath.lerp(songScore, intendedScore, FlxMath.bound(elapsed * 16, 0, 1)));
+
+		scoreTxt.text = 'SCORE: ' + InfiniteUtil.formatNumber(songScore);
+		scoreTxt.x = (FlxG.width - scoreTxt.width) / 2;
+
 		if (acceptOption)
 			return;
 
 		if (freeplayData.songData.length > 0) {
 			if (Controls.UI_UP)
-				changeSelection(1);
-			if (Controls.UI_DOWN)
 				changeSelection(-1);
+			if (Controls.UI_DOWN)
+				changeSelection(1);
 		}
 
 		if (DiffsUtils.difficulties.length > 0) {
 			if (Controls.UI_LEFT)
-				changeDifficulty(1);
-			if (Controls.UI_RIGHT)
 				changeDifficulty(-1);
+			if (Controls.UI_RIGHT)
+				changeDifficulty(1);
 		}
 
 		if (Controls.ACCEPT) {
@@ -133,20 +148,29 @@ class FreeplayState extends ScriptState {
 			acceptOption = true;
 			ScriptClass.switchState('MainMenuState');
 		}
+
+		for (icon in icons) {
+			if (icon.scale.x > 0.85) {
+				icon.scale.x = FlxMath.lerp(icon.scale.x, 0.85, elapsed * 12);
+				icon.scale.y = FlxMath.lerp(icon.scale.y, 0.85, elapsed * 12);
+			}
+		}
 	}
 
 	function changeDifficulty(change:Int = 0):Void {
 		curDiff += change;
-
-		DiffsUtils.getDifficulty(freeplayData.songData[curSelected].song);
 
 		if (curDiff < 0)
 			curDiff = DiffsUtils.difficulties.length - 1;
 		if (curDiff >= DiffsUtils.difficulties.length)
 			curDiff = 0;
 
+		DiffsUtils.getDifficulty(freeplayData.songData[curSelected].song);
+
 		diffTxt.text = '< ' + DiffsUtils.difficulties[curDiff].toUpperCase() + ' >';
-		diffTxt.x = FlxG.width * 0.85 - diffTxt.width;
+		diffTxt.x = (FlxG.width - diffTxt.width) / 2;
+
+		updateScore();
 	}
 
 	function changeSelection(change:Int = 0):Void {
@@ -167,8 +191,34 @@ class FreeplayState extends ScriptState {
 			}
 		}
 
-		songScore = SaveScore.getScore(freeplayData.songData[curSelected].song, curDiff);
-		scoreTxt.text = 'SCORE: $songScore';
-		scoreTxt.x = FlxG.width * 0.83 - scoreTxt.width;
+		updateScore();
+
+		if (album != null) {
+			album.loadGraphic(Paths.getPath('menus/freeplay/albums/' + freeplayData.songData[curSelected].album, 'image'));
+			album.x = FlxG.width * 0.9 - album.width;
+		}
+	}
+
+	function updateScore():Void {
+		intendedScore = SaveScore.getScore(freeplayData.songData[curSelected].song, curDiff);
+	}
+
+	override function beatHit(beat:Float) {
+		super.beatHit(beat);
+		for (icon in icons) {
+			if (icon != null) {
+				if (icon.bumpInBeats && Math.floor(beat % icon.stepTempo) == 0) {
+					icon.scale.set(1.05, 1.05);
+				}
+			}
+		}
+	}
+
+	override public function destroy() {
+		super.destroy();
+		freeplayData = null;
+		album = null;
+		songs = null;
+		icons = null;
 	}
 }

@@ -1,3 +1,4 @@
+import utils.InfiniteUtil;
 import flixel.util.FlxStringUtil;
 import flixel.text.FlxTextBorderStyle;
 
@@ -22,7 +23,7 @@ function postUpdate(elapsed:Float) {
 }
 
 function updateScore() {
-	var scoreFinal:String = FlxStringUtil.formatMoney(playStateConfig.score, false);
+	var scoreFinal:String = InfiniteUtil.formatNumber(playStateConfig.score);
 	scoreText.text = 'Score: $scoreFinal - Misses: ${playStateConfig.misses}';
 }
 

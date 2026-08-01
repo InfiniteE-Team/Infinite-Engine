@@ -11,12 +11,11 @@
     - [x] HUD
 
 - [ ] Menus
-    - [ ] Installer Menu
     - [ ] TitleState
     - [ ] StoryMenuState
-    - [ ] FreeplayState
-    - [ ] MainMenuState
-    - [ ] OptionsState
+    - [X] FreeplayState (WIP)
+    - [X] MainMenuState
+    - [X] OptionsState (WIP)
 
 - [x] Sub-Menus
     - [x] PauseMenuSubState
@@ -28,7 +27,7 @@
 
 - [x] Assets
     - [x] Paths
-    - [ ] Library
+    - [x] Library
 
 - [x] Audio
     - [x] RhythmCore
@@ -39,14 +38,12 @@
 - [x] Scripting
     - [x] HScript
     - [x] Lua
-    - [x] ScriptedState
-    - [x] ScriptedSubState
-    - [ ] CustomState
-    - [ ] CustomSubState
+    - [x] ScriptState
+    - [x] ScriptSubstate
+    - [X] ScriptClass - load states or substates into scripts
 
 - [ ] Modding
-    - [x] AssetPack
-    - [ ] AssetPackConfigMenu
+    - [x] Mods
     - [x] Imports
     - [ ] Additional Libraries
 

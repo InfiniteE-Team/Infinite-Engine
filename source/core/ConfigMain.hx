@@ -34,6 +34,10 @@ class ConfigMain extends flixel.FlxState {
 
 		InfiniteUtil.updateFramerate();
 
+		core.config.SaveScore.load();
+
+		core.system.FPSCounter.instance.updateVisibility();
+		
 		#if (DISCORD_ALLOWED && hxdiscord_rpc < "1.2.0")
 		core.api.DiscordAPI.init();
 		Application.current.onExit.add(function(exitCode:Int) {

@@ -61,6 +61,9 @@ class ScriptGlobals {
 		roots['OptionType'] = core.enums.OptionType;
 		roots['SaveData'] = core.config.SaveData;
 
+		// Shaders
+		roots['CustomShader'] = game.graphics.shaders.CustomShader;
+
 		// Utils
 		roots['Trace'] = Trace;
 
@@ -140,6 +143,8 @@ class ScriptGlobals {
 			"File" => sys.io.File,
 			// modchart
 			"ModchartSystem" => game.modchart.ModchartSystem,
+			// Shaders
+			"CustomShader" => game.graphics.shaders.CustomShader,
 			// modifiers
 			"DrunkModifier" => game.modchart.modifiers.Modifiers.DrunkModifier,
 			"TornadoModifier" => game.modchart.modifiers.Modifiers.TornadoModifier,

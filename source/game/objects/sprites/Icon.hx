@@ -4,7 +4,7 @@ import core.json.objects.CharacterData;
 
 class Icon extends core.scripting.types.sprites.ScriptedSprite {
 	public var bumpInBeats:Bool = true;
-	public var stepTempo:Float = 1;
+	public var stepTempo:Float = 2;
 
 	public function new(isPlayer:Bool, ?characterData:CharacterData, ?sprite:String = 'face') {
 		super();

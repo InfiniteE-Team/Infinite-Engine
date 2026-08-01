@@ -3,6 +3,7 @@ package core.json.engine;
 typedef SaveDataFields = {
 	// graphics
     var ?framerate:Int;
+	var ?fpsVisible:Bool;
 	var ?antialiasing:Bool;
 	var ?shaders:Bool;
 

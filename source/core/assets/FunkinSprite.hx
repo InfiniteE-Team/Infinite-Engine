@@ -171,8 +171,14 @@ class FunkinSprite extends animate.FlxAnimate {
 			flipX = props.flipX;
 		if (props.flipY != null)
 			flipY = props.flipY;
-		if (props.antialiasing != null)
-			antialiasing = props.antialiasing;
+
+		if (props.antialiasing != null) {
+			if (props.antialiasing)
+				antialiasing = SaveData.data.antialiasing;
+			else
+				antialiasing = false;
+		}
+		
 		if (props.scrollFactor != null)
 			scrollFactor.set(props.scrollFactor[0], props.scrollFactor[1]);
 	}

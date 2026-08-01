@@ -17,6 +17,9 @@ class SaveData {
 		if (SaveData.data.framerate == null)
 			SaveData.data.framerate = 60;
 
+		if (SaveData.data.fpsVisible == null)
+			SaveData.data.fpsVisible = true;
+
 		if (SaveData.data.antialiasing == null)
 			SaveData.data.antialiasing = true;
 

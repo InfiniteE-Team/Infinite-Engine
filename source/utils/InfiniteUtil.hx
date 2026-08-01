@@ -3,6 +3,27 @@ package utils;
 import flixel.tweens.FlxEase;
 
 class InfiniteUtil {
+	public static function formatNumber(number:Int):String {
+        var isNegative:Bool = number < 0;
+        var absNumber:Int = isNegative ? -number : number;
+        var str = Std.string(absNumber);
+        var len = str.length;
+        if (len <= 3) return (isNegative ? "-" : "") + str;
+        
+        var formatted = "";
+        var count = 0;
+        for (i in 0...len) {
+            var charIndex = len - 1 - i;
+            if (count > 0 && count % 3 == 0) {
+                formatted = "," + formatted;
+            }
+            formatted = str.charAt(charIndex) + formatted;
+            count++;
+        }
+        
+        return (isNegative ? "-" : "") + formatted;
+    }
+
 	public static function updateFramerate() {
 		FlxG.updateFramerate = core.config.SaveData.data.framerate;
 		FlxG.drawFramerate = core.config.SaveData.data.framerate;

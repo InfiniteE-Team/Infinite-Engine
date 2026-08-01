@@ -4,13 +4,15 @@
             "song": "4score",
             "bpm": "178",
             "icon": "dad",
-            "artist": "VGMComposer"
+            "artist": "VGMComposer",
+            "album": "expansion1"
         },
         {
             "song": "fresh",
             "bpm": "120",
             "icon": "dad",
-            "artist": "KawaiSprite"
+            "artist": "KawaiSprite",
+            "album": "expansion1"
         }
     ]
 }

@@ -37,9 +37,10 @@ class SaveScore {
 	}
 
 	static function getScore(song:String, diff:Int):Int {
-		if (!songScores.exists(formaterSong(song, diff)))
-			setScore(formaterSong(song, diff), 0, diff);
-		return songScores.get(formaterSong(song, diff));
+		var daSong = formaterSong(song, diff);
+		if (!songScores.exists(daSong))
+			return 0;
+		return songScores.get(daSong);
 	}
 
 	public static function load():Void {

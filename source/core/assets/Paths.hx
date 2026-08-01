@@ -113,6 +113,7 @@ class Paths {
 		if ((result is FlxFramesCollection)) {
 			var fc:FlxFramesCollection = cast result;
 			if (fc.parent != null && fc.parent.bitmap != null) {
+				fc.parent.persist = true;
 				@:privateAccess
 				fc.parent.bitmap.getTexture(FlxG.stage.context3D);
 				fc.parent.bitmap.disposeImage();
@@ -183,7 +184,7 @@ class Paths {
 
 					graphic.bitmap.disposeImage();
 					img.buffer = null;
-                    img = null;
+					img = null;
 
 					switch (formatDetected) {
 						case "animate":
@@ -198,12 +199,18 @@ class Paths {
 							finalAsset = graphic;
 					}
 
+					if ((finalAsset is FlxFramesCollection)) {
+						var fc:FlxFramesCollection = cast finalAsset;
+						if (fc.parent != null)
+							fc.parent.persist = true;
+					}
+
 					if (finalAsset != null) {
 						cache.set(fileName, finalAsset);
 					}
 				} else if (img != null) {
 					img.buffer = null;
-                    img = null;
+					img = null;
 				}
 
 				if (onComplete != null) {

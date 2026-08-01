@@ -172,6 +172,8 @@ class Character extends core.scripting.types.sprites.ScriptedSpriteGroup {
 		for (layer in layers)
 			layer.destroy();
 		layers = [];
+		if (parent == this)
+			parent = null;
 		super.destroy();
 	};
 }

@@ -9,4 +9,5 @@ typedef SongData = {
     var ?icon:String;
     var ?bpm:Float;
     var ?artist:String;
+    var ?album:String;
 }

@@ -35,8 +35,14 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 				name: 'Framerate',
 				description: 'Adjust the frames per second limit.',
 				saveField: 'framerate',
-				type: NUMBER(30, 240, 10)
-			},
+				type: NUMBER(30, 240, 5)
+			},/*
+			{
+				name: 'FPS Visible',
+				description: 'Display the current frames per second.',
+				saveField: 'fpsVisible',
+				type: CHECKBOX
+			},*/
 			{
 				name: 'Antialiasing',
 				description: 'It softens the edges of the images.',
@@ -59,6 +65,9 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 	var descText:FlxText;
 
 	var isCategory:Bool = true;
+
+	// Character preview
+	var character:game.objects.sprites.Character;
 
 	override public function create() {
 		super.create();
@@ -91,6 +100,32 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		descText.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFFFFFF00, "center");
 		descText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 1.5, 1);
 		add(descText);
+
+		try {
+			character = new game.objects.sprites.Character('bf', 'bf', 500, 150);
+		} catch (e:Dynamic) {
+			Trace.traceOnce('Warning: The character could not be loaded in the secondary menu. Reason: $e\n${haxe.CallStack.toString(haxe.CallStack.exceptionStack())}');
+			character = null;
+		}
+
+		if (character != null) {
+			character.visible = false;
+			character.setPosition(FlxG.width - 450, FlxG.height - 500);
+
+			if (character.layers != null) {
+				for (layer in character.layers) {
+					if (layer != null) {
+						layer.visible = false;
+						add(layer);
+					}
+				}
+			}
+			add(character);
+		}
+
+		if (character != null && (character.existsAnim('idle') || character.existsAnim('danceLeft'))) {
+			character.dance();
+		}
 
 		changeCategory(0);
 		updateVisualFocus();
@@ -162,6 +197,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		}
 
 		descText.text = currentList[curSelectedOption].description;
+		updateCharacterVisibility();
 	}
 
 	function updateVisualFocus() {
@@ -200,6 +236,8 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 				}
 			}
 		}
+
+		updateCharacterVisibility();
 	}
 
 	function changeOptionValue(direction:Int) {
@@ -217,8 +255,9 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 				var newValue:Bool = !currentValue;
 				Reflect.setField(SaveData.data, opt.saveField, newValue);
 
-				if (opt.saveField == 'antialiasing' && !currentValue) {
-					FlxSprite.defaultAntialiasing = false;
+				if (opt.saveField == 'antialiasing') {
+					FlxSprite.defaultAntialiasing = newValue;
+					updateAntialiasingLive(newValue);
 				}
 			case NUMBER(min, max, step):
 				var newValue:Float = currentValue + (direction * step);
@@ -237,6 +276,60 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		SaveData.flush();
 
 		valueTexts[curSelectedOption].text = Std.string(Reflect.field(SaveData.data, opt.saveField));
+	}
+
+	function updateAntialiasingLive(enabled:Bool) {
+		if (character != null) {
+			character.antialiasing = enabled;
+			if (character.layers != null) {
+				for (layer in character.layers) {
+					if (layer != null) {
+						layer.antialiasing = enabled;
+					}
+				}
+			}
+		}
+
+		for (txt in categoryTexts) {
+			if (txt != null)
+				txt.antialiasing = enabled;
+		}
+		for (txt in itemTexts) {
+			if (txt != null)
+				txt.antialiasing = enabled;
+		}
+		for (txt in valueTexts) {
+			if (txt != null)
+				txt.antialiasing = enabled;
+		}
+		if (descText != null)
+			descText.antialiasing = enabled;
+	}
+
+	function updateCharacterVisibility() {
+		if (character == null)
+			return;
+
+		var showChar:Bool = false;
+
+		if (!isCategory) {
+			var currentList = categoryOptions.get(categories[curCategory]);
+			if (currentList != null && currentList.length > 0 && curSelectedOption < currentList.length) {
+				var optName = currentList[curSelectedOption].name;
+				if (optName == 'Shaders' || optName == 'Antialiasing') {
+					showChar = true;
+				}
+			}
+		}
+
+		character.visible = showChar;
+		if (character.layers != null) {
+			for (layer in character.layers) {
+				if (layer != null) {
+					layer.visible = showChar;
+				}
+			}
+		}
 	}
 
 	override public function update(elapsed:Float) {
@@ -301,7 +394,34 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		}
 	}
 
+	override function beatHit(beat:Float) {
+		super.beatHit(beat);
+
+		if (character != null && character.visible) {
+			character.dance();
+		}
+	}
+
 	override function destroy() {
+		if (character != null) {
+			if (character.layers != null) {
+				for (layer in character.layers) {
+					if (layer != null) {
+						remove(layer);
+						layer.destroy();
+					}
+				}
+			}
+			remove(character);
+			character.destroy();
+			character = null;
+		}
+
 		super.destroy();
+
+		categoryTexts = null;
+		itemTexts = null;
+		valueTexts = null;
+		descText = null;
 	}
 }
