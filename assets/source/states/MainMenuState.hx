@@ -88,6 +88,11 @@ class MainMenuState extends ScriptState {
 				}
 			});
 		}
+
+		if (Controls.BACK) {
+			acceptOption = true;
+			ScriptClass.switchState('TitleState');
+		}
 	}
 
 	public function change(changeAmount:Int = 0):Void {

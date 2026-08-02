@@ -9,6 +9,7 @@ import flixel.util.FlxColor;
 import openfl.filters.BitmapFilterQuality;
 
 class FPS extends openfl.display.FPS {
+	public var peakRAM:Float = 0;
 	public var glowColor:FlxColor = FlxColor.fromString('#00ccff');
 
 	public function new(x:Float, y:Float, color:Int) {
@@ -28,22 +29,30 @@ class FPS extends openfl.display.FPS {
 	var mods:String = '';
 
 	public function infoFPS() {
-		var mem:Float = formatRam(System.totalMemory);
+		var currentMem:Float = System.totalMemory;
+		if (currentMem > peakRAM) {
+			peakRAM = currentMem;
+		}
+
+		var mem:String = formatRam(currentMem);
+		var maxMem:String = formatRam(peakRAM);
 
 		if (!core.ConfigMain.globalData.developerMode) {
-			var memGC:Float = formatRam(Gc.memUsage());
-			text = 'FPS: $currentFPS - [MEM: $mem MB / GC: $memGC MB]';
+			text = 'FPS: $currentFPS - [MEM: $mem MB / Peak: $maxMem MB]';
 		} else {
-			var memGC:Float = formatRam(Gc.memUsage());
 			if (core.assets.mods.ModsRegistry.onMod)
 				mods = ' - ' + core.assets.mods.ModsRegistry.currentMod;
 
-			text = 'FPS: $currentFPS - [MEM: $mem MB / GC: $memGC MB]\n\nDeveloper Mode' + mods;
+			text = 'FPS: $currentFPS - [MEM: $mem / $maxMem]\n\nDeveloper Mode' + mods;
 		}
 	}
 
-	public function formatRam(r:Float):Float {
-		var ram = Math.round(r / 1024 / 1024 * 100) / 100;
-		return ram;
+	public function formatRam(r:Float):String {
+		var mb = r / (1024 * 1024);
+		if (mb >= 1024) {
+			var gb = mb / 1024;
+			return (Math.round(gb * 100) / 100) + ' GB';
+		}
+		return (Math.round(mb * 100) / 100) + ' MB';
 	}
 }
