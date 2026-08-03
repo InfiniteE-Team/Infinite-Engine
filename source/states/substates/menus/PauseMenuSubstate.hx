@@ -147,6 +147,7 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 					openSubState(new states.substates.menus.OptionsMenuSubstate());
 				case "Exit to Menu":
 					resumeFunction();
+					game.PlayStateConfig.blueBalled = 0;
 					#if HSCRIPT_ALLOWED
 					script.call("ExitMenu", []);
 					#end

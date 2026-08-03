@@ -24,7 +24,7 @@ class DiscordAPI {
 	var handlers:DiscordEventHandlers;
 
 	private function new() {
-		trace(' DISCORD '.bold() + ' Initializing event handlers...');
+		trace(' DISCORD Initializing event handlers...');
 
 		handlers = new DiscordEventHandlers();
 
@@ -34,7 +34,7 @@ class DiscordAPI {
 	}
 
 	public static function init():Void {
-		trace(' DISCORD '.bold() + ' Initializing connection...');
+		trace(' DISCORD Initializing connection...');
 
 		if (!hasValidCredentials()) {
 			FlxG.log.warn("Tried to initialize Discord connection, but credentials are invalid!");
@@ -70,7 +70,7 @@ class DiscordAPI {
 	}
 
 	public function shutdown():Void {
-		trace(' DISCORD '.bold() + ' Shutting down...');
+		trace(' DISCORD Shutting down...');
 
 		Discord.Shutdown();
 	}
@@ -94,25 +94,25 @@ class DiscordAPI {
 	}
 
 	private static function onReady(request:cpp.RawConstPointer<DiscordUser>):Void {
-		trace(' DISCORD '.bold() + ' Client has connected!');
+		trace(' DISCORD Client has connected!');
 
 		final username:String = request[0].username;
 		final globalName:String = request[0].username;
 		final discriminator:Null<Int> = Std.parseInt(request[0].discriminator);
 
 		if (discriminator != null && discriminator != 0) {
-			trace(' DISCORD '.bold() + ' User: ${username}#${discriminator} (${globalName})');
+			trace(' DISCORD User: ${username}#${discriminator} (${globalName})');
 		} else {
-			trace(' DISCORD '.bold() + ' User: @${username} (${globalName})');
+			trace(' DISCORD User: @${username} (${globalName})');
 		}
 	}
 
 	private static function onDisconnected(errorCode:Int, message:cpp.ConstCharStar):Void {
-		trace(' DISCORD '.bold() + ' Client has disconnected! ($errorCode) "${cast (message, String)}"');
+		trace(' DISCORD Client has disconnected! ($errorCode) "${cast (message, String)}"');
 	}
 
 	private static function onError(errorCode:Int, message:cpp.ConstCharStar):Void {
-		trace(' DISCORD '.bold() + ' Client has received an error! ($errorCode) "${cast (message, String)}"');
+		trace(' DISCORD Client has received an error! ($errorCode) "${cast (message, String)}"');
 	}
 }
 
