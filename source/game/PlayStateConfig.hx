@@ -24,6 +24,8 @@ class PlayStateConfig {
 
 	public var isBotplay:Bool = false;
 
+	public static var blueBalled:Int = 0;
+
 	// storymode
 	public static var isStoryMode:Bool = false;
 	public static var curWeek:Int = 0;

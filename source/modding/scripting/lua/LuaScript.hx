@@ -1,4 +1,4 @@
-package core.scripting.lua;
+package modding.scripting.lua;
 
 import llua.*;
 import llua.Lua.Lua_helper;

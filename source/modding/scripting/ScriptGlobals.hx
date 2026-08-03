@@ -1,4 +1,4 @@
-package core.scripting;
+package modding.scripting;
 
 import rulescript.RuleScript;
 
@@ -35,7 +35,7 @@ class ScriptGlobals {
 		roots['Paths'] = core.assets.Paths;
 		roots['FunkinSprite'] = core.assets.FunkinSprite;
 		roots['RhythmCore'] = core.rhythm.RhythmCore;
-		roots['ScriptHandler'] = core.scripting.ScriptHandler;
+		roots['ScriptHandler'] = modding.scripting.ScriptHandler;
 		roots['Controls'] = core.config.Controls;
 
 		roots['MusicBeatState'] = states.MusicBeatState;
@@ -45,12 +45,12 @@ class ScriptGlobals {
 		roots['MasterAudio'] = core.rhythm.audio.MasterAudio;
 		roots['GameAudio'] = core.rhythm.audio.GameAudio;
 
-		roots['ScriptState'] = core.scripting.interfaces.ScriptState;
-		roots['ScriptSubstate'] = core.scripting.interfaces.ScriptSubstate;
+		roots['ScriptState'] = modding.scripting.interfaces.ScriptState;
+		roots['ScriptSubstate'] = modding.scripting.interfaces.ScriptSubstate;
 
-		roots['ScriptClass'] = core.scripting.types.ScriptClass;
+		roots['ScriptClass'] = modding.scripting.types.ScriptClass;
 
-		roots['ScriptedTypeDef'] = core.scripting.types.ScriptedTypeDef;
+		roots['ScriptedTypeDef'] = modding.scripting.types.ScriptedTypeDef;
 
 		// Json Formatters Engine
 		roots['Json'] = haxe.Json;
@@ -104,9 +104,9 @@ class ScriptGlobals {
 	}
 
 	public static function initLua():Void {
-		if (core.scripting.lua.LuaScript.globalClasses != null)
+		if (modding.scripting.lua.LuaScript.globalClasses != null)
 			return;
-		core.scripting.lua.LuaScript.globalClasses = [
+		modding.scripting.lua.LuaScript.globalClasses = [
 			// Flixel
 			"FlxG" => flixel.FlxG,
 			"FlxSprite" => flixel.FlxSprite,

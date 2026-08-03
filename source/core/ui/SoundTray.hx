@@ -1,4 +1,4 @@
-package core.system;
+package core.ui;
 
 import flixel.system.ui.FlxSoundTray;
 import flash.display.Bitmap;

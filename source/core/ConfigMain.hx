@@ -2,7 +2,7 @@ package core;
 
 import core.config.CursorConfig;
 import core.json.engine.GlobalData.GlobalConfig;
-import core.scripting.ScriptGlobals;
+import modding.scripting.ScriptGlobals;
 
 class ConfigMain extends flixel.FlxState {
 	public var mainState:Class<MusicBeatState> = game.PlayState;
@@ -36,7 +36,7 @@ class ConfigMain extends flixel.FlxState {
 
 		core.config.SaveScore.load();
 
-		core.system.FPSCounter.instance.updateVisibility();
+		core.ui.FPSCounter.instance.updateVisibility();
 		
 		#if (DISCORD_ALLOWED && hxdiscord_rpc < "1.2.0")
 		core.api.DiscordAPI.init();
@@ -66,10 +66,10 @@ class ConfigMain extends flixel.FlxState {
 
 		core.assets.Library.reloadMods();
 
-		if (!core.installer.InstallerMenu.hasAssetFiles('assets')) {
-			MusicBeatState.switchState(() -> new core.installer.InstallerMenu());
-		} else if (globalData.startStateScript != null) {
-			core.scripting.types.ScriptClass.switchState(globalData.startStateScript);
+		core.api.DiscordAPI.init();
+		
+		if (globalData.startStateScript != null) {
+			modding.scripting.types.ScriptClass.switchState(globalData.startStateScript);
 		} else {
 			MusicBeatState.switchState(() -> Type.createInstance(mainState, []));
 		}

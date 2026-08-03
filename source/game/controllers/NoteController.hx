@@ -16,7 +16,7 @@ import game.objects.sprites.notes.NoteSplash;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import game.graphics.shaders.hardcode.RGBShader;
 #if HSCRIPT_ALLOWED
-import core.scripting.ScriptHandler;
+import modding.scripting.ScriptHandler;
 #end
 
 class NoteController {

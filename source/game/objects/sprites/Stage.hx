@@ -5,7 +5,7 @@ import core.assets.FunkinSprite;
 import core.json.objects.StageData;
 import flixel.group.FlxGroup.FlxTypedGroup;
 #if HSCRIPT_ALLOWED
-import core.scripting.ScriptHandler;
+import modding.scripting.ScriptHandler;
 #end
 
 class Stage extends FlxTypedGroup<FlxBasic> {

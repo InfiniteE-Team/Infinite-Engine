@@ -1,4 +1,4 @@
-package core.system;
+package core.ui;
 
 import openfl.display.Sprite;
 import openfl.display.Shape;
@@ -8,7 +8,7 @@ class FPSCounter extends Sprite {
 	public static var instance:FPSCounter = null;
 
 	var bg = new Shape();
-	var fps:core.system.FPS;
+	var fps:core.ui.FPS;
 
 	public function new(x:Float, y:Float, color:Int) {
 		super();
@@ -17,7 +17,7 @@ class FPSCounter extends Sprite {
 		this.x = x;
 		this.y = y;
 
-		fps = new core.system.FPS(5, 5, color);
+		fps = new core.ui.FPS(5, 5, color);
 
 		addChild(bg);
 		addChild(fps);

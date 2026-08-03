@@ -1,7 +1,7 @@
 package;
 
 import core.EngineData;
-import core.system.FPSCounter;
+import core.ui.FPSCounter;
 import openfl.display.Sprite;
 // crash handler
 import haxe.CallStack;

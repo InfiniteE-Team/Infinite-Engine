@@ -4,7 +4,7 @@ import core.rhythm.TrackBeat;
 import core.json.JsonWatcher;
 import utils.InfoHelpDebug;
 #if HSCRIPT_ALLOWED
-import core.scripting.ScriptHandler;
+import modding.scripting.ScriptHandler;
 #end
 import game.controllers.InputController;
 

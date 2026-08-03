@@ -1,7 +1,7 @@
 package core.assets;
 
 import sys.FileSystem;
-import core.assets.mods.ModsRegistry;
+import modding.mods.ModsRegistry;
 
 class Library {
 	public static var baseFolder:String = "assets";

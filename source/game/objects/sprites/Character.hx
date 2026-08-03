@@ -3,7 +3,7 @@ package game.objects.sprites;
 import core.assets.FunkinSprite;
 import core.json.objects.CharacterData;
 
-class Character extends core.scripting.types.sprites.ScriptedSpriteGroup {
+class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 	public static var parent:Character;
 
 	public var curCharacter:String = 'bf';

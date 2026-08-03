@@ -70,17 +70,14 @@ class FunkinSprite extends animate.FlxAnimate {
 			var animPath = getAnimFilePath(anim);
 			var offset = animPath != null ? (filePathOffsets.get(animPath) ?? 0) : 0;
 
-			if (isAnimate) {
-				hasIndices ? this.anim.addBySymbolIndices(fullAnimName, anim.prefix, offset > 0 ? anim.indices.map(i -> i + offset) : anim.indices,
-					anim.framerate, anim.looped) : this.anim.addBySymbol(fullAnimName, anim.prefix, anim.framerate, anim.looped);
-			} else if (hasIndices) {
-				var indices = offset > 0 ? anim.indices.map(i -> i + offset) : anim.indices;
-				anim.prefix != null ? animation.addByIndices(fullAnimName, anim.prefix, indices, "", anim.framerate,
-					anim.looped) : animation.add(fullAnimName, indices, Std.int(anim.framerate ?? 24), anim.looped ?? false);
-			} else {
-				animation.addByPrefix(fullAnimName, anim.prefix, anim.framerate, anim.looped);
+			var finalIndices:Array<Int> = null;
+			if (hasIndices) {
+				finalIndices = offset > 0 ? anim.indices.map(i -> i + offset) : anim.indices;
 			}
+
+			addAnim(fullAnimName, anim.prefix ?? (animPath != null ? animPath : anim.name), anim.framerate ?? 24, anim.looped ?? true, finalIndices);
 		}
+
 		loadParams(props);
 		if (props.scale != null)
 			scale.set(props.scale[0], props.scale[1]);
@@ -91,6 +88,59 @@ class FunkinSprite extends animate.FlxAnimate {
 		if (graphic != null && graphic.bitmap != null) {
 			graphic.bitmap.disposeImage(); // clears RAM to use only the memory in VRAM
 		}
+	}
+
+	public function addAnim(name:String, prefix:String, fps:Float = 24, looped:Bool = true, ?indices:Array<Int>):Void {
+		var hasIndices:Bool = indices != null && indices.length > 0;
+
+		if (isAnimate) {
+			if (hasIndices) {
+				this.anim.addBySymbolIndices(name, prefix, indices, fps, looped);
+			} else {
+				if (hasFrameLabel(prefix)) {
+					this.anim.addByFrameLabel(name, prefix, fps, looped);
+				} else {
+					this.anim.addBySymbol(name, prefix, fps, looped);
+				}
+			}
+		} else {
+			if (hasIndices) {
+				if (prefix != null && prefix != "") {
+					animation.addByIndices(name, prefix, indices, "", fps, looped);
+				} else {
+					animation.add(name, indices, Std.int(fps), looped);
+				}
+			} else {
+				animation.addByPrefix(name, prefix, fps, looped);
+			}
+		}
+	}
+
+	function hasFrameLabel(name:String):Bool {
+		try {
+			final tl:animate.internal.Timeline = this.library.timeline;
+			if (tl != null)
+				for (layer in tl.layers)
+					for (frame in layer.frames)
+						if (frame.name != null && frame.name.rtrim() == name)
+							return true;
+			
+			@:privateAccess
+			final collections = this.library.addedCollections;
+			if (collections != null) {
+				for (col in collections) {
+					@:privateAccess
+					final colTl:animate.internal.Timeline = col.timeline;
+					if (colTl == null)
+						continue;
+					for (layer in colTl.layers)
+						for (frame in layer.frames)
+							if (frame.name != null && frame.name.rtrim() == name)
+								return true;
+				}
+			}
+		} catch (_) {}
+		return false;
 	}
 
 	private function loadAtlasOffsets(props:ObjectData, path:String):Map<String, Int> {
@@ -178,7 +228,7 @@ class FunkinSprite extends animate.FlxAnimate {
 			else
 				antialiasing = false;
 		}
-		
+
 		if (props.scrollFactor != null)
 			scrollFactor.set(props.scrollFactor[0], props.scrollFactor[1]);
 	}

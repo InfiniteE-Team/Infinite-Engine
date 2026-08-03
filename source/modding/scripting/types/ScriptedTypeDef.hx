@@ -1,4 +1,4 @@
-package core.scripting.types;
+package modding.scripting.types;
 
 import rulescript.parsers.HxParser;
 import rulescript.types.ScriptedTypedef;

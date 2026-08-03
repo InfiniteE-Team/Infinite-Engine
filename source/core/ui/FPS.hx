@@ -1,6 +1,5 @@
-package core.system;
+package core.ui;
 
-import cpp.vm.Gc;
 import openfl.system.System;
 import openfl.text.TextFieldAutoSize;
 // filters
@@ -40,8 +39,8 @@ class FPS extends openfl.display.FPS {
 		if (!core.ConfigMain.globalData.developerMode) {
 			text = 'FPS: $currentFPS - [MEM: $mem MB / Peak: $maxMem MB]';
 		} else {
-			if (core.assets.mods.ModsRegistry.onMod)
-				mods = ' - ' + core.assets.mods.ModsRegistry.currentMod;
+			if (modding.mods.ModsRegistry.onMod)
+				mods = ' - ' + modding.mods.ModsRegistry.currentMod;
 
 			text = 'FPS: $currentFPS - [MEM: $mem / $maxMem]\n\nDeveloper Mode' + mods;
 		}

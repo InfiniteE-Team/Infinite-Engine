@@ -1,4 +1,4 @@
-package core.scripting.interfaces;
+package modding.scripting.interfaces;
 
 import rulescript.scriptedClass.RuleScriptedClass;
 

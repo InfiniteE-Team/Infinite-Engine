@@ -63,6 +63,9 @@
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	<haxelib name="sl-windows-api" if="windows"/>
 
+	<haxelib name="haxeui-core" />
+	<haxelib name="haxeui-flixel" />
+
 	<!--<haxelib name="window-modcharting"/>-->
 
 	<!-- ______________________________ Haxedefines _____________________________ -->

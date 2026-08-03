@@ -5,7 +5,7 @@ import game.PlayState;
 import core.json.song.SongData.EventsData;
 import game.objects.sprites.Character;
 #if HSCRIPT_ALLOWED
-import core.scripting.ScriptHandler;
+import modding.scripting.ScriptHandler;
 #end
 
 class EventManager {

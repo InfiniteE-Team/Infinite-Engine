@@ -72,6 +72,20 @@
             "dir": null,
             "ref": "main",
             "url": "https://github.com/Slushi-Github/SL-Windows-API"
+        },
+        {
+            "name": "haxeui-core",
+            "type": "git",
+            "dir": null,
+            "ref": "master",
+            "url": "https://github.com/haxeui/haxeui-core"
+        },
+        {
+            "name": "haxeui-flixel",
+            "type": "git",
+            "dir": null,
+            "ref": "master",
+            "url": "https://github.com/haxeui/haxeui-flixel"
         }
     ]
 }

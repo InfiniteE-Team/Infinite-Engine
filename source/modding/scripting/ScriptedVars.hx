@@ -1,4 +1,4 @@
-package core.scripting;
+package modding.scripting;
 
 import game.PlayState;
 

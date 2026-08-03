@@ -1,4 +1,4 @@
-package core.scripting;
+package modding.scripting;
 
 import rulescript.RuleScript;
 import rulescript.parsers.HxParser;
@@ -7,9 +7,9 @@ class ScriptHandler {
 	public static var globalContext:rulescript.Context = new rulescript.Context();
 
 	var scripts:Array<RuleScript> = [];
-	var typedefs:Map<String, core.scripting.types.ScriptedTypeDef> = [];
+	var typedefs:Map<String, modding.scripting.types.ScriptedTypeDef> = [];
 
-	var luaScripts:Array<core.scripting.lua.LuaScript> = [];
+	var luaScripts:Array<modding.scripting.lua.LuaScript> = [];
 
 	var paths:Array<String> = [];
 	var modifiedTimes:Array<Float> = [];
@@ -36,7 +36,7 @@ class ScriptHandler {
 			return;
 
 		if (haxe.io.Path.extension(path) == 'lua') {
-			var script = new core.scripting.lua.LuaScript(path, superInstance);
+			var script = new modding.scripting.lua.LuaScript(path, superInstance);
 			luaScripts.push(script);
 			for (name => value in extraVars)
 				script.expose(name, value);
@@ -57,7 +57,7 @@ class ScriptHandler {
 	}
 
 	public function loadTypedef(name:String):Void {
-		var td = core.scripting.types.ScriptedTypeDef.loadTypedef(name);
+		var td = modding.scripting.types.ScriptedTypeDef.loadTypedef(name);
 		if (td != null) {
 			typedefs.set(name, td);
 			for (script in scripts) {

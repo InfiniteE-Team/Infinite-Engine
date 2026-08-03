@@ -10,7 +10,7 @@ import game.objects.sprites.notes.Note;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import core.rhythm.audio.GameAudio;
 #if HSCRIPT_ALLOWED
-import core.scripting.ScriptHandler;
+import modding.scripting.ScriptHandler;
 #end
 
 class CharacterController extends FunkinObjectRegistry {

@@ -339,7 +339,7 @@ class MenuState extends MusicBeatState {
 			case 'PlayState':
 				//MusicBeatState.switchState(() -> new states.LoadingState());
 			default:
-				core.scripting.types.ScriptClass.switchState(action);
+				modding.scripting.types.ScriptClass.switchState(action);
 		}
 		// ex:
 		// switch (action) {

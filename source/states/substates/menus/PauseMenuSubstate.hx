@@ -4,6 +4,8 @@ import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.sound.FlxSound;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
 
 class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 	var bg:FlxSprite;
@@ -11,6 +13,8 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 	var text:FlxText;
 
 	var options:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Options', 'Exit to Menu'];
+
+	var tips:Array<String> = ["wey tienes que darle a las flechitas no seas bobis"];
 
 	var curSelect:Int = 0;
 
@@ -24,6 +28,7 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 
 	var nameSong:FlxText;
 	var difficulty:FlxText;
+	var blueBalled:FlxText;
 
 	override public function create() {
 		super.create();
@@ -68,21 +73,39 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 
 		var textInfo:Array<String> = [
 			game.PlayState.instance.curSong,
-			'Difficulty: ${core.rhythm.DiffsUtils.diffCurrent.toUpperCase()}'
+			'Difficulty: ${core.rhythm.DiffsUtils.diffCurrent.toUpperCase()}',
+			'Blue Balled: ${game.PlayStateConfig.blueBalled}'
 		];
 
 		for (i in 0...textInfo.length) {
-			var infoSong = new FlxText(0, 20 + (i * 38), FlxG.width - 20, textInfo[i]);
+			var infoSong = new FlxText(0, 0 + (i * 38), FlxG.width - 20, textInfo[i]);
 			infoSong.setFormat(Paths.getPath('Funkin.otf', 'font'), 32, 0xFFFFFFFF, "right");
 			infoSong.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 			infoSong.antialiasing = SaveData.data.antialiasing;
 			infoSong.scrollFactor.set(0, 0);
+			infoSong.alpha = 0;
 			infoSongs.push(infoSong);
 			add(infoSong);
 		}
 
 		nameSong = infoSongs[0];
 		difficulty = infoSongs[1];
+		blueBalled = infoSongs[2];
+
+		FlxTween.tween(nameSong, {alpha: 1, y: nameSong.y + 20}, 0.5, {ease: FlxEase.circOut});
+		FlxTween.tween(difficulty, {alpha: 1, y: difficulty.y + 20}, 0.7, {ease: FlxEase.circOut});
+		FlxTween.tween(blueBalled, {alpha: 1, y: blueBalled.y + 20}, 0.9, {ease: FlxEase.circOut});
+
+		var tipText = new FlxText(0, 0, FlxG.width, tips[Std.random(tips.length)]);
+		tipText.setFormat(Paths.getPath('Funkin.otf', 'font'), 24, 0xFFFFFFFF, "center");
+		tipText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+		tipText.antialiasing = SaveData.data.antialiasing;
+		tipText.alpha = 0;
+		tipText.scrollFactor.set(0, 0);
+		tipText.y = FlxG.height - tipText.height - 40;
+		add(tipText);
+
+		FlxTween.tween(tipText, {alpha: 1, y: tipText.y + 20}, 1.2, {ease: FlxEase.circOut});
 
 		#if HSCRIPT_ALLOWED
 		script.call("postCreate", []);
@@ -175,6 +198,7 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 		for (info in infoSongs)
 			info.destroy();
 		infoSongs = null;
+		
 
 		if (pauseMenuMusic != null) {
 			pauseMenuMusic.stop();

@@ -107,7 +107,7 @@ class PlayState extends MusicBeatState {
 		super.create();
 
 		#if HSCRIPT_ALLOWED
-		core.scripting.ScriptedVars.gameplayVars(script, this);
+		modding.scripting.ScriptedVars.gameplayVars(script, this);
 		script.call("postCreate", []);
 		#end
 	}
@@ -247,6 +247,8 @@ class PlayState extends MusicBeatState {
 		#if HSCRIPT_ALLOWED
 		script.call('postEndSong', []);
 		#end
+
+		PlayStateConfig.blueBalled = 0;
 	}
 
 	// Other screens idk
@@ -288,6 +290,8 @@ class PlayState extends MusicBeatState {
 		if (script.callCancellable('onDeath', []))
 			return;
 		#end
+
+		PlayStateConfig.blueBalled++;
 
 		persistentUpdate = false;
 		persistentDraw = false;
@@ -505,6 +509,9 @@ class PlayState extends MusicBeatState {
 
 		if (stage != null)
 			stage.destroy();
+
+		if (playStateConfig != null)
+			playStateConfig.reset();
 
 		instance = null;
 		chars = null;

@@ -34,8 +34,8 @@ class TitleState extends ScriptState {
 
 		titleText = new FunkinSprite(100, FlxG.height * 0.8);
 		titleText.frames = Paths.getPath('menus/title/title-screen-text', 'animated');
-		titleText.anim.addBySymbol('idle', 'titleEnter', 24, true);
-		titleText.anim.addBySymbol('press', 'titleEnter', 24, true);
+		titleText.addAnim('idle', 'Idle', 24, true);
+		titleText.addAnim('press', 'Confirm', 24, true);
 		titleText.antialiasing = SaveData.data.antialiasing;
 		titleText.playAnim('idle');
 		titleText.updateHitbox();
@@ -52,7 +52,7 @@ class TitleState extends ScriptState {
             acceptOption = true;
             titleText.playAnim('press');
             FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
-            FlxG.camera.flash(0xFFFFFFFF, 0.4);
+            FlxG.camera.flash(0xFFFFFFFF, 0.2);
             new FlxTimer().start(1, function(tmr:FlxTimer) {
                 ScriptClass.switchState('MainMenuState');
             });

@@ -1,8 +1,8 @@
-package core.scripting.types;
+package modding.scripting.types;
 
 import rulescript.RuleScript;
 import states.substates.MusicBeatSubstate;
-import core.scripting.ScriptHandler;
+import modding.scripting.ScriptHandler;
 
 class ScriptClass {
 	// example load: ScriptClass.load('customClass');

@@ -1,7 +1,7 @@
-package core.scripting.types.sprites;
+package modding.scripting.types.sprites;
 
 #if HSCRIPT_ALLOWED
-import core.scripting.ScriptHandler;
+import modding.scripting.ScriptHandler;
 #end
 
 class ScriptedSpriteGroup extends core.assets.FunkinObjectRegistry {

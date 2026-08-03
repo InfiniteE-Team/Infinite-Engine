@@ -1,4 +1,4 @@
-package core.assets.mods;
+package modding.mods;
 
 class ModsRegistry {
     public static var onMod:Bool = false;

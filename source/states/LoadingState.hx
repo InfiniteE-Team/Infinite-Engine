@@ -58,7 +58,7 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function buildUI() {
-		_bg = new FlxSprite().loadGraphic(Paths.getPath('menus/installer/BG_installer', 'image'));
+		_bg = new FlxSprite().loadGraphic(Paths.getPath('menus/menuBG2', 'image'));
 		_bg.screenCenter();
 		_bg.antialiasing = SaveData.data.antialiasing;
 		_bg.scrollFactor.set(0, 0);

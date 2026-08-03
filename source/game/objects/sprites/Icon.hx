@@ -2,7 +2,7 @@ package game.objects.sprites;
 
 import core.json.objects.CharacterData;
 
-class Icon extends core.scripting.types.sprites.ScriptedSprite {
+class Icon extends modding.scripting.types.sprites.ScriptedSprite {
 	public var bumpInBeats:Bool = true;
 	public var stepTempo:Float = 2;
 
