@@ -18,7 +18,7 @@ class MainMenuState extends ScriptState {
 	override public function create() {
 		super.create();
 
-		MasterAudio.playMenu('menus/freakyMenu/freakyMenu', 0.6, 102);
+		MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102);
 
 		var bg:FlxSprite = new FlxSprite();
 		bg.loadGraphic(Paths.getPath('menus/menuBG', 'image'));
@@ -79,7 +79,7 @@ class MainMenuState extends ScriptState {
 						trace("In Story Mode");
 					case 'freeplay':
 						acceptOption = true;
-						ScriptClass.switchState('FreeplayState');
+						MusicBeatState.switchState(() -> new states.menus.FreeplayState());
 					case 'credits':
 						acceptOption = true;
 						trace("In Credits");

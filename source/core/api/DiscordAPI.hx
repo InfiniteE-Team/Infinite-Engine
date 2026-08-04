@@ -8,7 +8,7 @@ import hxdiscord_rpc.Types.DiscordUser;
 import sys.thread.Thread;
 
 class DiscordAPI {
-	static final DISCORD_CLIENT_ID:Null<String> = "112233445566778899"; // Replace with your actual Discord client ID
+	static final DISCORD_CLIENT_ID:Null<String> = "1534274562496270356"; // Replace with your actual Discord client ID
 
 	public static var instance(get, never):DiscordAPI;
 	static var _instance:Null<DiscordAPI> = null;

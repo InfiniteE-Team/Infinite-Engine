@@ -9,7 +9,7 @@ var comboPool = [];
 var missPool = [];
 
 function postCreate() {
-	scoreText = new FlxText(0, healthBarY + 30, FlxG.width, "Score: 0 - Misses: 0");
+	scoreText = new FlxText(0, healthBarY + 30, FlxG.width, "Score: 0 / Misses: 0");
 	scoreText.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFFFFFFFF, "center");
 	scoreText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 	scoreText.antialiasing = SaveData.data.antialiasing;
@@ -24,7 +24,7 @@ function postUpdate(elapsed:Float) {
 
 function updateScore() {
 	var scoreFinal:String = InfiniteUtil.formatNumber(playStateConfig.score);
-	scoreText.text = 'Score: $scoreFinal - Misses: ${playStateConfig.misses}';
+	scoreText.text = 'Score: $scoreFinal / Misses: ${playStateConfig.misses}';
 }
 
 function onRewind() {

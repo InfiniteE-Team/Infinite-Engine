@@ -3,7 +3,7 @@ package;
 import core.api.WindowAPI;
 import core.assets.Library;
 import flixel.text.FlxTextBorderStyle;
-import core.assets.mods.ModsRegistry;
+import modding.mods.ModsRegistry;
 
 class ModsSubstate extends ScriptSubstate {
 	var curSelected:Int = 0;

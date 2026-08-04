@@ -16,7 +16,7 @@ class TitleState extends ScriptState {
 	override public function create() {
 		super.create();
 
-		MasterAudio.playMenu('menus/freakyMenu/freakyMenu', 0.6, 102);
+		MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102);
 
 		logo = new FlxSprite(-150, -100);
 		logo.frames = Paths.getPath('menus/title/logoBumpin', 'animated');

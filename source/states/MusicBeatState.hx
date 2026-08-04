@@ -3,6 +3,7 @@ package states;
 import states.LoadingState;
 import core.rhythm.TrackBeat;
 import core.json.JsonWatcher;
+import states.menus.FreeplayState;
 import utils.InfoHelpDebug;
 #if HSCRIPT_ALLOWED
 import modding.scripting.ScriptHandler;

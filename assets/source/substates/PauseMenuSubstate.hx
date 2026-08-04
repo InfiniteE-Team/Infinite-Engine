@@ -1,3 +1,3 @@
 function ExitMenu() {
-	ScriptClass.switchState('FreeplayState');
+	MusicBeatState.switchState(() -> new states.menus.FreeplayState());
 }

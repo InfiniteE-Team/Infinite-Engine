@@ -9,13 +9,13 @@ function onUpdate(elapsed) {
 	if (Controls.ACCEPT)
 		pauseMenu();
 
-    if (FlxG.keys.justPressed.R && !startCount)
-        isDeath();
+	if (FlxG.keys.justPressed.R && !startCount)
+		isDeath();
 }
 
 function postEndSong() {
 	new FlxTimer().start(2, (_) -> {
 		if (!PlayStateConfig.isStoryMode)
-			ScriptClass.switchState('FreeplayState');
+			MusicBeatState.switchState(() -> new states.menus.FreeplayState());
 	});
 }
