@@ -3,5 +3,5 @@ package modding.scripting.interfaces;
 import rulescript.scriptedClass.RuleScriptedClass;
 
 @:keepSub
-@:strictScriptedConstructor  
+@:strictScriptedConstructor
 class ScriptState implements RuleScriptedClass extends MusicBeatState {}

@@ -91,8 +91,10 @@ class ScriptHandler {
 				script.registersuperInstance();
 		}
 		var result:Dynamic = null;
-		for (script in scripts)
-			result = script.access.callFunction(name, args);
+		for (script in scripts) {
+			if (script.interp.access.variableExists(name))
+				result = script.access.callFunction(name, args);
+		}
 		for (script in luaScripts)
 			result = script.call(name, args);
 		return result;
@@ -137,8 +139,32 @@ class ScriptHandler {
 		parser.allowAll();
 		var script = new RuleScript(null, parser, globalContext);
 		setupScript(script);
-		script.errorHandler = (error:haxe.Exception) -> Trace.traceOnce('[RuleScript Error] -> ${error.message}');
-		script.tryExecute(sys.io.File.getContent(path));
+		script.errorHandler = (error:haxe.Exception) -> {
+			var pos = script.interp.access.posInfos();
+			var file = pos.fileName;
+			var line = pos.lineNumber;
+			var msg = switch (Std.string(error.message)) {
+				case s if (s.startsWith("EUnknownVariable(")):
+					'Unknown variable: ${s.substring(17, s.length - 1)}';
+				case s if (s.startsWith("EInvalidAccess(")):
+					'Invalid field access: ${s.substring(15, s.length - 1)}';
+				case s: s;
+			};
+			Trace.traceOnce('[$file:$line] Script error: $msg');
+		};
+
+		try {
+			var parsed = parser.parse(sys.io.File.getContent(path));
+			script.execute(parsed);
+		} catch (e:hscript.Expr.Error) {
+			#if hscriptPos
+			Trace.traceOnce('[${haxe.io.Path.withoutDirectory(path)}:${e.line}] Parse/runtime error: ${hscript.Printer.errorToString(e)}');
+			#else
+			Trace.traceOnce('[${haxe.io.Path.withoutDirectory(path)}] Error: ${e}');
+			#end
+		} catch (e) {
+			Trace.traceOnce('[${haxe.io.Path.withoutDirectory(path)}] Unexpected: ${e.details()}');
+		}
 		return script;
 	}
 
@@ -178,6 +204,8 @@ class ScriptHandler {
 		superInstance = null;
 		for (script in luaScripts)
 			script.destroy();
+		pendingPaths = null;
+		typedefs = null;
 		luaScripts = null;
 	}
 }

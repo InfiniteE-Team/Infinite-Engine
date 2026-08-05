@@ -1,7 +1,6 @@
 package states;
 
 import states.LoadingState;
-import core.rhythm.TrackBeat;
 import core.json.JsonWatcher;
 import states.menus.FreeplayState;
 import utils.InfoHelpDebug;
@@ -12,9 +11,9 @@ import game.controllers.InputController;
 
 class MusicBeatState extends State {
 	public static var skipNextTransIn:Bool = false;
-    public static var skipNextTransOut:Bool = false;
+	public static var skipNextTransOut:Bool = false;
 
-	var tracker:TrackBeat = new TrackBeat();
+	var t:core.rhythm.RhythmTracker;
 
 	#if HSCRIPT_ALLOWED
 	var script:ScriptHandler;
@@ -30,29 +29,33 @@ class MusicBeatState extends State {
 		#end
 		super.create();
 
+		t = new core.rhythm.RhythmTracker();
+
 		if (core.ConfigMain.globalData.developerMode) {
 			infoHelp = new InfoHelpDebug(FlxG.width - 300, 0, 0);
 			add(infoHelp);
 		}
 
 		var isGlobalSkip = core.ConfigMain.globalData != null && core.ConfigMain.globalData.skipTrans == true;
-        var skipIn = skipNextTransIn || isGlobalSkip;
+		var skipIn = skipNextTransIn || isGlobalSkip;
 
 		if (skipIn) {
-            skipNextTransIn = false;
-            return;
-        }
+			skipNextTransIn = false;
+			return;
+		}
 
 		openSubState(new states.custom.CustomTransition(true, 0.2));
 	}
 
 	#if HSCRIPT_ALLOWED
 	function initScript() {
-		script = new ScriptHandler(this);
 		var theclass = Type.getClass(this);
 		var className = Type.getClassName(theclass).split('.').pop();
+
+		script = new ScriptHandler(this);
 		script.load(Paths.getPath(className, 'states'));
 		script.exposeStatics(theclass);
+		script.executeAll();
 	}
 	#end
 
@@ -70,8 +73,7 @@ class MusicBeatState extends State {
 				infoHelp.openUI();
 		}
 
-		tracker.update();
-		tracker.check(stepHit, beatHit);
+		t.check(stepHit, beatHit);
 	}
 
 	public static function resetState():Void {
@@ -87,21 +89,21 @@ class MusicBeatState extends State {
 		var currentState = FlxG.state;
 
 		var isGlobalSkip = core.ConfigMain.globalData != null && core.ConfigMain.globalData.skipTrans == true;
-        var skipOut = skipNextTransOut || isGlobalSkip;
+		var skipOut = skipNextTransOut || isGlobalSkip;
 
 		if (skipOut) {
-            skipNextTransOut = false;
-            FlxG.switchState(state);
-            return;
-        }
+			skipNextTransOut = false;
+			FlxG.switchState(state);
+			return;
+		}
 
-        if (currentState != null) {
-            currentState.openSubState(new states.custom.CustomTransition(false, 0.2, function() {
-                FlxG.switchState(state);
-            }));
-        } else {
-            FlxG.switchState(state);
-        }
+		if (currentState != null) {
+			currentState.openSubState(new states.custom.CustomTransition(false, 0.2, function() {
+				FlxG.switchState(state);
+			}));
+		} else {
+			FlxG.switchState(state);
+		}
 	}
 
 	public function stepHit(step:Int) {
@@ -130,6 +132,7 @@ class MusicBeatState extends State {
 		}
 		#end
 		infoHelp = null;
+		t.reset();
 		super.destroy();
 	}
 }

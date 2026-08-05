@@ -13,7 +13,7 @@ class ScriptedSprite extends core.assets.FunkinSprite {
 
 	#if HSCRIPT_ALLOWED
 	public function initScript(scriptPath:String):Void {
-		scriptPath = this.scriptPath;
+		this.scriptPath = scriptPath;
 		script = new ScriptHandler(this);
 		script.load(Paths.getPath(scriptPath, 'script'));
 		script.executeAll();

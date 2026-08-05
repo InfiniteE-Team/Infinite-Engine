@@ -224,8 +224,6 @@ class PlayState extends MusicBeatState {
 
 		gameAudio.playAll();
 		RhythmCore.resume(gameAudio);
-
-		tracker.reset();
 	}
 
 	public function endSong() {
@@ -399,6 +397,8 @@ class PlayState extends MusicBeatState {
 			script.call("onUpdate", [elapsed]);
 		#end
 
+		super.update(elapsed);
+
 		if (startCount && !paused) {
 			RhythmCore.songPosition += elapsed * 1000;
 		} else if (gameAudio != null && gameAudio.inst != null) {
@@ -442,8 +442,6 @@ class PlayState extends MusicBeatState {
 				}
 			}
 		}
-
-		super.update(elapsed);
 
 		#if HSCRIPT_ALLOWED
 		if (script != null)

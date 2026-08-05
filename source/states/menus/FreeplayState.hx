@@ -5,6 +5,7 @@ import utils.InfiniteUtil;
 import states.LoadingState;
 import flixel.text.FlxText;
 import flixel.math.FlxMath;
+import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import game.PlayStateConfig;
 import states.MusicBeatState;
@@ -108,7 +109,9 @@ class FreeplayState extends states.MusicBeatState {
 			FlxTween.tween(noExists, {alpha: 1}, 1, {type: FlxTweenType.PINGPONG});
 		}
 
-		box = new FlxSprite(770, -80).makeGraphic(590, 870, 0xFF0F0F0F);
+		box = new FlxSprite(770, -80).makeGraphic(1, 1, 0xFF0F0F0F);
+		box.scale.set(590, 870);
+		box.updateHitbox();
 		box.angle = 10;
 		add(box);
 
@@ -193,7 +196,7 @@ class FreeplayState extends states.MusicBeatState {
 
 		if (Controls.BACK) {
 			acceptOption = true;
-		    core.rhythm.audio.MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102, true);
+			core.rhythm.audio.MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102, true);
 			modding.scripting.types.ScriptClass.switchState('MainMenuState');
 		}
 
@@ -231,9 +234,8 @@ class FreeplayState extends states.MusicBeatState {
 
 		var songSelected:String = freeplayData.songData[curSelected].song;
 		var bpm:Float = freeplayData.songData[curSelected].bpm;
-		// var diffSelected:String = DiffsUtils.difficulties[curDiff];
 
-		if (songSelected != null /* && diffSelected != null*/) {
+		if (songSelected != null) {
 			core.rhythm.audio.MasterAudio.playMenu(Paths.getPath('songs/' + songSelected + '/audio/Inst.ogg'), 0.6, bpm, true);
 		}
 	}
@@ -284,9 +286,12 @@ class FreeplayState extends states.MusicBeatState {
 
 	override public function destroy() {
 		super.destroy();
-		freeplayData = null;
-		album = null;
+
 		songs = null;
 		icons = null;
+		freeplayData = null;
+		album = null;
+
+		FlxG.bitmap.clearUnused();
 	}
 }
