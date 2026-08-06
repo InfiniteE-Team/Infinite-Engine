@@ -52,7 +52,7 @@
             1,
             1
         ],
-        "alpha": 0.6,
+        "alpha": 1,
         "visible": true,
         "flipX": false,
         "flipY": false,
@@ -63,7 +63,6 @@
             1
         ],
         "antialiasing": true,
-        "firstAnim": "splash 1",
         "anims": [
             {
                 "name": "note0-Splash0",

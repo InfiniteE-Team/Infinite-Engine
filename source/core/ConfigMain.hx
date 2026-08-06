@@ -37,7 +37,7 @@ class ConfigMain extends flixel.FlxState {
 		core.config.SaveScore.load();
 
 		core.ui.FPSCounter.instance.updateVisibility();
-		
+
 		#if (DISCORD_ALLOWED && hxdiscord_rpc < "1.2.0")
 		core.api.DiscordAPI.init();
 		Application.current.onExit.add(function(exitCode:Int) {
@@ -57,9 +57,9 @@ class ConfigMain extends flixel.FlxState {
 		#if windows
 		core.api.WindowAPI.init();
 		#end
-/*
-		ConductorImplementation.custom_songPosition = () -> core.rhythm.RhythmCore.songPosition;
-		ConductorImplementation.custom_crochet = () -> core.rhythm.RhythmCore.crochet;*/
+		/*
+			ConductorImplementation.custom_songPosition = () -> core.rhythm.RhythmCore.songPosition;
+			ConductorImplementation.custom_crochet = () -> core.rhythm.RhythmCore.crochet; */
 
 		if (globalData.developerMode)
 			Trace.init();
@@ -67,7 +67,7 @@ class ConfigMain extends flixel.FlxState {
 		core.assets.Library.reloadMods();
 
 		core.api.DiscordAPI.init();
-		
+
 		if (globalData.startStateScript != null) {
 			modding.scripting.types.ScriptClass.switchState(globalData.startStateScript);
 		} else {

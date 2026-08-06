@@ -31,7 +31,7 @@ class NoteSplash extends FunkinSprite {
 	public function loadSprite(noteSkinData:NoteSkinData) {
 		loadProps(noteSkinData.props, 'game/noteskins/$noteSkin/splashes');
 		playAnim('note$direction-Splash$random', true);
-		RGBShader.applyByAnimation(this, noteSkinData, 'note$direction-Scroll');
+		RGBShader.applyByAnimation(this, noteSkinData, 'note$direction-Splash$random');
 	}
 
 	override function update(elapsed:Float) {

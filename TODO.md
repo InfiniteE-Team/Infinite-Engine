@@ -6,12 +6,12 @@
     - [x] Notes
     - [x] Sustains
     - [x] Note Splashes
-    - [ ] Hold Splash
+    - [X] Hold Splash
     - [x] Chart Format
     - [x] HUD
 
 - [ ] Menus
-    - [ ] TitleState
+    - [X] TitleState
     - [ ] StoryMenuState
     - [X] FreeplayState (WIP)
     - [X] MainMenuState
@@ -20,7 +20,13 @@
 - [x] Sub-Menus
     - [x] PauseMenuSubState
     - [ ] GameOverSubState
-    - [ ] FadeTransition
+    - [X] FadeTransition
+
+- [ ] Options Menu
+    - [X] Gameplay Section
+    - [ ] Keyboards Section (WIP)
+    - [X] Graphics Section
+    - [ ] Debug Section
 
 - [ ] Discord Pressence API
     - [ ] API Custom
@@ -56,8 +62,6 @@
 - [x] Config
     - [x] Global
     - [x] Debug
-    - [x] Options
-    - [x] Controls
 
 - [ ] Inputs
   - [x] Keyboard

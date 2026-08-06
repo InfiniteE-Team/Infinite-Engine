@@ -33,24 +33,37 @@ class InputController {
 
 				var canHold = songPos >= sustain.strumTime - 50 && songPos <= sustain.strumTime + sustain.length;
 				if (canHold) {
+					if (!sustain.isHeld) {
+						noteController.spawnHoldSplash(charStrums[i], i, sustain.noteType);
+					}
 					sustain.isHeld = true;
 					charStrums[i].playAnim('confirm' + i, false);
-				}
+				} else if (sustain.isHeld) {
+                    sustain.isHeld = false;
+                    noteController.stopHoldSplash(charStrums[i]);
+                }
 			}
 		} else { // release key
+			var wasHolding = false;
+
 			for (sustain in noteController.sustains.members) {
 				if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != charStrums[i])
 					continue;
 
 				var songPos = core.rhythm.RhythmCore.songPosition;
-				if (sustain.isHeld && songPos < (sustain.strumTime + sustain.length)) {
-					sustain.wasMissed = true;
-					sustain.canBeHit = false;
-					onMiss(playStateConfig, noteController, gameAudio);
+				if (sustain.isHeld) {
+					wasHolding = true;
+					if (songPos < (sustain.strumTime + sustain.length)) {
+						sustain.wasMissed = true;
+						sustain.canBeHit = false;
+						onMiss(playStateConfig, noteController, gameAudio);
+					}
 				}
-
 				sustain.isHeld = false;
 			}
+
+			if (wasHolding)
+				noteController.stopHoldSplash(charStrums[i]);
 
 			for (note in noteController.notes.members) {
 				if (note == null || !note.alive || !note.mustPress || note.wasMissed)

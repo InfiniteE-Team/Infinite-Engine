@@ -13,6 +13,7 @@ import game.objects.sprites.notes.StrumNote;
 import game.objects.sprites.notes.Note;
 import game.objects.sprites.notes.NoteSustain;
 import game.objects.sprites.notes.NoteSplash;
+import game.objects.sprites.notes.HoldSplash;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import game.graphics.shaders.hardcode.RGBShader;
 #if HSCRIPT_ALLOWED
@@ -27,6 +28,7 @@ class NoteController {
 
 	public var noteSkinData:NoteSkinData;
 	public var splashesSkinData:NoteSkinData;
+	public var holdSkinData:NoteSkinData;
 
 	public var noteSkin:String = 'default';
 	public var noteType:String = 'normal';
@@ -35,12 +37,14 @@ class NoteController {
 	public var notes:FlxTypedGroup<Note> = new FlxTypedGroup<Note>();
 	public var sustains:FlxTypedGroup<NoteSustain> = new FlxTypedGroup<NoteSustain>();
 	public var splashes:FlxTypedGroup<NoteSplash> = new FlxTypedGroup<NoteSplash>();
+	public var holdsplashes:FlxTypedGroup<HoldSplash> = new FlxTypedGroup<HoldSplash>();
 
 	public var strumsByChar:Map<String, FlxTypedGroup<StrumNote>> = new Map();
 
 	var _notePool:Map<String, Array<Note>> = new Map();
 	var _sustainPool:Map<String, Array<NoteSustain>> = new Map();
 	var _splashPool:Map<String, Array<NoteSplash>> = new Map();
+	var _holdsplashPool:Map<String, Array<HoldSplash>> = new Map();
 
 	public var unspawnNotes:Array<Note> = [];
 	public var charStrumOffsets:Map<String, Int> = new Map();
@@ -101,7 +105,7 @@ class NoteController {
 			loadGenerateStrums(strumPos != null ? strumPos[0] : 0, strumPos != null ? strumPos[1] : 0, daSong.chars[i].id, isPlayer);
 		}
 
-		strums.visible = notes.visible = sustains.visible = splashes.visible = daSong.strumsVisible;
+		strums.visible = notes.visible = sustains.visible = splashes.visible = holdsplashes.visible = daSong.strumsVisible;
 
 		Trace.traceOnce("Created Strums");
 	}
@@ -155,6 +159,10 @@ class NoteController {
 		// splashes
 		var splashesDataPath:String = 'noteskins/$noteSkin/splashes';
 		splashesSkinData = FormatJson.readJson(Paths.getPath('data/$splashesDataPath', "json"));
+
+		// hold splashes
+		var holdDataPath:String = 'noteskins/$noteSkin/holdsplashes';
+		holdSkinData = FormatJson.readJson(Paths.getPath('data/$holdDataPath', "json"));
 
 		Trace.traceOnce("Note Skin JSON loaded");
 	}
@@ -362,6 +370,56 @@ class NoteController {
 		_splashPool.get(splash.noteSkin).push(splash);
 	}
 
+	public var activeHoldSplashes:Map<StrumNote, HoldSplash> = new Map();
+
+    public function spawnHoldSplash(strum:StrumNote, direction:Int, noteType:String = 'normal'):Void {
+        if (activeHoldSplashes.exists(strum))
+            return;
+
+        var pool = _holdsplashPool.get(noteSkin);
+        var holdsplash:HoldSplash;
+
+        if (pool != null && pool.length > 0) {
+            holdsplash = pool.pop();
+            holdsplash.revive();
+        } else {
+            holdsplash = new HoldSplash(keys, strum.x + strum.offset.x, strum.y + strum.offset.y, holdSkinData, noteSkin, direction, noteType);
+        }
+
+        holdsplash.direction = direction;
+        holdsplash.noteControl = this;
+        holdsplash.setPosition(strum.x, strum.y);
+        holdsplash.loadSprite(holdSkinData);
+        holdsplashes.add(holdsplash);
+
+        activeHoldSplashes.set(strum, holdsplash);
+    }
+
+    public function stopHoldSplash(strum:StrumNote):Void {
+        var holdsplash = activeHoldSplashes.get(strum);
+        if (holdsplash != null) {
+            holdsplash.endHold();
+            activeHoldSplashes.remove(strum);
+        }
+    }
+
+    public function recycleHoldSplash(holdsplash:HoldSplash):Void {
+        holdsplashes.remove(holdsplash, true);
+        holdsplash.kill();
+        holdsplash.noteControl = null;
+
+        for (strum in activeHoldSplashes.keys()) {
+            if (activeHoldSplashes.get(strum) == holdsplash) {
+                activeHoldSplashes.remove(strum);
+                break;
+            }
+        }
+
+        if (!_holdsplashPool.exists(holdsplash.noteSkin))
+            _holdsplashPool.set(holdsplash.noteSkin, []);
+        _holdsplashPool.get(holdsplash.noteSkin).push(holdsplash);
+    }
+
 	public function update(songTime:Float) {
 		scrollSpeed = flixel.math.FlxMath.lerp(scrollSpeed, targetScrollSpeed, flixel.FlxG.elapsed * lerpSpeed);
 		updateNotes(songTime);
@@ -450,10 +508,30 @@ class NoteController {
 		for (sustain in sustains.members) {
 			if (sustain == null)
 				continue;
-			var isEnd = sustain.isSustainEnd;
+
+			var lane = sustain.direction;
+
+			// CPU HOLD SPLASHES
+			if (!SaveData.data.middlescroll) {
+                if (!sustain.mustPress) {
+                    var isWithinHold = songTime >= sustain.strumTime && songTime <= (sustain.strumTime + sustain.length);
+
+                    if (isWithinHold) {
+                        if (!sustain.isHeld) {
+                            sustain.isHeld = true;
+                            spawnHoldSplash(sustain.strum, lane % keys, sustain.noteType);
+                        }
+                        sustain.strum.playAnim('confirm' + (lane % keys), false);
+                    } else if (sustain.isHeld) {
+                        sustain.isHeld = false;
+                        stopHoldSplash(sustain.strum);
+                        sustain.strum.playAnim('static' + (lane % keys), true);
+                    }
+                }
+            }
 
 			// HANDLE SUSTAIN ENDS
-			if (isEnd) {
+			if (sustain.isSustainEnd) {
 				#if HSCRIPT_ALLOWED
 				if (scriptNC.callCancellable('onEndSustainMovementCancel', []))
 					continue;
@@ -526,9 +604,13 @@ class NoteController {
 			scriptNC.call("onSustainMovement", [sustain, songTime]);
 			#end
 
-			if (sustain.strumTime + sustain.length < songTime)
-				toDestroy.push(sustain);
-			else if (!isDownscroll && sustain.y + scaledHeight < 0)
+			if (sustain.strumTime + sustain.length < songTime) {
+                if (sustain.isHeld) {
+                    sustain.isHeld = false;
+                    stopHoldSplash(sustain.strum);
+                }
+                toDestroy.push(sustain);
+			} else if (!isDownscroll && sustain.y + scaledHeight < 0)
 				toDestroy.push(sustain);
 			else if (isDownscroll && sustain.y - sustain.offset.y > flixel.FlxG.height)
 				toDestroy.push(sustain);
@@ -648,11 +730,13 @@ class NoteController {
 		notes.destroy();
 		sustains.destroy();
 		splashes.destroy();
+		holdsplashes.destroy();
 
 		strums = null;
 		notes = null;
 		sustains = null;
 		splashes = null;
+		holdsplashes = null;
 	}
 
 	public function getCharStrums(charId:String):Array<StrumNote> {

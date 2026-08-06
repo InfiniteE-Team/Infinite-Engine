@@ -168,7 +168,8 @@ class PlayState extends MusicBeatState {
 			noteController.strums,
 			noteController.sustains,
 			noteController.notes,
-			noteController.splashes
+			noteController.splashes,
+			noteController.holdsplashes
 		]) {
 			noteControl.cameras = [camHUD];
 			add(noteControl);

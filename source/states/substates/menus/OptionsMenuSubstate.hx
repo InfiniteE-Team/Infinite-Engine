@@ -182,7 +182,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 
 		FlxG.sound.play(Paths.getPath('menus/scrollMenu', 'sound'));
 		if (currentList == null || currentList.length == 0) {
-			descText.text = "Presiona ENTER para configurar controles.";
+			descText.text = "Press ENTER to configure controls.";
 			return;
 		}
 
