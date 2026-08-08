@@ -43,7 +43,8 @@ class LoadingState extends MusicBeatState {
 	override public function create() {
 		super.create();
 
-		FlxG.sound.music.stop();
+		if (FlxG.sound.music != null)
+			FlxG.sound.music.stop();
 
 		buildUI();
 		collectQueue();

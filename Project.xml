@@ -16,11 +16,10 @@
 	<!-- ____________________________ Defines ___________________________ -->
 
 	<define name="CRASH_HANDLER" if="desktop" />
-	<define name="HSCRIPT_ALLOWED" if="desktop" />
+	<define name="HSCRIPT_ALLOWED"/>
 	<define name="LUA_ALLOWED" if="desktop" />
 	<define name="DISCORD_ALLOWED" if="desktop"/>
-
-	<define name="WM_CUSTOM_CONDUCTOR"/>
+	<define name="VIDEO_ALLOWED" if="cpp"/>
 
 	<define name="HX_WINDOWS" if="windows cpp"/>
 

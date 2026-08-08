@@ -45,6 +45,11 @@ class ScriptGlobals {
 		roots['MasterAudio'] = core.rhythm.audio.MasterAudio;
 		roots['GameAudio'] = core.rhythm.audio.GameAudio;
 
+		// Cutscenes
+		roots['VideoState'] = states.cutscenes.VideoState;
+		roots['VideoSprite'] = states.cutscenes.VideoSprite;
+
+		// Scripting
 		roots['ScriptState'] = modding.scripting.interfaces.ScriptState;
 		roots['ScriptSubstate'] = modding.scripting.interfaces.ScriptSubstate;
 
@@ -133,6 +138,13 @@ class ScriptGlobals {
 			// Save Config Game
 			"SaveScore" => core.config.SaveScore,
 			"SaveData" => core.config.SaveData,
+			// Sound
+			"Sound" => core.rhythm.audio.Sound,
+			"MasterAudio" => core.rhythm.audio.MasterAudio,
+			"GameAudio" => core.rhythm.audio.GameAudio,
+			// Cutscenes
+			"VideoState" => states.cutscenes.VideoState,
+			"VideoSprite" => states.cutscenes.VideoSprite,
 			// Utils
 			"Trace" => Trace,
 			#if windows

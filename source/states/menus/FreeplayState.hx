@@ -282,7 +282,7 @@ class FreeplayState extends states.MusicBeatState {
 		var bpm:Float = freeplayData.songData[curSelected].bpm;
 
 		if (songSelected != null) {
-			core.rhythm.audio.MasterAudio.playMenu(Paths.getPath('songs/' + songSelected + '/audio/Inst.ogg'), 0.6, bpm, true);
+			core.rhythm.audio.MasterAudio.playSong(Paths.getPath('songs/' + songSelected + '/audio/Inst.ogg'), 0.6, bpm, true);
 		}
 	}
 
