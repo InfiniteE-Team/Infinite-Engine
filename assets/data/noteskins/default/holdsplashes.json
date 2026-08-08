@@ -93,8 +93,8 @@
                 "flipX": false,
                 "flipY": false,
                 "offsets": [
-                    0,
-                    0
+                    20,
+                    20
                 ]
             },
             {
@@ -106,7 +106,7 @@
                 "flipX": false,
                 "flipY": false,
                 "offsets": [
-                    10,
+                    5,
                     10
                 ]
             },
@@ -132,8 +132,8 @@
                 "flipX": false,
                 "flipY": false,
                 "offsets": [
-                    0,
-                    0
+                    20,
+                    20
                 ]
             },
             {
@@ -145,7 +145,7 @@
                 "flipX": false,
                 "flipY": false,
                 "offsets": [
-                    10,
+                    5,
                     10
                 ]
             },
@@ -171,8 +171,8 @@
                 "flipX": false,
                 "flipY": false,
                 "offsets": [
-                    0,
-                    0
+                    20,
+                    20
                 ]
             },
             {
@@ -184,7 +184,7 @@
                 "flipX": false,
                 "flipY": false,
                 "offsets": [
-                    10,
+                    5,
                     10
                 ]
             },
@@ -210,8 +210,8 @@
                 "flipX": false,
                 "flipY": false,
                 "offsets": [
-                    0,
-                    0
+                    20,
+                    20
                 ]
             },
             {
@@ -223,7 +223,7 @@
                 "flipX": false,
                 "flipY": false,
                 "offsets": [
-                    10,
+                    5,
                     10
                 ]
             },

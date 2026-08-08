@@ -129,7 +129,7 @@ class FreeplayState extends states.MusicBeatState {
 		diffTxt.scrollFactor.set(0, 0);
 		add(diffTxt);
 
-		scoreTxt.x = 770 + (590 / 2) - (scoreTxt.fieldWidth / 2);
+		scoreTxt.x = 720 + (590 / 2) - (scoreTxt.fieldWidth / 2);
 		scoreTxt.y = FlxG.height * 0.76;
 
 		diffTxt.y = FlxG.height * 0.7;
@@ -224,7 +224,7 @@ class FreeplayState extends states.MusicBeatState {
 		DiffsUtils.getDifficulty(freeplayData.songData[curSelected].song);
 
 		diffTxt.text = '< ' + DiffsUtils.difficulties[curDiff].toUpperCase() + ' >';
-		diffTxt.x = 820;
+		diffTxt.x = 925;
 
 		updateScore();
 	}
