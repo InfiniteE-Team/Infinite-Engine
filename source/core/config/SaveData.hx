@@ -63,6 +63,9 @@ class SaveData {
 		if (SaveData.data.currentMod == null)
 			SaveData.data.currentMod = '';
 
+		if (SaveData.data.logInScreen == null)
+			SaveData.data.logInScreen = true;
+
 		flush();
 	}
 }

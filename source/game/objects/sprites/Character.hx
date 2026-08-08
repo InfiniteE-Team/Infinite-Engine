@@ -65,10 +65,12 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 				if (characterData.gameplay.position != null)
 					setPosition(characterData.gameplay.position[0], characterData.gameplay.position[1]);
 
-				for (layer in characterData.render.layers) {
-					var sprite = new FunkinSprite(0, 0);
-					sprite.loadProps(layer, 'game/characters');
-					layers.push(sprite);
+				if (characterData.render.layers != null) {
+					for (layer in characterData.render.layers) {
+						var sprite = new FunkinSprite(0, 0);
+						sprite.loadProps(layer, 'game/characters');
+						layers.push(sprite);
+					}
 				}
 		}
 
@@ -107,16 +109,19 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		if (script.callCancellable('onPlayAnim', [name, force]))
 			return;
 		#end
-		for (layer in layers)
-			layer.playAnim(name, force);
 
-		for (layer in characterData.render.layers) {
-			for (anim in layer.anims) {
-				if (anim.name == name) {
-					isFlipXAnim = anim.flipX;
-					if (flipX != isFlipXAnim)
-						flipX = isFlipXAnim;
-					break;
+		if (characterData.render.layers != null) {
+			for (layer in layers)
+				layer.playAnim(name, force);
+
+			for (layer in characterData.render.layers) {
+				for (anim in layer.anims) {
+					if (anim.name == name) {
+						isFlipXAnim = anim.flipX;
+						if (flipX != isFlipXAnim)
+							flipX = isFlipXAnim;
+						break;
+					}
 				}
 			}
 		}

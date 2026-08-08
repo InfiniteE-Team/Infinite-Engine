@@ -47,7 +47,7 @@ class Countdown extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSp
 			core.json.extensions.AudioData.AudioConfig.playElementAudio(countStep.sound, 'gameplay/countdown/$curCountdown/');
 
 		if (countStep.props != null && countStep.props.path != null) {
-			var sprite:FunkinSprite = new FunkinSprite();
+			var sprite:FunkinSprite = new FunkinSprite(0, 0, true);
 			sprite.loadProps(countStep.props, 'game/countdown/$curCountdown');
 			sprite.screenCenter();
 			add(sprite);

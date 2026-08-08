@@ -43,7 +43,6 @@ class Sound extends flixel.sound.FlxSound {
 	public static function clearGlobalCache():Void {
         if (streamedCache != null) {
             streamedCache.clear();
-            trace("Sound Cache cleaned!");
         }
     }
 

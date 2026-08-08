@@ -30,7 +30,7 @@ class TitleState extends ScriptState {
         gfDance.antialiasing = SaveData.data.antialiasing;
         add(gfDance);
 
-        titleText = new FunkinSprite(100, FlxG.height * 0.8);
+        titleText = new FunkinSprite(100, FlxG.height * 0.8, true);
         titleText.frames = Paths.getPath('menus/title/title-screen-text', 'animated');
         titleText.addAnim('idle', 'Idle', 24, true);
         titleText.addAnim('press', 'Confirm', 24, true);

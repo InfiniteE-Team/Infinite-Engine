@@ -16,9 +16,21 @@ class FunkinSprite extends animate.FlxAnimate {
 
 	var _suffixes:Map<String, String> = new Map();
 
+	var _assetLoaded:Bool = false;
+
 	// Tracks the last anim played — DO NOT use anim.name (FlxAnimateController),
 	// that only updates for Adobe Animate atlas sprites, not Sparrow.
 	public var currentAnim:String = '';
+
+	public function new(?x:Float = 0, ?y:Float = 0, ?usesLoadProps:Bool = false) {
+		super(x, y);
+		if (usesLoadProps) {
+			_assetLoaded = true;
+			@:privateAccess
+			this._frame = null;
+			this.graphic = null;
+		}
+	}
 
 	override public function updateHitbox() {
 		super.updateHitbox();
@@ -26,6 +38,7 @@ class FunkinSprite extends animate.FlxAnimate {
 
 	public function loadProps(props:ObjectData, path:String):Void {
 		var assetPath = '$path/${props.path}';
+
 		var loaded = Paths.getPath(assetPath, 'animated');
 
 		if (loaded == null) {
@@ -88,6 +101,8 @@ class FunkinSprite extends animate.FlxAnimate {
 		if (graphic != null && graphic.bitmap != null) {
 			graphic.bitmap.disposeImage(); // clears RAM to use only the memory in VRAM
 		}
+
+		_assetLoaded = true;
 	}
 
 	public function addAnim(name:String, prefix:String, fps:Float = 24, looped:Bool = true, ?indices:Array<Int>):Void {
@@ -124,7 +139,7 @@ class FunkinSprite extends animate.FlxAnimate {
 					for (frame in layer.frames)
 						if (frame.name != null && frame.name.rtrim() == name)
 							return true;
-			
+
 			@:privateAccess
 			final collections = this.library.addedCollections;
 			if (collections != null) {
@@ -201,6 +216,7 @@ class FunkinSprite extends animate.FlxAnimate {
 		makeGraphic(Std.int(props.scale[0]), Std.int(props.scale[1]), color);
 		loadParams(props);
 		updateHitbox();
+		_assetLoaded = true;
 	}
 
 	public function loadParams(props:ObjectData):Void {
@@ -266,6 +282,8 @@ class FunkinSprite extends animate.FlxAnimate {
 		offset.set(0 - off.x, 0 - off.y);
 
 	override public function draw():Void {
+		if (!_assetLoaded)
+			return;
 		if (isAnimate && (timeline == null || timeline.layers == null || timeline.layers.length == 0))
 			return;
 		super.draw();

@@ -17,5 +17,7 @@ function postEndSong() {
 	new FlxTimer().start(2, (_) -> {
 		if (!PlayStateConfig.isStoryMode)
 			MusicBeatState.switchState(() -> new states.menus.FreeplayState());
+		else
+			ScriptClass.switchState('StoryMenuState');
 	});
 }

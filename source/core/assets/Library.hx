@@ -25,6 +25,8 @@ class Library {
 	}
 
 	public static function reloadMods():Void {
+		@:privateAccess
+		Paths.pathCache.clear();
 		ModsRegistry.mods = getAvailableMods();
 
 		if (SaveData.data.currentMod != null && ModsRegistry.mods.contains(SaveData.data.currentMod)) {

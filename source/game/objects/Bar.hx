@@ -41,7 +41,7 @@ class Bar extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite> 
 		clear();
 
 		for (i in 0...numberBars) {
-			var bar:FunkinSprite = new FunkinSprite(0, 0);
+			var bar:FunkinSprite = new FunkinSprite(0, 0, true);
 			if (isSpriteSheet)
 				bar.loadGraphic(Paths.getPath(spriteSheetPath, 'image'));
 			else

@@ -16,11 +16,17 @@
     - [X] FreeplayState (WIP)
     - [X] MainMenuState
     - [X] OptionsState (WIP)
+    - [ ] Result Screen
 
 - [x] Sub-Menus
     - [x] PauseMenuSubState
     - [ ] GameOverSubState
     - [X] FadeTransition
+
+- [ ] Cutscenes
+    - [ ] Video Sprites
+    - [ ] Video Cutscenes
+    - [ ] Dialogues
 
 - [ ] Options Menu
     - [X] Gameplay Section

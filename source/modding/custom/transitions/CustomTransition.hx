@@ -1,4 +1,4 @@
-package states.custom;
+package modding.custom.transitions;
 
 import flixel.FlxSprite;
 import flixel.FlxCamera;

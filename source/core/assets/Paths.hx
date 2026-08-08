@@ -68,19 +68,22 @@ class Paths {
 	}
 
 	public static function getAnimated(fileName:String):Dynamic {
-		if (cache.exists(fileName))
-			return cache.get(fileName);
+		var resolvedPath = Library.findLib('images/$fileName.png') ?? Library.findLib('images/$fileName');
+		var cacheKey = resolvedPath ?? fileName;
 
-		var imagePath = getPath(fileName, IMAGE);
+		if (cache.exists(cacheKey))
+			return cache.get(cacheKey);
+
+		var imagePath = getPath(fileName, 'image');
 		var folder = Library.findLib('images/$fileName');
 		var result:Dynamic = null;
 
 		var graphic:flixel.graphics.FlxGraphic = null;
 		if (imagePath != null) {
-			graphic = FlxG.bitmap.get(fileName);
+			graphic = FlxG.bitmap.get(cacheKey);
 			if (graphic == null) {
 				var bmp = openfl.display.BitmapData.fromFile(imagePath);
-				graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, fileName);
+				graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, cacheKey);
 				graphic.persist = true;
 
 				@:privateAccess
@@ -108,7 +111,7 @@ class Paths {
 		}
 
 		if (result != null)
-			cache.set(fileName, result);
+			cache.set(cacheKey, result);
 
 		if ((result is FlxFramesCollection)) {
 			var fc:FlxFramesCollection = cast result;
@@ -119,6 +122,7 @@ class Paths {
 				fc.parent.bitmap.disposeImage();
 			}
 		}
+
 		return result;
 	}
 

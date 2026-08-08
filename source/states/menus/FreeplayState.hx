@@ -14,21 +14,26 @@ import core.rhythm.DiffsUtils;
 import flixel.tweens.FlxTween;
 import core.assets.FunkinSprite;
 import game.objects.sprites.Icon;
+import flixel.addons.display.FlxBackdrop;
 // filters
 import openfl.text.TextField;
 import openfl.text.TextFormat;
 import openfl.filters.GlowFilter;
-import flixel.util.FlxColor;
 import openfl.filters.BitmapFilterQuality;
 
 class FreeplayState extends states.MusicBeatState {
 	public static var curSelected:Int = 0;
+
+	var bg:FlxBackdrop;
+	var buildings:FlxBackdrop;
 
 	var songs:Array<FlxSprite> = [];
 	var icons:Array<Icon> = [];
 	var freeplayData:core.json.engine.FreeplayData;
 
 	var album:FunkinSprite;
+
+	var artistTxt:FlxText;
 
 	// song score & lerp variables
 	var scoreTxt:FlxText;
@@ -61,22 +66,43 @@ class FreeplayState extends states.MusicBeatState {
 
 		freeplayData = FormatJson.readJson(Paths.getPath('songs/listSong', 'json'));
 
-		var bg:FlxSprite = new FlxSprite();
-		bg.loadGraphic(Paths.getPath('menus/menuBG', 'image'));
+		bg = new FlxBackdrop(Paths.getPath('menus/freeplay/bg', 'image'), flixel.util.FlxAxes.X);
 		bg.antialiasing = SaveData.data.antialiasing;
-		bg.scrollFactor.set();
+		bg.scale.set(0.25, 0.25);
+		bg.scrollFactor.set(0, 0);
+		bg.updateHitbox();
 		bg.screenCenter();
+		bg.velocity.set(-50, 0);
 		add(bg);
 
+		buildings = new FlxBackdrop(Paths.getPath('menus/freeplay/buildings', 'image'), flixel.util.FlxAxes.X);
+		buildings.antialiasing = SaveData.data.antialiasing;
+		buildings.scale.set(0.25, 0.25);
+		buildings.scrollFactor.set(0, 0);
+		buildings.updateHitbox();
+		buildings.screenCenter();
+		buildings.velocity.set(-150, 0);
+		add(buildings);
+
 		if (freeplayData != null && freeplayData.songData != null) {
+			var cardImgPath:String = Paths.getPath('menus/freeplay/card', 'image');
+			var songNameFormat:TextFormat = new TextFormat(Paths.getPath('5by7.ttf', 'font'), 42, 0xFFFFFFFF);
+			var songNameFilters:Array<openfl.filters.BitmapFilter> = [
+				new openfl.filters.GlowFilter(FlxColor.fromString('#00ccff'), 1.0, 6, 6, 100, openfl.filters.BitmapFilterQuality.MEDIUM)
+			];
+			var charDataCache:Map<String, Dynamic> = new Map();
 			for (i in 0...freeplayData.songData.length) {
+				var card:FlxSprite = new FlxSprite().loadGraphic(cardImgPath);
+				card.antialiasing = SaveData.data.antialiasing;
+				card.ID = i;
+				songs.push(card);
+				add(card);
+
 				var tf:TextField = new TextField();
 				tf.autoSize = openfl.text.TextFieldAutoSize.LEFT;
 				tf.text = freeplayData.songData[i].song;
-				tf.setTextFormat(new TextFormat(Paths.getPath('5by7.ttf', 'font'), 42, 0xFFFFFFFF));
-				tf.filters = [
-					new openfl.filters.GlowFilter(FlxColor.fromString('#00ccff'), 1.0, 6, 6, 100, openfl.filters.BitmapFilterQuality.MEDIUM)
-				];
+				tf.setTextFormat(songNameFormat);
+				tf.filters = songNameFilters;
 				var bmp:openfl.display.BitmapData = new openfl.display.BitmapData(Math.ceil(tf.width + 12), Math.ceil(tf.height + 12), true, 0x00000000);
 				bmp.draw(tf);
 				var song:FlxSprite = new FlxSprite(300 - (i * 50), 100 + (i * 125));
@@ -86,12 +112,21 @@ class FreeplayState extends states.MusicBeatState {
 				songs.push(song);
 				add(song);
 
-				var charData = FormatJson.readJson(Paths.getPath('data/characters/' + freeplayData.songData[i].icon, 'json'));
+				card.x = song.x - 80;
+				card.y = song.y - 50;
+
+				var iconName:String = freeplayData.songData[i].icon;
+				var charData = charDataCache.get(iconName);
+				if (charData == null) {
+					charData = FormatJson.readJson(Paths.getPath('data/characters/' + iconName, 'json'));
+					charDataCache.set(iconName, charData);
+				}
 				var icon:Icon = new Icon(false, charData);
 				if (icon != null) {
 					icon.scale.set(0.85, 0.85);
 					icon.x = (song.x - (i * 50)) - song.width;
 					icon.y = song.y / 2 + (i * 60);
+					icon.ID = i;
 					icon.updateHitbox();
 					icons.push(icon);
 					add(icon);
@@ -115,6 +150,13 @@ class FreeplayState extends states.MusicBeatState {
 		box.angle = 10;
 		add(box);
 
+		artistTxt = new FlxText(0, 0, 0, 'Artist: ??');
+		artistTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
+		artistTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+		artistTxt.antialiasing = SaveData.data.antialiasing;
+		artistTxt.scrollFactor.set(0, 0);
+		add(artistTxt);
+
 		scoreTxt = new FlxText(0, 10, 0, 'SCORE:');
 		scoreTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
 		scoreTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
@@ -129,12 +171,15 @@ class FreeplayState extends states.MusicBeatState {
 		diffTxt.scrollFactor.set(0, 0);
 		add(diffTxt);
 
-		scoreTxt.x = 720 + (590 / 2) - (scoreTxt.fieldWidth / 2);
+		artistTxt.x = 725 + (590 / 2) - artistTxt.width;
+		artistTxt.y = FlxG.height * 0.64;
+
+		scoreTxt.x = 720 + (590 / 2) - (scoreTxt.width / 2);
 		scoreTxt.y = FlxG.height * 0.76;
 
 		diffTxt.y = FlxG.height * 0.7;
 
-		album = new FunkinSprite(0, 100);
+		album = new FunkinSprite(0, 100, true);
 		album.antialiasing = SaveData.data.antialiasing;
 		add(album);
 
@@ -261,6 +306,19 @@ class FreeplayState extends states.MusicBeatState {
 			}
 		}
 
+		for (item in icons) {
+			if (item.ID == curSelected) {
+				item.alpha = 1.0;
+			} else {
+				item.alpha = 0.6;
+			}
+		}
+
+		if (freeplayData.songData[curSelected].artist != null)
+			artistTxt.text = 'Artist: ' + freeplayData.songData[curSelected].artist;
+		else
+			artistTxt.text = 'Artist: ??';
+
 		updateScore();
 
 		if (album != null) {
@@ -292,6 +350,8 @@ class FreeplayState extends states.MusicBeatState {
 		icons = null;
 		freeplayData = null;
 		album = null;
+		bg = null;
+		buildings = null;
 
 		FlxG.bitmap.clearUnused();
 	}

@@ -20,7 +20,7 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 	public function createHUD() {
 		healthBarY = core.config.SaveData.data.downscroll ? FlxG.height * 0.1 : FlxG.height * 0.88;
 
-		healthBarBG = new FunkinSprite(0, healthBarY);
+		healthBarBG = new FunkinSprite(0, healthBarY, true);
 		healthBarBG.loadGraphic(Paths.getPath('game/hud/healthBar', 'image'));
 		healthBarBG.scrollFactor.set(0, 0);
 		healthBarBG.x = (FlxG.width - healthBarBG.width) * 0.5;

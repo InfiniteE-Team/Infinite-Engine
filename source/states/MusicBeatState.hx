@@ -44,7 +44,7 @@ class MusicBeatState extends State {
 			return;
 		}
 
-		openSubState(new states.custom.CustomTransition(true, 0.2));
+		openSubState(new modding.custom.transitions.CustomTransition(true, 0.2));
 	}
 
 	#if HSCRIPT_ALLOWED
@@ -98,7 +98,7 @@ class MusicBeatState extends State {
 		}
 
 		if (currentState != null) {
-			currentState.openSubState(new states.custom.CustomTransition(false, 0.2, function() {
+			currentState.openSubState(new modding.custom.transitions.CustomTransition(false, 0.2, function() {
 				FlxG.switchState(state);
 			}));
 		} else {
