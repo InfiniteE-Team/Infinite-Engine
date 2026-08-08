@@ -2,11 +2,14 @@ package states.substates.menus;
 
 import flixel.FlxSprite;
 import flixel.text.FlxText;
+import flixel.graphics.frames.FlxAtlasFrames;
 import core.json.engine.OptionData;
+import states.substates.menus.options.Keybind;
 
 class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 	var categoryTexts:Array<FlxText> = [];
-	var categories:Array<String> = ['Gameplay', 'Keybinds', 'Graphics'];
+	var categoryGraphics:Array<FlxSprite> = [];
+	var categories:Array<String> = ['Gameplay', 'Keybinds', 'Graphics', 'Debug'];
 	var curCategory:Int = 0;
 
 	var categoryOptions:Map<String, Array<OptionData>> = [
@@ -36,13 +39,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 				description: 'Adjust the frames per second limit.',
 				saveField: 'framerate',
 				type: NUMBER(30, 240, 5)
-			},/*
-			{
-				name: 'FPS Visible',
-				description: 'Display the current frames per second.',
-				saveField: 'fpsVisible',
-				type: CHECKBOX
-			},*/
+			},
 			{
 				name: 'Antialiasing',
 				description: 'It softens the edges of the images.',
@@ -56,12 +53,13 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 				type: CHECKBOX
 			}
 		],
-		'Keybinds' => []
+		'Keybinds' => [],
+		'Debug' => []
 	];
 
 	var curSelectedOption:Int = 0;
 	var itemTexts:Array<FlxText> = [];
-	var valueTexts:Array<FlxText> = [];
+	var valueTexts:Array<FlxSprite> = [];
 	var descText:FlxText;
 
 	var isCategory:Bool = true;
@@ -78,15 +76,17 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		bg.alpha = 0.8;
 		add(bg);
 
-		var options:FlxText = new FlxText(0, 20, bg.width - 40, 'OPTIONS');
-		options.setFormat(Paths.getPath('Funkin.otf', 'font'), 40, 0xFFFFFFFF, "center");
-		options.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
-		options.antialiasing = SaveData.data.antialiasing;
-		options.scrollFactor.set(0, 0);
+		var limit:FlxSprite = new FlxSprite().loadGraphic(Paths.getPath('menus/options/LimitsMenu', 'image'));
+		limit.screenCenter();
+		limit.y += 50;
+		add(limit);
+
+		var options:FlxSprite = new FlxSprite().loadGraphic(Paths.getPath('menus/options/Options_logo', 'image'));
+		options.screenCenter(X);
 		add(options);
 
 		for (i in 0...categories.length) {
-			var text:FlxText = new FlxText(50, 100 + (i * 50), 0, categories[i]);
+			var text:FlxText = new FlxText(50, 150 + (i * 50), 0, categories[i]);
 			text.setFormat(Paths.getPath('Funkin.otf', 'font'), 34, 0xFFFFFFFF, "left");
 			text.ID = i;
 			text.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
@@ -94,9 +94,20 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 			text.scrollFactor.set(0, 0);
 			categoryTexts.push(text);
 			add(text);
+
+			var catName = categories[i];
+			var image:FlxSprite = new FlxSprite(text.x + text.width + 10, text.y);
+			image.frames = Paths.getPath('menus/options/sections', 'animated');
+			image.animation.addByPrefix(catName, catName + '_symbol0000', 24, false);
+			image.animation.play(catName);
+			image.scale.set(0.7, 0.7);
+			image.updateHitbox();
+			image.antialiasing = SaveData.data.antialiasing;
+			categoryGraphics.push(image);
+			add(image);
 		}
 
-		descText = new FlxText(0, bg.y + bg.height - 50, bg.width - 40, "");
+		descText = new FlxText(0, bg.y + bg.height - 100, bg.width - 40, "");
 		descText.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFFFFFF00, "center");
 		descText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 1.5, 1);
 		add(descText);
@@ -140,6 +151,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		}
 
 		curSelectedOption = 0;
+
 		reloadOptions();
 	}
 
@@ -158,23 +170,61 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		for (i in 0...currentList.length) {
 			var opt = currentList[i];
 
-			var optText:FlxText = new FlxText(300, 100 + (i * 50), 0, opt.name);
+			var optText:FlxText = new FlxText(350, 150 + (i * 50), 0, opt.name);
 			optText.setFormat(Paths.getPath('Funkin.otf', 'font'), 26, 0xFFFFFFFF, "left");
 			optText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 			itemTexts.push(optText);
 			add(optText);
 
 			var rawValue = Reflect.field(SaveData.data, opt.saveField);
-			var valueStr:String = Std.string(rawValue);
+			var valSprite:FlxSprite;
 
-			var valText:FlxText = new FlxText(FlxG.width / 2 + 150, 100 + (i * 50), 0, valueStr);
-			valText.setFormat(Paths.getPath('Funkin.otf', 'font'), 26, 0xFFFFFFFF, "right");
-			valText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
-			valueTexts.push(valText);
-			add(valText);
+			switch (opt.type) {
+				case CHECKBOX:
+					valSprite = new FlxSprite(FlxG.width / 2 + 150, 150 + (i * 50));
+					valSprite.frames = Paths.getPath('menus/options/check_box', 'animated');
+					valSprite.animation.addByPrefix('uncheck', 'UnCheck0000', 24, false);
+					valSprite.animation.addByPrefix('check', 'Check0000', 24, false);
+					valSprite.animation.addByPrefix('to_check', 'To_Check', 24, false);
+					valSprite.animation.addByPrefix('to_uncheck', 'To_UnCheck', 24, false);
+
+					valSprite.animation.play('check', true);
+
+					if (rawValue == true) {
+						valSprite.animation.play('check', true);
+					} else {
+						valSprite.animation.play('uncheck', true);
+					}
+					valSprite.scale.set(0.6, 0.6);
+					valSprite.updateHitbox();
+
+				default:
+					var valText = new FlxText(FlxG.width / 2 + 150, 150 + (i * 50), 0, Std.string(rawValue));
+					valText.setFormat(Paths.getPath('Funkin.otf', 'font'), 26, 0xFFFFFFFF, "right");
+					valText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+					valSprite = valText;
+					valText.text = Std.string(Reflect.field(SaveData.data, opt.saveField));
+			}
+
+			valueTexts.push(valSprite);
+			add(valSprite);
 		}
+/*
+		if (categories[curCategory] == 'Keybinds') {
+			createKeybinds();
+		}*/
 
 		updateSelection(0);
+	}
+
+	function createKeybinds() {
+		var keys:FlxText = new FlxText(350, 150, 0, 'Keys');
+		keys.setFormat(Paths.getPath('Funkin.otf', 'font'), 26, 0xFFFFFFFF, "left");
+		keys.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+		add(keys);
+
+		var key:Keybind = new Keybind(0, 0, 'Tecla');
+		add(key);
 	}
 
 	function updateSelection(change:Int = 0) {
@@ -192,7 +242,9 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 			var isSelected = (i == curSelectedOption);
 			if (!isCategory) {
 				itemTexts[i].color = isSelected ? 0xFFFFFF00 : 0xFFFFFFFF;
-				valueTexts[i].color = isSelected ? 0xFFFFFF00 : 0xFFFFFFFF;
+				if (Std.isOfType(valueTexts[i], FlxText)) {
+					cast(valueTexts[i], FlxText).color = isSelected ? 0xFFFFFF00 : 0xFFFFFFFF;
+				}
 			}
 		}
 
@@ -216,7 +268,9 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 					itemTexts[curSelectedOption].alpha = 0.6;
 				}
 				if (valueTexts != null && valueTexts[curSelectedOption] != null) {
-					valueTexts[curSelectedOption].color = 0xFFFFFFFF;
+					if (Std.isOfType(valueTexts[curSelectedOption], FlxText)) {
+						cast(valueTexts[curSelectedOption], FlxText).color = 0xFFFFFFFF;
+					}
 					valueTexts[curSelectedOption].alpha = 0.6;
 				}
 			}
@@ -230,9 +284,15 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 
 			for (i in 0...itemTexts.length) {
 				if (i == curSelectedOption) {
-					itemTexts[i].color = valueTexts[i].color = 0xFFFFFF00;
+					itemTexts[i].color = 0xFFFFFF00;
+					if (Std.isOfType(valueTexts[i], FlxText)) {
+						cast(valueTexts[i], FlxText).color = 0xFFFFFF00;
+					}
 				} else {
-					itemTexts[i].color = valueTexts[i].color = 0xFFFFFFFF;
+					itemTexts[i].color = 0xFFFFFFFF;
+					if (Std.isOfType(valueTexts[i], FlxText)) {
+						cast(valueTexts[i], FlxText).color = 0xFFFFFFFF;
+					}
 				}
 			}
 		}
@@ -255,6 +315,15 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 				var newValue:Bool = !currentValue;
 				Reflect.setField(SaveData.data, opt.saveField, newValue);
 
+				var spr = valueTexts[curSelectedOption];
+				if (spr != null && !Std.isOfType(spr, FlxText)) {
+					if (newValue) {
+						spr.animation.play('to_check', true);
+					} else {
+						spr.animation.play('to_uncheck', true);
+					}
+				}
+
 				if (opt.saveField == 'antialiasing') {
 					FlxSprite.defaultAntialiasing = newValue;
 					updateAntialiasingLive(newValue);
@@ -271,11 +340,13 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 					FlxG.drawFramerate = Math.round(newValue);
 					FlxG.updateFramerate = Math.round(newValue);
 				}
+
+				if (Std.isOfType(valueTexts[curSelectedOption], FlxText)) {
+					cast(valueTexts[curSelectedOption], FlxText).text = Std.string(newValue);
+				}
 		}
 
 		SaveData.flush();
-
-		valueTexts[curSelectedOption].text = Std.string(Reflect.field(SaveData.data, opt.saveField));
 	}
 
 	function updateAntialiasingLive(enabled:Bool) {
@@ -298,9 +369,9 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 			if (txt != null)
 				txt.antialiasing = enabled;
 		}
-		for (txt in valueTexts) {
-			if (txt != null)
-				txt.antialiasing = enabled;
+		for (spr in valueTexts) {
+			if (spr != null && !Std.isOfType(spr, FlxText))
+				spr.antialiasing = enabled;
 		}
 		if (descText != null)
 			descText.antialiasing = enabled;

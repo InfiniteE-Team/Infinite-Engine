@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="sections.png">
+	<!-- Created with Adobe Animate version 21.0.5.40714 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="Controls_symbol0000" x="0" y="0" width="108" height="65"/>
+	<SubTexture name="Debug_symbol0000" x="0" y="65" width="113" height="57"/>
+	<SubTexture name="Gameplay_symbol0000" x="0" y="122" width="79" height="66"/>
+	<SubTexture name="Graphics_symbol0000" x="79" y="122" width="70" height="68"/>
+</TextureAtlas>

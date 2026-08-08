@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="slider.png">
+	<!-- Created with Adobe Animate version 21.0.5.40714 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="Barraend0000" x="0" y="40" width="18" height="12"/>
+	<SubTexture name="Barramid0000" x="0" y="0" width="18" height="40"/>
+	<SubTexture name="Barramiddle0000" x="18" y="0" width="18" height="40"/>
+</TextureAtlas>

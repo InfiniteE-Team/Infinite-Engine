@@ -129,7 +129,9 @@ class FreeplayState extends states.MusicBeatState {
 		diffTxt.scrollFactor.set(0, 0);
 		add(diffTxt);
 
+		scoreTxt.x = 770 + (590 / 2) - (scoreTxt.fieldWidth / 2);
 		scoreTxt.y = FlxG.height * 0.76;
+
 		diffTxt.y = FlxG.height * 0.7;
 
 		album = new FunkinSprite(0, 100);
@@ -161,7 +163,6 @@ class FreeplayState extends states.MusicBeatState {
 		songScore = Math.floor(FlxMath.lerp(songScore, intendedScore, FlxMath.bound(elapsed * 16, 0, 1)));
 
 		scoreTxt.text = 'SCORE: ' + InfiniteUtil.formatNumber(songScore);
-		scoreTxt.x = FlxG.width * 0.9 - scoreTxt.width;
 
 		if (acceptOption)
 			return;
@@ -223,7 +224,7 @@ class FreeplayState extends states.MusicBeatState {
 		DiffsUtils.getDifficulty(freeplayData.songData[curSelected].song);
 
 		diffTxt.text = '< ' + DiffsUtils.difficulties[curDiff].toUpperCase() + ' >';
-		diffTxt.x = FlxG.width * 0.889 - diffTxt.width;
+		diffTxt.x = 820;
 
 		updateScore();
 	}

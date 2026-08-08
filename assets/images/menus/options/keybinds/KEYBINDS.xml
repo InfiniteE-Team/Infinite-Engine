@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="KEYBINDS.png">
+	<!-- Created with Adobe Animate version 21.0.5.40714 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="Tecla0000" x="226" y="0" width="73" height="64"/>
+	<SubTexture name="TeclaAlt0000" x="133" y="0" width="93" height="64"/>
+	<SubTexture name="TeclaAlt_selct0000" x="133" y="64" width="93" height="64"/>
+	<SubTexture name="TeclaBackspace0000" x="0" y="0" width="133" height="64"/>
+	<SubTexture name="TeclaBackspace_selct0000" x="0" y="64" width="133" height="64"/>
+	<SubTexture name="TeclaCapslock0000" x="133" y="128" width="93" height="64"/>
+	<SubTexture name="TeclaCapslock_selct0000" x="133" y="192" width="93" height="64"/>
+	<SubTexture name="TeclaCtrl0000" x="133" y="256" width="93" height="64"/>
+	<SubTexture name="TeclaCtrl_selct0000" x="133" y="320" width="93" height="64"/>
+	<SubTexture name="TeclaDown0000" x="226" y="128" width="73" height="64"/>
+	<SubTexture name="TeclaDown_selct0000" x="226" y="192" width="73" height="64"/>
+	<SubTexture name="TeclaEnter0000" x="0" y="128" width="133" height="64"/>
+	<SubTexture name="TeclaEnter_selct0000" x="0" y="192" width="133" height="64"/>
+	<SubTexture name="TeclaEsc0000" x="226" y="256" width="73" height="64"/>
+	<SubTexture name="TeclaEsc_selct0000" x="226" y="320" width="73" height="64"/>
+	<SubTexture name="TeclaLeft0000" x="226" y="384" width="73" height="64"/>
+	<SubTexture name="TeclaLeft_selct0000" x="226" y="448" width="73" height="64"/>
+	<SubTexture name="TeclaRight0000" x="299" y="128" width="73" height="64"/>
+	<SubTexture name="TeclaRight_selct0000" x="299" y="192" width="73" height="64"/>
+	<SubTexture name="TeclaShifI0000" x="0" y="256" width="133" height="64"/>
+	<SubTexture name="TeclaShift_selct0000" x="0" y="320" width="133" height="64"/>
+	<SubTexture name="TeclaSpace0000" x="0" y="384" width="133" height="64"/>
+	<SubTexture name="TeclaSpace_selct0000" x="0" y="448" width="133" height="64"/>
+	<SubTexture name="TeclaTab0000" x="133" y="384" width="93" height="64"/>
+	<SubTexture name="TeclaTab_selct0000" x="133" y="448" width="93" height="64"/>
+	<SubTexture name="TeclaUP0000" x="299" y="256" width="73" height="64"/>
+	<SubTexture name="TeclaUP_selct0000" x="299" y="320" width="73" height="64"/>
+	<SubTexture name="Tecla_selct0000" x="226" y="64" width="73" height="64"/>
+	<SubTexture name="TeclaÑ0000" x="299" y="0" width="73" height="64"/>
+	<SubTexture name="TeclaÑ_selct0000" x="299" y="64" width="73" height="64"/>
+</TextureAtlas>

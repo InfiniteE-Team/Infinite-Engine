@@ -106,7 +106,7 @@
                 "flipX": false,
                 "flipY": false,
                 "offsets": [
-                    0,
+                    10,
                     10
                 ]
             },
@@ -145,7 +145,7 @@
                 "flipX": false,
                 "flipY": false,
                 "offsets": [
-                    0,
+                    10,
                     10
                 ]
             },
@@ -184,7 +184,7 @@
                 "flipX": false,
                 "flipY": false,
                 "offsets": [
-                    0,
+                    10,
                     10
                 ]
             },
@@ -223,7 +223,7 @@
                 "flipX": false,
                 "flipY": false,
                 "offsets": [
-                    0,
+                    10,
                     10
                 ]
             },
