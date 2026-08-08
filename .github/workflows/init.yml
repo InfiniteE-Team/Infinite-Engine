@@ -6,18 +6,23 @@ on:
 
 jobs:
   build:
+    name: Build ${{ matrix.platform }}
+    permissions: write-all
+    runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: windows-latest
+          - platform: Windows
+            os: windows-latest
             target: windows
-          - os: ubuntu-latest
+          - platform: Linux
+            os: ubuntu-latest
             target: linux
-          - os: macos-13
+          - platform: MacOS
+            os: macos-15
             target: mac
-
-    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -34,11 +39,13 @@ jobs:
       - name: Install dependencies via hmm
         run: haxelib run hmm install
         
-      - name: Install LuaJIT (Linux)
+      - name: Install System Dependencies (Linux)
         if: matrix.target == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libluajit-5.1-dev luajit
+          sudo apt-get install -y libvlc-dev libvlccore-dev
+          sudo apt-get install -y libasound2-dev libgl1-mesa-dev libglu1-mesa-dev libx11-dev libxext-dev libxi-dev libxrandr-dev libxinerama-dev
 
       - name: Install LuaJIT (Mac)
         if: matrix.target == 'mac'

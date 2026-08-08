@@ -66,6 +66,8 @@ class ConfigMain extends flixel.FlxState {
 
 		core.assets.Library.reloadMods();
 
+		modding.mods.ModData.ModConfig.init();
+
 		core.api.DiscordAPI.init();
 
 		if (globalData.startStateScript != null) {

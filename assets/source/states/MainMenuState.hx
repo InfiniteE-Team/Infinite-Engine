@@ -76,7 +76,7 @@ class MainMenuState extends ScriptState {
 				switch (menuOptions[curSelected]) {
 					case 'storymode':
 						acceptOption = true;
-						trace("In Story Mode");
+						ScriptClass.switchState('StoryMenuState');
 					case 'freeplay':
 						acceptOption = true;
 						MusicBeatState.switchState(() -> new states.menus.FreeplayState());
