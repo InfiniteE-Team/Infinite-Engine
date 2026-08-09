@@ -29,6 +29,9 @@ class PlayStateConfig {
 	// storymode
 	public static var isStoryMode:Bool = false;
 	public static var curWeek:Int = 0;
+	public static var storyPlaylist:Array<String> = [];
+	public static var storyWeekName:String = "";
+	public static var storyScore:Int = 0;
 
 	//
 

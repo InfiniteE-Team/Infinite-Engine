@@ -41,7 +41,7 @@ class ResultScreen extends ScriptState {
 		add(results);
 
 		rating = new FlxSprite(-400, 100);
-		rating.loadGraphic(Paths.getPath('menus/resultScreen/ratings/'+ratingPath, 'image'));
+		rating.loadGraphic(Paths.getPath('menus/resultScreen/ratings/' + ratingPath, 'image'));
 		rating.antialiasing = SaveData.data.antialiasing;
 		rating.scale.set(1.3, 1.3);
 		rating.updateHitbox();
@@ -96,7 +96,7 @@ class ResultScreen extends ScriptState {
 				if (!PlayStateConfig.isStoryMode)
 					MusicBeatState.switchState(() -> new states.menus.FreeplayState());
 				else
-					ScriptClass.switchState('StoryMenuState');
+					MusicBeatState.switchState(() -> new states.menus.StoryMenuState());
 			});
 		}
 	}

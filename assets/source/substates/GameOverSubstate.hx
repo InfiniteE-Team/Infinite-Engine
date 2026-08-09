@@ -4,5 +4,5 @@ function onBack() {
 	if (!PlayStateConfig.isStoryMode)
 		MusicBeatState.switchState(() -> new states.menus.FreeplayState());
 	else
-		ScriptClass.switchState('StoryMenuState');
+		MusicBeatState.switchState(() -> new states.menus.StoryMenuState());
 }

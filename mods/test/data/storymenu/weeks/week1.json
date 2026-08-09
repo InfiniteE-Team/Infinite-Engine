@@ -1,0 +1,20 @@
+{
+    "week": "week1",
+    "priority": 1,
+    "weekGraphic": "week1",
+    "chars": [
+        "bf",
+        "bf",
+        "bf"
+    ],
+    "description": "DADDY DEAREST",
+    "songs": [
+        {
+            "song": "fresh",
+            "bpm": "120",
+            "icon": "dad",
+            "artist": "KawaiSprite",
+            "album": "expansion1"
+        }
+    ]
+}

@@ -62,6 +62,9 @@ class ModsSubstate extends ScriptSubstate {
 		}
 
 		if (Controls.ACCEPT) {
+			if (ModsRegistry.currentMod == ModsRegistry.mods[curSelected])
+				return;
+
 			acceptOption = true;
 			ModsRegistry.onMod = true;
 			ModsRegistry.currentMod = ModsRegistry.mods[curSelected];
@@ -72,12 +75,12 @@ class ModsSubstate extends ScriptSubstate {
 
 			trace("Mod actual: " + ModsRegistry.currentMod);
 
-			@:privateAccess
-			Paths.pathCache.clear();
-
-			FlxG.bitmap.clearCache();
-
-			WindowAPI.restartApp();
+			FlxTimer.wait(0.1, () -> {
+				@:privateAccess
+				Paths.clearCache();
+				FlxG.bitmap.clearCache();
+				WindowAPI.restartApp();
+			});
 		}
 
 		if (Controls.BACK)

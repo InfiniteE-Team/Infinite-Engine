@@ -19,7 +19,7 @@ class CameraController {
 
 	public var existsCamEvents:Bool = false;
 
-	public var lerp:Float = 0.06;
+	public var lerp:Float = 0.04;
 
 	public function new(camGame:Camera, camHUD:Camera) {
 		this.camGame = camGame;

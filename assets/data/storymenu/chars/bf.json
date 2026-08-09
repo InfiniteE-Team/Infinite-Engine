@@ -1,0 +1,39 @@
+{
+    "name": "char",
+    "path": "bf",
+    "position": [
+        0,
+        0
+    ],
+    "scale": [
+        1,
+        1
+    ],
+    "alpha": 1.0,
+    "visible": true,
+    "flipX": false,
+    "flipY": false,
+    "antialiasing": true,
+    "anims": [
+        {
+            "name": "idle",
+            "prefix": "idle",
+            "offsets": [
+                -13,
+                -4
+            ],
+            "framerate": 24,
+            "looped": false
+        },
+        {
+            "name": "confirm",
+            "prefix": "confirm",
+            "offsets": [
+                -10,
+                -7
+            ],
+            "framerate": 24,
+            "looped": false
+        }
+    ]
+}

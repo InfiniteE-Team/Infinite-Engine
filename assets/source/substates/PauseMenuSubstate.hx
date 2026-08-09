@@ -1,3 +1,8 @@
+import game.PlayStateConfig;
+
 function ExitMenu() {
-	MusicBeatState.switchState(() -> new states.menus.FreeplayState());
+	if (!PlayStateConfig.isStoryMode)
+		MusicBeatState.switchState(() -> new states.menus.FreeplayState());
+	else
+		MusicBeatState.switchState(() -> new states.menus.StoryMenuState());
 }

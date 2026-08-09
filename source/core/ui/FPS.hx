@@ -42,7 +42,7 @@ class FPS extends openfl.display.FPS {
 			if (modding.mods.ModsRegistry.onMod)
 				mods = ' - ' + modding.mods.ModsRegistry.currentMod;
 
-			text = 'FPS: $currentFPS - [MEM: $mem / $maxMem]\n\nDeveloper Mode' + mods;
+			text = 'FPS: $currentFPS - [MEM: $mem / $maxMem] - (Developer Mode' + mods + ')';
 		}
 	}
 

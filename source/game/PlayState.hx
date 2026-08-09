@@ -227,21 +227,43 @@ class PlayState extends MusicBeatState {
 		RhythmCore.resume(gameAudio);
 	}
 
+	var _endSongCalled:Bool = false;
+
 	public function endSong() {
+		if (_endSongCalled)
+			return;
+		_endSongCalled = true;
+
 		#if HSCRIPT_ALLOWED
 		if (script.callCancellable('onEndSongCancel', []))
 			return;
 		#end
 
-		if (!PlayStateConfig.isStoryMode)
-			core.config.SaveScore.saveSong(curSong, playStateConfig.score, curDifficulty);
-		else {
-			// WIP
-			core.config.SaveScore.saveWeek(curSong, playStateConfig.score, curDifficulty);
-		}
-
-		// idk what to do here, maybe go to score screen or something? for now just reset the state
 		flixel.tweens.FlxTween.tween(cameraController.camPoint, {y: camGame.y + 200}, 1, {ease: flixel.tweens.FlxEase.quadOut});
+
+		if (!PlayStateConfig.isStoryMode) {
+			core.config.SaveScore.saveSong(curSong, playStateConfig.score, curDifficulty);
+			new flixel.util.FlxTimer().start(2, (_) -> {
+				MusicBeatState.switchState(() -> new states.menus.FreeplayState());
+			});
+		} else {
+			PlayStateConfig.storyScore += playStateConfig.score;
+
+			if (PlayStateConfig.storyPlaylist.length > 0) {
+				var nextSong = PlayStateConfig.storyPlaylist[0];
+				PlayStateConfig.storyPlaylist.shift();
+				new flixel.util.FlxTimer().start(2, (_) -> {
+					MusicBeatState.switchState(() -> new states.LoadingState(nextSong, curDifficulty));
+				});
+			} else {
+				core.config.SaveScore.saveWeek(PlayStateConfig.storyWeekName, PlayStateConfig.storyScore, curDifficulty);
+				new flixel.util.FlxTimer().start(2, (_) -> {
+					PlayStateConfig.isStoryMode = false;
+					PlayStateConfig.storyScore = 0;
+					MusicBeatState.switchState(() -> new states.menus.StoryMenuState());
+				});
+			}
+		}
 
 		#if HSCRIPT_ALLOWED
 		script.call('postEndSong', []);

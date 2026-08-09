@@ -12,8 +12,8 @@
 
 - [ ] Menus
     - [X] TitleState
-    - [ ] StoryMenuState
-    - [X] FreeplayState (WIP)
+    - [X] StoryMenuState
+    - [X] FreeplayState
     - [X] MainMenuState
     - [X] OptionsState (WIP)
     - [ ] Result Screen
