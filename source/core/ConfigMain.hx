@@ -27,7 +27,15 @@ class ConfigMain extends flixel.FlxState {
 
 		FlxG.mouse.visible = false;
 
+		Paths.clearCache();
+		core.assets.Library.reloadMods();
+
+		modding.mods.ModData.ModConfig.init();
+
 		globalData.configGlobal();
+
+		if (globalData.developerMode)
+			Trace.init();
 
 		if (globalData.startState != null)
 			mainState = globalData.startState;
@@ -54,21 +62,11 @@ class ConfigMain extends flixel.FlxState {
 
 		flixel.FlxSprite.defaultAntialiasing = true;
 
-		#if windows
-		core.api.WindowAPI.init();
-		#end
+		FlxG.autoPause = false;
+
 		/*
 			ConductorImplementation.custom_songPosition = () -> core.rhythm.RhythmCore.songPosition;
 			ConductorImplementation.custom_crochet = () -> core.rhythm.RhythmCore.crochet; */
-
-		if (globalData.developerMode)
-			Trace.init();
-
-		core.assets.Library.reloadMods();
-
-		modding.mods.ModData.ModConfig.init();
-
-		core.api.DiscordAPI.init();
 
 		if (globalData.startStateScript != null) {
 			modding.scripting.types.ScriptClass.switchState(globalData.startStateScript);

@@ -14,13 +14,10 @@ class State extends flixel.FlxState {
 	override public function create() {
 		super.create();
 		tweenManager = new flixel.tweens.FlxTween.FlxTweenManager();
-        timerManager = new flixel.util.FlxTimer.FlxTimerManager();
+		timerManager = new flixel.util.FlxTimer.FlxTimerManager();
 
 		add(tweenManager);
-        add(timerManager);
-
-		FlxG.signals.focusLost.add(onFocusLost);
-		FlxG.signals.focusGained.add(onFocusGained);
+		add(timerManager);
 	}
 
 	override function openSubState(substate:flixel.FlxSubState) {
@@ -40,36 +37,53 @@ class State extends flixel.FlxState {
 		tweenTimerPause(true);
 	}
 
-	override function onFocusLost():Void {
-		FlxG.sound.pause();
+	var lastVolume:Float = 1.0;
+	var volumeTween:flixel.tweens.FlxTween;
+
+	override public function onFocusLost():Void {
 		tweenTimerPause(false);
+
+		if (volumeTween == null || !volumeTween.active) {
+			lastVolume = FlxG.sound.volume;
+		}
+
+		if (volumeTween != null)
+			volumeTween.cancel();
+
+		volumeTween = flixel.tweens.FlxTween.tween(FlxG.sound, {volume: lastVolume * 0.4}, 0.5);
 	}
 
-	function onFocusGained():Void {
-		FlxG.sound.resume();
+	override public function onFocus():Void {
 		tweenTimerPause(true);
+
+		if (volumeTween != null)
+			volumeTween.cancel();
+		volumeTween = flixel.tweens.FlxTween.tween(FlxG.sound, {volume: lastVolume}, 0.5);
 	}
 
 	override function destroy() {
+		if (volumeTween != null) {
+			volumeTween.cancel();
+			volumeTween.destroy();
+			volumeTween = null;
+		}
+
 		super.destroy();
 		#if cpp
 		Gc.run(true);
 		Gc.compact();
 		#end
 
-		FlxG.signals.focusLost.remove(onFocusLost);
-		FlxG.signals.focusGained.remove(onFocusGained);
-
 		if (tweenManager != null) {
-            tweenManager.clear();
-            tweenManager.destroy();
-            tweenManager = null;
-        }
-        if (timerManager != null) {
-            timerManager.clear();
-            timerManager.destroy();
-            timerManager = null;
-        }
+			tweenManager.clear();
+			tweenManager.destroy();
+			tweenManager = null;
+		}
+		if (timerManager != null) {
+			timerManager.clear();
+			timerManager.destroy();
+			timerManager = null;
+		}
 
 		Sound.clearGlobalCache();
 	}

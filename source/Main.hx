@@ -24,6 +24,9 @@ class Main extends Sprite {
 	function mainGame() {
 		addChild(new core.Game(core.ConfigMain));
 		addChild(fps);
+
+		var window = new core.ui.Window();
+		addChild(window);
 	}
 
 	private function onKeyDown(e:openfl.events.KeyboardEvent):Void {

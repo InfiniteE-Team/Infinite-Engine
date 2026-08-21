@@ -11,6 +11,7 @@ typedef SaveDataFields = {
 	var ?downscroll:Bool;
 	var ?middlescroll:Bool;
     var ?ghosttaping:Bool;
+    var ?laneBackdrop:Float;
 	
 	// controls
 	var ?noteKeyPresets:haxe.DynamicAccess<Array<Array<String>>>;

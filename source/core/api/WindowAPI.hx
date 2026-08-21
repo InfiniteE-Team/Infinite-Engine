@@ -13,6 +13,7 @@ class WindowAPI {
 	public static function init() {
 		#if windows
 		WindowsAPI.reDefineMainWindowTitle(lime.app.Application.current.window.title);
+		WindowsAPI.setWindowRound(WindowRound.DWMWCP_ROUND);
 		WindowsAPI.windowDarkMode(true);
 		#end
 		scaleWindow();

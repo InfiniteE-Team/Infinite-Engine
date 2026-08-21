@@ -20,7 +20,7 @@
 
 - [x] Sub-Menus
     - [x] PauseMenuSubState
-    - [ ] GameOverSubState
+    - [X] GameOverSubState (WIP)
     - [X] FadeTransition
 
 - [ ] Cutscenes
@@ -32,7 +32,7 @@
     - [X] Gameplay Section
     - [ ] Keyboards Section (WIP)
     - [X] Graphics Section
-    - [ ] Debug Section
+    - [X] Debug Section
 
 - [ ] Discord Pressence API
     - [ ] API Custom

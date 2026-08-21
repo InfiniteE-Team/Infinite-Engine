@@ -12,6 +12,10 @@ class Library {
 	public static function getAvailableMods():Array<String> {
 		var modNames:Array<String> = [];
 
+		if (!FileSystem.exists(modsFolder)) {
+			try FileSystem.createDirectory(modsFolder) catch (e:Dynamic) {}
+		}
+
 		if (FileSystem.exists(modsFolder) && FileSystem.isDirectory(modsFolder)) {
 			for (item in FileSystem.readDirectory(modsFolder)) {
 				var fullPath = '$modsFolder/$item';
@@ -29,15 +33,17 @@ class Library {
 		Paths.pathCache.clear();
 		ModsRegistry.mods = getAvailableMods();
 
-		if (SaveData.data.currentMod != null && ModsRegistry.mods.contains(SaveData.data.currentMod)) {
-			ModsRegistry.currentMod = SaveData.data.currentMod;
-			ModsRegistry.onMod = SaveData.data.onMod != null ? SaveData.data.onMod : true;
+		Trace.traceOnce('Mods scan → cwd: ${Sys.getCwd()} | found: ${ModsRegistry.mods}');
+
+		var savedMod = SaveData.data.currentMod;
+		var savedOnMod = SaveData.data.onMod;
+
+		if (savedMod != null && savedMod != '' && ModsRegistry.mods.contains(savedMod)) {
+			ModsRegistry.currentMod = savedMod;
+			ModsRegistry.onMod = savedOnMod != null ? savedOnMod : true;
 		} else {
 			ModsRegistry.onMod = (ModsRegistry.mods.length > 0);
-			if (ModsRegistry.mods.length > 0)
-				ModsRegistry.currentMod = ModsRegistry.mods[0];
-			else
-				ModsRegistry.currentMod = '';
+			ModsRegistry.currentMod = ModsRegistry.mods.length > 0 ? ModsRegistry.mods[0] : '';
 		}
 	}
 
@@ -77,35 +83,5 @@ class Library {
 		}
 
 		return null;
-	}
-
-	public static function listFolder(folder:String):Array<String> {
-		var result:Array<String> = [];
-
-		var addFilesFromDir = function(dirPath:String) {
-			if (FileSystem.exists(dirPath)) {
-				for (name in FileSystem.readDirectory(dirPath)) {
-					if (!result.contains(name)) {
-						result.push(name);
-					}
-				}
-			}
-		};
-
-		if (ModsRegistry.onMod) {
-			if (ModsRegistry.currentMod != null && ModsRegistry.currentMod != '') {
-				addFilesFromDir('$modsFolder/${ModsRegistry.currentMod}/$folder');
-			}
-
-			for (mod in ModsRegistry.mods) {
-				if (mod != ModsRegistry.currentMod) {
-					addFilesFromDir('$modsFolder/$mod/$folder');
-				}
-			}
-		}
-
-		addFilesFromDir('$baseFolder/$folder');
-
-		return result;
 	}
 }

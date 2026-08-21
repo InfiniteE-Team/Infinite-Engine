@@ -132,6 +132,45 @@ class FreeplayState extends states.MusicBeatState {
 					add(icon);
 				}
 			}
+
+			box = new FlxSprite(770, -80).makeGraphic(1, 1, 0xFF0F0F0F);
+			box.scale.set(590, 870);
+			box.updateHitbox();
+			box.angle = 10;
+			add(box);
+
+			artistTxt = new FlxText(0, 0, 0, 'Artist: ??');
+			artistTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
+			artistTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+			artistTxt.antialiasing = SaveData.data.antialiasing;
+			artistTxt.scrollFactor.set(0, 0);
+			add(artistTxt);
+
+			scoreTxt = new FlxText(0, 10, 0, 'SCORE:');
+			scoreTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
+			scoreTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+			scoreTxt.antialiasing = SaveData.data.antialiasing;
+			scoreTxt.scrollFactor.set(0, 0);
+			add(scoreTxt);
+
+			diffTxt = new FlxText(0, scoreTxt.y + scoreTxt.height, 0, 'HARD');
+			diffTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
+			diffTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+			diffTxt.antialiasing = SaveData.data.antialiasing;
+			diffTxt.scrollFactor.set(0, 0);
+			add(diffTxt);
+
+			artistTxt.x = 725 + (590 / 2) - artistTxt.width;
+			artistTxt.y = FlxG.height * 0.64;
+
+			scoreTxt.x = 720 + (590 / 2) - (scoreTxt.width / 2);
+			scoreTxt.y = FlxG.height * 0.76;
+
+			diffTxt.y = FlxG.height * 0.7;
+
+			album = new FunkinSprite(0, 100, true);
+			album.antialiasing = SaveData.data.antialiasing;
+			add(album);
 		} else {
 			var noExists = new FlxText(0, FlxG.height / 2 - 35, FlxG.width, "There are no songs! - Create your music list in 'songs/listSong.json'");
 			noExists.setFormat(Paths.getPath('5by7_b.ttf', 'font'), 24, 0xFFFFB2B2, "center");
@@ -143,45 +182,6 @@ class FreeplayState extends states.MusicBeatState {
 
 			FlxTween.tween(noExists, {alpha: 1}, 1, {type: FlxTweenType.PINGPONG});
 		}
-
-		box = new FlxSprite(770, -80).makeGraphic(1, 1, 0xFF0F0F0F);
-		box.scale.set(590, 870);
-		box.updateHitbox();
-		box.angle = 10;
-		add(box);
-
-		artistTxt = new FlxText(0, 0, 0, 'Artist: ??');
-		artistTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
-		artistTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
-		artistTxt.antialiasing = SaveData.data.antialiasing;
-		artistTxt.scrollFactor.set(0, 0);
-		add(artistTxt);
-
-		scoreTxt = new FlxText(0, 10, 0, 'SCORE:');
-		scoreTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
-		scoreTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
-		scoreTxt.antialiasing = SaveData.data.antialiasing;
-		scoreTxt.scrollFactor.set(0, 0);
-		add(scoreTxt);
-
-		diffTxt = new FlxText(0, scoreTxt.y + scoreTxt.height, 0, 'HARD');
-		diffTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
-		diffTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
-		diffTxt.antialiasing = SaveData.data.antialiasing;
-		diffTxt.scrollFactor.set(0, 0);
-		add(diffTxt);
-
-		artistTxt.x = 725 + (590 / 2) - artistTxt.width;
-		artistTxt.y = FlxG.height * 0.64;
-
-		scoreTxt.x = 720 + (590 / 2) - (scoreTxt.width / 2);
-		scoreTxt.y = FlxG.height * 0.76;
-
-		diffTxt.y = FlxG.height * 0.7;
-
-		album = new FunkinSprite(0, 100, true);
-		album.antialiasing = SaveData.data.antialiasing;
-		add(album);
 
 		if (freeplayData != null && freeplayData.songData != null && freeplayData.songData.length > 0) {
 			if (curSelected >= freeplayData.songData.length)
@@ -207,12 +207,13 @@ class FreeplayState extends states.MusicBeatState {
 
 		songScore = Math.floor(FlxMath.lerp(songScore, intendedScore, FlxMath.bound(elapsed * 16, 0, 1)));
 
-		scoreTxt.text = 'SCORE: ' + InfiniteUtil.formatNumber(songScore);
+		if (freeplayData != null && freeplayData.songData != null)
+			scoreTxt.text = 'SCORE: ' + InfiniteUtil.formatNumber(songScore);
 
 		if (acceptOption)
 			return;
 
-		if (freeplayData.songData.length > 0) {
+		if (freeplayData != null && freeplayData.songData.length > 0) {
 			if (Controls.UI_UP)
 				changeSelection(-1);
 			if (Controls.UI_DOWN)
@@ -259,6 +260,9 @@ class FreeplayState extends states.MusicBeatState {
 	}
 
 	function changeDifficulty(change:Int = 0):Void {
+		if (freeplayData == null || freeplayData.songData == null)
+			return;
+
 		curDiff += change;
 
 		if (curDiff < 0)
@@ -287,6 +291,9 @@ class FreeplayState extends states.MusicBeatState {
 	}
 
 	function changeSelection(change:Int = 0):Void {
+		if (freeplayData == null || freeplayData.songData == null)
+			return;
+
 		curSelected += change;
 
 		FlxG.sound.play(Paths.getPath('menus/scrollMenu', 'sound'));

@@ -7,5 +7,6 @@ class Game extends FlxGame {
 		super(1280, 720, initialState, 60, 60, true, false);
 		_customSoundTray = cast core.ui.SoundTray;
 		
+		core.api.WindowAPI.init();
 	}
 }

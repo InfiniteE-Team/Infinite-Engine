@@ -165,6 +165,7 @@ class PlayState extends MusicBeatState {
 		noteController = new NoteController(SONG, SaveData.data.downscroll, SaveData.data.ghosttaping, script, playStateConfig, gameAudio);
 		core.ConfigMain.controls.loadPreset(noteController.keys);
 		for (noteControl in [
+			noteController.blackBacks,
 			noteController.strums,
 			noteController.sustains,
 			noteController.notes,
@@ -337,22 +338,19 @@ class PlayState extends MusicBeatState {
 	}
 
 	override function onFocusLost():Void {
-		gameAudio.pauseAll();
 		#if HSCRIPT_ALLOWED
 		script.call('onFocusLost', []);
 		#end
+		pauseMenu();
 	}
 
-	override function onFocusGained():Void {
+	override function onFocus():Void {
 		#if HSCRIPT_ALLOWED
-		script.call('onFocusGained', []);
+		script.call('onFocus', []);
 		#end
-		if (!paused && !startCount) {
-			gameAudio.playAll();
-			gameAudio.resyncVocals();
-		}
+
 		#if HSCRIPT_ALLOWED
-		script.call('postFocusGained', []);
+		script.call('postFocus', []);
 		#end
 	}
 

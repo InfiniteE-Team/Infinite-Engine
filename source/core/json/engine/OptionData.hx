@@ -7,4 +7,5 @@ typedef OptionData = {
 	var description:String;
 	var saveField:String;
 	var type:OptionType;
+	var ?displayFormat:String;
 }

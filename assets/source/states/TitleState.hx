@@ -50,7 +50,6 @@ class TitleState extends ScriptState {
             acceptOption = true;
             titleText.playAnim('press');
             FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
-            FlxG.camera.flash(0xFFFFFFFF, 0.2);
             new FlxTimer().start(1, function(tmr:FlxTimer) {
                 ScriptClass.switchState('MainMenuState');
             });

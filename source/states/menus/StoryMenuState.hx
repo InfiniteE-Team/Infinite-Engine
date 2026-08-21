@@ -354,26 +354,24 @@ class StoryMenuState extends MusicBeatState {
 
 		if (Controls.UI_UP && curWeek > 0) {
 			arrowLeft.animation.play('confirm', true);
-			arrowLeft.animation.finishCallback = _ -> {
-				arrowLeft.animation.play('idle');
-				arrowLeft.animation.finishCallback = null;
-			};
+			arrowLeft.animation.onFinish.addOnce(_ -> {
+                arrowLeft.animation.play('idle');
+            });
 			curWeek--;
 			refreshWeek();
 			refreshDiff();
 		} else if (Controls.UI_DOWN && curWeek < weeks.length - 1) {
 			arrowRight.animation.play('confirm', true);
-			arrowRight.animation.finishCallback = _ -> {
-				arrowRight.animation.play('idle');
-				arrowRight.animation.finishCallback = null;
-			};
+			arrowRight.animation.onFinish.addOnce(_ -> {
+                arrowRight.animation.play('idle');
+            });
 			curWeek++;
 			refreshWeek();
 			refreshDiff();
 		}
 
 		if (Controls.UI_LEFT || Controls.UI_RIGHT) {
-			var dir = Controls.UI_RIGHT ? -1 : 1;
+			var dir = Controls.UI_LEFT ? -1 : 1;
 			curDiff += dir;
 			if (curDiff < 0)
 				curDiff = DiffsUtils.difficulties.length - 1;
@@ -382,10 +380,9 @@ class StoryMenuState extends MusicBeatState {
 
 			var arrow = dir < 0 ? diffLeft : diffRight;
 			arrow.animation.play('confirm', true);
-			arrow.animation.finishCallback = _ -> {
-				arrow.animation.play('idle');
-				arrow.animation.finishCallback = null;
-			};
+			arrow.animation.onFinish.addOnce(_ -> {
+                arrow.animation.play('idle');
+            });
 
 			refreshDiff();
 		}

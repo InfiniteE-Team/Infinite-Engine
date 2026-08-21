@@ -15,6 +15,13 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 	var categoryOptions:Map<String, Array<OptionData>> = [
 		'Gameplay' => [
 			{
+				name: 'Lane Backdrop',
+				description: 'Increase or decrease the opacity of the lane background in your notes.',
+				saveField: 'laneBackdrop',
+				type: NUMBER(0, 100, 5),
+				displayFormat: '%'
+			},
+			{
 				name: 'Downscroll',
 				description: 'Reverse the direction of the notes downwards.',
 				saveField: 'downscroll',
@@ -206,11 +213,11 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 					valSprite.updateHitbox();
 
 				default:
-					var valText = new FlxText(FlxG.width / 2 + 150, 150 + (i * 50), 0, Std.string(rawValue));
+					var valText = new FlxText(FlxG.width / 2 + 150, 150 + (i * 50), 0, Std.string(rawValue) + opt.displayFormat);
 					valText.setFormat(Paths.getPath('Funkin.otf', 'font'), 26, 0xFFFFFFFF, "right");
 					valText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 					valSprite = valText;
-					valText.text = Std.string(Reflect.field(SaveData.data, opt.saveField));
+					valText.text = Std.string(Reflect.field(SaveData.data, opt.saveField)) + opt.displayFormat;
 			}
 
 			valueTexts.push(valSprite);
@@ -349,7 +356,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 				}
 
 				if (Std.isOfType(valueTexts[curSelectedOption], FlxText)) {
-					cast(valueTexts[curSelectedOption], FlxText).text = Std.string(newValue);
+					cast(valueTexts[curSelectedOption], FlxText).text = Std.string(newValue) + opt.displayFormat;
 				}
 		}
 

@@ -7,6 +7,7 @@ import flixel.group.FlxSpriteGroup;
 
 class Trace {
 	static var textGroup:FlxSpriteGroup;
+	static var plugin:TracePlugin;
 	static var messages:Array<{
 		text:String,
 		color:Int,
@@ -16,20 +17,44 @@ class Trace {
 	static final DURATION:Float = 7.0;
 
 	public static function init() {
+		if (textGroup != null)
+			return;
+
 		textGroup = new FlxSpriteGroup();
 		textGroup.scrollFactor.set(0, 0);
-		textGroup.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-		textGroup.visible = SaveData.data.logInScreen;
+		updateVisibility();
 
-		if (textGroup != null || FlxG.state != null)
-			FlxG.state.add(textGroup);
+		plugin = new TracePlugin(textGroup);
+		FlxG.plugins.addPlugin(plugin);
 	}
 
+	public static function updateVisibility() {
+        if (textGroup != null) {
+            var showLogs:Bool = false;
+            try {
+                showLogs = SaveData.data != null && SaveData.data.logInScreen;
+            } catch(e:Dynamic) {
+                showLogs = false;
+            }
+            textGroup.visible = showLogs;
+        }
+    }
+
 	public static function traceOnce(text:String, ?isError:Bool = false) {
-		if (textGroup != null || textGroup.members == null)
+		if (textGroup != null && textGroup.members == null)
 			textGroup = null;
 		if (textGroup == null)
 			init();
+
+		updateVisibility();
+
+		if (textGroup != null && !textGroup.visible) {
+            trace(text);
+            return;
+        }
+
+		if (FlxG.cameras.list.length > 0)
+			textGroup.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 
 		var color = isError ? 0xFFFF0000 : 0xFFFFFFFF;
 
@@ -59,10 +84,8 @@ class Trace {
 		textGroup.add(label);
 		entry.label = label;
 
-		// fade in
 		FlxTween.tween(label, {alpha: 1}, 0.2);
 
-		// fade out
 		entry.timer = new FlxTimer().start(DURATION, (_) -> {
 			FlxTween.tween(label, {alpha: 0}, 0.5, {
 				onComplete: (_) -> {
@@ -75,14 +98,24 @@ class Trace {
 		});
 
 		messages.push(entry);
-		if (messages.length > 10)
-			messages.shift();
+
+		if (messages.length > 10) {
+			var oldest = messages.shift();
+			if (oldest.timer != null)
+				oldest.timer.cancel();
+			FlxTween.cancelTweensOf(oldest.label);
+			if (oldest.label != null) {
+				textGroup.remove(oldest.label, true);
+				oldest.label.destroy();
+			}
+		}
 
 		trace(text);
 	}
 
 	static function refreshDisplay() {
-		textGroup.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
+		if (FlxG.cameras.list.length > 0)
+			textGroup.cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 		var yOffset = 10.0;
 		for (m in messages) {
 			if (m.label != null) {
@@ -93,6 +126,15 @@ class Trace {
 	}
 
 	public static function clear() {
+		for (m in messages) {
+			if (m.timer != null)
+				m.timer.cancel();
+			FlxTween.cancelTweensOf(m.label);
+			if (m.label != null) {
+				textGroup.remove(m.label, true);
+				m.label.destroy();
+			}
+		}
 		messages = [];
 	}
 }

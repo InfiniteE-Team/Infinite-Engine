@@ -35,6 +35,9 @@ class SaveData {
 		if (SaveData.data.ghosttaping == null)
 			SaveData.data.ghosttaping = true;
 
+		if (SaveData.data.laneBackdrop == null)
+			SaveData.data.laneBackdrop = 0;
+
 		if (SaveData.data.noteKeyPresets == null){
 			var presets:haxe.DynamicAccess<Array<Array<String>>> = {};
 			var keys4:Array<Array<String>> = [["A", "LEFT"], ["S", "DOWN"], ["W", "UP"], ["D", "RIGHT"]];

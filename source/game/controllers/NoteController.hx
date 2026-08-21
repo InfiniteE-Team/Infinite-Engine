@@ -33,6 +33,7 @@ class NoteController {
 	public var noteSkin:String = 'default';
 	public var noteType:String = 'normal';
 
+	public var blackBacks:FlxTypedGroup<flixel.FlxSprite> = new FlxTypedGroup<flixel.FlxSprite>();
 	public var strums:FlxTypedGroup<StrumNote> = new FlxTypedGroup<StrumNote>();
 	public var notes:FlxTypedGroup<Note> = new FlxTypedGroup<Note>();
 	public var sustains:FlxTypedGroup<NoteSustain> = new FlxTypedGroup<NoteSustain>();
@@ -102,10 +103,13 @@ class NoteController {
 
 			var strumPos = daSong.chars[i].strums.position;
 			var isPlayer = CharacterController.namesPlayer.contains(daSong.chars[i].role);
+			var bg = bglaneBackdrop(strumPos != null ? strumPos[0] : 0);
+			blackBacks.add(bg);
+
 			loadGenerateStrums(strumPos != null ? strumPos[0] : 0, strumPos != null ? strumPos[1] : 0, daSong.chars[i].id, isPlayer);
 		}
 
-		strums.visible = notes.visible = sustains.visible = splashes.visible = holdsplashes.visible = daSong.strumsVisible;
+		strums.visible = blackBacks.visible = notes.visible = sustains.visible = splashes.visible = holdsplashes.visible = daSong.strumsVisible;
 
 		Trace.traceOnce("Created Strums");
 	}
@@ -165,6 +169,14 @@ class NoteController {
 		holdSkinData = FormatJson.readJson(Paths.getPath('data/$holdDataPath', "json"));
 
 		Trace.traceOnce("Note Skin JSON loaded");
+	}
+
+	public function bglaneBackdrop(x:Float):flixel.FlxSprite {
+		var strumWidth:Float = (keys * 112) + (spacing * (keys - 1)) + 45;
+		var back:flixel.FlxSprite = new flixel.FlxSprite(x, 0).makeGraphic(Std.int(strumWidth), FlxG.height, flixel.util.FlxColor.BLACK);
+		var alphaVal:Float = SaveData.data.laneBackdrop;
+		back.alpha = (alphaVal > 1) ? (alphaVal / 100) : alphaVal;
+		return back;
 	}
 
 	public function loadGenerateStrums(x:Float, y:Float, charId:String, isPlayer:Bool) {
@@ -372,53 +384,53 @@ class NoteController {
 
 	public var activeHoldSplashes:Map<StrumNote, HoldSplash> = new Map();
 
-    public function spawnHoldSplash(strum:StrumNote, direction:Int, noteType:String = 'normal'):Void {
-        if (activeHoldSplashes.exists(strum))
-            return;
+	public function spawnHoldSplash(strum:StrumNote, direction:Int, noteType:String = 'normal'):Void {
+		if (activeHoldSplashes.exists(strum))
+			return;
 
-        var pool = _holdsplashPool.get(noteSkin);
-        var holdsplash:HoldSplash;
+		var pool = _holdsplashPool.get(noteSkin);
+		var holdsplash:HoldSplash;
 
-        if (pool != null && pool.length > 0) {
-            holdsplash = pool.pop();
-            holdsplash.revive();
-        } else {
-            holdsplash = new HoldSplash(keys, strum.x + strum.offset.x, strum.y + strum.offset.y, holdSkinData, noteSkin, direction, noteType);
-        }
+		if (pool != null && pool.length > 0) {
+			holdsplash = pool.pop();
+			holdsplash.revive();
+		} else {
+			holdsplash = new HoldSplash(keys, strum.x + strum.offset.x, strum.y + strum.offset.y, holdSkinData, noteSkin, direction, noteType);
+		}
 
-        holdsplash.direction = direction;
-        holdsplash.noteControl = this;
-        holdsplash.setPosition(strum.x, strum.y);
-        holdsplash.loadSprite(holdSkinData);
-        holdsplashes.add(holdsplash);
+		holdsplash.direction = direction;
+		holdsplash.noteControl = this;
+		holdsplash.setPosition(strum.x, strum.y);
+		holdsplash.loadSprite(holdSkinData);
+		holdsplashes.add(holdsplash);
 
-        activeHoldSplashes.set(strum, holdsplash);
-    }
+		activeHoldSplashes.set(strum, holdsplash);
+	}
 
-    public function stopHoldSplash(strum:StrumNote):Void {
-        var holdsplash = activeHoldSplashes.get(strum);
-        if (holdsplash != null) {
-            holdsplash.endHold();
-            activeHoldSplashes.remove(strum);
-        }
-    }
+	public function stopHoldSplash(strum:StrumNote):Void {
+		var holdsplash = activeHoldSplashes.get(strum);
+		if (holdsplash != null) {
+			holdsplash.endHold();
+			activeHoldSplashes.remove(strum);
+		}
+	}
 
-    public function recycleHoldSplash(holdsplash:HoldSplash):Void {
-        holdsplashes.remove(holdsplash, true);
-        holdsplash.kill();
-        holdsplash.noteControl = null;
+	public function recycleHoldSplash(holdsplash:HoldSplash):Void {
+		holdsplashes.remove(holdsplash, true);
+		holdsplash.kill();
+		holdsplash.noteControl = null;
 
-        for (strum in activeHoldSplashes.keys()) {
-            if (activeHoldSplashes.get(strum) == holdsplash) {
-                activeHoldSplashes.remove(strum);
-                break;
-            }
-        }
+		for (strum in activeHoldSplashes.keys()) {
+			if (activeHoldSplashes.get(strum) == holdsplash) {
+				activeHoldSplashes.remove(strum);
+				break;
+			}
+		}
 
-        if (!_holdsplashPool.exists(holdsplash.noteSkin))
-            _holdsplashPool.set(holdsplash.noteSkin, []);
-        _holdsplashPool.get(holdsplash.noteSkin).push(holdsplash);
-    }
+		if (!_holdsplashPool.exists(holdsplash.noteSkin))
+			_holdsplashPool.set(holdsplash.noteSkin, []);
+		_holdsplashPool.get(holdsplash.noteSkin).push(holdsplash);
+	}
 
 	public function update(songTime:Float) {
 		scrollSpeed = flixel.math.FlxMath.lerp(scrollSpeed, targetScrollSpeed, flixel.FlxG.elapsed * lerpSpeed);
@@ -513,22 +525,22 @@ class NoteController {
 
 			// CPU HOLD SPLASHES
 			if (!SaveData.data.middlescroll) {
-                if (!sustain.mustPress) {
-                    var isWithinHold = songTime >= sustain.strumTime && songTime <= (sustain.strumTime + sustain.length);
+				if (!sustain.mustPress) {
+					var isWithinHold = songTime >= sustain.strumTime && songTime <= (sustain.strumTime + sustain.length);
 
-                    if (isWithinHold) {
-                        if (!sustain.isHeld) {
-                            sustain.isHeld = true;
-                            spawnHoldSplash(sustain.strum, lane % keys, sustain.noteType);
-                        }
-                        sustain.strum.playAnim('confirm' + (lane % keys), false);
-                    } else if (sustain.isHeld) {
-                        sustain.isHeld = false;
-                        stopHoldSplash(sustain.strum);
-                        sustain.strum.playAnim('static' + (lane % keys), true);
-                    }
-                }
-            }
+					if (isWithinHold) {
+						if (!sustain.isHeld) {
+							sustain.isHeld = true;
+							spawnHoldSplash(sustain.strum, lane % keys, sustain.noteType);
+						}
+						sustain.strum.playAnim('confirm' + (lane % keys), false);
+					} else if (sustain.isHeld) {
+						sustain.isHeld = false;
+						stopHoldSplash(sustain.strum);
+						sustain.strum.playAnim('static' + (lane % keys), true);
+					}
+				}
+			}
 
 			// HANDLE SUSTAIN ENDS
 			if (sustain.isSustainEnd) {
@@ -605,11 +617,11 @@ class NoteController {
 			#end
 
 			if (sustain.strumTime + sustain.length < songTime) {
-                if (sustain.isHeld) {
-                    sustain.isHeld = false;
-                    stopHoldSplash(sustain.strum);
-                }
-                toDestroy.push(sustain);
+				if (sustain.isHeld) {
+					sustain.isHeld = false;
+					stopHoldSplash(sustain.strum);
+				}
+				toDestroy.push(sustain);
 			} else if (!isDownscroll && sustain.y + scaledHeight < 0)
 				toDestroy.push(sustain);
 			else if (isDownscroll && sustain.y - sustain.offset.y > flixel.FlxG.height)

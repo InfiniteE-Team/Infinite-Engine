@@ -62,8 +62,10 @@ class ModsSubstate extends ScriptSubstate {
 		}
 
 		if (Controls.ACCEPT) {
-			if (ModsRegistry.currentMod == ModsRegistry.mods[curSelected])
+			if (ModsRegistry.currentMod == ModsRegistry.mods[curSelected]) {
+				FlxG.sound.play(Paths.getPath('menus/cancelMenu', 'sound'));
 				return;
+			}
 
 			acceptOption = true;
 			ModsRegistry.onMod = true;

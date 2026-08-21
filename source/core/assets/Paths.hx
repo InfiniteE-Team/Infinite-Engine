@@ -9,7 +9,6 @@ import flixel.graphics.frames.FlxFramesCollection;
 
 class Paths {
 	private static var pathCache = new Map<String, String>();
-
 	private static var cache = new Map<String, Dynamic>();
 
 	public static function getPath(fileName:String, ?type:core.enums.AssetType = DEFAULT):Dynamic {
@@ -57,13 +56,11 @@ class Paths {
 
 	public static function resolveScript(fileName:String):String {
 		var extensions = ['.hx', '.lua', '.hxc'];
-
 		for (ext in extensions) {
 			if (FileSystem.exists(fileName + ext)) {
 				return fileName + ext;
 			}
 		}
-
 		return fileName + '.hx';
 	}
 
@@ -75,7 +72,7 @@ class Paths {
 			return cache.get(cacheKey);
 
 		var imagePath = getPath(fileName, 'image');
-		var folder = Library.findLib('images/$fileName');
+		var folder = resolvedPath;
 		var result:Dynamic = null;
 
 		var graphic:flixel.graphics.FlxGraphic = null;

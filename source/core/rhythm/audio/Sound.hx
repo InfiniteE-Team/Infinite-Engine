@@ -25,9 +25,9 @@ class Sound extends flixel.sound.FlxSound {
 		}
 
 		if (!streamedCache.exists(path))
-			streamedCache.set(type, path);
+			streamedCache.set(path, path);
 
-		loadStreamed(streamedCache.get(type));
+		loadStreamed(streamedCache.get(path));
 	}
 
 	public var playbackRate(default, set):Float = 1.0;
@@ -41,10 +41,10 @@ class Sound extends flixel.sound.FlxSound {
 	}
 
 	public static function clearGlobalCache():Void {
-        if (streamedCache != null) {
-            streamedCache.clear();
-        }
-    }
+		if (streamedCache != null) {
+			streamedCache.clear();
+		}
+	}
 
 	override public function destroy():Void {
 		soundPath = null;
