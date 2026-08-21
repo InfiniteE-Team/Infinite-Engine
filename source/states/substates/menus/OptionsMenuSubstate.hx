@@ -213,19 +213,23 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 					valSprite.updateHitbox();
 
 				default:
-					var valText = new FlxText(FlxG.width / 2 + 150, 150 + (i * 50), 0, Std.string(rawValue) + opt.displayFormat);
+					var displayFormat = opt.displayFormat;
+					if (displayFormat == null)
+						displayFormat = '';
+
+					var valText = new FlxText(FlxG.width / 2 + 150, 150 + (i * 50), 0, Std.string(rawValue) + displayFormat);
 					valText.setFormat(Paths.getPath('Funkin.otf', 'font'), 26, 0xFFFFFFFF, "right");
 					valText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 					valSprite = valText;
-					valText.text = Std.string(Reflect.field(SaveData.data, opt.saveField)) + opt.displayFormat;
+					valText.text = Std.string(Reflect.field(SaveData.data, opt.saveField)) + displayFormat;
 			}
 
 			valueTexts.push(valSprite);
 			add(valSprite);
 		}
-/*
-		if (categories[curCategory] == 'Keybinds') {
-			createKeybinds();
+		/*
+			if (categories[curCategory] == 'Keybinds') {
+				createKeybinds();
 		}*/
 
 		updateSelection(0);
@@ -355,8 +359,12 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 					FlxG.updateFramerate = Math.round(newValue);
 				}
 
+				var displayFormat = opt.displayFormat;
+				if (displayFormat == null)
+					displayFormat = '';
+
 				if (Std.isOfType(valueTexts[curSelectedOption], FlxText)) {
-					cast(valueTexts[curSelectedOption], FlxText).text = Std.string(newValue) + opt.displayFormat;
+					cast(valueTexts[curSelectedOption], FlxText).text = Std.string(newValue) + displayFormat;
 				}
 		}
 
