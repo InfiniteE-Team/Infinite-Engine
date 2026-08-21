@@ -13,6 +13,7 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 	var text:FlxText;
 
 	var options:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Options', 'Exit to Menu'];
+	var defaultOptions:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Options', 'Exit to Menu'];
 
 	var tips:Array<String> = ["wey tienes que darle a las flechitas no seas bobis"];
 
@@ -29,6 +30,8 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 	var nameSong:FlxText;
 	var difficulty:FlxText;
 	var blueBalled:FlxText;
+
+	var modeDifficultyChanging:Bool = false;
 
 	override public function create() {
 		super.create();
@@ -114,14 +117,40 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 		changeCur(0);
 	}
 
+	function reloadMenuOptions() {
+		for (t in texts) {
+			t.destroy();
+		}
+		texts = [];
+
+		for (i in 0...options.length) {
+			var text = new FlxText(100, 100 + (i * 60), FlxG.width, options[i]);
+			text.setFormat(Paths.getPath('Funkin.otf', 'font'), 34, 0xFFFFFFFF, "left");
+			text.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+			text.antialiasing = SaveData.data.antialiasing;
+			text.scrollFactor.set(0, 0);
+			texts.push(text);
+			add(text);
+		}
+
+		curSelect = 0;
+		changeCur(0);
+	}
+
 	override public function update(elapsed:Float) {
 		#if HSCRIPT_ALLOWED
 		script.call("onUpdate", [elapsed]);
 		#end
 
 		if (Controls.BACK) {
-			resumeFunction();
-			#if HSCRIPT_ALLOWED script.call("ExitMenu", []); #end
+			if (modeDifficultyChanging) {
+				modeDifficultyChanging = false;
+				options = defaultOptions;
+				reloadMenuOptions();
+			} else {
+				resumeFunction();
+				#if HSCRIPT_ALLOWED script.call("ExitMenu", []); #end
+			}
 		}
 
 		if (options.length > 0) {
@@ -132,25 +161,55 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 		}
 
 		if (Controls.ACCEPT) {
-			switch (options[curSelect]) {
-				case "Resume":
-					resumeFunction();
-					close();
-				case "Restart Song":
-					resumeFunction();
-					if (game.PlayState.instance != null)
-						game.PlayState.instance.rewindSong();
-					close();
-				case "Change Difficulty":
-					trace('wip');
-				case "Options":
-					openSubState(new states.substates.menus.OptionsMenuSubstate());
-				case "Exit to Menu":
+			if (!modeDifficultyChanging) {
+				switch (options[curSelect]) {
+					case "Resume":
+						resumeFunction();
+						close();
+					case "Restart Song":
+						resumeFunction();
+						if (game.PlayState.instance != null)
+							game.PlayState.instance.rewindSong();
+						close();
+					case "Change Difficulty":
+						modeDifficultyChanging = true;
+						options = [];
+						for (diff in core.rhythm.DiffsUtils.difficulties) {
+							options.push(diff.toUpperCase());
+						}
+						options.push('Exit to Menu');
+						reloadMenuOptions();
+					case "Options":
+						openSubState(new states.substates.menus.OptionsMenuSubstate());
+					case "Exit to Menu":
+						resumeFunction();
+						game.PlayStateConfig.blueBalled = 0;
+						#if HSCRIPT_ALLOWED
+						script.call("ExitMenu", []);
+						#end
+				}
+			} else {
+				if (options[curSelect] == 'Exit to Menu' || options[curSelect] == 'Back') {
+					modeDifficultyChanging = false;
+					options = defaultOptions;
+					reloadMenuOptions();
+				} else {
+					var selectedDiffString = options[curSelect].toLowerCase();
+
+					var diffIndex = core.rhythm.DiffsUtils.difficulties.indexOf(selectedDiffString);
+					if (diffIndex == -1)
+						diffIndex = 0;
+
+					core.rhythm.DiffsUtils.diffCurrent = core.rhythm.DiffsUtils.difficulties[diffIndex];
+
 					resumeFunction();
 					game.PlayStateConfig.blueBalled = 0;
-					#if HSCRIPT_ALLOWED
-					script.call("ExitMenu", []);
-					#end
+					close();
+
+					var currentSongName = game.PlayState.instance.curSong;
+
+					MusicBeatState.switchState(() -> new game.PlayState(currentSongName, diffIndex));
+				}
 			}
 		}
 
@@ -199,7 +258,6 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 		for (info in infoSongs)
 			info.destroy();
 		infoSongs = null;
-		
 
 		if (pauseMenuMusic != null) {
 			pauseMenuMusic.stop();

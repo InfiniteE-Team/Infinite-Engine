@@ -7,7 +7,7 @@ class DiffsUtils {
 
 	public static var diffCurrent:String = '';
 
-	public static var defaultOrder:Array<String> = ["easy", "normal", "hard", "erect"];
+	public static var defaultOrder:Array<String> = ["easy", "normal", "hard", "erect", "nightmare"];
 
 	public function new() {}
 

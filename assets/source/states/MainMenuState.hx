@@ -69,6 +69,9 @@ class MainMenuState extends ScriptState {
 		if (FlxG.keys.justPressed.TAB)
 			ScriptClass.openSubstate('ModsSubstate');
 
+		if (FlxG.keys.justPressed.SEVEN)
+			ScriptClass.switchState('StageEditor');
+
 		if (accept) {
 			FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
 			FlxG.camera.flash(0xFFFFFFFF, 0.4);

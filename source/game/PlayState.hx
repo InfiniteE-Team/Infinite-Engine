@@ -42,7 +42,6 @@ class PlayState extends MusicBeatState {
 	public var events:EventManager = new EventManager();
 	public var noteController:NoteController;
 	public var modchartSystem:game.modchart.ModchartSystem;
-	public var sustainRenderer:game.modchart.SustainRenderer;
 
 	// public var windowMod:WindowModManager = null;
 	// visuals
@@ -374,11 +373,6 @@ class PlayState extends MusicBeatState {
 			modchartSystem.destroy();
 		}
 
-		if (sustainRenderer != null) {
-			sustainRenderer.destroy();
-			sustainRenderer = null;
-		}
-
 		if (noteController != null) {
 			remove(noteController.strums);
 			remove(noteController.sustains);
@@ -512,11 +506,6 @@ class PlayState extends MusicBeatState {
 		if (modchartSystem != null) {
 			modchartSystem.destroy();
 			modchartSystem = null;
-		}
-
-		if (sustainRenderer != null) {
-			sustainRenderer.destroy();
-			sustainRenderer = null;
 		}
 
 		if (noteController != null)

@@ -14,8 +14,6 @@ class NoteSustain extends Note {
 
 	public var parentNote:NoteSustain = null;
 
-	public var mesh:game.modchart.SustainMesh = null;
-
 	public function new(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0, length:Float,
 			?noteType:String = 'normal', isSustainEnd:Bool = false) {
 		this.length = length;
@@ -30,11 +28,6 @@ class NoteSustain extends Note {
 		this.isHeld = false;
 		this.parentNote = null;
 
-		if (mesh != null) {
-			mesh.destroy();
-			mesh = null;
-		}
-		
 		clipRect = null;
 
 		reinit(strumTime, keys, x, y, noteSkinData, noteSkin, direction, noteType);
