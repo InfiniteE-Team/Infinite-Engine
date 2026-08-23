@@ -3,6 +3,7 @@ package modding.mods;
 import sys.FileSystem;
 import lime.app.Application;
 import lime.graphics.Image;
+import states.menus.ModsState;
 
 typedef ModData = {
 	var ?nameMod:String;
@@ -17,6 +18,8 @@ typedef ModData = {
 }
 
 class ModConfig {
+	public static var modData:ModData;
+	
 	public function new() {}
 
 	public static function init() {
@@ -27,9 +30,9 @@ class ModConfig {
 		}
 
 		try {
-			var data:ModData = FormatJson.readJson(jsonPath);
-			if (data.appIcon != null && data.appIcon != "") {
-				setAppIcon(data.appIcon);
+			modData = FormatJson.readJson(jsonPath);
+			if (modData.appIcon != null && modData.appIcon != "") {
+				setAppIcon(modData.appIcon);
 			}
 		} catch (e:Dynamic) {
 			Trace.traceOnce('Error to parsed the mod: $e');

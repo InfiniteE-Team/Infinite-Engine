@@ -81,6 +81,10 @@ class NoteController {
 	public var playStateConfig:PlayStateConfig;
 	public var gameAudio:core.rhythm.audio.GameAudio;
 
+	// config
+	var strumsVisible:Bool = true;
+	var notesVisible:Bool = true;
+
 	public function new(daSong:SongConfig, isDownscroll:Bool, isGhostTapping:Bool, script:ScriptHandler, playStateConfig:PlayStateConfig,
 			gameAudio:core.rhythm.audio.GameAudio) {
 		this.daSong = daSong;
@@ -101,13 +105,16 @@ class NoteController {
 
 			var strumPos = daSong.chars[i].strums.position;
 			var isPlayer = CharacterController.namesPlayer.contains(daSong.chars[i].role);
+			var charData = daSong.chars[i];
+			strumsVisible = charData?.strums?.visible ?? true;
+			notesVisible = charData?.strums?.notesVisible ?? strumsVisible;
+
 			var bg = bglaneBackdrop(strumPos != null ? strumPos[0] : 0);
+			bg.visible = strumsVisible && notesVisible;
 			blackBacks.add(bg);
 
 			loadGenerateStrums(strumPos != null ? strumPos[0] : 0, strumPos != null ? strumPos[1] : 0, daSong.chars[i].id, isPlayer);
 		}
-
-		strums.visible = blackBacks.visible = notes.visible = sustains.visible = splashes.visible = holdsplashes.visible = daSong.strumsVisible;
 
 		Trace.traceOnce("Created Strums");
 	}
@@ -184,8 +191,6 @@ class NoteController {
 		var charGroup = strumsByChar.get(charId);
 
 		var charData = Lambda.find(daSong.chars, c -> c.id == charId);
-		var strumsVisible:Bool = charData?.strums?.visible ?? true;
-		var notesVisible:Bool = charData?.strums?.notesVisible ?? strumsVisible;
 
 		_charNotesVisible.set(charId, notesVisible);
 

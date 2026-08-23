@@ -243,7 +243,6 @@ class FreeplayState extends states.MusicBeatState {
 
 		if (Controls.BACK) {
 			acceptOption = true;
-			core.rhythm.audio.MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102, true);
 			modding.scripting.types.ScriptClass.switchState('MainMenuState');
 		}
 
@@ -286,7 +285,7 @@ class FreeplayState extends states.MusicBeatState {
 		var bpm:Float = freeplayData.songData[curSelected].bpm;
 
 		if (songSelected != null) {
-			core.rhythm.audio.MasterAudio.playSong(Paths.getPath('songs/' + songSelected + '/audio/Inst.ogg'), 0.6, bpm, true);
+			core.rhythm.audio.MasterAudio.playSong(Paths.getPath('songs/' + songSelected + '/audio/Inst.ogg'), 0.6, bpm);
 		}
 	}
 

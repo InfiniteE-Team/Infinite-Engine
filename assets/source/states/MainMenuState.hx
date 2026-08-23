@@ -67,7 +67,7 @@ class MainMenuState extends ScriptState {
 			change(-1);
 
 		if (FlxG.keys.justPressed.TAB)
-			ScriptClass.switchState('ModsState');
+			MusicBeatState.switchState(() -> new states.menus.ModsState());
 
 		if (FlxG.keys.justPressed.SEVEN)
 			ScriptClass.switchState('StageEditor');
