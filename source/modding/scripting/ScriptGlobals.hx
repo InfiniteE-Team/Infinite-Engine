@@ -23,9 +23,25 @@ class ScriptGlobals {
 		roots['FlxEase'] = flixel.tweens.FlxEase;
 		roots['FlxMath'] = flixel.math.FlxMath;
 
-		// Engine
-		roots['GlobalConfig'] = core.json.engine.GlobalData.GlobalConfig;
+		// Haxe UI
+		roots['Toolkit'] = haxe.ui.Toolkit;
+		roots['Screen'] = haxe.ui.core.Screen;
+		roots['Component'] = haxe.ui.core.Component;
+		roots['VBox'] = haxe.ui.containers.VBox;
+		roots['HBox'] = haxe.ui.containers.HBox;
+		roots['Button'] = haxe.ui.components.Button;
+		roots['Label'] = haxe.ui.components.Label;
+		roots['CheckBox'] = haxe.ui.components.CheckBox;
+		roots['TextField'] = haxe.ui.components.TextField;
+		roots['Slider'] = haxe.ui.components.Slider;
+		roots['DropDown'] = haxe.ui.components.DropDown;
+		roots['MenuBar'] = haxe.ui.containers.menus.MenuBar;
+		roots['Menu'] = haxe.ui.containers.menus.Menu;
+		roots['MenuItem'] = haxe.ui.containers.menus.MenuItem;
 
+		// Engine
+
+		roots['GlobalConfig'] = core.json.engine.GlobalData.GlobalConfig;
 		roots['Bar'] = game.objects.Bar;
 		roots['PlayState'] = game.PlayState;
 		roots['MenuState'] = states.MenuState;
@@ -79,8 +95,8 @@ class ScriptGlobals {
 		#end
 
 		// Haxe std extra
-		roots['FileSystem'] = sys.FileSystem;
 		roots['File'] = sys.io.File;
+		roots['FileSystem'] = sys.FileSystem;
 
 		// modchart
 		roots['ModchartSystem'] = game.modchart.ModchartSystem;
@@ -105,7 +121,7 @@ class ScriptGlobals {
 		roots['BeatXModifier'] = game.modchart.modifiers.Modifiers.BeatXModifier;
 		roots['ShrinkXModifier'] = game.modchart.modifiers.Modifiers.ShrinkXModifier;
 
-		//roots['WindowModManager'] = windowmodcharting.WindowModManager;
+		// roots['WindowModManager'] = windowmodcharting.WindowModManager;
 	}
 
 	public static function initLua():Void {
@@ -177,7 +193,7 @@ class ScriptGlobals {
 			"ShrinkXModifier" => game.modchart.modifiers.Modifiers.ShrinkXModifier,
 			"BeatXModifier" => game.modchart.modifiers.Modifiers.BeatXModifier,
 			"TanDrunkModifier" => game.modchart.modifiers.Modifiers.TanDrunkModifier,
-			//"WindowModManager" => windowmodcharting.WindowModManager
+			// "WindowModManager" => windowmodcharting.WindowModManager
 		];
 	}
 }
