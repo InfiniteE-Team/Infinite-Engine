@@ -9,11 +9,7 @@ import core.json.engine.GlobalData.GlobalConfig;
 import core.json.song.RatingData;
 // notes
 import core.json.objects.NoteSkinData;
-import game.objects.sprites.notes.StrumNote;
-import game.objects.sprites.notes.Note;
-import game.objects.sprites.notes.NoteSustain;
-import game.objects.sprites.notes.NoteSplash;
-import game.objects.sprites.notes.HoldSplash;
+import game.objects.sprites.notes.*;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import game.graphics.shaders.hardcode.RGBShader;
 #if HSCRIPT_ALLOWED
@@ -46,6 +42,8 @@ class NoteController {
 	var _sustainPool:Map<String, Array<NoteSustain>> = new Map();
 	var _splashPool:Map<String, Array<NoteSplash>> = new Map();
 	var _holdsplashPool:Map<String, Array<HoldSplash>> = new Map();
+
+	var _charNotesVisible:Map<String, Bool> = new Map();
 
 	public var unspawnNotes:Array<Note> = [];
 	public var charStrumOffsets:Map<String, Int> = new Map();
@@ -185,6 +183,12 @@ class NoteController {
 		}
 		var charGroup = strumsByChar.get(charId);
 
+		var charData = Lambda.find(daSong.chars, c -> c.id == charId);
+		var strumsVisible:Bool = charData?.strums?.visible ?? true;
+		var notesVisible:Bool = charData?.strums?.notesVisible ?? strumsVisible;
+
+		_charNotesVisible.set(charId, notesVisible);
+
 		for (i in 0...keys) {
 			#if HSCRIPT_ALLOWED
 			scriptNC.call("onBuildStrums", []);
@@ -211,6 +215,8 @@ class NoteController {
 			#if HSCRIPT_ALLOWED
 			scriptNC.call("safeBuildStrums", []);
 			#end
+
+			strum.visible = strumsVisible;
 
 			strums.add(strum);
 			charGroup.add(strum);
@@ -268,8 +274,9 @@ class NoteController {
 			note.direction = globalLane;
 			note.strumTime = data.time;
 			note.mustPress = CharacterController.namesPlayer.contains(charData.role);
-			if (!daSong.strumsVisible)
-				note.visible = false;
+
+			var notesVis = _charNotesVisible.get(charData.id) ?? true;
+			note.visible = notesVis;
 
 			note.strum = strum;
 			note.noteControl = this;
@@ -301,8 +308,7 @@ class NoteController {
 				sustain.noteType = data.type;
 				if (isDownscroll)
 					sustain.flipY = true;
-				if (!daSong.strumsVisible)
-					sustain.visible = false;
+				sustain.visible = notesVis;
 
 				sustain.origin.y = 0;
 				// Just for initial scale, we will recalculate on update anyway
@@ -334,8 +340,7 @@ class NoteController {
 				sustainEnd.noteType = data.type;
 				if (isDownscroll)
 					sustainEnd.flipY = true;
-				if (!daSong.strumsVisible)
-					sustainEnd.visible = false;
+				sustainEnd.visible = notesVis;
 				sustainEnd.origin.y = 0;
 
 				#if HSCRIPT_ALLOWED

@@ -45,6 +45,7 @@ typedef StrumsData = {
 	var ?position:Array<Float>;
 	var ?scale:Array<Float>;
 	var ?visible:Bool;
+	var ?notesVisible:Bool;
 }
 
 typedef EventsData = {

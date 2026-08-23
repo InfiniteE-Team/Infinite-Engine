@@ -180,6 +180,8 @@ class PlayState extends MusicBeatState {
 		modchartSystem.cacheStrumBase();
 
 		// NoteController.meshSustainsActive = true;
+
+		chars.setupMissCallback(noteController);
 	}
 
 	// Code Song
@@ -513,6 +515,7 @@ class PlayState extends MusicBeatState {
 
 		if (events != null)
 			events.destroy();
+		
 		events = null;
 
 		if (stage != null)

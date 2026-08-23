@@ -6,7 +6,7 @@ enum abstract SoundType(String) from String to String {
 }
 
 class Sound extends flixel.sound.FlxSound {
-	public static var streamedCache:Map<String, String> = new Map<String, String>();
+	public static var streamedCache:Map<String, openfl.media.Sound> = new Map();
 
 	public var soundType:SoundType;
 	public var soundPath:String;
@@ -19,15 +19,37 @@ class Sound extends flixel.sound.FlxSound {
 	}
 
 	public function onSoundStreamed(type:SoundType, path:String) {
-		if (path == null) {
-			trace('Sound path not found for "$path"');
+		if (path == null)
+			return;
+
+		var absPath = sys.FileSystem.absolutePath(path);
+
+		if (!sys.FileSystem.exists(absPath)) {
+			trace('Sound: not found: $absPath');
 			return;
 		}
 
-		if (!streamedCache.exists(path))
-			streamedCache.set(path, path);
+		var oflSound = streamedCache.get(absPath);
+		if (oflSound == null) {
+			#if lime_cffi
+			var buffer = lime.media.AudioBuffer.fromFile(absPath);
+			if (buffer == null) {
+				trace('Sound: AudioBuffer null for: $absPath');
+				return;
+			}
+			oflSound = openfl.media.Sound.fromAudioBuffer(buffer);
+			#else
+			oflSound = openfl.media.Sound.fromFile(absPath);
+			#end
 
-		loadStreamed(streamedCache.get(path));
+			if (oflSound == null) {
+				trace('Sound: fromFile null for: $absPath');
+				return;
+			}
+			streamedCache.set(absPath, oflSound);
+		}
+
+		load(oflSound);
 	}
 
 	public var playbackRate(default, set):Float = 1.0;
@@ -41,9 +63,17 @@ class Sound extends flixel.sound.FlxSound {
 	}
 
 	public static function clearGlobalCache():Void {
-		if (streamedCache != null) {
-			streamedCache.clear();
+		for (snd in streamedCache) {
+			@:privateAccess
+			if (snd.__buffer != null) {
+				snd.__buffer.dispose();
+				snd.__buffer = null;
+			}
+			snd.close();
 		}
+
+		if (streamedCache != null)
+			streamedCache.clear();
 	}
 
 	override public function destroy():Void {

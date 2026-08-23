@@ -39,9 +39,9 @@ class InputController {
 					sustain.isHeld = true;
 					charStrums[i].playAnim('confirm' + i, false);
 				} else if (sustain.isHeld) {
-                    sustain.isHeld = false;
-                    noteController.stopHoldSplash(charStrums[i]);
-                }
+					sustain.isHeld = false;
+					noteController.stopHoldSplash(charStrums[i]);
+				}
 			}
 		} else { // release key
 			var wasHolding = false;
@@ -149,6 +149,7 @@ class InputController {
 	}
 
 	public function onMiss(playStateConfig:PlayStateConfig, noteController:NoteController, gameAudio:GameAudio) {
+		trace('=== onMiss called === health antes: ' + playStateConfig.health);
 		if (isMiss != null)
 			isMiss();
 		gameAudio.onMiss();
@@ -156,6 +157,7 @@ class InputController {
 		playStateConfig.score += noteController.getMissScore();
 		playStateConfig.misses++;
 		playStateConfig.combo = 0;
+		trace('=== onMiss health despues: ' + playStateConfig.health);
 	}
 
 	public function isCPUHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, noteController:NoteController, charId:String, i:Int) {

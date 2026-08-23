@@ -79,7 +79,8 @@ class PsychPorter implements FormatChartConverter {
 						role: 'gf',
 						strums: {
 							position: [0, 0],
-							visible: false
+							visible: false,
+							notesVisible: false
 						}
 					},
 					{

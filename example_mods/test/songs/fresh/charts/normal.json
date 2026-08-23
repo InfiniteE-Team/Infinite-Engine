@@ -16,7 +16,8 @@
                         50,
                         0
                     ],
-                    "visible": false
+                    "visible": false,
+                    "notesVisible": false
                 }
             },
             {

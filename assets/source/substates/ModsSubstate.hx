@@ -78,10 +78,8 @@ class ModsSubstate extends ScriptSubstate {
 			trace("Mod actual: " + ModsRegistry.currentMod);
 
 			FlxTimer.wait(0.1, () -> {
-				@:privateAccess
-				Paths.clearCache();
-				FlxG.bitmap.clearCache();
-				WindowAPI.restartApp();
+				Library.reloadMods();
+				MusicBeatState.switchState(() -> new core.ConfigMain());
 			});
 		}
 

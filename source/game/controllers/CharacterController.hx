@@ -116,6 +116,9 @@ class CharacterController extends FunkinObjectRegistry {
 				}
 			}
 		}
+	}
+
+	public function setupMissCallback(noteController:NoteController):Void {
 		input.isMiss = function() {
 			for (char in playerChars) {
 				var strums = noteController.getCharStrums(char.id);

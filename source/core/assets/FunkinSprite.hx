@@ -36,6 +36,54 @@ class FunkinSprite extends animate.FlxAnimate {
 		super.updateHitbox();
 	}
 
+	// RUNTIME LOAD GRAPHICS IMAGES!111!
+	override public function loadGraphic(graphic:flixel.system.FlxAssets.FlxGraphicAsset, animated = false, frameWidth = 0, frameHeight = 0, unique = false,
+			?key:String):flixel.FlxSprite {
+		if ((graphic is String)) {
+			var path:String = cast graphic;
+			if (path != null && sys.FileSystem.exists(path)) {
+				if (sys.FileSystem.exists('$path/Animation.json')) {
+					frames = cast FlxAnimateFrames.fromAnimate(path);
+					_assetLoaded = true;
+					return this;
+				}
+
+				var bmp = openfl.display.BitmapData.fromFile(path);
+				if (bmp == null)
+					return super.loadGraphic(graphic, animated, frameWidth, frameHeight, unique, key);
+
+				var flxGraphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, path);
+				flxGraphic.persist = true;
+				@:privateAccess flxGraphic.bitmap.getTexture(FlxG.stage.context3D);
+				flxGraphic.bitmap.disposeImage();
+
+				var xmlPath = path.substr(0, path.lastIndexOf('.')) + '.xml';
+				if (sys.FileSystem.exists(xmlPath)) {
+					frames = FlxAtlasFrames.fromSparrow(flxGraphic, sys.io.File.getContent(xmlPath));
+					_assetLoaded = true;
+					return this;
+				}
+
+				var jsonPath = path.substr(0, path.lastIndexOf('.')) + '.json';
+				if (sys.FileSystem.exists(jsonPath)) {
+					frames = FlxAtlasFrames.fromTexturePackerJson(flxGraphic, sys.io.File.getContent(jsonPath));
+					_assetLoaded = true;
+					return this;
+				}
+
+				var txtPath = path.substr(0, path.lastIndexOf('.')) + '.txt';
+				if (sys.FileSystem.exists(txtPath)) {
+					frames = FlxAtlasFrames.fromLibGdx(flxGraphic, sys.io.File.getContent(txtPath));
+					_assetLoaded = true;
+					return this;
+				}
+
+				return super.loadGraphic(flxGraphic, animated, frameWidth, frameHeight, unique, key ?? path);
+			}
+		}
+		return super.loadGraphic(graphic, animated, frameWidth, frameHeight, unique, key);
+	}
+
 	public function loadProps(props:ObjectData, path:String):Void {
 		var assetPath = '$path/${props.path}';
 

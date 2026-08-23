@@ -5,7 +5,11 @@ class PlayStateConfig {
 	public static inline var strumLineY:Float = 50.0;
 
 	// gameplay
-	public var health:Float = 1.0;
+	public var health(default, set):Float = 1.0;
+
+	function set_health(value:Float):Float {
+		return health = flixel.math.FlxMath.bound(value, 0, 2);
+	}
 
 	public var score:Int = 0;
 

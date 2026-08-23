@@ -13,7 +13,9 @@ class Library {
 		var modNames:Array<String> = [];
 
 		if (!FileSystem.exists(modsFolder)) {
-			try FileSystem.createDirectory(modsFolder) catch (e:Dynamic) {}
+			try
+				FileSystem.createDirectory(modsFolder)
+			catch (e:Dynamic) {}
 		}
 
 		if (FileSystem.exists(modsFolder) && FileSystem.isDirectory(modsFolder)) {
@@ -29,8 +31,7 @@ class Library {
 	}
 
 	public static function reloadMods():Void {
-		@:privateAccess
-		Paths.pathCache.clear();
+		clearModCache();
 		ModsRegistry.mods = getAvailableMods();
 
 		Trace.traceOnce('Mods scan → cwd: ${Sys.getCwd()} | found: ${ModsRegistry.mods}');
@@ -49,8 +50,9 @@ class Library {
 
 	public static function findLib(file:String):String {
 		@:privateAccess
-		if (Paths.pathCache.exists(file))
+		if (Paths.pathCache.exists(file)) {
 			return Paths.pathCache.get(file);
+		}
 
 		if (ModsRegistry.onMod) {
 			if (ModsRegistry.currentMod != null && ModsRegistry.currentMod != '') {
@@ -61,18 +63,6 @@ class Library {
 					return currentModPath;
 				}
 			}
-
-			for (mod in ModsRegistry.mods) {
-				if (mod == ModsRegistry.currentMod)
-					continue;
-
-				var modPath = '$modsFolder/$mod/$file';
-				if (FileSystem.exists(modPath)) {
-					@:privateAccess
-					Paths.pathCache.set(file, modPath);
-					return modPath;
-				}
-			}
 		}
 
 		var basePath = '$baseFolder/$file';
@@ -81,7 +71,40 @@ class Library {
 			Paths.pathCache.set(file, basePath);
 			return basePath;
 		}
-
 		return null;
+	}
+
+	public static function clearModCache():Void {
+		@:privateAccess {
+			var pathsToRemove = [
+				for (k => v in Paths.pathCache)
+					if (v != null && v.startsWith(modsFolder)) k
+			];
+			for (trash in pathsToRemove)
+				Paths.pathCache.remove(trash);
+
+			var assetsToRemove = [
+				for (k in Paths.cache.keys())
+					if (k.startsWith(modsFolder)) k
+			];
+			for (trashes in assetsToRemove) {
+				var asset = Paths.cache.get(trashes);
+				if (asset is flixel.graphics.frames.FlxFramesCollection) {
+					var fc = cast(asset, flixel.graphics.frames.FlxFramesCollection);
+					fc.parent?.bitmap?.dispose();
+					if (fc.parent != null)
+						FlxG.bitmap.remove(fc.parent);
+					fc.destroy();
+				} else if (asset is flixel.graphics.FlxGraphic) {
+					var graphic = cast(asset, flixel.graphics.FlxGraphic);
+					graphic.bitmap?.dispose();
+					FlxG.bitmap.remove(graphic);
+					graphic.destroy();
+				}
+				Paths.cache.remove(trashes);
+			}
+		}
+
+		core.rhythm.audio.Sound.clearGlobalCache();
 	}
 }
