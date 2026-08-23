@@ -48,6 +48,13 @@ class MainMenuState extends ScriptState {
 		game.scrollFactor.set(0, 0);
 		add(game);
 
+		var modsText:FlxText = new FlxText(FlxG.width * 0.01, FlxG.height * 0.91, FlxG.width, 'Press Tab - Mods Menu');
+		modsText.setFormat(Paths.getPath('Funkin.otf', 'font'), 24, 0xFFFFFFFF, "left");
+		modsText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+		modsText.antialiasing = SaveData.data.antialiasing;
+		modsText.scrollFactor.set(0, 0);
+		add(modsText);
+
 		change(0);
 	}
 

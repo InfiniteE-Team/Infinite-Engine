@@ -1,12 +1,8 @@
 package states.menus;
 
-import sys.FileSystem;
-import core.assets.Library;
-import core.api.WindowAPI;
 import core.assets.Library;
 import flixel.text.FlxText;
 import flixel.util.FlxTimer;
-import modding.mods.ModData;
 import core.assets.FunkinSprite;
 import modding.mods.ModsRegistry;
 
@@ -38,7 +34,7 @@ class ModsState extends states.MusicBeatState {
 
 		for (i in 0...ModsRegistry.mods.length) {
 			var graphic = Paths.getPath('iconMod', 'image');
-			if (!FileSystem.exists(graphic))
+			if (!sys.FileSystem.exists(graphic))
 				graphic = Paths.getPath('menus/mods/fallback-icon', 'image');
 
 			var spacing:Float = 110;
@@ -63,8 +59,8 @@ class ModsState extends states.MusicBeatState {
 			add(mod);
 
 			var description:String = '??';
-			if (modding.mods.ModConfig.modData != null && modding.mods.ModConfig.modData.description != null) {
-				description = modding.mods.ModConfig.modData.description;
+			if (modding.mods.ModData.ModConfig.modData != null && modding.mods.ModData.ModConfig.modData.description != null) {
+				description = modding.mods.ModData.ModConfig.modData.description;
 			}
 
 			var modDesc:FlxText = new FlxText(330, 240 + (i * spacing), FlxG.width, description);
