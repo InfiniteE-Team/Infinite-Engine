@@ -182,6 +182,14 @@ class ScriptHandler {
 	}
 
 	public function destroy():Void {
+		if (scripts != null) {
+			for (script in scripts) {
+				@:privateAccess script.interp.variables = new hxscript.runtime.Bindings();
+				var interp = Std.downcast(script.interp, GameInterp);
+				if (interp != null)
+					interp.setContext(null);
+			}
+		}
 		scripts = null;
 		paths = null;
 		modifiedTimes = null;

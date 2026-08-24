@@ -62,11 +62,10 @@ class ScriptClass {
 	}
 
 	public static function loadAsClass<T>(path:String, className:String, content:String, args:Array<Dynamic>):T {
-		var env = ScriptHandler.globalEnv;
+		var env = new hxscript.Environment();
 
-		if (env.modules != null && env.modules.exists(className)) {
-			env.modules.remove(className);
-		}
+		for (k => v in ScriptHandler.globalEnv.variables)
+			env.variables.set(k, v);
 
 		var module:Module;
 		try {
@@ -91,7 +90,9 @@ class ScriptClass {
 		}
 
 		var cls:hxscript.types.ScriptedClass = cast type;
-		return cast cls.typeCreateInstance(args ?? []);
+		var instance:T = cast cls.typeCreateInstance(args ?? []);
+
+		return instance;
 	}
 
 	private static function checkIsClass(content:String):Bool {
