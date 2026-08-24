@@ -28,16 +28,9 @@
             "url": "https://github.com/MaybeMaru/flixel-animate"
         },
         {
-            "name": "hscript",
+            "name": "hxscript",
             "type": "haxelib",
-            "version": "2.7.0"
-        },
-        {
-            "name": "rulescript",
-            "type": "git",
-            "dir": null,
-            "ref": "dev",
-            "url": "https://github.com/Kriptel/RuleScript"
+            "version": "2.0.4"
         },
         {
             "name": "ale-json",

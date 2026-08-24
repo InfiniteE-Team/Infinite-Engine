@@ -1,23 +1,20 @@
 package modding.scripting;
 
-import rulescript.RuleScript;
-import rulescript.parsers.HxParser;
+import hxscript.Script;
+import hxscript.Environment;
+import hxscript.Module;
 
 class ScriptHandler {
-	public static var globalContext:rulescript.Context = new rulescript.Context();
+	public static var globalEnv:Environment = new Environment();
 
-	var scripts:Array<RuleScript> = [];
-	var typedefs:Map<String, modding.scripting.types.ScriptedTypeDef> = [];
-
+	var scripts:Array<Script> = [];
 	var luaScripts:Array<modding.scripting.lua.LuaScript> = [];
 
 	var paths:Array<String> = [];
 	var modifiedTimes:Array<Float> = [];
 	var pendingPaths:Array<String> = [];
 
-	// this in scripts.
 	var superInstance:Dynamic;
-
 	var extraVars:Map<String, Dynamic> = [];
 
 	public function new(superInstance:Dynamic) {
@@ -59,14 +56,10 @@ class ScriptHandler {
 	public function loadTypedef(name:String):Void {
 		var td = modding.scripting.types.ScriptedTypeDef.loadTypedef(name);
 		if (td != null) {
-			typedefs.set(name, td);
 			for (script in scripts) {
-				var data = td.resolve(script.access.execute);
-				if (data != null) {
-					script.access.setVariable(name, data);
-				} else {
-					Trace.traceOnce("Error typedef not find the content ideal");
-				}
+				td.init(null, script.interp);
+				var valueToSet = td.structural ? td : td.alias;
+				script.variables.set(name, valueToSet);
 			}
 		}
 	}
@@ -86,14 +79,16 @@ class ScriptHandler {
 	public function call(name:String, args:Array<Dynamic>):Dynamic {
 		if (scripts == null)
 			return null;
+
 		if (name == "postCreate") {
 			for (script in luaScripts)
 				script.registersuperInstance();
 		}
+
 		var result:Dynamic = null;
 		for (script in scripts) {
-			if (script.interp.access.variableExists(name))
-				result = script.access.callFunction(name, args);
+			if (script.variables.exists(name))
+				result = script.call(name, args);
 		}
 		for (script in luaScripts)
 			result = script.call(name, args);
@@ -104,9 +99,11 @@ class ScriptHandler {
 		if (scripts == null)
 			return false;
 		for (script in scripts) {
-			var result = script.access.callFunction(name, args);
-			if (result == true)
-				return true;
+			if (script.variables.exists(name)) {
+				var result = script.call(name, args);
+				if (result == true)
+					return true;
+			}
 		}
 		for (script in luaScripts) {
 			if (script.callCancellable(name, args))
@@ -116,10 +113,8 @@ class ScriptHandler {
 	}
 
 	public function exposeStatics(cls:Class<Dynamic>):Void {
-		for (field in Type.getClassFields(cls)) {
-			var value = Reflect.getProperty(cls, field);
-			setVar(field, value);
-		}
+		for (field in Type.getClassFields(cls))
+			setVar(field, Reflect.getProperty(cls, field));
 	}
 
 	public function hotReload():Void {
@@ -134,69 +129,67 @@ class ScriptHandler {
 		}
 	}
 
-	function buildScript(path:String):Null<RuleScript> {
-		var parser = new HxParser();
-		parser.allowAll();
-		var script = new RuleScript(null, parser, globalContext);
-		setupScript(script);
-		script.errorHandler = (error:haxe.Exception) -> {
-			var pos = script.interp.access.posInfos();
-			var file = pos.fileName;
-			var line = pos.lineNumber;
-			var msg = switch (Std.string(error.message)) {
-				case s if (s.startsWith("EUnknownVariable(")):
-					'Unknown variable: ${s.substring(17, s.length - 1)}';
-				case s if (s.startsWith("EInvalidAccess(")):
-					'Invalid field access: ${s.substring(15, s.length - 1)}';
-				case s: s;
-			};
-			Trace.traceOnce('[$file:$line] Script error: $msg');
+	function buildScript(path:String):Null<Script> {
+		var content:String;
+		try {
+			content = sys.io.File.getContent(path);
+		} catch (e) {
+			Trace.traceOnce('[${haxe.io.Path.withoutDirectory(path)}] Cannot read file: ${e.message}');
+			return null;
+		}
+
+		var scriptName = haxe.io.Path.withoutDirectory(path);
+		var script = new Script(content, scriptName, globalEnv);
+
+		script.onParsingError = function(e) {
+			Trace.traceOnce('[$scriptName] Parse error: ${e.message}');
+		};
+		script.onProgramError = function(e) {
+			var d = hxscript.error.Sink.history[hxscript.error.Sink.history.length - 1];
+			var line = d != null ? '${d.line}' : '?';
+			Trace.traceOnce('[$scriptName:$line] Script error: ${e.message}');
 		};
 
-		try {
-			var parsed = parser.parse(sys.io.File.getContent(path));
-			script.execute(parsed);
-		} catch (e:hscript.Expr.Error) {
-			#if hscriptPos
-			Trace.traceOnce('[${haxe.io.Path.withoutDirectory(path)}:${e.line}] Parse/runtime error: ${hscript.Printer.errorToString(e)}');
-			#else
-			Trace.traceOnce('[${haxe.io.Path.withoutDirectory(path)}] Error: ${e}');
-			#end
-		} catch (e) {
-			Trace.traceOnce('[${haxe.io.Path.withoutDirectory(path)}] Unexpected: ${e.details()}');
-		}
+		setupScript(script);
+		script.start();
+
 		return script;
 	}
 
-	function setupScript(script:RuleScript):Void {
-		script.superInstance = superInstance;
+	function setupScript(script:Script):Void {
+		var interp = Std.downcast(script.interp, modding.scripting.GameInterp);
+		if (interp != null)
+			interp.setContext(superInstance);
 
+		script.variables.set('this', superInstance);
 		for (name => value in extraVars)
-			script.access.setVariable(name, value);
-
-		for (name => td in typedefs) {
-			var data = td.resolve(script.access.execute);
-			if (data != null) {
-				script.access.setVariable(name, data);
-			}
-		}
+			script.variables.set(name, value);
 	}
 
 	function setVar(name:String, value:Dynamic):Void {
 		for (script in scripts)
-			script.access.setVariable(name, value);
+			script.variables.set(name, value);
 	}
 
 	function reload(i:Int):Void {
-		scripts[i].access.resetInterp();
+		var content = sys.io.File.getContent(paths[i]);
+		scripts[i].parse(content);
 		setupScript(scripts[i]);
-		scripts[i].tryExecute(sys.io.File.getContent(paths[i]));
+		scripts[i].start();
 		modifiedTimes[i] = sys.FileSystem.stat(paths[i]).mtime.getTime();
-		scripts[i].access.callFunction('postCreate', []);
+		scripts[i].call('postCreate', []);
 		Trace.traceOnce('[ScriptHandler] hot-reloaded: ${paths[i]}');
 	}
 
 	public function destroy():Void {
+		if (scripts != null) {
+			for (script in scripts) {
+				@:privateAccess script.interp.variables = new hxscript.runtime.Bindings();
+				var interp = Std.downcast(script.interp, GameInterp);
+				if (interp != null)
+					interp.setContext(null);
+			}
+		}
 		scripts = null;
 		paths = null;
 		modifiedTimes = null;
@@ -205,7 +198,6 @@ class ScriptHandler {
 		for (script in luaScripts)
 			script.destroy();
 		pendingPaths = null;
-		typedefs = null;
 		luaScripts = null;
 	}
 }
