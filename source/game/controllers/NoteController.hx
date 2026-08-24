@@ -3,7 +3,6 @@ package game.controllers;
 import game.PlayStateConfig;
 import flixel.tweens.FlxTween;
 // song
-import core.rhythm.RhythmCore;
 import core.json.song.SongData.SongConfig;
 import core.json.engine.GlobalData.GlobalConfig;
 import core.json.song.RatingData;
@@ -35,6 +34,8 @@ class NoteController {
 	public var sustains:FlxTypedGroup<NoteSustain> = new FlxTypedGroup<NoteSustain>();
 	public var splashes:FlxTypedGroup<NoteSplash> = new FlxTypedGroup<NoteSplash>();
 	public var holdsplashes:FlxTypedGroup<HoldSplash> = new FlxTypedGroup<HoldSplash>();
+
+	public var activeOpponentHolds:Map<Int, Bool> = new Map();
 
 	public var strumsByChar:Map<String, FlxTypedGroup<StrumNote>> = new Map();
 
@@ -337,7 +338,7 @@ class NoteController {
 
 				sustainEnd.ID = globalLane;
 				sustainEnd.direction = globalLane;
-				sustainEnd.strumTime = data.time + data.length;
+				sustainEnd.strumTime = data.time;
 				sustainEnd.mustPress = note.mustPress;
 				sustainEnd.noteControl = this;
 				sustainEnd.strum = strum;
@@ -361,7 +362,13 @@ class NoteController {
 		scriptNC.call("postGenerateNotes", []);
 		#end
 
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("onSortNotes", []);
+		#end
 		unspawnNotes.sort(sortNotes);
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("postSortNotes", []);
+		#end
 	}
 
 	public function spawnSplash(strum:StrumNote, direction:Int, noteType:String = 'normal'):Void {
@@ -448,6 +455,7 @@ class NoteController {
 	}
 
 	var toDestroy:Array<Note> = [];
+	var toDestroySet:Map<Note, Bool> = new Map();
 
 	public function updateNotes(songTime:Float) {
 		#if HSCRIPT_ALLOWED
@@ -476,6 +484,8 @@ class NoteController {
 		}
 
 		toDestroy.resize(0);
+		toDestroySet.clear();
+		activeOpponentHolds.clear();
 
 		var scrollMult = 0.45 * scrollSpeed;
 
@@ -508,6 +518,7 @@ class NoteController {
 
 			if (!note.mustPress && note.wasGoodHit && !note.alive) {
 				toDestroy.push(note);
+				toDestroySet.set(note, true);
 			}
 
 			if (!isDownscroll && note.y + note.frameHeight * note.scale.y < 0) {
@@ -517,6 +528,7 @@ class NoteController {
 					input.onMiss(playStateConfig, this, gameAudio);
 				}
 				toDestroy.push(note);
+				toDestroySet.set(note, true);
 			} else if (isDownscroll && note.y > flixel.FlxG.height) {
 				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
 					note.wasMissed = true;
@@ -524,6 +536,7 @@ class NoteController {
 					input.onMiss(playStateConfig, this, gameAudio);
 				}
 				toDestroy.push(note);
+				toDestroySet.set(note, true);
 			}
 		}
 
@@ -537,21 +550,22 @@ class NoteController {
 			if (!SaveData.data.middlescroll) {
 				if (!sustain.mustPress) {
 					var isWithinHold = songTime >= sustain.strumTime && songTime <= (sustain.strumTime + sustain.length);
-
 					if (isWithinHold) {
 						if (!sustain.isHeld) {
 							sustain.isHeld = true;
 							spawnHoldSplash(sustain.strum, lane % keys, sustain.noteType);
 						}
 						sustain.strum.playAnim('confirm' + (lane % keys), false);
+						activeOpponentHolds.set(lane, true);
 					} else if (sustain.isHeld) {
 						sustain.isHeld = false;
 						stopHoldSplash(sustain.strum);
 						sustain.strum.playAnim('static' + (lane % keys), true);
+						activeOpponentHolds.remove(lane);
 					}
 				}
 			}
-
+			
 			// HANDLE SUSTAIN ENDS
 			if (sustain.isSustainEnd) {
 				#if HSCRIPT_ALLOWED
@@ -560,8 +574,9 @@ class NoteController {
 				#end
 
 				var body = sustain.parentNote;
-				if (body == null || toDestroy.contains(body)) {
+				if (body == null || toDestroySet.exists(body)) {
 					toDestroy.push(sustain);
+					toDestroySet.set(sustain, true);
 					continue;
 				}
 
@@ -632,10 +647,14 @@ class NoteController {
 					stopHoldSplash(sustain.strum);
 				}
 				toDestroy.push(sustain);
-			} else if (!isDownscroll && sustain.y + scaledHeight < 0)
+				toDestroySet.set(sustain, true);
+			} else if (!isDownscroll && sustain.y + scaledHeight < 0) {
 				toDestroy.push(sustain);
-			else if (isDownscroll && sustain.y - sustain.offset.y > flixel.FlxG.height)
+				toDestroySet.set(sustain, true);
+			} else if (isDownscroll && sustain.y - sustain.offset.y > flixel.FlxG.height) {
 				toDestroy.push(sustain);
+				toDestroySet.set(sustain, true);
+			}
 		}
 
 		for (note in toDestroy) {
@@ -745,6 +764,8 @@ class NoteController {
 		_cachedRatings = null;
 
 		strums.destroy();
+		activeOpponentHolds = null;
+
 		for (group in strumsByChar)
 			group.destroy();
 		strumsByChar = null;
@@ -799,26 +820,12 @@ class NoteController {
 	}
 
 	function sortNotes(a:Note, b:Note):Int {
-		#if HSCRIPT_ALLOWED
-		scriptNC.call("onSortNotes", []);
-		#end
-
-		var result:Int = 0;
-
 		if (a.strumTime < b.strumTime)
-			result = -1;
-		else if (a.strumTime > b.strumTime)
-			result = 1;
-		else {
-			var aOrder = (a is NoteSustain) ? (cast(a, NoteSustain).isSustainEnd ? 2 : 1) : 0;
-			var bOrder = (b is NoteSustain) ? (cast(b, NoteSustain).isSustainEnd ? 2 : 1) : 0;
-			result = aOrder - bOrder;
-		}
-
-		#if HSCRIPT_ALLOWED
-		scriptNC.call("postSortNotes", []);
-		#end
-
-		return result;
+			return -1;
+		if (a.strumTime > b.strumTime)
+			return 1;
+		var aOrder = (a is NoteSustain) ? (cast(a, NoteSustain).isSustainEnd ? 2 : 1) : 0;
+		var bOrder = (b is NoteSustain) ? (cast(b, NoteSustain).isSustainEnd ? 2 : 1) : 0;
+		return aOrder - bOrder;
 	}
 }

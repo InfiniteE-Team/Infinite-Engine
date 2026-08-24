@@ -3,10 +3,8 @@ package game.controllers;
 import game.PlayState;
 import game.PlayStateConfig;
 import game.objects.sprites.Character;
-import core.assets.FunkinSprite;
 import core.assets.FunkinObjectRegistry;
 import game.controllers.NoteController;
-import game.objects.sprites.notes.Note;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import core.rhythm.audio.GameAudio;
 #if HSCRIPT_ALLOWED
@@ -95,17 +93,10 @@ class CharacterController extends FunkinObjectRegistry {
 					if (charScript != null)
 						charScript.call("onNoteSustainCPU", []);
 					#end
-					var songPos = core.rhythm.RhythmCore.songPosition;
-					var holdingActive = false;
-					for (sustain in noteController.sustains.members) {
-						if (sustain == null || !sustain.alive || sustain.strum != strums[i])
-							continue;
-						if (sustain.mustPress == false && songPos >= sustain.strumTime && songPos <= sustain.strumTime + sustain.length) {
-							sustain.isHeld = true;
-							strums[i].playAnim('confirm' + i, false);
-							holdingActive = true;
-							break;
-						}
+					var globalLane = noteController.charStrumOffsets.get(char.id);
+					var holdingActive = globalLane != null && noteController.activeOpponentHolds.exists(globalLane + i);
+					if (holdingActive) {
+						strums[i].playAnim('confirm' + i, false);
 					}
 					#if HSCRIPT_ALLOWED
 					if (charScript != null)
@@ -129,7 +120,6 @@ class CharacterController extends FunkinObjectRegistry {
 	}
 
 	public function isSinging(noteController:NoteController) {
-		var songPos = core.rhythm.RhythmCore.songPosition;
 		for (char in opponentChars) {
 			var strums = noteController.getCharStrums(char.id);
 			for (i in 0...strums.length) {
@@ -139,15 +129,10 @@ class CharacterController extends FunkinObjectRegistry {
 					continue;
 				}
 
-				var holdingActive = false;
-				for (sustain in noteController.sustains.members) {
-					if (sustain == null || !sustain.alive || sustain.mustPress || sustain.strum != strums[i])
-						continue;
-					if (songPos >= sustain.strumTime && songPos <= sustain.strumTime + sustain.length) {
-						setSing(char, sustain.direction);
-						holdingActive = true;
-						break;
-					}
+				var globalLane = noteController.charStrumOffsets.get(char.id);
+				var holdingActive = globalLane != null && noteController.activeOpponentHolds.exists(globalLane + i);
+				if (holdingActive) {
+					setSing(char, globalLane + i);
 				}
 
 				if (!holdingActive)

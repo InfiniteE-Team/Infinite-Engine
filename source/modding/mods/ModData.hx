@@ -19,7 +19,7 @@ typedef ModData = {
 
 class ModConfig {
 	public static var modData:ModData;
-	
+
 	public function new() {}
 
 	public static function init() {
@@ -36,6 +36,18 @@ class ModConfig {
 			}
 		} catch (e:Dynamic) {
 			Trace.traceOnce('Error to parsed the mod: $e');
+		}
+	}
+
+	public static function loadForMod(modName:String):ModData {
+		var metaPath = '${core.assets.Library.modsFolder}/$modName/data/meta.json';
+		if (!sys.FileSystem.exists(metaPath))
+			return null;
+		try {
+			return FormatJson.readJson(metaPath);
+		} catch (e:Dynamic) {
+			Trace.traceOnce('Error parsing meta for mod $modName: $e');
+			return null;
 		}
 	}
 

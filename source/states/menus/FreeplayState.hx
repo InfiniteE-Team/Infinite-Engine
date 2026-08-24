@@ -16,8 +16,6 @@ import core.assets.FunkinSprite;
 import game.objects.sprites.Icon;
 import flixel.addons.display.FlxBackdrop;
 // filters
-import openfl.text.TextField;
-import openfl.text.TextFormat;
 import openfl.filters.GlowFilter;
 import openfl.filters.BitmapFilterQuality;
 
@@ -86,10 +84,6 @@ class FreeplayState extends states.MusicBeatState {
 
 		if (freeplayData != null && freeplayData.songData != null) {
 			var cardImgPath:String = Paths.getPath('menus/freeplay/card', 'image');
-			var songNameFormat:TextFormat = new TextFormat(Paths.getPath('5by7.ttf', 'font'), 42, 0xFFFFFFFF);
-			var songNameFilters:Array<openfl.filters.BitmapFilter> = [
-				new openfl.filters.GlowFilter(FlxColor.fromString('#00ccff'), 1.0, 6, 6, 100, openfl.filters.BitmapFilterQuality.MEDIUM)
-			];
 			var charDataCache:Map<String, Dynamic> = new Map();
 			for (i in 0...freeplayData.songData.length) {
 				var card:FlxSprite = new FlxSprite().loadGraphic(cardImgPath);
@@ -98,15 +92,11 @@ class FreeplayState extends states.MusicBeatState {
 				songs.push(card);
 				add(card);
 
-				var tf:TextField = new TextField();
-				tf.autoSize = openfl.text.TextFieldAutoSize.LEFT;
-				tf.text = freeplayData.songData[i].song;
-				tf.setTextFormat(songNameFormat);
-				tf.filters = songNameFilters;
-				var bmp:openfl.display.BitmapData = new openfl.display.BitmapData(Math.ceil(tf.width + 12), Math.ceil(tf.height + 12), true, 0x00000000);
-				bmp.draw(tf);
-				var song:FlxSprite = new FlxSprite(300 - (i * 50), 100 + (i * 125));
-				song.loadGraphic(bmp);
+				var song:FlxText = new FlxText(300 - (i * 50), 100 + (i * 125), 0, freeplayData.songData[i].song);
+				song.setFormat(Paths.getPath('5by7.ttf', 'font'), 42, 0xFFFFFFFF);
+				@:privateAccess song.textField.filters = [
+					new openfl.filters.GlowFilter(FlxColor.fromString('#00ccff'), 1.0, 6, 6, 100, BitmapFilterQuality.MEDIUM)
+				];
 				song.antialiasing = SaveData.data.antialiasing;
 				song.ID = i;
 				songs.push(song);
@@ -205,10 +195,14 @@ class FreeplayState extends states.MusicBeatState {
 		script.call("onUpdate", [elapsed]);
 		#end
 
-		songScore = Math.floor(FlxMath.lerp(songScore, intendedScore, FlxMath.bound(elapsed * 16, 0, 1)));
-
-		if (freeplayData != null && freeplayData.songData != null)
-			scoreTxt.text = 'SCORE: ' + InfiniteUtil.formatNumber(songScore);
+		if (songScore != intendedScore) {
+			var newScore = Math.floor(FlxMath.lerp(songScore, intendedScore, FlxMath.bound(elapsed * 16, 0, 1)));
+			if (newScore == songScore)
+				newScore = intendedScore;
+			songScore = newScore;
+			if (freeplayData != null && freeplayData.songData != null)
+				scoreTxt.text = 'SCORE: ' + InfiniteUtil.formatNumber(songScore);
+		}
 
 		if (acceptOption)
 			return;

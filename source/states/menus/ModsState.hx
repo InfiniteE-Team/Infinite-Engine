@@ -58,10 +58,8 @@ class ModsState extends states.MusicBeatState {
 			listModTitles.push(mod);
 			add(mod);
 
-			var description:String = '??';
-			if (modding.mods.ModData.ModConfig.modData != null && modding.mods.ModData.ModConfig.modData.description != null) {
-				description = modding.mods.ModData.ModConfig.modData.description;
-			}
+			var modMeta = modding.mods.ModData.ModConfig.loadForMod(ModsRegistry.mods[i]);
+			var description:String = modMeta?.description ?? '??';
 
 			var modDesc:FlxText = new FlxText(330, 240 + (i * spacing), FlxG.width, description);
 			modDesc.setFormat(Paths.getPath('Funkin.otf', 'font'), 32, 0xFFFFFFFF, "left");
@@ -241,7 +239,7 @@ class ModsState extends states.MusicBeatState {
 				FlxG.camera.flash(0xFFFFFFFF, 2);
 				acceptOption = false;
 
-				for (electrocuted in [boyfriend, gf]){
+				for (electrocuted in [boyfriend, gf]) {
 					electrocuted.playAnim('crispy');
 
 					if (electrocuted.isFinished('crispy'))
