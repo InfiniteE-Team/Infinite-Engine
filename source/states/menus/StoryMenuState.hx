@@ -9,7 +9,6 @@ import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import game.PlayStateConfig;
 import states.LoadingState;
-import states.MusicBeatState;
 import core.config.SaveScore;
 import core.rhythm.DiffsUtils;
 import flixel.tweens.FlxTween.FlxTweenType;

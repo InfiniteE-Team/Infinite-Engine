@@ -1,5 +1,3 @@
-package;
-
 import core.EngineData;
 import states.substates.menus.OptionsMenuSubstate;
 import flixel.text.FlxTextBorderStyle;

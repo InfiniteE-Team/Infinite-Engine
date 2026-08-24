@@ -1,3 +1,3 @@
 package modding.editors;
 
-class CharacterEditor extends states.MusicBeatState {}
+class CharacterEditor extends MusicBeatState {}

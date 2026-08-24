@@ -1,5 +1,3 @@
-package;
-
 import game.PlayStateConfig;
 
 class ResultScreen extends ScriptState {

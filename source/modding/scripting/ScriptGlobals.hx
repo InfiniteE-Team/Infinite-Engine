@@ -1,6 +1,8 @@
 package modding.scripting;
 
-import rulescript.RuleScript;
+import hxscript.Config;
+import hxscript.setup.Boot;
+import game.modchart.modifiers.Modifiers;
 
 class ScriptGlobals {
 	static var initialized:Bool = false;
@@ -10,118 +12,86 @@ class ScriptGlobals {
 			return;
 		initialized = true;
 
-		var roots = RuleScript.defaultImports[''];
+		hxscript.Config.interpClass = modding.scripting.GameInterp;
 
-		// Flixel
-		roots['FlxG'] = flixel.FlxG;
-		roots['FlxSprite'] = flixel.FlxSprite;
-		roots['FlxText'] = flixel.text.FlxText;
-		roots['FlxSound'] = flixel.sound.FlxSound;
-		roots['Camera'] = game.objects.Camera;
-		roots['FlxTween'] = flixel.tweens.FlxTween;
-		roots['FlxTimer'] = flixel.util.FlxTimer;
-		roots['FlxEase'] = flixel.tweens.FlxEase;
-		roots['FlxMath'] = flixel.math.FlxMath;
+		Boot.importGlobals([
+			// Flixel
+			'flixel.FlxG',
+			'flixel.FlxSprite',
+			'flixel.text.FlxText',
+			'flixel.sound.FlxSound',
+			'flixel.tweens.FlxTween',
+			'flixel.util.FlxTimer',
+			'flixel.tweens.FlxEase',
+			'flixel.math.FlxMath',
+			// Engine
+			'core.json.engine.GlobalData.GlobalConfig',
+			'game.objects.Bar',
+			'game.PlayState',
+			'states.MenuState',
+			'utils.Alphabet',
+			'game.objects.sprites.Character',
+			'game.objects.sprites.Stage',
+			'core.assets.Paths',
+			'core.assets.FunkinSprite',
+			'core.rhythm.RhythmCore',
+			'modding.scripting.ScriptHandler',
+			'core.config.Controls',
+			'states.MusicBeatState',
+			// Audio
+			'core.rhythm.audio.Sound',
+			'core.rhythm.audio.MasterAudio',
+			'core.rhythm.audio.GameAudio',
+			// Cutscenes
+			'states.cutscenes.VideoState',
+			'states.cutscenes.VideoSprite',
+			// Scripting
+			'modding.scripting.interfaces.ScriptState',
+			'modding.scripting.interfaces.ScriptSubstate',
+			'modding.scripting.types.ScriptClass',
+			// Shaders
+			'game.graphics.shaders.CustomShader',
+			// Modchart
+			'game.modchart.ModchartSystem',
+		]);
 
-		// Haxe UI
-		roots['Toolkit'] = haxe.ui.Toolkit;
-		roots['Screen'] = haxe.ui.core.Screen;
-		roots['Component'] = haxe.ui.core.Component;
-		roots['VBox'] = haxe.ui.containers.VBox;
-		roots['HBox'] = haxe.ui.containers.HBox;
-		roots['Button'] = haxe.ui.components.Button;
-		roots['Label'] = haxe.ui.components.Label;
-		roots['CheckBox'] = haxe.ui.components.CheckBox;
-		roots['TextField'] = haxe.ui.components.TextField;
-		roots['Slider'] = haxe.ui.components.Slider;
-		roots['DropDown'] = haxe.ui.components.DropDown;
-		roots['MenuBar'] = haxe.ui.containers.menus.MenuBar;
-		roots['Menu'] = haxe.ui.containers.menus.Menu;
-		roots['MenuItem'] = haxe.ui.containers.menus.MenuItem;
+		Config.globalVariables.set('Json', haxe.Json);
+		Config.globalVariables.set('FormatJson', FormatJson);
+		Config.globalVariables.set('SaveScore', core.config.SaveScore);
+		Config.globalVariables.set('SaveData', core.config.SaveData);
+		Config.globalVariables.set('OptionType', core.enums.OptionType);
+		Config.globalVariables.set('Trace', Trace);
+		Config.globalVariables.set('File', sys.io.File);
+		Config.globalVariables.set('FileSystem', sys.FileSystem);
+		Config.globalVariables.set('Camera', game.objects.Camera);
 
-		// Engine
-
-		roots['GlobalConfig'] = core.json.engine.GlobalData.GlobalConfig;
-		roots['Bar'] = game.objects.Bar;
-		roots['PlayState'] = game.PlayState;
-		roots['MenuState'] = states.MenuState;
-		roots['Alphabet'] = utils.Alphabet;
-		roots['Character'] = game.objects.sprites.Character;
-		roots['Stage'] = game.objects.sprites.Stage;
-		roots['Paths'] = core.assets.Paths;
-		roots['FunkinSprite'] = core.assets.FunkinSprite;
-		roots['RhythmCore'] = core.rhythm.RhythmCore;
-		roots['ScriptHandler'] = modding.scripting.ScriptHandler;
-		roots['Controls'] = core.config.Controls;
-
-		roots['MusicBeatState'] = states.MusicBeatState;
-
-		// Sound
-		roots['Sound'] = core.rhythm.audio.Sound;
-		roots['MasterAudio'] = core.rhythm.audio.MasterAudio;
-		roots['GameAudio'] = core.rhythm.audio.GameAudio;
-
-		// Cutscenes
-		roots['VideoState'] = states.cutscenes.VideoState;
-		roots['VideoSprite'] = states.cutscenes.VideoSprite;
-
-		// Scripting
-		roots['ScriptState'] = modding.scripting.interfaces.ScriptState;
-		roots['ScriptSubstate'] = modding.scripting.interfaces.ScriptSubstate;
-
-		roots['ScriptClass'] = modding.scripting.types.ScriptClass;
-
-		roots['ScriptedTypeDef'] = modding.scripting.types.ScriptedTypeDef;
-
-		// Json Formatters Engine
-		roots['Json'] = haxe.Json;
-		roots['FormatJson'] = FormatJson;
-
-		// Save Content Game
-		roots['SaveScore'] = core.config.SaveScore;
-		roots['OptionType'] = core.enums.OptionType;
-		roots['SaveData'] = core.config.SaveData;
-
-		// Shaders
-		roots['CustomShader'] = game.graphics.shaders.CustomShader;
-
-		// Utils
-		roots['Trace'] = Trace;
+		// Modifiers
+		Config.globalVariables.set('DrunkModifier', DrunkModifier);
+		Config.globalVariables.set('TornadoModifier', TornadoModifier);
+		Config.globalVariables.set('TipsyModifier', TipsyModifier);
+		Config.globalVariables.set('TipsyZModifier', TipsyZModifier);
+		Config.globalVariables.set('ReverseModifier', ReverseModifier);
+		Config.globalVariables.set('FlipModifier', FlipModifier);
+		Config.globalVariables.set('ConfusionModifier', ConfusionModifier);
+		Config.globalVariables.set('MiniModifier', MiniModifier);
+		Config.globalVariables.set('StealthModifier', StealthModifier);
+		Config.globalVariables.set('ZModifier', ZModifier);
+		Config.globalVariables.set('SpeedModifier', SpeedModifier);
+		Config.globalVariables.set('ConfusionOffsetModifier', ConfusionOffsetModifier);
+		Config.globalVariables.set('TwirlModifier', TwirlModifier);
+		Config.globalVariables.set('ShakyModifier', ShakyModifier);
+		Config.globalVariables.set('PulseModifier', PulseModifier);
+		Config.globalVariables.set('BlinkModifier', BlinkModifier);
+		Config.globalVariables.set('TanDrunkModifier', TanDrunkModifier);
+		Config.globalVariables.set('BeatXModifier', BeatXModifier);
+		Config.globalVariables.set('ShrinkXModifier', ShrinkXModifier);
 
 		#if windows
-		roots['WindowsAPI'] = winapi.WindowsAPI;
-		roots['WindowsGDI'] = winapi.gdi.WindowsGDI;
-		roots['WindowsGDIThread'] = winapi.gdi.WindowsGDIThread;
+		Config.globalVariables.set('WindowsAPI', winapi.WindowsAPI);
+		Config.globalVariables.set('WindowsGDI', winapi.gdi.WindowsGDI);
 		#end
 
-		// Haxe std extra
-		roots['File'] = sys.io.File;
-		roots['FileSystem'] = sys.FileSystem;
-
-		// modchart
-		roots['ModchartSystem'] = game.modchart.ModchartSystem;
-		// modifiers
-		roots['DrunkModifier'] = game.modchart.modifiers.Modifiers.DrunkModifier;
-		roots['TornadoModifier'] = game.modchart.modifiers.Modifiers.TornadoModifier;
-		roots['TipsyModifier'] = game.modchart.modifiers.Modifiers.TipsyModifier;
-		roots['TipsyZModifier'] = game.modchart.modifiers.Modifiers.TipsyZModifier;
-		roots['ReverseModifier'] = game.modchart.modifiers.Modifiers.ReverseModifier;
-		roots['FlipModifier'] = game.modchart.modifiers.Modifiers.FlipModifier;
-		roots['ConfusionModifier'] = game.modchart.modifiers.Modifiers.ConfusionModifier;
-		roots['MiniModifier'] = game.modchart.modifiers.Modifiers.MiniModifier;
-		roots['StealthModifier'] = game.modchart.modifiers.Modifiers.StealthModifier;
-		roots['ZModifier'] = game.modchart.modifiers.Modifiers.ZModifier;
-		roots['SpeedModifier'] = game.modchart.modifiers.Modifiers.SpeedModifier;
-		roots['ConfusionOffsetModifier'] = game.modchart.modifiers.Modifiers.ConfusionOffsetModifier;
-		roots['TwirlModifier'] = game.modchart.modifiers.Modifiers.TwirlModifier;
-		roots['ShakyModifier'] = game.modchart.modifiers.Modifiers.ShakyModifier;
-		roots['PulseModifier'] = game.modchart.modifiers.Modifiers.PulseModifier;
-		roots['BlinkModifier'] = game.modchart.modifiers.Modifiers.BlinkModifier;
-		roots['TanDrunkModifier'] = game.modchart.modifiers.Modifiers.TanDrunkModifier;
-		roots['BeatXModifier'] = game.modchart.modifiers.Modifiers.BeatXModifier;
-		roots['ShrinkXModifier'] = game.modchart.modifiers.Modifiers.ShrinkXModifier;
-
-		// roots['WindowModManager'] = windowmodcharting.WindowModManager;
+		hxscript.flixel.Shims.register();
 	}
 
 	public static function initLua():Void {
@@ -174,25 +144,25 @@ class ScriptGlobals {
 			// Shaders
 			"CustomShader" => game.graphics.shaders.CustomShader,
 			// modifiers
-			"DrunkModifier" => game.modchart.modifiers.Modifiers.DrunkModifier,
-			"TornadoModifier" => game.modchart.modifiers.Modifiers.TornadoModifier,
-			"TipsyModifier" => game.modchart.modifiers.Modifiers.TipsyModifier,
-			"TipsyZModifier" => game.modchart.modifiers.Modifiers.TipsyZModifier,
-			"ReverseModifier" => game.modchart.modifiers.Modifiers.ReverseModifier,
-			"FlipModifier" => game.modchart.modifiers.Modifiers.FlipModifier,
-			"ConfusionModifier" => game.modchart.modifiers.Modifiers.ConfusionModifier,
-			"MiniModifier" => game.modchart.modifiers.Modifiers.MiniModifier,
-			"StealthModifier" => game.modchart.modifiers.Modifiers.StealthModifier,
-			"ZModifier" => game.modchart.modifiers.Modifiers.ZModifier,
-			"SpeedModifier" => game.modchart.modifiers.Modifiers.SpeedModifier,
-			"ConfusionOffsetModifier" => game.modchart.modifiers.Modifiers.ConfusionOffsetModifier,
-			"TwirlModifier" => game.modchart.modifiers.Modifiers.TwirlModifier,
-			"ShakyModifier" => game.modchart.modifiers.Modifiers.ShakyModifier,
-			"PulseModifier" => game.modchart.modifiers.Modifiers.PulseModifier,
-			"BlinkModifier" => game.modchart.modifiers.Modifiers.BlinkModifier,
-			"ShrinkXModifier" => game.modchart.modifiers.Modifiers.ShrinkXModifier,
-			"BeatXModifier" => game.modchart.modifiers.Modifiers.BeatXModifier,
-			"TanDrunkModifier" => game.modchart.modifiers.Modifiers.TanDrunkModifier,
+			"DrunkModifier" => DrunkModifier,
+			"TornadoModifier" => TornadoModifier,
+			"TipsyModifier" => TipsyModifier,
+			"TipsyZModifier" => TipsyZModifier,
+			"ReverseModifier" => ReverseModifier,
+			"FlipModifier" => FlipModifier,
+			"ConfusionModifier" => ConfusionModifier,
+			"MiniModifier" => MiniModifier,
+			"StealthModifier" => StealthModifier,
+			"ZModifier" => ZModifier,
+			"SpeedModifier" => SpeedModifier,
+			"ConfusionOffsetModifier" => ConfusionOffsetModifier,
+			"TwirlModifier" => TwirlModifier,
+			"ShakyModifier" => ShakyModifier,
+			"PulseModifier" => PulseModifier,
+			"BlinkModifier" => BlinkModifier,
+			"ShrinkXModifier" => ShrinkXModifier,
+			"BeatXModifier" => BeatXModifier,
+			"TanDrunkModifier" => TanDrunkModifier,
 			// "WindowModManager" => windowmodcharting.WindowModManager
 		];
 	}

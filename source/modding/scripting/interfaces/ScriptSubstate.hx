@@ -1,7 +1,5 @@
 package modding.scripting.interfaces;
 
-import rulescript.scriptedClass.RuleScriptedClass;
-
+@:scriptable
 @:keepSub
-@:strictScriptedConstructor
-class ScriptSubstate implements RuleScriptedClass extends states.substates.MusicBeatSubstate {}
+class ScriptSubstate extends states.substates.MusicBeatSubstate {}
