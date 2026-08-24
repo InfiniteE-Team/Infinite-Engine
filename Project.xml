@@ -21,6 +21,8 @@
 	<define name="DISCORD_ALLOWED" if="desktop"/>
 	<define name="VIDEO_ALLOWED" if="cpp"/>
 
+	<define name="haxeui_dont_impose_base_class" />
+
 	<define name="HX_WINDOWS" if="windows cpp"/>
 
 	<!-- ____________________________ Template Settings ___________________________ -->
@@ -51,8 +53,9 @@
 	<haxelib name="flixel-animate"/>
 	<haxelib name="openfl"/>
 
-	<haxelib name="hscript"/>
-	<haxelib name="rulescript"/>
+	<haxelib name="hxscript" />
+	<haxedef name="hxscript_hl" />
+	<haxedef name="hxscript_host" value="modding,game,states,core,utils" />
 
 	<haxelib name="ale-json"/>
 
@@ -83,6 +86,10 @@
 
 	<haxedef name="HXCPP_CHECK_POINTER" if="desktop" />
     <haxedef name="HXCPP_STACK_LINE" if="desktop" />
+
+	<!--HxScript-->
+	<haxedef name="hxscript_host" value="modding,game,states,core,utils" />
+	<haxeflag name="--macro" value="include('modding.scripting.interfaces')" />
 
 	<!-- _______________________________Compiler Flags _______________________________ -->
 	<compilerflag name="-D HXCPP_M64" if="cpp" />

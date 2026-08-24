@@ -6,7 +6,7 @@ import flixel.util.FlxTimer;
 import core.assets.FunkinSprite;
 import modding.mods.ModsRegistry;
 
-class ModsState extends states.MusicBeatState {
+class ModsState extends MusicBeatState {
 	var curSelected:Int = 0;
 
 	var listModTitles:Array<FlxText> = [];

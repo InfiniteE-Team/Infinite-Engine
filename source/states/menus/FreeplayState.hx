@@ -8,7 +8,6 @@ import flixel.math.FlxMath;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import game.PlayStateConfig;
-import states.MusicBeatState;
 import core.config.SaveScore;
 import core.rhythm.DiffsUtils;
 import flixel.tweens.FlxTween;
@@ -19,7 +18,7 @@ import flixel.addons.display.FlxBackdrop;
 import openfl.filters.GlowFilter;
 import openfl.filters.BitmapFilterQuality;
 
-class FreeplayState extends states.MusicBeatState {
+class FreeplayState extends MusicBeatState {
 	public static var curSelected:Int = 0;
 
 	var bg:FlxBackdrop;

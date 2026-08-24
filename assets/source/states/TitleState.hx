@@ -1,5 +1,3 @@
-package;
-
 class TitleState extends ScriptState {
 	var logo:FlxSprite;
 	var gfDance:FlxSprite;

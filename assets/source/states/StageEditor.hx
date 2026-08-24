@@ -1,5 +1,3 @@
-package;
-
 class StageEditor extends ScriptState {
 	public var defaultZoom:Int = 0.4;
 	public var curStage:String = 'stage';

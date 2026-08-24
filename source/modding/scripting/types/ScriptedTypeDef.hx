@@ -1,28 +1,28 @@
 package modding.scripting.types;
 
-import rulescript.parsers.HxParser;
-import rulescript.types.ScriptedTypedef;
+import hxscript.Module;
+import hxscript.types.ScriptedTypedef;
 
-class ScriptedTypeDef extends ScriptedTypedef {
-	public static function loadTypedef(typeDefName:String, ?args:Array<Dynamic>):ScriptedTypeDef {
-		var path = Paths.getPath(typeDefName, 'typedefs');
+class ScriptedTypeDef {
+    public static function loadTypedef(typeDefName:String):ScriptedTypedef {
+        var path = Paths.getPath(typeDefName, 'typedefs');
 
-		if (path == null || !sys.FileSystem.exists(path)) {
-			Trace.traceOnce('ScriptedState: Not found source/typedefs/$typeDefName.hx', true);
-			return null;
-		}
-
-		var parser = new HxParser();
-        parser.allowAll();
-		var content = sys.io.File.getContent(path);
-
-		try {
-            var ast = parser.parser.parseString(content);
-            var typedefObj = new ScriptedTypeDef(ast);
-            return typedefObj;
-        } catch (e:Dynamic) {
-            Trace.traceOnce('Error to parse typedef $typeDefName: $e', true);
+        if (path == null || !sys.FileSystem.exists(path)) {
+            Trace.traceOnce('ScriptedTypeDef: Not found source/typedefs/$typeDefName.hx', true);
             return null;
         }
-	}
+        var content = sys.io.File.getContent(path);
+
+        try {
+            var module = new Module(content, typeDefName, [], path);
+            var type = module.types.get(typeDefName);
+            if (type is ScriptedTypedef)
+                return cast type;
+            Trace.traceOnce('ScriptedTypeDef: "$typeDefName" is not a typedef', true);
+            return null;
+        } catch (e) {
+            Trace.traceOnce('ScriptedTypeDef: Error parsing $typeDefName: ${e.message}', true);
+            return null;
+        }
+    }
 }
