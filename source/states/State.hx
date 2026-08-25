@@ -7,6 +7,8 @@ class State extends flixel.FlxState {
 	private var tweenManager:flixel.tweens.FlxTween.FlxTweenManager;
 	private var timerManager:flixel.util.FlxTimer.FlxTimerManager;
 
+	public static var skipNextAudioClear:Bool = false;
+
 	public function new() {
 		super();
 	}
@@ -85,6 +87,10 @@ class State extends flixel.FlxState {
 			timerManager = null;
 		}
 
-		Sound.clearGlobalCache();
+		if (skipNextAudioClear) {
+			skipNextAudioClear = false;
+		} else {
+			Sound.clearGlobalCache();
+		}
 	}
 }

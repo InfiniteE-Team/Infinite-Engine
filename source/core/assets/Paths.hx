@@ -101,9 +101,9 @@ class Paths {
 		if (folder != null && FileSystem.exists('$folder/Animation.json')) {
 			result = FlxAnimateFrames.fromAnimate(folder);
 		} else {
-			tryLib('.xml', (g, p) -> FlxAtlasFrames.fromSparrow(g, p))
-			|| tryLib('.txt', (g, p) -> FlxAtlasFrames.fromLibGdx(g, p))
-			|| tryLib('.json', (g, p) -> FlxAtlasFrames.fromTexturePackerJson(g, p))
+			tryLib('.xml', (g, p) -> FlxAtlasFrames.fromSparrow(g, sys.io.File.getContent(p)))
+			|| tryLib('.txt', (g, p) -> FlxAtlasFrames.fromLibGdx(g, sys.io.File.getContent(p)))
+			|| tryLib('.json', (g, p) -> FlxAtlasFrames.fromTexturePackerJson(g, sys.io.File.getContent(p)))
 			|| (result = graphic) != null;
 		}
 
@@ -187,17 +187,22 @@ class Paths {
 					img.buffer = null;
 					img = null;
 
-					switch (formatDetected) {
-						case "animate":
-							finalAsset = FlxAnimateFrames.fromAnimate(folderPath);
-						case "sparrow":
-							finalAsset = FlxAtlasFrames.fromSparrow(graphic, rawData);
-						case "json":
-							finalAsset = FlxAtlasFrames.fromTexturePackerJson(graphic, rawData);
-						case "pack":
-							finalAsset = FlxAtlasFrames.fromLibGdx(graphic, rawData);
-						default: // "image"
-							finalAsset = graphic;
+					try {
+						switch (formatDetected) {
+							case "animate":
+								finalAsset = FlxAnimateFrames.fromAnimate(folderPath);
+							case "sparrow":
+								finalAsset = FlxAtlasFrames.fromSparrow(graphic, rawData);
+							case "json":
+								finalAsset = FlxAtlasFrames.fromTexturePackerJson(graphic, rawData);
+							case "pack":
+								finalAsset = FlxAtlasFrames.fromLibGdx(graphic, rawData);
+							default:
+								finalAsset = graphic;
+						}
+					} catch (e:Dynamic) {
+						Trace.traceOnce('cacheAutoAsync: Failed to parse atlas for "$fileName" ($formatDetected): $e', true);
+						finalAsset = graphic;
 					}
 
 					if ((finalAsset is FlxFramesCollection)) {

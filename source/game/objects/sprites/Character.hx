@@ -21,7 +21,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 
 	public var cameraOffset:Point = {x: 0, y: 0};
 
-	var singTime:Float = 4;
+	var singTime:Float = 2;
 
 	static final CHAR_ANIMS:Array<String> = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
 
@@ -56,7 +56,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 				}
 
 				idleAfterSing = characterData.gameplay.idleAfterSing ?? true;
-				singTime = characterData.gameplay.singTime ?? 4;
+				singTime = characterData.gameplay.singTime ?? 2;
 				cameraOffset = {
 					x: characterData.gameplay.cameraOffset != null ? characterData.gameplay.cameraOffset[0] : 0,
 					y: characterData.gameplay.cameraOffset != null ? characterData.gameplay.cameraOffset[1] : 0

@@ -19,6 +19,7 @@ class PsychPorter implements FormatChartConverter {
 		var p1:String = song.player1 ?? 'bf';
 		var p2:String = song.player2 ?? 'dad';
 		var p3:String = song.player3 ?? song.gfVersion ?? 'gf';
+		var formatVersion = song.format ?? null;
 
 		var events:Array<EventsData> = [];
 
@@ -31,13 +32,25 @@ class PsychPorter implements FormatChartConverter {
 			for (note in sectionNotes) {
 				var lane = Std.int(note[1]);
 				var over = lane > 3;
-				notes.push({
-					char: over ? p2 : p1,
-					lane: over ? lane - 4 : lane,
-					time: note[0],
-					type: 'normal',
-					length: note[2]
-				});
+				var isPlayer:Bool = mustHit ? over : !over;
+
+				if (formatVersion == null) {
+					notes.push({
+						char: isPlayer ? p2 : p1,
+						lane: over ? lane - 4 : lane,
+						time: note[0],
+						type: 'normal',
+						length: note[2]
+					});
+				} else {
+					notes.push({
+						char: over ? p2 : p1,
+						lane: over ? lane - 4 : lane,
+						time: note[0],
+						type: 'normal',
+						length: note[2]
+					});
+				}
 
 				if (sectionStart == null || note[0] < sectionStart)
 					sectionStart = note[0];

@@ -5,7 +5,6 @@ import core.json.song.ports.*;
 class ChartPorter {
 	static var converters:Array<FormatChartConverter> = [
 		new PsychPorter(),
-		new AndromedaPorter(),
         new LegacyPorter(),
         new VSlicePorter(),
         new CNEPorter()

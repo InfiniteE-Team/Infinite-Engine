@@ -18,7 +18,6 @@ import core.json.song.SongData.SongConfig;
 import game.controllers.events.EventManager;
 import game.objects.Countdown;
 
-// window
 // import windowmodcharting.WindowModManager;
 class PlayState extends MusicBeatState {
 	public static var instance:PlayState;
@@ -26,6 +25,8 @@ class PlayState extends MusicBeatState {
 	// cameras
 	public var camGame:Camera;
 	public var camHUD:Camera;
+	public var camOther:Camera;
+
 	public var cameraController:CameraController;
 
 	// Song
@@ -116,8 +117,12 @@ class PlayState extends MusicBeatState {
 		camHUD = new Camera();
 		camHUD.bgColor.alpha = 0;
 
+		camOther = new Camera();
+		camOther.bgColor.alpha = 0;
+
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD, false);
+		FlxG.cameras.add(camOther, false);
 
 		cameraController = new CameraController(camGame, camHUD);
 	}
@@ -200,12 +205,15 @@ class PlayState extends MusicBeatState {
 	}
 
 	public function startCountdown() {
+		#if HSCRIPT_ALLOWED
+		script.call("onCountdown", []);
+		#end
 		startCount = true;
 		var crochet:Float = (60 / SONG.bpmSong) * 1000;
 		RhythmCore.songPosition = -crochet * 4;
 
 		countDown = new Countdown(0, 0, SONG.countdown);
-		countDown.cameras = [camHUD];
+		countDown.cameras = [camOther];
 		add(countDown);
 
 		countDown.onComplete = function() {
@@ -515,7 +523,7 @@ class PlayState extends MusicBeatState {
 
 		if (events != null)
 			events.destroy();
-		
+
 		events = null;
 
 		if (stage != null)

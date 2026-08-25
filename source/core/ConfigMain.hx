@@ -64,14 +64,9 @@ class ConfigMain extends flixel.FlxState {
 
 		FlxG.autoPause = false;
 
-		/*
-			ConductorImplementation.custom_songPosition = () -> core.rhythm.RhythmCore.songPosition;
-			ConductorImplementation.custom_crochet = () -> core.rhythm.RhythmCore.crochet; */
+		var innerState:() -> MusicBeatState = if (globalData.startStateScript != null) () ->
+			modding.scripting.types.ScriptClass.load(globalData.startStateScript); else() -> Type.createInstance(mainState, []);
 
-		if (globalData.startStateScript != null) {
-			modding.scripting.types.ScriptClass.switchState(globalData.startStateScript);
-		} else {
-			MusicBeatState.switchState(() -> Type.createInstance(mainState, []));
-		}
+		MusicBeatState.switchState(() -> new states.preload.FunkinPreloader(innerState));
 	}
 }

@@ -14,6 +14,8 @@ class MusicBeatState extends State {
 	public static var skipNextTransIn:Bool = false;
 	public static var skipNextTransOut:Bool = false;
 
+	public static var skipNextCacheClear:Bool = false;
+
 	var t:core.rhythm.RhythmTracker;
 
 	#if HSCRIPT_ALLOWED
@@ -140,7 +142,10 @@ class MusicBeatState extends State {
 	}
 
 	override function destroy():Void {
-		core.assets.Paths.clearCache();
+		if (!skipNextCacheClear)
+			core.assets.Paths.clearCache();
+		else
+			skipNextCacheClear = false;
 		JsonWatcher.clear();
 		#if HSCRIPT_ALLOWED
 		if (script != null) {
