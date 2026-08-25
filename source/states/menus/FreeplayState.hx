@@ -255,6 +255,10 @@ class FreeplayState extends MusicBeatState {
 		if (freeplayData == null || freeplayData.songData == null)
 			return;
 
+		#if HSCRIPT_ALLOWED
+		script.call("onChangeDifficulty", [change]);
+		#end
+
 		curDiff += change;
 
 		if (curDiff < 0)
@@ -268,6 +272,10 @@ class FreeplayState extends MusicBeatState {
 		diffTxt.x = 925;
 
 		updateScore();
+
+		#if HSCRIPT_ALLOWED
+		script.call("postChangeDifficulty", [change]);
+		#end
 	}
 
 	function changeMusic():Void {
@@ -280,11 +288,19 @@ class FreeplayState extends MusicBeatState {
 		if (songSelected != null) {
 			core.rhythm.audio.MasterAudio.playSong(Paths.getPath('songs/' + songSelected + '/audio/Inst.ogg'), 0.6, bpm);
 		}
+
+		#if HSCRIPT_ALLOWED
+		script.call("onChangeMusic", []);
+		#end
 	}
 
 	function changeSelection(change:Int = 0):Void {
 		if (freeplayData == null || freeplayData.songData == null)
 			return;
+
+		#if HSCRIPT_ALLOWED
+		script.call("onChangeSelection", [change]);
+		#end
 
 		curSelected += change;
 
@@ -324,6 +340,10 @@ class FreeplayState extends MusicBeatState {
 			album.loadGraphic(Paths.getPath('menus/freeplay/albums/' + freeplayData.songData[curSelected].album, 'image'));
 			album.x = FlxG.width * 0.91 - album.width;
 		}
+
+		#if HSCRIPT_ALLOWED
+		script.call("postChangeSelection", [change]);
+		#end
 	}
 
 	function updateScore():Void {

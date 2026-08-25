@@ -6,9 +6,13 @@ class MasterAudio {
 	// Class for the Audio General Manager
 	public static function playMenu(path:String, volume:Float = 1, ?bpm:Float = 102):Void {
 		if (FlxG.sound.music == null || !FlxG.sound.music.playing || currentTrackPath != path) {
+			var soundObj:Dynamic = null;
+			if (sys.FileSystem.exists(path)) {
+				soundObj = openfl.media.Sound.fromFile(path);
+			}
 			currentTrackPath = path;
 			RhythmCore.changeBPM(bpm);
-			FlxG.sound.playMusic(path, volume, true);
+			FlxG.sound.playMusic(soundObj, volume, true);
 		}
 	}
 
