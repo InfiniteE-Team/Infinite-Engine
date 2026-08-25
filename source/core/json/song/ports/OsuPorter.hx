@@ -114,7 +114,7 @@ class OsuPorter implements FormatChartConverter {
 				role: 'player',
 				strums: {
 					position: [720, 0]
-				} 
+				}
 			}
 		] : [
 			{

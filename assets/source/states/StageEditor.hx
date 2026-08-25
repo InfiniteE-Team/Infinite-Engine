@@ -1,5 +1,5 @@
 class StageEditor extends ScriptState {
-	public var defaultZoom:Int = 0.4;
+	public var defaultZoom:Float = 0.4;
 	public var curStage:String = 'stage';
 	public var elements:Array<Dynamic> = [];
 

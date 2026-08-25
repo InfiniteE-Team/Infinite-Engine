@@ -7,4 +7,5 @@ typedef WeekData = {
 	var chars:Array<String>;
 	var description:String;
 	var songs:Array<FreeplayData.SongData>;
+	var ?stickerPack:String;
 }

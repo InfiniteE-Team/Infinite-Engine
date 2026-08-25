@@ -10,4 +10,5 @@ typedef SongData = {
     var ?bpm:Float;
     var ?artist:String;
     var ?album:String;
+	var ?stickerPack:String;
 }

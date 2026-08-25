@@ -230,7 +230,7 @@ class FreeplayState extends MusicBeatState {
 			PlayStateConfig.isStoryMode = false;
 
 			new FlxTimer().start(1, function(tmr:FlxTimer) {
-				MusicBeatState.switchState(() -> new LoadingState(songSelected, curDiff));
+				MusicBeatState.switchState(() -> new LoadingState(songSelected, curDiff), freeplayData.songData[curSelected].stickerPack ?? 'default');
 			});
 		}
 

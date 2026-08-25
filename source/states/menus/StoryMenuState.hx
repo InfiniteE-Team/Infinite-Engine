@@ -415,7 +415,7 @@ class StoryMenuState extends MusicBeatState {
 		new FlxTimer().start(1, function(_) {
 			var firstSong = PlayStateConfig.storyPlaylist[0];
 			PlayStateConfig.storyPlaylist.shift();
-			MusicBeatState.switchState(() -> new LoadingState(firstSong, curDiff));
+			MusicBeatState.switchState(() -> new LoadingState(firstSong, curDiff), data.stickerPack ?? 'default');
 		});
 	}
 

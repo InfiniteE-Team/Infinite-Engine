@@ -10,6 +10,7 @@ import modding.scripting.ScriptHandler;
 import game.controllers.InputController;
 
 class MusicBeatState extends State {
+	public static var nextStickerPack:String = null;
 	public static var skipNextTransIn:Bool = false;
 	public static var skipNextTransOut:Bool = false;
 
@@ -43,8 +44,18 @@ class MusicBeatState extends State {
 			skipNextTransIn = false;
 			return;
 		}
+		/*
+			var pack = MusicBeatState.nextStickerPack;
+			MusicBeatState.nextStickerPack = null;
 
-		openSubState(new modding.custom.transitions.CustomTransition(true, 0.2));
+			if (pack != null && pack.length > 0) {
+				modding.custom.transitions.StickerOverlay.instance().leave();
+		} else {*/
+		var isGlobalSkip = core.ConfigMain.globalData != null && core.ConfigMain.globalData.skipTrans == true;
+		if (!skipNextTransIn && !isGlobalSkip)
+			openSubState(new modding.custom.transitions.CustomTransition(true, 0.2));
+		skipNextTransIn = false;
+		// }
 	}
 
 	#if HSCRIPT_ALLOWED
@@ -82,11 +93,9 @@ class MusicBeatState extends State {
 		FlxG.resetState();
 	}
 
-	public static function switchState(state:() -> MusicBeatState):Void {
+	public static function switchState(state:() -> MusicBeatState, ?packName:String = null):Void {
 		if (core.ConfigMain.globalData.developerMode)
 			JsonWatcher.updateSwitch();
-
-		var currentState = FlxG.state;
 
 		var isGlobalSkip = core.ConfigMain.globalData != null && core.ConfigMain.globalData.skipTrans == true;
 		var skipOut = skipNextTransOut || isGlobalSkip;
@@ -96,14 +105,23 @@ class MusicBeatState extends State {
 			FlxG.switchState(state);
 			return;
 		}
+		/*
+			nextStickerPack = packName;
 
-		if (currentState != null) {
-			currentState.openSubState(new modding.custom.transitions.CustomTransition(false, 0.2, function() {
+			if (packName != null && packName.length > 0) {
+				modding.custom.transitions.StickerOverlay.instance().show(packName, function() {
+					FlxG.switchState(state);
+				});
+		} else {*/
+		if (FlxG.state != null) {
+			FlxG.state.openSubState(new modding.custom.transitions.CustomTransition(false, 0.2, function() {
 				FlxG.switchState(state);
 			}));
-		} else {
-			FlxG.switchState(state);
 		}
+		/*else {
+				FlxG.switchState(state);
+			}
+		}*/
 	}
 
 	public function stepHit(step:Int) {
