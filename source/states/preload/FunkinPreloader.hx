@@ -52,8 +52,6 @@ class FunkinPreloader extends MusicBeatState {
 	 */
 	var currentStep:FunkinPreloadStep = FunkinPreloadStep.Scanning;
 
-	// ─── Asset queues ─────────────────────────────────────────────────────────
-
 	/**
 	 * Relative image keys collected during the scan step, fed to `Paths.cacheAutoAsync`.
 	 * Example entry: `"characters/boyfriend"`
@@ -89,6 +87,9 @@ class FunkinPreloader extends MusicBeatState {
 	var barBgAudio:FlxSprite;
 	var barAudio:FlxBar;
 	var labelAudio:FlxText;
+
+	var vfdShader:VFDOverlay;
+	var vfdBitmap:flash.display.Bitmap;
 
 	/**
 	 * Read by `barGraphics` via reflection to get the current fill ratio.
@@ -135,6 +136,8 @@ class FunkinPreloader extends MusicBeatState {
 
 	override public function update(elapsed:Float):Void {
 		super.update(elapsed);
+
+		vfdShader.update(elapsed * 100);
 	}
 
 	function buildUI():Void {
@@ -183,6 +186,12 @@ class FunkinPreloader extends MusicBeatState {
 		progressLines.pixels.draw(shape);
 		progressLines.dirty = true;
 		add(progressLines);
+
+		vfdBitmap = new flash.display.Bitmap(new flash.display.BitmapData(FlxG.width, FlxG.height, true, 0xFFFFFFFF));
+		FlxG.addChildBelowMouse(vfdBitmap);
+
+		vfdShader = new VFDOverlay();
+		vfdBitmap.shader = vfdShader;
 	}
 
 	function updateStatusText():Void {
@@ -402,6 +411,7 @@ class FunkinPreloader extends MusicBeatState {
 			return;
 
 		launched = true;
+		FlxG.removeChild(vfdBitmap);
 		State.skipNextAudioClear = true;
 		MusicBeatState.skipNextCacheClear = true;
 		MusicBeatState.switchState(nextState);
