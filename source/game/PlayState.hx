@@ -87,6 +87,14 @@ class PlayState extends MusicBeatState {
 		SONG = new SongConfig();
 		SONG.configSong(curSong, DiffsUtils.difficulties[curDifficulty]);
 
+		#if DISCORD_ALLOWED
+		core.api.DiscordAPI.instance.setPresence({
+			state: 'Playing: ${curSong}',
+			details: 'Difficulty: ' + DiffsUtils.difficulties[curDifficulty],
+			largeImageKey: "album-volume1"
+		});
+		#end
+
 		buildStageandChars();
 
 		add(gameAudio);

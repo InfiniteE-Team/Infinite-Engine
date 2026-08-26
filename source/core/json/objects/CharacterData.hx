@@ -24,10 +24,10 @@ typedef GameplayData = {
 }
 
 typedef CharDeath = {
-	var character:String;
-	var sound:String;
-	var music:String;
-	var endSound:String;
+    var ?character:String;
+    var ?sound:String;
+    var ?music:String;
+    var ?endSound:String;
 }
 
 // render for chars

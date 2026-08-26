@@ -46,10 +46,17 @@ class ConfigMain extends flixel.FlxState {
 
 		core.ui.FPSCounter.instance.updateVisibility();
 
-		#if (DISCORD_ALLOWED && hxdiscord_rpc < "1.2.0")
-		core.api.DiscordAPI.init();
-		Application.current.onExit.add(function(exitCode:Int) {
-			core.api.DiscordAPI.shutdown();
+		#if DISCORD_ALLOWED
+		var discordId = (modding.mods.ModData.ModConfig.modData?.discord != null
+			&& modding.mods.ModData.ModConfig.modData.discord != "") ? modding.mods.ModData.ModConfig.modData.discord : "1534274562496270356";
+		core.api.DiscordAPI.initWithId(discordId);
+		core.api.DiscordAPI.instance.setPresence({
+			state: "In the Menu",
+			details: "Infinite Engine",
+			largeImageKey: "icon"
+		});
+		lime.app.Application.current.onExit.add(function(exitCode:Int) {
+			core.api.DiscordAPI.instance.shutdown();
 		});
 		#end
 

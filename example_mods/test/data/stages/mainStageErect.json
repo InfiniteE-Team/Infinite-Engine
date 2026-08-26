@@ -1,0 +1,227 @@
+{
+    "name": "mainStageErect",
+    "defaultZoom": 0.85,
+    "hideGF": false,
+    "elements": [
+        {
+            "type": "sprite",
+            "props": {
+                "name": "crowd",
+                "path": "crowd",
+                "position": [
+                    680,
+                    295
+                ],
+                "scrollFactor": [
+                    0.8,
+                    0.8
+                ],
+                "antialiasing": true,
+                "anims": [
+                    {
+                        "framerate": 24,
+                        "prefix": "idle",
+                        "name": "idle",
+                        "looped": true
+                    }
+                ],
+                "firstAnim": "idle"
+            }
+        },
+        {
+            "type": "sprite",
+            "props": {
+                "name": "bg",
+                "path": "bg",
+                "position": [
+                    -765.296437388173,
+                    -240.178364869155
+                ],
+                "scrollFactor": [
+                    1,
+                    1
+                ],
+                "antialiasing": true,
+                "alpha": 1
+            }
+        },
+        {
+            "type": "sprite",
+            "props": {
+                "name": "server",
+                "path": "server",
+                "position": [
+                    -992.149284463567,
+                    205.781788252844
+                ],
+                "scale": [
+                    1,
+                    1
+                ],
+                "scrollFactor": [
+                    1,
+                    1
+                ],
+                "antialiasing": true
+            }
+        },
+        {
+            "type": "character",
+            "id": "gf",
+            "position": [
+                168.333333333333,
+                148.333333333333
+            ],
+            "camPos": [
+                0,
+                0
+            ]
+        },
+        {
+            "type": "character",
+            "id": "dad",
+            "position": [
+                -203.33341683009,
+                46.6667007927961
+            ],
+            "camPos": [
+                0,
+                0
+            ]
+        },
+        {
+            "type": "character",
+            "id": "bf",
+            "position": [
+                789.164385180904,
+                461.017836071663
+            ],
+            "camPos": [
+                0,
+                0
+            ]
+        },
+        {
+            "type": "sprite",
+            "props": {
+                "name": "brightLightSmall",
+                "path": "brightLightSmall",
+                "blend": "softlight",
+                "position": [
+                    965,
+                    -105
+                ],
+                "scale": [
+                    1,
+                    1
+                ],
+                "scrollFactor": [
+                    1.2,
+                    1.2
+                ],
+                "antialiasing": true
+            }
+        },
+        {
+            "type": "sprite",
+            "props": {
+                "name": "lights",
+                "path": "lights",
+                "position": [
+                    -845,
+                    -245
+                ],
+                "scale": [
+                    1,
+                    1
+                ],
+                "scrollFactor": [
+                    1.2,
+                    1.2
+                ],
+                "antialiasing": true
+            }
+        },
+        {
+            "type": "sprite",
+            "props": {
+                "name": "orangeLight",
+                "path": "orangeLight",
+                "position": [
+                    190,
+                    -500
+                ],
+                "scale": [
+                    1,
+                    1700
+                ],
+                "blend": "add",
+                "scrollFactor": [
+                    1,
+                    1
+                ],
+                "antialiasing": true
+            }
+        },
+        {
+            "type": "sprite",
+            "props": {
+                "name": "lightgreen",
+                "path": "lightgreen",
+                "position": [
+                    -180.000000000001,
+                    250
+                ],
+                "scale": [
+                    1,
+                    1
+                ],
+                "scrollFactor": [
+                    1,
+                    1
+                ],
+                "antialiasing": true
+            }
+        },
+        {
+            "type": "sprite",
+            "props": {
+                "name": "lightred",
+                "path": "lightred",
+                "position": [
+                    -105.000000000001,
+                    560
+                ],
+                "scale": [
+                    1,
+                    1
+                ],
+                "scrollFactor": [
+                    1,
+                    1
+                ],
+                "antialiasing": true
+            }
+        },
+        {
+            "type": "sprite",
+            "props": {
+                "name": "lightAbove",
+                "path": "lightAbove",
+                "position": [
+                    830.000000000001,
+                    -116.666666652375
+                ],
+                "scale": [
+                    1,
+                    1
+                ],
+                "scrollFactor": [
+                    1,
+                    1
+                ],
+                "antialiasing": true
+            }
+        }
+    ]
+}

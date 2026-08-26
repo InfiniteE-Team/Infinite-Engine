@@ -1,7 +1,6 @@
 package states.menus;
 
 import flixel.FlxSprite;
-import utils.InfiniteUtil;
 import states.LoadingState;
 import flixel.text.FlxText;
 import flixel.math.FlxMath;

@@ -49,9 +49,9 @@ class GameOverSubstate extends MusicBeatSubstate {
 				PlayState.instance.cameraController.followChar(char);
 
 			if (gameOverData != null && gameOverData.gameplay != null && gameOverData.gameplay.death != null) {
-				sound = gameOverData.gameplay.death.sound;
-				music = gameOverData.gameplay.death.music;
-				endSound = gameOverData.gameplay.death.endSound;
+				sound = gameOverData.gameplay.death?.sound ?? 'default/fnf_loss_sfx';
+				music = gameOverData.gameplay.death?.music ?? 'default/gameOver';
+				endSound = gameOverData.gameplay.death?.endSound ?? 'default/gameOverEnd';
 			}
 
 			break;
@@ -79,7 +79,7 @@ class GameOverSubstate extends MusicBeatSubstate {
 		script.call("onUpdate", []);
 		#end
 
-		if (char.isFinished('firstDeath') && !char.currentAnim.startsWith('firstDeath')) {
+		if (char.isFinished('firstDeath')) {
 			char.playAnim('deathLoop', true);
 			FlxG.sound.playMusic(Paths.getPath('gameplay/death/' + music, 'music'));
 		}

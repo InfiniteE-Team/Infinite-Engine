@@ -13,6 +13,22 @@ class DiscordAPI {
 	public static var instance(get, never):DiscordAPI;
 	static var _instance:Null<DiscordAPI> = null;
 
+	public static function initWithId(clientId:String):Void {
+		trace(' DISCORD Initializing connection...');
+
+		if (clientId == null || clientId == "" || clientId.contains(" ")) {
+			FlxG.log.warn("Tried to initialize Discord connection, but credentials are invalid!");
+			return;
+		}
+
+		@:nullSafety(Off)
+		{
+			Discord.Initialize(clientId, cpp.RawPointer.addressOf(instance.handlers), false, "");
+		}
+
+		instance.createDaemon();
+	}
+
 	static function get_instance():DiscordAPI {
 		if (DiscordAPI._instance == null)
 			_instance = new DiscordAPI();
@@ -31,22 +47,6 @@ class DiscordAPI {
 		handlers.ready = cpp.Function.fromStaticFunction(onReady);
 		handlers.disconnected = cpp.Function.fromStaticFunction(onDisconnected);
 		handlers.errored = cpp.Function.fromStaticFunction(onError);
-	}
-
-	public static function init():Void {
-		trace(' DISCORD Initializing connection...');
-
-		if (!hasValidCredentials()) {
-			FlxG.log.warn("Tried to initialize Discord connection, but credentials are invalid!");
-			return;
-		}
-
-		@:nullSafety(Off)
-		{
-			Discord.Initialize(DISCORD_CLIENT_ID, cpp.RawPointer.addressOf(instance.handlers), false, "");
-		}
-
-		instance.createDaemon();
 	}
 
 	/**
@@ -86,7 +86,7 @@ class DiscordAPI {
 		presence.state = cast(params.state, Null<String>) ?? "";
 		presence.details = cast(params.details, Null<String>) ?? "";
 
-		presence.largeImageKey = cast(params.largeImageKey, Null<String>) ?? "album-volume1";
+		presence.largeImageKey = cast(params.largeImageKey, Null<String>) ?? "icon";
 
 		presence.smallImageKey = cast(params.smallImageKey, Null<String>) ?? "";
 
@@ -97,7 +97,7 @@ class DiscordAPI {
 		trace(' DISCORD Client has connected!');
 
 		final username:String = request[0].username;
-		final globalName:String = request[0].username;
+		final globalName:String = request[0].globalName;
 		final discriminator:Null<Int> = Std.parseInt(request[0].discriminator);
 
 		if (discriminator != null && discriminator != 0) {

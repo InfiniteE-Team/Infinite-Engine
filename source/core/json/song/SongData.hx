@@ -15,7 +15,8 @@ typedef MetaData = {
 	var ?stage:String;
 	var ?countdown:String;
 	var ?needVoices:Bool;
-	var ?vocSeparated:Bool;
+	var ?instCustom:Null<String>;
+	var ?vocs:Null<Array<String>>;
 }
 
 typedef GameplayData = {
@@ -83,7 +84,9 @@ class SongConfig {
 
 	public var strumsVisible:Bool = true;
 
-	public var vocSeparated:Bool = false;
+	public var instCustom:String = 'Inst';
+
+	public var vocs:Array<String> = [];
 
 	public function new() {}
 
@@ -100,8 +103,6 @@ class SongConfig {
 
 		if (osuPath != null) {
 			songData = ChartPorter.tryConvertOsu(osuPath);
-			//game.PlayState.instance.osuMode = true;
-
 			Trace.traceOnce('SongData: load Song path: $osuPath');
 		}
 
@@ -109,10 +110,12 @@ class SongConfig {
 			var raw:Dynamic = FormatJson.readJson(Paths.getPath(baseFile, 'json'));
 			if (raw == null)
 				return;
-			var converted = ChartPorter.tryConvert(raw);
+
+			var meta:Dynamic = tryLoadVSliceMeta(curSong);
+			var converted = ChartPorter.tryConvert(raw, diff, meta);
 			songData = converted ?? cast raw;
 
-			Trace.traceOnce('SongData: load Song path: $baseFile');
+			trace('SongData: load Song path: $baseFile');
 		}
 
 		if (songData == null)
@@ -124,7 +127,8 @@ class SongConfig {
 		needVoices = songData.meta.needVoices ?? true;
 		stage = songData.meta.stage ?? 'stage';
 		countdown = songData.meta.countdown ?? 'default';
-		vocSeparated = songData.meta.vocSeparated ?? false;
+		instCustom = songData.meta.instCustom ?? 'Inst';
+		vocs = songData.meta.vocs ?? null;
 
 		for (note in songData.notes) {
 			noteLane = note.lane ?? 0;
@@ -139,5 +143,17 @@ class SongConfig {
 			noteSkin = chars[i].strums.noteSkin ?? 'default';
 			strumsVisible = chars[i].strums.visible ?? true;
 		}
+	}
+
+	private function tryLoadVSliceMeta(curSong:String):Dynamic {
+		var path = core.assets.Library.findLib('songs/$curSong/$curSong-metadata.json');
+		if (sys.FileSystem.exists(path)) {
+			var meta:Dynamic = FormatJson.readJson(path);
+			if (meta != null) {
+				Trace.traceOnce('SongData: V-Slice metadata loaded from $path');
+				return meta;
+			}
+		}
+		return null;
 	}
 }

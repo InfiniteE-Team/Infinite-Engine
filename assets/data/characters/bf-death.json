@@ -12,9 +12,10 @@
             0
         ],
         "death": {
-            "character": null,
-            "sound": null,
-            "endAnim": null
+            "character": "bf-death",
+            "sound": "default/fnf_loss_sfx",
+            "music": "default/gameOver",
+            "endSound": "default/gameOverEnd"
         },
         "idleAfterSing": true
     },

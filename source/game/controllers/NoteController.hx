@@ -10,7 +10,6 @@ import core.json.song.RatingData;
 import core.json.objects.NoteSkinData;
 import game.objects.sprites.notes.*;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import game.graphics.shaders.hardcode.RGBShader;
 #if HSCRIPT_ALLOWED
 import modding.scripting.ScriptHandler;
 #end

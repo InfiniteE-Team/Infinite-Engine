@@ -5,7 +5,6 @@ import flixel.sound.FlxSound;
 import core.json.song.SongData.SongConfig;
 
 // Class for the gameplay audio
-
 class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 	public var inst:Sound;
 	public var vocals:Sound;
@@ -32,7 +31,7 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 		}
 		soundMisses = [];
 
-		inst = audio('Inst', onfinish);
+		inst = audio(SONG.instCustom ?? 'Inst', onfinish);
 		if (inst != null)
 			add(inst);
 
@@ -52,7 +51,7 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 		if (SONG == null)
 			return;
 
-		if (!SONG.vocSeparated) {
+		if (SONG.vocs == null) {
 			vocals = audio('Voices', onfinish);
 			if (vocals != null) {
 				vocalsGroup.push(vocals);
@@ -60,21 +59,21 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 				add(vocals);
 			}
 			return;
-		}
+		} else {
+			if (SONG.chars != null) {
+				for (i in 0...SONG.chars.length) {
+					var charName = SONG.chars[i];
+					var charVoc = audio(SONG.vocs[i], onfinish);
 
-		if (SONG.chars != null) {
-			for (i in 0...SONG.chars.length) {
-				var charName = SONG.chars[i];
-				var charVoc = audio('Voices-' + charName, onfinish);
-
-				if (charVoc != null) {
-					vocalsGroup.push(charVoc);
-					vocalsMap.set(Std.string(charName), charVoc);
-					add(charVoc);
+					if (charVoc != null) {
+						vocalsGroup.push(charVoc);
+						vocalsMap.set(Std.string(charName), charVoc);
+						add(charVoc);
+					}
 				}
+				if (vocalsGroup.length > 0)
+					vocals = vocalsGroup[0];
 			}
-			if (vocalsGroup.length > 0)
-				vocals = vocalsGroup[0];
 		}
 	}
 
@@ -96,7 +95,7 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 			if (voice == null)
 				continue;
 
-			if (!SONG.vocSeparated || SONG.needVoices) {
+			if (SONG.vocs == null || SONG.needVoices) {
 				if (isMiss)
 					voice.volume = 0;
 				else if (voice.volume < 1)

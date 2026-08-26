@@ -158,7 +158,7 @@ class MenuState extends MusicBeatState {
 	function applyTweenIn(obj:flixel.FlxBasic, el:Element):Void {
 		var tween = el.tweenIn;
 		var delay = (el.startDelay ?? 0) + (tween.delay ?? 0);
-		var ease = utils.InfiniteUtil.resolveEase(tween.ease);
+		var ease = InfiniteUtil.resolveEase(tween.ease);
 		var spr:Dynamic = cast obj;
 
 		switch (tween.type) {
@@ -273,7 +273,7 @@ class MenuState extends MusicBeatState {
 
 		if (el.tweenOut != null) {
 			var tween = el.tweenOut;
-			var ease = utils.InfiniteUtil.resolveEase(tween.ease);
+			var ease = InfiniteUtil.resolveEase(tween.ease);
 			var spr:Dynamic = cast obj;
 
 			switch (tween.type) {
