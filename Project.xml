@@ -54,8 +54,6 @@
 	<haxelib name="openfl"/>
 
 	<haxelib name="hxscript" />
-	<haxedef name="hxscript_hl" />
-	<haxedef name="hxscript_host" value="modding,game,states,core,utils" />
 
 	<haxelib name="ale-json"/>
 
@@ -84,14 +82,18 @@
 
 	<haxedef name="DEBUG_CONSOLE" />
 
+	<haxedef name="hxscript_hl" />
+	<haxedef name="hxscript_host" value="modding,game,states,core,utils" />
+	<haxedef name="hxscript_no_hl_bridges" />
+
 	<haxedef name="HXCPP_CHECK_POINTER" if="desktop" />
     <haxedef name="HXCPP_STACK_LINE" if="desktop" />
 
 	<!--HxScript-->
 	<haxedef name="hxscript_host" value="modding,game,states,core,utils" />
-	<haxeflag name="--macro" value="include('modding.scripting.interfaces')" />
 
 	<!-- _______________________________Compiler Flags _______________________________ -->
+	<haxeflag name="--macro" value="include('modding.scripting.interfaces')" />
 	<compilerflag name="-D HXCPP_M64" if="cpp" />
 
 	<!-- Place custom nodes like icons here -->

@@ -46,6 +46,8 @@ class FreeplayState extends MusicBeatState {
 
 	var acceptOption:Bool = false;
 
+	var camFollow:flixel.FlxObject;
+
 	public function new() {
 		super();
 	}
@@ -71,6 +73,11 @@ class FreeplayState extends MusicBeatState {
 		bg.screenCenter();
 		bg.velocity.set(-50, 0);
 		add(bg);
+
+		camFollow = new flixel.FlxObject(100, 150, 1, 1);
+		add(camFollow);
+
+		FlxG.camera.follow(camFollow, flixel.FlxCamera.FlxCameraFollowStyle.LOCKON, 0.08);
 
 		buildings = new FlxBackdrop(Paths.getPath('menus/freeplay/buildings', 'image'), flixel.util.FlxAxes.X);
 		buildings.antialiasing = SaveData.data.antialiasing;
@@ -113,10 +120,10 @@ class FreeplayState extends MusicBeatState {
 				var icon:Icon = new Icon(false, charData);
 				if (icon != null) {
 					icon.scale.set(0.85, 0.85);
-					icon.x = (song.x - (i * 50)) - song.width;
+					icon.updateHitbox();
+					icon.x = card.x - icon.width + 40;
 					icon.y = song.y / 2 + (i * 60);
 					icon.ID = i;
-					icon.updateHitbox();
 					icons.push(icon);
 					add(icon);
 				}
@@ -126,9 +133,10 @@ class FreeplayState extends MusicBeatState {
 			box.scale.set(590, 870);
 			box.updateHitbox();
 			box.angle = 10;
+			box.scrollFactor.set(0, 0);
 			add(box);
 
-			artistTxt = new FlxText(0, 0, 0, 'Artist: ??');
+			artistTxt = new FlxText(0, 0, 590, 'Artist: ??');
 			artistTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
 			artistTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 			artistTxt.antialiasing = SaveData.data.antialiasing;
@@ -142,23 +150,24 @@ class FreeplayState extends MusicBeatState {
 			scoreTxt.scrollFactor.set(0, 0);
 			add(scoreTxt);
 
-			diffTxt = new FlxText(0, scoreTxt.y + scoreTxt.height, 0, 'HARD');
+			diffTxt = new FlxText(950, scoreTxt.y + scoreTxt.height, 0, 'HARD');
 			diffTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
 			diffTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 			diffTxt.antialiasing = SaveData.data.antialiasing;
 			diffTxt.scrollFactor.set(0, 0);
 			add(diffTxt);
 
-			artistTxt.x = 725 + (590 / 2) - artistTxt.width;
+			artistTxt.x = FlxG.width * 0.58;
 			artistTxt.y = FlxG.height * 0.64;
 
-			scoreTxt.x = 720 + (590 / 2) - (scoreTxt.width / 2);
+			scoreTxt.x = 900;
 			scoreTxt.y = FlxG.height * 0.76;
 
 			diffTxt.y = FlxG.height * 0.7;
 
 			album = new FunkinSprite(0, 100, true);
 			album.antialiasing = SaveData.data.antialiasing;
+			album.scrollFactor.set(0, 0);
 			add(album);
 		} else {
 			var noExists = new FlxText(0, FlxG.height / 2 - 35, FlxG.width, "There are no songs! - Create your music list in 'songs/listSong.json'");
@@ -182,6 +191,10 @@ class FreeplayState extends MusicBeatState {
 		#if HSCRIPT_ALLOWED
 		script.call("postCreate", []);
 		#end
+
+		var totalHeight:Float = (freeplayData != null && freeplayData.songData != null) ? freeplayData.songData.length * 125 + 300 : FlxG.height;
+		var totalWidth:Float = (freeplayData != null && freeplayData.songData != null) ? FlxG.width + freeplayData.songData.length * 50 + 200 : FlxG.width;
+		FlxG.camera.setScrollBoundsRect(-totalWidth, 0, totalWidth * 2, totalHeight, true);
 
 		changeSelection(0);
 		changeDifficulty(0);
@@ -269,7 +282,7 @@ class FreeplayState extends MusicBeatState {
 		DiffsUtils.getDifficulty(freeplayData.songData[curSelected].song);
 
 		diffTxt.text = '< ' + DiffsUtils.difficulties[curDiff].toUpperCase() + ' >';
-		diffTxt.x = 925;
+		diffTxt.x = 950;
 
 		updateScore();
 
@@ -329,16 +342,28 @@ class FreeplayState extends MusicBeatState {
 			}
 		}
 
-		if (freeplayData.songData[curSelected].artist != null)
-			artistTxt.text = 'Artist: ' + freeplayData.songData[curSelected].artist;
-		else
-			artistTxt.text = 'Artist: ??';
+		if (artistTxt != null) {
+			if (freeplayData.songData[curSelected].artist != null)
+				artistTxt.text = 'Artist: ' + freeplayData.songData[curSelected].artist;
+			else
+				artistTxt.text = 'Artist: ??';
+
+			artistTxt.x = FlxG.width * 0.58;
+		}
 
 		updateScore();
 
 		if (album != null) {
 			album.loadGraphic(Paths.getPath('menus/freeplay/albums/' + freeplayData.songData[curSelected].album, 'image'));
 			album.x = FlxG.width * 0.91 - album.width;
+		}
+
+		if (songs.length > 0) {
+			var targetCard = songs[curSelected * 2];
+			if (targetCard != null) {
+				camFollow.x = targetCard.x + (targetCard.width / 2) + (FlxG.width * 0.15);
+				camFollow.y = targetCard.y + (targetCard.height / 2) + (FlxG.height * 0.15);
+			}
 		}
 
 		#if HSCRIPT_ALLOWED

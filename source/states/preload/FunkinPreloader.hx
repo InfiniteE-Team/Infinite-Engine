@@ -12,39 +12,21 @@ import core.rhythm.audio.Sound;
 
 /**
  * Runs immediately after ConfigMain, before the mod's initial state.
- * Scans `images/`, `sounds/` and `music/` from the active mod and base assets,
- * then bulk-caches them using `Paths.cacheAutoAsync` (graphics) and
- * `Sound.streamedCache` (audio) so the first state switch is lag-free.
+ * Scans images/, sounds/, songs/ and music/ from the active mod and base 
+ * assets, then bulk-caches them using `Paths.cacheAutoAsync` (graphics) 
+ * and `Sound.streamedCache` (audio) so the first state switch is lag-free.
  */
 class FunkinPreloader extends MusicBeatState {
-	/**
-	 * Width of each progress bar, in pixels.
-	 */
 	static final BAR_WIDTH:Int = 1000;
 
-	/**
-	 * Height of each progress bar segment, in pixels.
-	 */
 	static final BAR_HEIGHT:Int = 10;
 
-	/**
-	 * Duration of the fade-out after all assets are cached, in seconds.
-	 */
 	static final FADE_TIME:Float = 0.35;
 
-	/**
-	 * Gap between the graphics bar and the audio bar, in pixels.
-	 */
 	static final BAR_GAP:Float = 36;
 
-	/**
-	 * Vertical center of the bar cluster, as a fraction of screen height.
-	 */
 	static final BAR_CENTER_Y:Float = 0.685;
 
-	/**
-	 * Lambda that produces the state to switch to once preloading finishes.
-	 */
 	var nextState:() -> MusicBeatState;
 
 	/**
@@ -91,17 +73,11 @@ class FunkinPreloader extends MusicBeatState {
 	var vfdShader:VFDOverlay;
 	var vfdBitmap:flash.display.Bitmap;
 
-	/**
-	 * Read by `barGraphics` via reflection to get the current fill ratio.
-	 */
 	public var graphicsProgress(get, never):Float;
 
 	function get_graphicsProgress():Float
 		return totalImages > 0 ? (loadedImages / totalImages) : 1.0;
 
-	/**
-	 * Read by `barAudio` via reflection to get the current fill ratio.
-	 */
 	public var audioProgress(get, never):Float;
 
 	function get_audioProgress():Float
@@ -282,10 +258,6 @@ class FunkinPreloader extends MusicBeatState {
 		}
 	}
 
-	/**
-	 * Fires off all image cache jobs via `Paths.cacheAutoAsync`.
-	 * Each callback increments `loadedImages` and ticks the completion check.
-	 */
 	function dispatchGraphics():Void {
 		if (totalImages == 0) {
 			graphicsDone = true;
@@ -401,11 +373,6 @@ class FunkinPreloader extends MusicBeatState {
 		haxe.Timer.delay(immediatelyLaunch, Std.int(FADE_TIME * 1000));
 	}
 
-	/**
-	 * Performs the actual state switch.
-	 * Guards against being called more than once (e.g. from both the
-	 * zero-assets fast-path and the normal fade-out path).
-	 */
 	function immediatelyLaunch():Void {
 		if (launched)
 			return;
@@ -475,13 +442,6 @@ enum abstract FunkinPreloadStep(String) to String {
 		}
 	}
 
-	/**
-	 * Returns the smaller sub-label with live counters.
-	 * @param totalImages   Total images to cache.
-	 * @param totalAudio    Total audio files to cache.
-	 * @param loadedImages  Images cached so far.
-	 * @param loadedAudio   Audio files cached so far.
-	 */
 	public function getSubLabel(totalImages:Int, totalAudio:Int, loadedImages:Int, loadedAudio:Int):String {
 		return switch (this) {
 			case Scanning:
