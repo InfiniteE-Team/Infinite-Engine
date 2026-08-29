@@ -96,7 +96,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		add(limit);
 
 		var options:FlxSprite = new FlxSprite(0, 10).loadGraphic(Paths.getPath('menus/options/Options_logo', 'image'));
-		options.scale.set(0.9,0.9);
+		options.scale.set(0.9, 0.9);
 		options.updateHitbox();
 		options.screenCenter(X);
 		add(options);

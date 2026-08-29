@@ -32,13 +32,6 @@ function updateScore(elapsed:Float) {
 	scoreText.text = 'Score: $displayScore // Combo Breaks: ${playStateConfig.misses}';
 }
 
-function onRewind() {
-	ratingPool = [];
-	comboPool = [];
-	numberPool = [];
-	missPool = [];
-}
-
 function onDestroy() {
 	ratingPool = [];
 	comboPool = [];

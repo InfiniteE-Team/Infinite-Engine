@@ -253,9 +253,12 @@ class ModsState extends MusicBeatState {
 		}
 
 		if (Controls.BACK) {
-			if (changeMod)
+			if (changeMod) {
+				#if DISCORD_ALLOWED
+				core.api.DiscordAPI.instance.shutdown();
+				#end
 				FlxG.switchState(() -> new core.ConfigMain());
-			else
+			} else
 				modding.scripting.types.ScriptClass.switchState('MainMenuState');
 		}
 	}

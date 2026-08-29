@@ -89,8 +89,8 @@ class PlayState extends MusicBeatState {
 
 		#if DISCORD_ALLOWED
 		core.api.DiscordAPI.instance.setPresence({
-			state: 'Playing: ${curSong}',
-			details: 'Difficulty: ' + DiffsUtils.difficulties[curDifficulty],
+			details: 'Playing: ${curSong}',
+			state: 'Difficulty: ' + DiffsUtils.difficulties[curDifficulty].toUpperCase(),
 			largeImageKey: "album-volume1"
 		});
 		#end
@@ -381,9 +381,12 @@ class PlayState extends MusicBeatState {
 	public function rewindSong():Void {
 		#if HSCRIPT_ALLOWED
 		if (script != null) {
-			script.call("onRewind", []);
+			script.call("onDestroy", []);
+			script.destroy();
 		}
 		#end
+
+		script.call("onRewind", []);
 
 		gameAudio.stopAll();
 
@@ -392,11 +395,12 @@ class PlayState extends MusicBeatState {
 		}
 
 		if (noteController != null) {
+			remove(noteController.blackBacks);
 			remove(noteController.strums);
 			remove(noteController.sustains);
 			remove(noteController.notes);
 			remove(noteController.splashes);
-
+			remove(noteController.holdsplashes);
 			noteController.destroy();
 			noteController = null;
 		}
@@ -406,16 +410,29 @@ class PlayState extends MusicBeatState {
 			events = new EventManager();
 		}
 
-		RhythmCore.reset(SONG.bpmSong);
+		buildStrumsandNotes();
 
-		if (chars != null)
-			chars.danceAll();
+		RhythmCore.reset(SONG.bpmSong);
+		t.reset(); // reset steps and beats
 
 		if (playStateConfig != null)
 			playStateConfig.reset();
 
-		buildStrumsandNotes();
+		#if HSCRIPT_ALLOWED
+		startScript();
+		modding.scripting.ScriptedVars.gameplayVars(script, this);
+		script.call("onCreate", []);
+		script.call("postCreate", []);
+		#end
+
+		noteController.generateNotes(0, SONG);
 		startCountdown();
+
+		if (chars != null)
+			chars.resetAll();
+
+		if (SONG.songData.gameplay.events != null)
+			events.loadEvents(SONG.songData.gameplay.events);
 
 		#if HSCRIPT_ALLOWED
 		script.call('onRewindPost', []);

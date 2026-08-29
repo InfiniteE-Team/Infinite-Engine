@@ -39,7 +39,7 @@ class FreeplayState extends MusicBeatState {
 	var box:FlxSprite;
 
 	// difficulty
-	public static var curDiff:Int = 0;
+	var curDiff:Int = 0;
 
 	var diffTxt:FlxText;
 
@@ -59,6 +59,12 @@ class FreeplayState extends MusicBeatState {
 		script.executeAll();
 		script.call("onCreate", []);
 		#end
+
+		core.api.DiscordAPI.instance.setPresence({
+			state: "In the Menu",
+			details: "Infinite Engine",
+			largeImageKey: "icon"
+		});
 
 		core.rhythm.audio.MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102);
 

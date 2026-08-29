@@ -63,7 +63,7 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 			else
 				iconP2 = icon;
 		}
-		_updateIconPositions();
+		_updateIconPositions(0.016);
 	}
 
 	override public function update(elapsed:Float) {
@@ -86,7 +86,7 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 		}
 
 		_updateLosingAnim();
-		_updateIconPositions();
+		_updateIconPositions(elapsed);
 	}
 
 	function _updateLosingAnim() {
@@ -101,21 +101,27 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 		}
 	}
 
-	function _updateIconPositions() {
+	function _updateIconPositions(elapsed:Float = 0.016) {
 		if (healthBarBG == null)
 			return;
 
 		var ratio = 1.0 - Math.max(0, Math.min(PlayState.instance.playStateConfig.health / 2.0, 1.0));
-		var barCenterX = healthBarBG.x + healthBarBG.width * ratio;
+		var centerX = healthBarBG.x + healthBarBG.width * ratio;
+		var lerpVal = Math.max(0, Math.min(1, elapsed * 12));
 
-		if (iconP1 != null) {
-			iconP1.x = barCenterX - iconP1.width * 0.5 + 55;
-			iconP1.y = healthBarBG.y - iconP1.height * 0.5;
-		}
+		var icons = [iconP1, iconP2];
+		var offsets = [55, -55];
 
-		if (iconP2 != null) {
-			iconP2.x = barCenterX - iconP2.width * 0.5 - 55;
-			iconP2.y = healthBarBG.y - iconP2.height * 0.5;
+		for (i in 0...icons.length) {
+			var icon = icons[i];
+			if (icon == null)
+				continue;
+
+			var targetX = centerX - icon.width * 0.5 + offsets[i];
+			var targetY = healthBarBG.y - icon.height * 0.5;
+
+			icon.x = flixel.math.FlxMath.lerp(icon.x, targetX, lerpVal);
+			icon.y = targetY;
 		}
 	}
 

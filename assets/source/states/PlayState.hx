@@ -8,6 +8,9 @@ function onUpdate(elapsed) {
 	if (Controls.ACCEPT)
 		pauseMenu();
 
+	if (FlxG.keys.justPressed.SEVEN)
+		ScriptClass.switchState('GameplayEditor');
+
 	if (FlxG.keys.justPressed.R && !startCount)
 		isDeath();
 }

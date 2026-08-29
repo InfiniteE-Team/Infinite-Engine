@@ -254,6 +254,17 @@ class CharacterController extends FunkinObjectRegistry {
 		#end
 	}
 
+	public function resetAll() {
+		for (chars in [playerChars, opponentChars, gfChars]) {
+			for (char in chars) {
+				char.isSing = false;
+				char.isMiss = false;
+				char.singCountTime = 0;
+			}
+		}
+		danceAll();
+	}
+
 	// utils
 
 	inline function setSing(char:Character, dir:Int) {

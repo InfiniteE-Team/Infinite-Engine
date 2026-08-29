@@ -110,10 +110,9 @@ class NoteController {
 			notesVisible = charData?.strums?.notesVisible ?? strumsVisible;
 
 			var bg = bglaneBackdrop(strumPos != null ? strumPos[0] : 0);
-			bg.visible = strumsVisible && notesVisible;
 			blackBacks.add(bg);
-
 			loadGenerateStrums(strumPos != null ? strumPos[0] : 0, strumPos != null ? strumPos[1] : 0, daSong.chars[i].id, isPlayer);
+			bg.visible = strumsVisible && notesVisible;
 		}
 
 		Trace.traceOnce("Created Strums");
@@ -178,6 +177,8 @@ class NoteController {
 
 	public function bglaneBackdrop(x:Float):flixel.FlxSprite {
 		var strumWidth:Float = (keys * 112) + (spacing * (keys - 1)) + 45;
+		if (SaveData.data.middlescroll)
+			x = (FlxG.width / 2) - (strumWidth / 2);
 		var back:flixel.FlxSprite = new flixel.FlxSprite(x, 0).makeGraphic(Std.int(strumWidth), FlxG.height, flixel.util.FlxColor.BLACK);
 		var alphaVal:Float = SaveData.data.laneBackdrop;
 		back.alpha = (alphaVal > 1) ? (alphaVal / 100) : alphaVal;
@@ -206,9 +207,12 @@ class NoteController {
 
 			if (SaveData.data.middlescroll) {
 				if (isPlayer)
-					strum.x = ((FlxG.width - ((keys * 112) + ((keys - 1) * spacing))) / 2) + i * (112 + spacing);
-				else
+					strum.x = ((FlxG.width - ((keys * 112) + ((keys - 1) * spacing))) / 2) + i * (112 + spacing) - 25;
+				else {
 					strum.visible = false;
+					strumsVisible = false;
+					notesVisible = false;
+				}
 			}
 
 			if (!PlayStateConfig.isStoryMode) {
@@ -564,7 +568,7 @@ class NoteController {
 					}
 				}
 			}
-			
+
 			// HANDLE SUSTAIN ENDS
 			if (sustain.isSustainEnd) {
 				#if HSCRIPT_ALLOWED

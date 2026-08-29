@@ -76,7 +76,7 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 
 		var textInfo:Array<String> = [
 			game.PlayState.instance.curSong,
-			'Difficulty: ${core.rhythm.DiffsUtils.diffCurrent.toUpperCase()}',
+			'Difficulty: ${core.rhythm.DiffsUtils.difficulties[game.PlayState.instance.curDifficulty].toUpperCase()}',
 			'Blue Balled: ${game.PlayStateConfig.blueBalled}'
 		];
 
