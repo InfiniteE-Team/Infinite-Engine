@@ -75,22 +75,15 @@ class PlayState extends MusicBeatState {
 		if (playStateConfig != null)
 			playStateConfig.reset();
 
-		#if HSCRIPT_ALLOWED
-		startScript();
-		#end
-
 		addCameras();
 
+		SONG = new SongConfig();
+		SONG.configSong(curSong, DiffsUtils.difficulties[curDifficulty]);
+
 		#if HSCRIPT_ALLOWED
+		startScript();
 		script.call("onCreate", []);
 		#end
-
-		DiffsUtils.getDifficulty(curSong);
-
-		if (SONG == null || SONG.songData == null) {
-			SONG = new SongConfig();
-			SONG.configSong(curSong, DiffsUtils.difficulties[curDifficulty]);
-		}
 
 		#if DISCORD_ALLOWED
 		core.api.DiscordAPI.instance.setPresence({
@@ -282,11 +275,12 @@ class PlayState extends MusicBeatState {
 			return;
 		#end
 
+		cameraController.isLock = true;
 		flixel.tweens.FlxTween.tween(cameraController.camPoint, {y: camGame.y + 200}, 1, {ease: flixel.tweens.FlxEase.quadOut});
 
 		if (!PlayStateConfig.isStoryMode) {
 			core.config.SaveScore.saveSong(curSong, playStateConfig.score, curDifficulty);
-			new flixel.util.FlxTimer().start(2, (_) -> {
+			new flixel.util.FlxTimer().start(1.1, (_) -> {
 				MusicBeatState.switchState(() -> new states.menus.FreeplayState());
 			});
 		} else {
@@ -295,12 +289,12 @@ class PlayState extends MusicBeatState {
 			if (PlayStateConfig.storyPlaylist.length > 0) {
 				var nextSong = PlayStateConfig.storyPlaylist[0];
 				PlayStateConfig.storyPlaylist.shift();
-				new flixel.util.FlxTimer().start(2, (_) -> {
+				new flixel.util.FlxTimer().start(1.1, (_) -> {
 					MusicBeatState.switchState(() -> new states.LoadingState(nextSong, curDifficulty));
 				});
 			} else {
 				core.config.SaveScore.saveWeek(PlayStateConfig.storyWeekName, PlayStateConfig.storyScore, curDifficulty);
-				new flixel.util.FlxTimer().start(2, (_) -> {
+				new flixel.util.FlxTimer().start(1.1, (_) -> {
 					PlayStateConfig.isStoryMode = false;
 					PlayStateConfig.storyScore = 0;
 					MusicBeatState.switchState(() -> new states.menus.StoryMenuState());

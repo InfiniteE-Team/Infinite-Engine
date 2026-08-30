@@ -148,14 +148,14 @@ class GameplayEditor extends MusicBeatState {
 		if (Controls.BACK) {
 			acceptOption = true;
 			gameAudio.stopAll();
-			game.PlayState.SONG = SONG;/*
+			/*
 			var startMs = RhythmCore.songPosition;
 			MusicBeatState.switchState(() -> {
 				var ps = new game.PlayState();
 				ps.startTime = startMs;
 				return ps;
 			});*/
-			MusicBeatState.switchState(() -> new game.PlayState());
+			MusicBeatState.switchState(() -> new game.PlayState(SONG.songName, states.menus.FreeplayState.curDiff));
 		}
 	}
 }

@@ -13,6 +13,8 @@ class CameraController {
 
 	public var camPoint:FlxObject;
 
+	public var isLock:Bool = false;
+
 	public var char:Character = null;
 
 	public var zoomEnabled:Bool = true;
@@ -38,9 +40,11 @@ class CameraController {
 	}
 
 	public function followChar(char:Character) {
-		if (char != null) {
-			var pos = char.getCamPosition();
-			moveCameraTo(pos.x, pos.y);
+		if (!isLock) {
+			if (char != null) {
+				var pos = char.getCamPosition();
+				moveCameraTo(pos.x, pos.y);
+			}
 		}
 	}
 
