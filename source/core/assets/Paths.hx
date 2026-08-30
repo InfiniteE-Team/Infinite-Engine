@@ -11,6 +11,8 @@ class Paths {
 	private static var pathCache = new Map<String, String>();
 	private static var cache = new Map<String, Dynamic>();
 
+	public static var currentSong:String = "";
+
 	public static function getPath(fileName:String, ?type:core.enums.AssetType = DEFAULT):Dynamic {
 		try {
 			switch (type) {
@@ -27,7 +29,8 @@ class Paths {
 				case MUSIC:
 					return Library.findLib("music/" + fileName + '.ogg');
 				case SONG_AUDIO:
-					return Library.findLib('songs/${PlayState.instance.curSong}/audio/$fileName.ogg');
+					var songName = PlayState.instance?.curSong ?? currentSong;
+					return Library.findLib('songs/$songName/audio/$fileName.ogg');
 				case ANIMATED:
 					return getAnimated(fileName);
 				case XML:

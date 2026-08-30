@@ -19,11 +19,19 @@ class CursorConfig extends FunkinSprite {
 		loadProps(cursorProps, 'cursor');
 
 		if (this.graphic == null || this.graphic.bitmap == null) {
-			Trace.traceOnce("CursorConfig: graphic is null, cursor not loaded",true);
+			Trace.traceOnce("CursorConfig: graphic is null, cursor not loaded", true);
 			return;
 		}
 
 		FlxG.mouse.load(this.graphic.bitmap);
 		FlxG.mouse.visible = true;
+	}
+
+	public static function refresh():Void {
+		if (ConfigMain.cursor == null)
+			return;
+		var bmp = ConfigMain.cursor.graphic?.bitmap;
+		if (bmp != null)
+			FlxG.mouse.load(bmp);
 	}
 }

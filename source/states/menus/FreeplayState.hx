@@ -39,7 +39,7 @@ class FreeplayState extends MusicBeatState {
 	var box:FlxSprite;
 
 	// difficulty
-	var curDiff:Int = 0;
+	public static var curDiff:Int = 0;
 
 	var diffTxt:FlxText;
 
@@ -286,6 +286,8 @@ class FreeplayState extends MusicBeatState {
 
 		DiffsUtils.getDifficulty(freeplayData.songData[curSelected].song);
 
+		curDiff = flixel.math.FlxMath.minInt(curDiff, DiffsUtils.difficulties.length - 1);
+
 		diffTxt.text = '< ' + DiffsUtils.difficulties[curDiff].toUpperCase() + ' >';
 		diffTxt.x = 950;
 
@@ -370,6 +372,8 @@ class FreeplayState extends MusicBeatState {
 				camFollow.y = targetCard.y + (targetCard.height / 2) + (FlxG.height * 0.15);
 			}
 		}
+
+		changeDifficulty(0);
 
 		#if HSCRIPT_ALLOWED
 		script.call("postChangeSelection", [change]);

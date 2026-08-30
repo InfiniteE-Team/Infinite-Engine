@@ -20,6 +20,8 @@ class State extends flixel.FlxState {
 
 		add(tweenManager);
 		add(timerManager);
+
+		core.config.CursorConfig.refresh();
 	}
 
 	override function openSubState(substate:flixel.FlxSubState) {

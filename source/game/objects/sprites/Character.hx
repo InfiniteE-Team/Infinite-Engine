@@ -19,6 +19,9 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 
 	public var singCountTime:Float = 0;
 
+	// is special animation yep
+	public var isSpecial:Bool = false;
+
 	public var cameraOffset:Point = {x: 0, y: 0};
 
 	var singTime:Float = 2;
@@ -87,10 +90,10 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 				y + (characterData.render.layers[i].position ?? [0.0, 0.0])[1]);
 		}
 
-		if (isSing || isMiss)
+		if ((isSing || isMiss) && !isSpecial)
 			singCountTime += elapsed;
 
-		if (isSing || isMiss) {
+		if ((isSing || isMiss) && !isSpecial) {
 			var beatLengthSecs = core.rhythm.RhythmCore.crochet / 1000.0;
 			if (singCountTime >= singTime * beatLengthSecs) {
 				isSing = false;
@@ -102,6 +105,48 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		#if HSCRIPT_ALLOWED
 		script.call('postUpdate', [elapsed]);
 		#end
+	}
+
+	public function playSpecialAnim(animKey:String):Bool {
+		if (characterData == null || characterData.gameplay == null || characterData.gameplay.specialAnims == null)
+			return false;
+
+		var data:Dynamic = Reflect.field(characterData.gameplay.specialAnims, animKey);
+		if (data == null)
+			return false;
+
+		var canInterrupt = data.interrupt ?? false;
+		if (!canInterrupt && (isSing || isMiss))
+			return false;
+
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable('onSpecialAnim', [animKey, data.anim]))
+			return false;
+		#end
+
+		var force = data.force ?? true;
+		playAnim(data.anim, force);
+		isSpecial = true;
+		isSing = false;
+		isMiss = false;
+		singCountTime = 0;
+
+		if (layers.length > 0) {
+			layers[0].animation.finishCallback = function(name:String) {
+				if (name == data.anim && isSpecial) {
+					isSpecial = false;
+
+					dance();
+					layers[0].animation.finishCallback = null;
+				}
+			};
+		}
+
+		#if HSCRIPT_ALLOWED
+		script.call('postSpecialAnim', [animKey, data.anim]);
+		#end
+
+		return true;
 	}
 
 	override public function playAnim(name:String, ?force:Bool = true) {
@@ -140,7 +185,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 	var bopAnimExists:Bool = false;
 
 	override public function dance() {
-		if (isMiss || (!idleAfterSing || isSing) || singCountTime > 0)
+		if (isSpecial || isMiss || (!idleAfterSing || isSing) || singCountTime > 0)
 			return;
 
 		#if HSCRIPT_ALLOWED

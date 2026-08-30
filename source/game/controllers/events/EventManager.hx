@@ -10,25 +10,33 @@ import modding.scripting.ScriptHandler;
 
 class EventManager {
 	#if HSCRIPT_ALLOWED
-	public var eventScript:ScriptHandler;
+	var eventScripts:Map<String, ScriptHandler> = [];
 	#end
+
 	public var pendingEvents:Array<EventsData> = [];
 	public var onEvent:(EventsData) -> Void = null;
 
 	public function new() {}
 
 	#if HSCRIPT_ALLOWED
-	public function initEventScript(events:Array<EventsData>):Void {
-		eventScript = new ScriptHandler(this);
+	public function initEventScripts(events:Array<EventsData>):Void {
 		var loadedScripts:Array<String> = [];
 		for (event in events) {
 			if (loadedScripts.contains(event.name))
 				continue;
-			eventScript.load(Paths.getPath('events/' + event.name, 'script'));
+			var path = Paths.getPath('events/' + event.name, 'script');
+			if (path == null || !sys.FileSystem.exists(path)) {
+				loadedScripts.push(event.name);
+				continue;
+			}
+			var handler = new ScriptHandler(this);
+			handler.load(path);
+			handler.executeAll();
+			handler.call('onCreate', []);
+			eventScripts.set(event.name, handler);
+
 			loadedScripts.push(event.name);
 		}
-		eventScript.executeAll();
-		eventScript.call('onCreate', []);
 	}
 	#end
 
@@ -39,8 +47,14 @@ class EventManager {
 		onEvent = handleEvent;
 
 		#if HSCRIPT_ALLOWED
-		initEventScript(events);
+		initEventScripts(events);
 		#end
+	}
+
+	public function triggerEvent(name:String, arguments:Dynamic, ?time:Float = 0):Void {
+		var event:EventsData = {name: name, arguments: arguments, time: time};
+		if (onEvent != null)
+			onEvent(event);
 	}
 
 	function handleEvent(event:EventsData) {
@@ -50,7 +64,7 @@ class EventManager {
 				var charId:String = Reflect.field(event.arguments, 'char');
 				var char = PlayState.instance.chars.get(charId);
 				if (char == null) {
-					Trace.traceOnce('Camera Follow char "$charId" not found');
+					Trace.traceOnce('[EventManager] Camera Follow char "$charId" not found');
 					return;
 				}
 				PlayState.instance.cameraController.char = cast(char, Character);
@@ -59,10 +73,21 @@ class EventManager {
 				if (!Math.isNaN(newSpeed)) {
 					PlayState.instance.noteController.targetScrollSpeed = newSpeed;
 				}
+			case 'Play Special Anim':
+				var charId:String = Reflect.field(event.arguments, 'char');
+				var animKey:String = Reflect.field(event.arguments, 'anim');
+				if (charId == null || animKey == null) {
+					Trace.traceOnce('[EventManager] Play Special Anim: "char" or "anim" are missing from the arguments');
+					return;
+				}
+				var success = PlayState.instance.chars.playSpecialAnim(charId, animKey);
+				if (!success)
+					Trace.traceOnce('[EventManager] Play Special Anim: could not be reproduced "$animKey" in "$charId"');
 		}
-
 		#if HSCRIPT_ALLOWED
-		eventScript.call('onEvent', [event.name, event.arguments, event.time]);
+		var handler = eventScripts.get(event.name);
+		if (handler != null)
+			handler.call('onEvent', [event.arguments, event.time]);
 		#end
 	}
 
@@ -77,5 +102,10 @@ class EventManager {
 	public function destroy() {
 		pendingEvents = null;
 		onEvent = null;
+		#if HSCRIPT_ALLOWED
+		for (handler in eventScripts)
+			handler.destroy();
+		eventScripts = null;
+		#end
 	}
 }

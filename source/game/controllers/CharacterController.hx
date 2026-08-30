@@ -284,6 +284,13 @@ class CharacterController extends FunkinObjectRegistry {
 		#end
 	}
 
+	public function playSpecialAnim(charId:String, animKey:String):Bool {
+		if (!existsId(charId))
+			return false;
+		var char = cast(get(charId), Character);
+		return char.playSpecialAnim(animKey);
+	}
+
 	public function isPlayerMissing():Bool
 		return Lambda.exists(playerChars, c -> c.isMiss);
 

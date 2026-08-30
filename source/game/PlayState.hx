@@ -72,6 +72,9 @@ class PlayState extends MusicBeatState {
 
 		PlayStateConfig.isPlaying = true;
 
+		if (playStateConfig != null)
+			playStateConfig.reset();
+
 		#if HSCRIPT_ALLOWED
 		startScript();
 		#end
@@ -84,8 +87,10 @@ class PlayState extends MusicBeatState {
 
 		DiffsUtils.getDifficulty(curSong);
 
-		SONG = new SongConfig();
-		SONG.configSong(curSong, DiffsUtils.difficulties[curDifficulty]);
+		if (SONG == null || SONG.songData == null) {
+			SONG = new SongConfig();
+			SONG.configSong(curSong, DiffsUtils.difficulties[curDifficulty]);
+		}
 
 		#if DISCORD_ALLOWED
 		core.api.DiscordAPI.instance.setPresence({
@@ -103,6 +108,8 @@ class PlayState extends MusicBeatState {
 		controllerHUD.cameras = [camHUD];
 		add(controllerHUD);
 
+		super.create();
+
 		buildStrumsandNotes();
 		/*
 			windowMod = new WindowModManager();
@@ -111,8 +118,6 @@ class PlayState extends MusicBeatState {
 		loadSong();
 
 		startCountdown();
-
-		super.create();
 
 		#if HSCRIPT_ALLOWED
 		modding.scripting.ScriptedVars.gameplayVars(script, this);
@@ -206,7 +211,10 @@ class PlayState extends MusicBeatState {
 		gameAudio.pauseAll();
 		RhythmCore.pause(gameAudio);
 
-		noteController.generateNotes(0, SONG);
+		if (startTime > 0)
+			gameAudio.setTime(startTime);
+
+		noteController.generateNotes(startTime, SONG);
 
 		if (SONG.songData.gameplay.events != null)
 			events.loadEvents(SONG.songData.gameplay.events);
@@ -218,6 +226,17 @@ class PlayState extends MusicBeatState {
 		#end
 		startCount = true;
 		var crochet:Float = (60 / SONG.bpmSong) * 1000;
+		if (startTime > 0) {
+			RhythmCore.songPosition = startTime;
+			countDown = new Countdown(0, 0, SONG.countdown);
+			countDown.cameras = [camOther];
+			countDown.onComplete = function() {
+				initSong();
+			}
+			countDown.onComplete();
+			return;
+		}
+
 		RhythmCore.songPosition = -crochet * 4;
 
 		countDown = new Countdown(0, 0, SONG.countdown);
@@ -240,6 +259,12 @@ class PlayState extends MusicBeatState {
 
 	public function initSong() {
 		startCount = false;
+
+		if (startTime > 0) {
+			gameAudio.setTime(startTime);
+			RhythmCore.songPosition = startTime;
+			t.reset();
+		}
 
 		gameAudio.playAll();
 		RhythmCore.resume(gameAudio);
@@ -420,8 +445,8 @@ class PlayState extends MusicBeatState {
 
 		#if HSCRIPT_ALLOWED
 		startScript();
-		modding.scripting.ScriptedVars.gameplayVars(script, this);
 		script.call("onCreate", []);
+		modding.scripting.ScriptedVars.gameplayVars(script, this);
 		script.call("postCreate", []);
 		#end
 
@@ -449,10 +474,17 @@ class PlayState extends MusicBeatState {
 
 		super.update(elapsed);
 
+		if (FlxG.keys.justPressed.SEVEN) {
+			modding.editors.GameplayEditor.SONG = SONG;
+			MusicBeatState.switchState(() -> new modding.editors.GameplayEditor());
+		}
+
 		if (startCount && !paused) {
 			RhythmCore.songPosition += elapsed * 1000;
 		} else if (gameAudio != null && gameAudio.inst != null) {
 			if (gameAudio.inst.playing && gameAudio.inst.time > 0) {
+				RhythmCore.songPosition = gameAudio.inst.time;
+			} else if (gameAudio.inst.playing && gameAudio.inst.time > startTime * 0.5) {
 				RhythmCore.songPosition = gameAudio.inst.time;
 			} else if (!paused) {
 				RhythmCore.songPosition += elapsed * 1000;

@@ -113,6 +113,9 @@ class FunkinSprite extends animate.FlxAnimate {
 		if (!isSimpleImage && !isAnimate && props.anims != null)
 			filePathOffsets = loadAtlasOffsets(props, path);
 
+		if (isAnimate && props.anims != null)
+			loadAnimateFilePaths(props, path);
+
 		for (anim in props.anims ?? []) {
 			var suffix = anim.suffix ?? '';
 			var fullAnimName = anim.name + suffix;
@@ -136,7 +139,9 @@ class FunkinSprite extends animate.FlxAnimate {
 				finalIndices = offset > 0 ? anim.indices.map(i -> i + offset) : anim.indices;
 			}
 
-			addAnim(fullAnimName, anim.prefix ?? (animPath != null ? animPath : anim.name), anim.framerate ?? 24, anim.looped ?? true, finalIndices);
+			var targetPrefix = (anim.prefix != null && anim.prefix != "") ? anim.prefix : anim.name;
+
+			addAnim(fullAnimName, targetPrefix, anim.framerate ?? 24, anim.looped ?? true, finalIndices);
 		}
 
 		loadParams(props);
@@ -242,6 +247,24 @@ class FunkinSprite extends animate.FlxAnimate {
 
 		cacheOffsets.set(assetPath, offsets);
 		return offsets;
+	}
+
+	private function loadAnimateFilePaths(props:ObjectData, path:String):Void {
+		var animateFrames = cast(frames, FlxAnimateFrames);
+		var merged = new Map<String, Bool>();
+
+		for (anim in props.anims) {
+			var animPath = getAnimFilePath(anim);
+			if (animPath == null || animPath == props.path || merged.exists(animPath))
+				continue;
+			merged.set(animPath, true);
+
+			var extra = Paths.getAnimated('$path/$animPath');
+			if (extra == null || !(extra is FlxAnimateFrames))
+				continue;
+
+			animateFrames.addAtlas(cast(extra, FlxAnimateFrames));
+		}
 	}
 
 	static function getAnimFilePath(anim:AnimData):Null<String> {
