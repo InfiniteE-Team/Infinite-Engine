@@ -280,21 +280,20 @@ class PlayState extends MusicBeatState {
 
 		if (!PlayStateConfig.isStoryMode) {
 			core.config.SaveScore.saveSong(curSong, playStateConfig.score, curDifficulty);
-			new flixel.util.FlxTimer().start(1.1, (_) -> {
+			new flixel.util.FlxTimer().start(0.9, (_) -> {
 				MusicBeatState.switchState(() -> new states.menus.FreeplayState());
 			});
 		} else {
 			PlayStateConfig.storyScore += playStateConfig.score;
-
 			if (PlayStateConfig.storyPlaylist.length > 0) {
 				var nextSong = PlayStateConfig.storyPlaylist[0];
 				PlayStateConfig.storyPlaylist.shift();
-				new flixel.util.FlxTimer().start(1.1, (_) -> {
+				new flixel.util.FlxTimer().start(0.9, (_) -> {
 					MusicBeatState.switchState(() -> new states.LoadingState(nextSong, curDifficulty));
 				});
 			} else {
 				core.config.SaveScore.saveWeek(PlayStateConfig.storyWeekName, PlayStateConfig.storyScore, curDifficulty);
-				new flixel.util.FlxTimer().start(1.1, (_) -> {
+				new flixel.util.FlxTimer().start(0.9, (_) -> {
 					PlayStateConfig.isStoryMode = false;
 					PlayStateConfig.storyScore = 0;
 					MusicBeatState.switchState(() -> new states.menus.StoryMenuState());

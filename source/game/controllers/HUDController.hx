@@ -38,10 +38,10 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 				continue;
 			var isPlayer = game.controllers.CharacterController.namesPlayer.contains(charData.role);
 			var isOpponent = game.controllers.CharacterController.namesOpponent.contains(charData.role);
-			if (isPlayer && char.characterData.healthBarColor != null)
-				bfColor = char.characterData.healthBarColor;
-			if (isOpponent && char.characterData.healthBarColor != null)
-				dadColor = char.characterData.healthBarColor;
+			if (isPlayer && char.characterData.icon.healthBarColor != null)
+				bfColor = flixel.util.FlxColor.fromString(char.characterData.icon.healthBarColor);
+			if (isOpponent && char.characterData.icon.healthBarColor != null)
+				dadColor = flixel.util.FlxColor.fromString(char.characterData.icon.healthBarColor);
 		}
 		healthBar.createFilledBar([dadColor, bfColor]);
 		add(healthBar);

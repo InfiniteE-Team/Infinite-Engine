@@ -42,4 +42,5 @@ typedef IconData = {
 	var ?props:ObjectData;
 	var ?bumpInBeats:Bool;
 	var ?stepTempo:Float;
+	var ?healthBarColor:String;
 }
