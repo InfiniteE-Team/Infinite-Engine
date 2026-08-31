@@ -10,6 +10,8 @@ class ScriptHandler {
 	var scripts:Array<Script> = [];
 	var luaScripts:Array<modding.scripting.lua.LuaScript> = [];
 
+	public static var moduleRegistry:Map<String, Module> = [];
+
 	var paths:Array<String> = [];
 	var modifiedTimes:Array<Float> = [];
 	var pendingPaths:Array<String> = [];
@@ -172,10 +174,12 @@ class ScriptHandler {
 	}
 
 	function reload(i:Int):Void {
+		moduleRegistry.get(paths[i])?.snapshot();
+
 		var content = sys.io.File.getContent(paths[i]);
 		scripts[i].parse(content);
-		setupScript(scripts[i]);
 		scripts[i].start();
+		setupScript(scripts[i]);
 		modifiedTimes[i] = sys.FileSystem.stat(paths[i]).mtime.getTime();
 		scripts[i].call('postCreate', []);
 		Trace.traceOnce('[ScriptHandler] hot-reloaded: ${paths[i]}');

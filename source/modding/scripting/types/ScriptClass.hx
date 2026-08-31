@@ -76,6 +76,10 @@ class ScriptClass {
 		}
 
 		env.addModule(module);
+		for (path => mod in ScriptHandler.moduleRegistry) {
+			env.addModule(mod);
+		}
+
 		env.start();
 
 		var type = env.resolve(className);
