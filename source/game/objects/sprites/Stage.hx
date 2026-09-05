@@ -21,6 +21,8 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 	public var charProps:Map<String, StageElement> = [];
 	public var hideGF:Bool = false;
 
+	public var objectMap:Map<String, FunkinSprite> = new Map();
+
 	public var charLayer:FlxTypedGroup<FlxBasic> = new FlxTypedGroup();
 
 	#if HSCRIPT_ALLOWED
@@ -99,11 +101,17 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 				elements.push(sprite);
 				add(sprite);
 
+				if (element.props?.name != null)
+					objectMap.set(element.props.name, sprite);
+
 			case 'graphic':
 				var sprite = new FunkinSprite(0, 0);
 				sprite.loadMakeGraphic(element.props);
 				elements.push(sprite);
 				add(sprite);
+
+				if (element.props?.name != null)
+					objectMap.set(element.props.name, sprite);
 
 			case 'sound':
 				if (element.audio?.path != null)
@@ -111,6 +119,10 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 			default:
 				Trace.traceOnce('Element Type Unknown $type', true);
 		}
+	}
+
+	public function getObject(name:String):FunkinSprite {
+		return objectMap.get(name);
 	}
 
 	override public function update(elapsed:Float):Void {
@@ -142,6 +154,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 			element.destroy();
 		elements = null;
 		charProps = null;
+		objectMap = null;
 		charLayer.destroy();
 		charLayer = null;
 		super.destroy();

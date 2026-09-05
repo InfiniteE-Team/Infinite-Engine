@@ -4758,7 +4758,7 @@
 		"song": "4score",
 		"validScore": true,
 		"needsVoices": true,
-		"stage": "stage",
+		"stage": "stage_4score",
 		"speed": 2,
 		"bpm": 178,
 		"format": "psych_v1_convert"

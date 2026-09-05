@@ -10,6 +10,9 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 
 	public var characterData:CharacterData;
 	public var layers:Array<FunkinSprite> = [];
+
+	public var layerMap:Map<String, FunkinSprite> = new Map();
+
 	public var isPlayer:Bool = false;
 	public var isSing:Bool = false;
 	public var isMiss:Bool = false;
@@ -73,6 +76,9 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 						var sprite = new FunkinSprite(0, 0);
 						sprite.loadProps(layer, 'game/characters');
 						layers.push(sprite);
+
+						if (layer.name != null)
+							layerMap.set(layer.name, sprite);
 					}
 				}
 		}
@@ -80,6 +86,10 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		#if HSCRIPT_ALLOWED
 		script.call('postCreate', []);
 		#end
+	}
+
+	public function getLayer(name:String):FunkinSprite {
+		return layerMap.get(name);
 	}
 
 	override public function update(elapsed:Float):Void {
@@ -224,6 +234,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		layers = [];
 		if (parent == this)
 			parent = null;
+		layerMap = null;
 		super.destroy();
 	};
 }

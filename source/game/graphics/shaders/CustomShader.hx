@@ -14,15 +14,17 @@ class CustomShader {
 		return new FlxRuntimeShader(sys.io.File.getContent(shaderPath));
 	}
 
-	public static function applyToCamera(name:String, cam:Camera) {
+	public static function applyToCamera(name:String, cam:Camera):FlxRuntimeShader {
 		var sh = loadShader(name);
 		if (sh == null)
-			return;
+			return null;
 
 		var filter = new ShaderFilter(sh);
 		if (cam.filters == null)
 			cam.filters = [filter];
 		else
 			cam.filters.push(filter);
+		
+		return sh;
 	}
 }
