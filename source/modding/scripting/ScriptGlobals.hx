@@ -65,6 +65,9 @@ class ScriptGlobals {
 		Config.globalVariables.set('FileSystem', sys.FileSystem);
 		Config.globalVariables.set('Camera', game.objects.Camera);
 
+		Config.globalVariables.set('globalConfig', core.ConfigMain.globalData);
+		Config.globalVariables.set('modData', modding.mods.ModData.ModConfig.modData);
+
 		Config.globalVariables.set('AudioAnalyzer', core.rhythm.audio.AudioAnalyzer);
 
 		// Modifiers

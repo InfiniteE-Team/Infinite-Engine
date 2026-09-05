@@ -28,15 +28,31 @@ class GlobalConfig {
 		hud = globalData.hud ?? 'default';
 		developerMode = globalData.developerMode ?? true;
 		skipTrans = globalData.skipTrans ?? false;
-		
+
 		var stateStr = globalData.startState;
 		if (stateStr != null) {
 			var cls:Class<MusicBeatState> = cast(Type.resolveClass(stateStr) ?? Type.resolveClass('states.$stateStr'));
 			if (cls != null)
 				startState = cls;
-			else {
+			else
 				startStateScript = stateStr;
-			}
 		}
+
+		#if HSCRIPT_ALLOWED
+		loadGlobalScripts();
+		#end
+	}
+
+	public static var globalScripts:modding.scripting.ScriptHandler = new modding.scripting.ScriptHandler(null);
+
+	function loadGlobalScripts():Void {
+		globalScripts.loadFolder('scripts/global');
+
+		if (modding.mods.ModsRegistry.onMod) {
+			var mod = modding.mods.ModsRegistry.currentMod;
+			globalScripts.loadFolder('scripts/global');
+		}
+
+		globalScripts.call('onCreate', []);
 	}
 }

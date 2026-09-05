@@ -15,3 +15,7 @@ function onUpdate(elapsed) {
 	if (FlxG.keys.justPressed.R && !startCount)
 		isDeath();
 }
+
+function onDestroy() {
+	lime.app.Application.current.window.title = "Infinite Engine";
+}

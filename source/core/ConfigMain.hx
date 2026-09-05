@@ -34,6 +34,10 @@ class ConfigMain extends flixel.FlxState {
 
 		globalData.configGlobal();
 
+		#if HSCRIPT_ALLOWED
+		GlobalConfig.globalScripts.call('onInit', []);
+		#end
+
 		if (globalData.developerMode)
 			Trace.init();
 

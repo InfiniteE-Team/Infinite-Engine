@@ -35,7 +35,7 @@ class Window extends Sprite {
 		addChild(topBar);
 
 		var title = new TextField();
-		title.text = "Infinite Engine";
+		title.text = Application.current.window.title;
 		title.autoSize = openfl.text.TextFieldAutoSize.LEFT;
 		title.defaultTextFormat = new openfl.text.TextFormat(Paths.getPath("Funkin.otf", "font"), 20, 0xEBFCFF);
 		title.x = 25;
@@ -78,6 +78,12 @@ class Window extends Sprite {
 
 		minBtn.addEventListener(MouseEvent.CLICK, function(e:MouseEvent) {
 			Application.current.window.minimized = true;
+		});
+
+		addEventListener(Event.ENTER_FRAME, function(_) {
+			var current = Application.current.window.title;
+			if (title.text != current)
+				title.text = current;
 		});
 
 		var closeBtn = new Sprite();

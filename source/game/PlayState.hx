@@ -392,6 +392,7 @@ class PlayState extends MusicBeatState {
 	function startScript() {
 		initScript();
 		script.loadFolder('songs/$curSong/scripts');
+		script.loadFolder('scripts/gameplay');
 		script.load(Paths.getPath('hud', 'script'));
 		script.executeAll();
 	}
