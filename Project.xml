@@ -65,6 +65,11 @@
 	<haxelib name="haxeui-core" />
 	<haxelib name="haxeui-flixel" />
 
+	<haxelib name="funkin.vis" />
+	<haxelib name="grig.audio" />
+
+	<haxelib name="foxlite"/>
+
 	<!--<haxelib name="window-modcharting"/>-->
 
 	<!-- ______________________________ Haxedefines _____________________________ -->

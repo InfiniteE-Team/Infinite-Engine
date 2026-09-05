@@ -65,6 +65,8 @@ class ScriptGlobals {
 		Config.globalVariables.set('FileSystem', sys.FileSystem);
 		Config.globalVariables.set('Camera', game.objects.Camera);
 
+		Config.globalVariables.set('AudioAnalyzer', core.rhythm.audio.AudioAnalyzer);
+
 		// Modifiers
 		Config.globalVariables.set('DrunkModifier', DrunkModifier);
 		Config.globalVariables.set('TornadoModifier', TornadoModifier);

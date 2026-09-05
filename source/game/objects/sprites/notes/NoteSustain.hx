@@ -14,6 +14,8 @@ class NoteSustain extends Note {
 
 	public var parentNote:NoteSustain = null;
 
+	public var wasNoteHit:Bool = false;
+
 	public function new(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0, length:Float,
 			?noteType:String = 'normal', isSustainEnd:Bool = false) {
 		this.length = length;

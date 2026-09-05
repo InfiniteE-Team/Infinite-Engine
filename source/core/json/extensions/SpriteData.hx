@@ -66,7 +66,7 @@ typedef AnimData = {
 class SpriteData {
 	public function new() {}
 
-	public function loadNameVars(data:ObjectData) {
+	public function loadVar(data:ObjectData) {
 		var name = data.name;
 	}
 }

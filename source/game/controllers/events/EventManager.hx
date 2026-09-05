@@ -73,6 +73,11 @@ class EventManager {
 				if (!Math.isNaN(newSpeed)) {
 					PlayState.instance.noteController.targetScrollSpeed = newSpeed;
 				}
+			case 'Change BPM':
+				var newBPM:Float = Std.parseFloat(Reflect.field(event.arguments, 'bpm'));
+				if (!Math.isNaN(newBPM) && newBPM > 0) {
+					core.rhythm.RhythmCore.changeBPM(newBPM);
+				}
 			case 'Play Special Anim':
 				var charId:String = Reflect.field(event.arguments, 'char');
 				var animKey:String = Reflect.field(event.arguments, 'anim');

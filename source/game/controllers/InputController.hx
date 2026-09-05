@@ -31,7 +31,7 @@ class InputController {
 				if (sustain.isSustainEnd)
 					continue;
 
-				var canHold = songPos >= sustain.strumTime - 50 && songPos <= sustain.strumTime + sustain.length;
+				var canHold = sustain.wasNoteHit && songPos >= sustain.strumTime - 50 && songPos <= sustain.strumTime + sustain.length;
 				if (canHold) {
 					if (!sustain.isHeld) {
 						noteController.spawnHoldSplash(charStrums[i], i, sustain.noteType);
@@ -53,7 +53,8 @@ class InputController {
 				var songPos = core.rhythm.RhythmCore.songPosition;
 				if (sustain.isHeld) {
 					wasHolding = true;
-					if (songPos < (sustain.strumTime + sustain.length)) {
+					var remaining = (sustain.strumTime + sustain.length) - songPos;
+					if (remaining > 50) {
 						sustain.wasMissed = true;
 						sustain.canBeHit = false;
 						onMiss(playStateConfig, noteController, gameAudio);
@@ -64,18 +65,6 @@ class InputController {
 
 			if (wasHolding)
 				noteController.stopHoldSplash(charStrums[i]);
-
-			for (note in noteController.notes.members) {
-				if (note == null || !note.alive || !note.mustPress || note.wasMissed)
-					continue;
-				if (note.strum != charStrums[i] || !note.tooLate)
-					continue;
-
-				note.wasMissed = true;
-				note.canBeHit = false;
-
-				onMiss(playStateConfig, noteController, gameAudio);
-			}
 
 			charStrums[i].playAnim('static' + i, true);
 		}
@@ -131,6 +120,13 @@ class InputController {
 			}
 
 			bestNote.wasGoodHit = true;
+			for (sustain in noteController.sustains.members) {
+				if (sustain == null || !sustain.alive)
+					continue;
+				if (sustain.strum == charStrums[i] && sustain.strumTime == bestNote.strumTime)
+					sustain.wasNoteHit = true;
+			}
+
 			bestNote.kill();
 			charStrums[i].playAnim('confirm' + i, false);
 
