@@ -34,10 +34,6 @@ class ConfigMain extends flixel.FlxState {
 
 		globalData.configGlobal();
 
-		#if HSCRIPT_ALLOWED
-		GlobalConfig.globalScripts.call('onInit', []);
-		#end
-
 		if (globalData.developerMode)
 			Trace.init();
 
@@ -66,6 +62,9 @@ class ConfigMain extends flixel.FlxState {
 
 		#if HSCRIPT_ALLOWED
 		ScriptGlobals.init();
+		globalData.loadGlobalScripts();
+		GlobalConfig.globalScripts.executeAll();
+		GlobalConfig.globalScripts.call('onInit', []);
 		#end
 
 		cursor = new CursorConfig();
@@ -78,6 +77,8 @@ class ConfigMain extends flixel.FlxState {
 		var innerState:() -> MusicBeatState = if (globalData.startStateScript != null) () ->
 			modding.scripting.types.ScriptClass.load(globalData.startStateScript); else() -> Type.createInstance(mainState, []);
 
+		lime.app.Application.current.window.title = modding.mods.ModData.ModConfig.modData?.name ?? "Infinite Engine";
+		
 		MusicBeatState.switchState(() -> new states.preload.FunkinPreloader(innerState));
 	}
 }

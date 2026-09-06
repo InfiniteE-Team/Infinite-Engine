@@ -100,6 +100,7 @@ class LuaScript {
 		_current = this;
 
 		// require: require("FlxTween") or require("flixel.tweens.FlxTween")
+		// Load Lua Scripts Ex: require("gameplay/hud.lua")!
 		luaFunction("require", function(name:String):Dynamic {
 			if (_requireCache.exists(name))
 				return _requireCache[name];
@@ -152,6 +153,19 @@ class LuaScript {
 			}
 
 			Trace.traceOnce('[LuaScript] require("$name"): not found', true);
+			return null;
+		});
+
+		luaFunction("import", function(classPath:String, varName:String):Dynamic {
+			var cls = Type.resolveClass(classPath) ?? cast Type.resolveEnum(classPath);
+			if (cls == null && globalClasses != null)
+				cls = globalClasses.get(classPath);
+			if (cls != null) {
+				pushHaxeClass(cls);
+				Lua.setglobal(L, varName);
+			} else {
+				Trace.traceOnce('[LuaScript] import("$classPath", "$varName"): not found', true);
+			}
 			return null;
 		});
 

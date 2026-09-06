@@ -98,7 +98,9 @@
 	<haxedef name="hxscript_host" value="modding,game,states,core,utils" />
 
 	<!-- _______________________________Compiler Flags _______________________________ -->
+	<haxeflag name="--macro" value="include('foxlite')" />
 	<haxeflag name="--macro" value="include('modding.scripting.interfaces')" />
+	
 	<compilerflag name="-D HXCPP_M64" if="cpp" />
 
 	<!-- Place custom nodes like icons here -->

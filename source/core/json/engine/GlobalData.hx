@@ -37,22 +37,11 @@ class GlobalConfig {
 			else
 				startStateScript = stateStr;
 		}
-
-		#if HSCRIPT_ALLOWED
-		loadGlobalScripts();
-		#end
 	}
 
 	public static var globalScripts:modding.scripting.ScriptHandler = new modding.scripting.ScriptHandler(null);
 
-	function loadGlobalScripts():Void {
+	public function loadGlobalScripts():Void {
 		globalScripts.loadFolder('scripts/global');
-
-		if (modding.mods.ModsRegistry.onMod) {
-			var mod = modding.mods.ModsRegistry.currentMod;
-			globalScripts.loadFolder('scripts/global');
-		}
-
-		globalScripts.call('onCreate', []);
 	}
 }

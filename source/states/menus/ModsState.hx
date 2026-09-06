@@ -33,9 +33,15 @@ class ModsState extends MusicBeatState {
 		Library.reloadMods();
 
 		for (i in 0...ModsRegistry.mods.length) {
-			var graphic = Paths.getPath('iconMod', 'image');
+			var modName = ModsRegistry.mods[i];
+			var modsFolder = core.assets.Library.modsFolder;
+
+			var graphic = '$modsFolder/$modName/images/iconMod.png';
 			if (!sys.FileSystem.exists(graphic))
 				graphic = Paths.getPath('menus/mods/fallback-icon', 'image');
+
+			var modMeta = modding.mods.ModData.ModConfig.loadForMod(modName);
+			var description:String = modMeta?.description ?? '??';
 
 			var spacing:Float = 110;
 
@@ -57,9 +63,6 @@ class ModsState extends MusicBeatState {
 			listMods.push(mod);
 			listModTitles.push(mod);
 			add(mod);
-
-			var modMeta = modding.mods.ModData.ModConfig.loadForMod(ModsRegistry.mods[i]);
-			var description:String = modMeta?.description ?? '??';
 
 			var modDesc:FlxText = new FlxText(330, 240 + (i * spacing), FlxG.width, description);
 			modDesc.setFormat(Paths.getPath('Funkin.otf', 'font'), 32, 0xFFFFFFFF, "left");

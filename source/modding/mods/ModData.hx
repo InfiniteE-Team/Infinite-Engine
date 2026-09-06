@@ -6,7 +6,8 @@ import lime.graphics.Image;
 import states.menus.ModsState;
 
 typedef ModData = {
-	var ?nameMod:String;
+	var ?name:String;
+	var ?version:String;
 	var ?author:String;
 	var ?appIcon:String;
 	var ?description:String;
