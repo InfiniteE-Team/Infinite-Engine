@@ -53,6 +53,17 @@ class ScriptGlobals {
 			'game.graphics.shaders.CustomShader',
 			// Modchart
 			'game.modchart.ModchartSystem',
+			// Foxlite
+			'foxlite.FoxBasic',
+			'foxlite.FoxCache',
+			'foxlite.FoxCamera',
+			'foxlite.FoxInstancedModel',
+			'foxlite.FoxLayer',
+			'foxlite.FoxModel',
+			'foxlite.FoxObject',
+			'foxlite.FoxOfflineScene',
+			'foxlite.FoxScene',
+			'foxlite.FoxShader',
 		]);
 
 		Config.globalVariables.set('Json', haxe.Json);

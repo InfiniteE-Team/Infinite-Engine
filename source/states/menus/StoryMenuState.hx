@@ -64,6 +64,11 @@ class StoryMenuState extends MusicBeatState {
 
 		loadAllWeeks();
 
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onCreateCancel", []))
+			return;
+		#end
+
 		buildBackground();
 		buildTopBar();
 		buildCharArea();
@@ -86,6 +91,10 @@ class StoryMenuState extends MusicBeatState {
 	}
 
 	function buildBackground() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onBuildBackgroundCancel", []))
+			return;
+		#end
 		var bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFFDCC202);
 		add(bg);
 
@@ -98,6 +107,10 @@ class StoryMenuState extends MusicBeatState {
 	}
 
 	function buildTopBar() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onBuildTopBarCancel", []))
+			return;
+		#end
 		scoreText = new FlxText(10, 17, FlxG.width * 0.5, "LEVEL SCORE: 0");
 		scoreText.setFormat(Paths.getPath('vcr.ttf', 'font'), 40, FlxColor.WHITE, "left");
 		scoreText.antialiasing = SaveData.data.antialiasing;
@@ -112,11 +125,20 @@ class StoryMenuState extends MusicBeatState {
 	}
 
 	function buildCharArea() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onBuildCharAreaCancel", []))
+			return;
+		#end
+
 		charGroup = new FlxTypedGroup<states.menus.objects.WeekCharacter>();
 		add(charGroup);
 	}
 
 	function buildWeekBanner() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onBuildWeekBannerCancel", []))
+			return;
+		#end
 		weekBanner = new FlxSprite();
 		weekBanner.antialiasing = SaveData.data.antialiasing;
 		weekBanner.scrollFactor.set(0, 0);
@@ -124,6 +146,10 @@ class StoryMenuState extends MusicBeatState {
 	}
 
 	function buildTracksPanel() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onBuildTracksPanelCancel", []))
+			return;
+		#end
 		tracksTitleText = new FlxText(-470, FlxG.height * 0.725, FlxG.width, "TRACKS");
 		tracksTitleText.setFormat(Paths.getPath('vcr.ttf', 'font'), 30, 0xFFD93939, "center");
 		tracksTitleText.antialiasing = SaveData.data.antialiasing;
@@ -144,7 +170,8 @@ class StoryMenuState extends MusicBeatState {
 
 	function buildArrows() {
 		#if HSCRIPT_ALLOWED
-		script.call('onWeekArrows', []);
+		if (script.callCancellable("onBuildArrowsCancel", []))
+			return;
 		#end
 
 		arrowLeft = new FlxSprite();
@@ -177,6 +204,11 @@ class StoryMenuState extends MusicBeatState {
 	}
 
 	function buildDiffSelector() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onBuildDiffSelectorCancel", []))
+			return;
+		#end
+
 		diffLeft = new FlxSprite();
 		diffLeft.frames = Paths.getPath('menus/storymenu/ui/arrows', 'animated');
 		diffLeft.animation.addByPrefix('idle', 'leftIdle', 24, true);
@@ -231,11 +263,21 @@ class StoryMenuState extends MusicBeatState {
 		}
 
 		weeks.sort((a, b) -> a.priority - b.priority);
+
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("postLoadAllWeeksCancel", []))
+			return;
+		#end
 	}
 
 	function refreshWeek(animate:Bool = true) {
 		if (weeks.length == 0)
 			return;
+
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onRefreshWeekCancel", []))
+			return;
+		#end
 
 		var data = weeks[curWeek];
 
@@ -294,6 +336,11 @@ class StoryMenuState extends MusicBeatState {
 	}
 
 	function refreshDiff() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onRefreshDiffCancel", []))
+			return;
+		#end
+
 		if (weeks.length == 0)
 			return;
 
@@ -335,6 +382,8 @@ class StoryMenuState extends MusicBeatState {
 
 		#if HSCRIPT_ALLOWED
 		script.call("onUpdate", [elapsed]);
+		if (script.callCancellable("onUpdateCancel", [elapsed]))
+			return;
 		#end
 
 		if (acceptOption)
@@ -354,6 +403,11 @@ class StoryMenuState extends MusicBeatState {
 	}
 
 	function handleInput() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onHandleInputCancel", []))
+			return;
+		#end
+
 		if (weeks.length == 0)
 			return;
 
@@ -399,6 +453,11 @@ class StoryMenuState extends MusicBeatState {
 	}
 
 	function startWeek() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onStartWeekCancel", []))
+			return;
+		#end
+
 		var data = weeks[curWeek];
 		if (data.songs == null || data.songs.length == 0) {
 			acceptOption = false;

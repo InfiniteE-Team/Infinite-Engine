@@ -128,6 +128,8 @@ class MusicBeatState extends State {
 
 	public function stepHit(step:Int) {
 		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onStepHitCancel", [step]))
+			return;
 		script.call("onStepHit", [step]);
 		#end
 
@@ -137,6 +139,8 @@ class MusicBeatState extends State {
 
 	public function beatHit(beat:Float):Void {
 		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onBeatHitCancel", [beat]))
+			return;
 		script.call("onBeatHit", [beat]);
 		#end
 	}

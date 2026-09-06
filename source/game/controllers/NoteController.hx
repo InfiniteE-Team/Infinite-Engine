@@ -292,7 +292,7 @@ class NoteController {
 			note.noteType = data.type;
 
 			#if HSCRIPT_ALLOWED
-			scriptNC.call("onGenerateNote", []);
+			scriptNC.call("onGenerateNote", [note]);
 			#end
 
 			if (data.length > 0) {
@@ -324,7 +324,7 @@ class NoteController {
 				sustain.scale.y = (totalLength * 0.45 * scrollSpeed) / sustain.frameHeight;
 
 				#if HSCRIPT_ALLOWED
-				scriptNC.call("onGenerateSustain", []);
+				scriptNC.call("onGenerateSustain", [sustain]);
 				#end
 
 				unspawnNotes.push(sustain);
@@ -353,7 +353,7 @@ class NoteController {
 				sustainEnd.origin.y = 0;
 
 				#if HSCRIPT_ALLOWED
-				scriptNC.call("onGenerateEndSustain", []);
+				scriptNC.call("onGenerateEndSustain", [sustainEnd]);
 				#end
 
 				unspawnNotes.push(sustainEnd);
@@ -497,7 +497,7 @@ class NoteController {
 				continue;
 
 			#if HSCRIPT_ALLOWED
-			if (scriptNC.callCancellable('onNoteMovementCancel', []))
+			if (scriptNC.callCancellable('onNoteMovementCancel', [note]))
 				continue;
 			#end
 
@@ -690,7 +690,7 @@ class NoteController {
 		}
 
 		#if HSCRIPT_ALLOWED
-		scriptNC.call("onDestroyNotes", []);
+		scriptNC.call("onDestroyNotes", [note]);
 		#end
 	}
 

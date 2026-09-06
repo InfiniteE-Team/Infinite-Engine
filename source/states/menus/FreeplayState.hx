@@ -70,6 +70,11 @@ class FreeplayState extends MusicBeatState {
 
 		freeplayData = FormatJson.readJson(Paths.getPath('songs/listSong', 'json'));
 
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onCreateCancel", []))
+			return;
+		#end
+
 		bg = new FlxBackdrop(Paths.getPath('menus/freeplay/bg', 'image'), flixel.util.FlxAxes.X);
 		bg.antialiasing = SaveData.data.antialiasing;
 		bg.scale.set(0.25, 0.25);
