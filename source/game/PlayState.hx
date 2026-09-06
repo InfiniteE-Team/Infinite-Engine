@@ -393,7 +393,6 @@ class PlayState extends MusicBeatState {
 		initScript();
 		script.loadFolder('songs/$curSong/scripts');
 		script.loadFolder('scripts/gameplay');
-		script.load(Paths.getPath('hud', 'script'));
 		script.executeAll();
 	}
 
@@ -404,6 +403,8 @@ class PlayState extends MusicBeatState {
 			script.destroy();
 		}
 		#end
+
+    	game.graphics.shaders.CustomShader.clearAll();
 
 		script.call("onRewind", []);
 
@@ -595,6 +596,8 @@ class PlayState extends MusicBeatState {
 		noteController = null;
 
 		cameraController = null;
+
+    	game.graphics.shaders.CustomShader.clearAll();
 
 		super.destroy();
 	}

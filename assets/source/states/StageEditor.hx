@@ -1,3 +1,9 @@
+import haxe.ui.Toolkit;
+import haxe.ui.core.Screen;
+import haxe.ui.containers.VBox;
+import haxe.ui.containers.menus.Menu;
+import haxe.ui.containers.menus.MenuBar;
+
 class StageEditor extends ScriptState {
 	public var defaultZoom:Float = 0.4;
 	public var curStage:String = 'stage';

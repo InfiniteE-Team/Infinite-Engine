@@ -33,11 +33,28 @@ function updateScore(elapsed:Float) {
 }
 
 function onDestroy() {
+	for (sprite in ratingPool) {
+		remove(sprite);
+		sprite.destroy();
+	}
+	for (sprite in numberPool) {
+		remove(sprite);
+		sprite.destroy();
+	}
+	for (sprite in comboPool) {
+		remove(sprite);
+		sprite.destroy();
+	}
+	for (sprite in missPool) {
+		remove(sprite);
+		sprite.destroy();
+	}
 	ratingPool = [];
 	comboPool = [];
 	numberPool = [];
 	missPool = [];
 	scoreText.destroy();
+	scoreText = null;
 }
 
 var PIXEL_ZOOM = 6;
