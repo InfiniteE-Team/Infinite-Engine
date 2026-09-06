@@ -21,23 +21,34 @@ typedef ModData = {
 class ModConfig {
 	public static var modData:ModData;
 
+	public static var name:String = "Mod Name";
+
 	public function new() {}
 
 	public static function init() {
 		var jsonPath = Paths.getPath('meta', 'json');
 		if (jsonPath == null || !FileSystem.exists(jsonPath)) {
 			Trace.traceOnce('The mod file "meta.json" was not found in: $jsonPath', true);
+			name = core.EngineData.name;
+			modData = null;
+			lime.app.Application.current.window.title = name;
 			return;
 		}
 
 		try {
 			modData = FormatJson.readJson(jsonPath);
-			if (modData.appIcon != null && modData.appIcon != "") {
+			if (modData.appIcon != null && modData.appIcon != "")
 				setAppIcon(modData.appIcon);
-			}
 		} catch (e:Dynamic) {
 			Trace.traceOnce('Error to parsed the mod: $e');
 		}
+
+		if (modData == null)
+			name = core.EngineData.name;
+		else
+			name = modData.name ?? core.EngineData.name;
+
+		lime.app.Application.current.window.title = name;
 	}
 
 	public static function loadForMod(modName:String):ModData {

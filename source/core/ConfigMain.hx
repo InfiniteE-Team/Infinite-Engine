@@ -76,9 +76,7 @@ class ConfigMain extends flixel.FlxState {
 
 		var innerState:() -> MusicBeatState = if (globalData.startStateScript != null) () ->
 			modding.scripting.types.ScriptClass.load(globalData.startStateScript); else() -> Type.createInstance(mainState, []);
-
-		lime.app.Application.current.window.title = modding.mods.ModData.ModConfig.modData?.name ?? "Infinite Engine";
-		
+						
 		MusicBeatState.switchState(() -> new states.preload.FunkinPreloader(innerState));
 	}
 }
