@@ -107,7 +107,7 @@ class ScriptGlobals {
 		Config.globalVariables.set('WindowsGDI', winapi.gdi.WindowsGDI);
 		#end
 
-		hxscript.flixel.Shims.register();
+		hxscript.setup.Shims.register();
 	}
 
 	public static function initLua():Void {

@@ -95,15 +95,14 @@ class CharacterController extends FunkinObjectRegistry {
 					#end
 					var globalLane = noteController.charStrumOffsets.get(char.id);
 					var holdingActive = globalLane != null && noteController.activeOpponentHolds.exists(globalLane + i);
-					if (holdingActive) {
+					if (holdingActive)
 						strums[i].playAnim('confirm' + i, false);
-					}
+					else
+						strums[i].playAnim('static' + i, true);
 					#if HSCRIPT_ALLOWED
 					if (charScript != null)
 						charScript.call("postNoteSustainCPU", []);
 					#end
-					if (!holdingActive)
-						strums[i].playAnim('static' + i, true);
 				}
 			}
 		}
@@ -131,11 +130,9 @@ class CharacterController extends FunkinObjectRegistry {
 
 				var globalLane = noteController.charStrumOffsets.get(char.id);
 				var holdingActive = globalLane != null && noteController.activeOpponentHolds.exists(globalLane + i);
-				if (holdingActive) {
+				if (holdingActive)
 					setSing(char, globalLane + i);
-				}
-
-				if (!holdingActive)
+				else
 					strums[i].playAnim('static' + i, true);
 			}
 		}
