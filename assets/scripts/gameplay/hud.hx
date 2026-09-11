@@ -131,7 +131,7 @@ function _showComboNumbers(combo, pixelPart1, pixelPart2) {
 		var numScore = _getFromPool(numberPool);
 		numScore.alpha = 1;
 		numScore.visible = true;
-		numScore.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + 'nums/num' + Std.int(i) + pixelPart2, 'image'));
+		numScore.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + 'nums/digit-' + Std.int(i) + pixelPart2, 'image'));
 
 		numScore.x = FlxG.width * 0.55 + (43 * daLoop) - 90 + 20;
 		numScore.y = FlxG.height * 0.5 + 20;
@@ -224,7 +224,7 @@ function _getFromPool(pool) {
 		}
 	}
 
-	var newSprite = new FlxSprite();
+	var newSprite = new FunkinSprite(0, 0, true);
 	newSprite.cameras = [camHUD];
 	newSprite.scrollFactor.set(0, 0);
 	pool.push(newSprite);
