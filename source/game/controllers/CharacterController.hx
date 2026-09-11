@@ -72,8 +72,57 @@ class CharacterController extends FunkinObjectRegistry {
 		input.isGhostTapping = core.config.SaveData.data.ghosttaping;
 		for (char in playerChars) {
 			var strums = noteController.getCharStrums(char.id);
-			for (i in 0...strums.length)
-				updatePlayerLane(char, strums, i, noteController, gameAudio, playStateConfig);
+			#if HSCRIPT_ALLOWED
+			var charScript = scriptMap.get(char.id);
+			#end
+			for (i in 0...strums.length) {
+				if (SaveData.data.botplay) {
+					for (note in noteController.notes.members) {
+						if (note == null || !note.alive || !note.mustPress || note.wasGoodHit || note.wasMissed)
+							continue;
+						var lane = noteController.charStrumOffsets.get(char.id);
+						if (lane == null)
+							continue;
+						if (note.direction != lane + i)
+							continue;
+						var diff = note.strumTime - core.rhythm.RhythmCore.songPosition;
+						if (diff <= 0) {
+							strums[i].playAnim('confirm' + i, false);
+							note.wasGoodHit = true;
+
+							var ratingType = noteController.getRatingForDiff(0);
+							if (ratingType != null) {
+								playStateConfig.score += ratingType.score;
+								playStateConfig.health += ratingType.health;
+								playStateConfig.combo++;
+								note.rating = ratingType.rating;
+								playStateConfig.rating = ratingType.rating;
+							}
+							for (sustain in noteController.sustains.members) {
+								if (sustain == null || !sustain.alive)
+									continue;
+								if (sustain.strum == strums[i] && sustain.strumTime == note.strumTime)
+									sustain.wasNoteHit = true;
+							}
+
+							note.kill();
+							if (ratingType != null && ratingType.splash)
+								noteController.spawnSplash(strums[i], i, note.noteType);
+							
+							setSing(char, note.direction);
+							char.isMiss = false;
+						}
+					}
+					var globalLane = noteController.charStrumOffsets.get(char.id);
+					var holdingActive = globalLane != null && noteController.activeOpponentHolds.exists(globalLane + i);
+					if (holdingActive)
+						strums[i].playAnim('confirm' + i, false);
+					else
+						strums[i].playAnim('static' + i, true);
+				} else {
+					updatePlayerLane(char, strums, i, noteController, gameAudio, playStateConfig);
+				}
+			}
 		}
 		for (char in opponentChars) {
 			var strums = noteController.getCharStrums(char.id);
@@ -83,7 +132,7 @@ class CharacterController extends FunkinObjectRegistry {
 			for (i in 0...strums.length) {
 				var note = noteController.getHittableNote(char.id, i, false);
 				if (note != null) {
-					input.isCPUHit(strums, noteController, char.id, i);
+					input.isCPUHit(strums, noteController, char.id, i, false);
 					#if HSCRIPT_ALLOWED
 					if (charScript != null)
 						charScript.call("onNoteHitCPU", []);
@@ -151,6 +200,9 @@ class CharacterController extends FunkinObjectRegistry {
 	}
 
 	function onLaneKeyDown(i:Int):Void {
+		if (SaveData.data.botplay)
+			return;
+
 		for (char in playerChars) {
 			var strums = _noteController.getCharStrums(char.id);
 			if (i >= strums.length)

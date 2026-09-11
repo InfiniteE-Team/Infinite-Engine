@@ -17,11 +17,6 @@ class PlayStateConfig {
 
 	public var combo:Int = 0;
 
-	// accuracy
-	public var accuracy:Float = 0.0;
-	public var totalNotesHit:Int = 0;
-	public var totalAccuracyWeight:Float = 0.0;
-
 	public var rating:String = "N/A";
 
 	public static var isPlaying:Bool = false;
@@ -45,10 +40,7 @@ class PlayStateConfig {
 		health = 1.0;
 		score = 0;
 		misses = 0;
-		accuracy = 0.0;
 		rating = "N/A";
-		totalNotesHit = 0;
-		totalAccuracyWeight = 0.0;
 		combo = 0;
 	}
 

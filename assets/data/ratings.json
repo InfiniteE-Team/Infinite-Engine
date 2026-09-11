@@ -6,7 +6,6 @@
             "score": 350,
             "health": 0.10,
             "window": 45,
-            "accuracyWeight": 1.0,
             "splash": true
         },
         {
@@ -14,16 +13,14 @@
             "path": "good",
             "score": 200,
             "health": 0.05,
-            "window": 90,
-            "accuracyWeight": 0.75
+            "window": 90
         },
         {
             "rating": "bad",
             "path": "bad",
             "score": 100,
             "health": -0.03,
-            "window": 135,
-            "accuracyWeight": 0.50
+            "window": 135
         },
         {
             "rating": "shit",
@@ -31,7 +28,6 @@
             "score": 50,
             "health": -0.03,
             "window": 166,
-            "accuracyWeight": 0.25,
             "miss": true
         },
         {

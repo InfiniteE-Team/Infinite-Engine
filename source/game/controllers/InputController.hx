@@ -105,11 +105,6 @@ class InputController {
 			if (ratingType != null) {
 				playStateConfig.score += ratingType.score;
 				playStateConfig.health += ratingType.health;
-
-				playStateConfig.totalAccuracyWeight += ratingType.accuracyWeight;
-				playStateConfig.totalNotesHit++;
-				playStateConfig.accuracy = playStateConfig.totalAccuracyWeight / playStateConfig.totalNotesHit;
-
 				bestNote.rating = ratingType.rating;
 				playStateConfig.rating = ratingType.rating;
 
@@ -154,8 +149,9 @@ class InputController {
 		playStateConfig.combo = 0;
 	}
 
-	public function isCPUHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, noteController:NoteController, charId:String, i:Int) {
-		var note = noteController.getHittableNote(charId, i, false);
+	public function isCPUHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, noteController:NoteController, charId:String, i:Int,
+			mustPress:Bool = false) {
+		var note = noteController.getHittableNote(charId, i, mustPress);
 		if (note != null) {
 			charStrums[i].playAnim('confirm' + i, false);
 			note.wasGoodHit = true;

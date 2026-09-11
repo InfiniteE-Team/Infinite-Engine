@@ -29,7 +29,10 @@ function updateScore(elapsed:Float) {
 
 	var displayScore:String = InfiniteUtil.formatNumber(Math.floor(intendedScore));
 
-	scoreText.text = 'Score: $displayScore // Combo Breaks: ${playStateConfig.misses}';
+	if (SaveData.data.botplay)
+		scoreText.text = 'BOTPLAY';
+	else
+		scoreText.text = 'Score: $displayScore // Combo Breaks: ${playStateConfig.misses}';
 }
 
 function onDestroy() {

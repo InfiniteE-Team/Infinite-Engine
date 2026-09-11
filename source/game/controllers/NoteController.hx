@@ -566,6 +566,24 @@ class NoteController {
 						sustain.strum.playAnim('static' + (lane % keys), true);
 						activeOpponentHolds.remove(lane);
 					}
+				} else {
+					if (sustain.mustPress && SaveData.data.botplay) {
+						var isWithinHold = songTime >= sustain.strumTime && songTime <= (sustain.strumTime + sustain.length);
+						if (isWithinHold) {
+							sustain.wasNoteHit = true;
+							if (!sustain.isHeld) {
+								sustain.isHeld = true;
+								spawnHoldSplash(sustain.strum, lane % keys, sustain.noteType);
+							}
+							activeOpponentHolds.set(lane, true);
+							sustain.strum.playAnim('confirm' + (lane % keys), false);
+						} else if (sustain.isHeld) {
+							sustain.isHeld = false;
+							stopHoldSplash(sustain.strum);
+							sustain.strum.playAnim('static' + (lane % keys), true);
+							activeOpponentHolds.remove(lane);
+						}
+					}
 				}
 			}
 
@@ -660,10 +678,14 @@ class NoteController {
 			}
 		}
 
+		for (strum in activeHoldSplashes.keys()) {
+			var holdsplash = activeHoldSplashes.get(strum);
+			if (holdsplash != null && holdsplash.alive)
+				holdsplash.setPosition(strum.x, strum.y);
+		}
 		for (note in toDestroy) {
 			destroyNotes(note);
 		}
-
 		#if HSCRIPT_ALLOWED
 		scriptNC.call("postNoteUpdate", [songTime]);
 		#end
