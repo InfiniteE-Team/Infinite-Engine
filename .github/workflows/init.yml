@@ -2,7 +2,7 @@ name: Infinite Engine Build
 
 on:
   push:
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -16,43 +16,45 @@ jobs:
         include:
           - platform: Windows
             os: windows-latest
-            target: windows
+            build_cmd: haxelib run lime build windows
+            artifact_path: export/windows/bin
+
           - platform: Linux
-            os: ubuntu-latest
-            target: linux
+            os: ubuntu-22.04
+            build_cmd: haxelib run lime build linux
+            artifact_path: export/linux/bin
+
           - platform: MacOS
             os: macos-15
-            target: mac
-
+            build_cmd: haxelib run lime build macos --app-version="4.0.0-${{ github.run_id}}"
+            artifact_path: export/macos/bin
+          
+          - platform: MacOS x64
+            os: macos-15-intel
+            build_cmd: haxelib run lime build macos --app-version="4.0.0-${{ github.run_id}}"
+            artifact_path: export/macos/bin
+      
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Pull the New Commit
+        uses: actions/checkout@v4.1.7
 
       - name: Setup Haxe
-        uses: krdlab/setup-haxe@v1
+        uses: krdlab/setup-haxe@master
         with:
-          haxe-version: 4.3.4
+          haxe-version: 4.3.7
 
-      - name: Install hmm
-        run: haxelib install hmm --quiet
-
-      - name: Install dependencies via hmm
-        run: haxelib run hmm install
-        
-      - name: Install System Dependencies (Linux)
-        if: matrix.target == 'linux'
+      - name: Install Main Libraries
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libluajit-5.1-dev luajit
-          sudo apt-get install -y libvlc-dev libvlccore-dev
-          sudo apt-get install -y libasound2-dev libgl1-mesa-dev libglu1-mesa-dev libx11-dev libxext-dev libxi-dev libxrandr-dev libxinerama-dev
+          haxelib --global git hmm https://github.com/ALE-Psych-Crew/hmm
+          haxelib --global run hmm setup
+          haxelib --global run hmm install
 
-      - name: Install LuaJIT (Mac)
-        if: matrix.target == 'mac'
-        run: brew install luajit
+      - name: Build for ${{ matrix.platform }}
+        run: ${{ matrix.build_cmd }}
 
-      - name: Setup Lime
-        run: echo y | haxelib run lime setup
-
-      - name: Build
-        run: haxelib run lime build ${{ matrix.target }} -release
+      - name: Upload Game
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }} Build
+          path: ${{ matrix.artifact_path }}
+          if-no-files-found: error
