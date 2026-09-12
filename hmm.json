@@ -78,15 +78,15 @@
             "name": "funkin.vis",
             "type": "git",
             "dir": null,
-            "ref": "22b1ce089dd924f15cdc4632397ef3504d464e90",
+            "ref": "02bada154b474c2554709b9d12aef0cbf0da3ec9",
             "url": "https://github.com/FunkinCrew/funkVis"
         },
         {
             "name": "grig.audio",
             "type": "git",
-            "dir": null,
-            "ref": "cbf91e2180fd2e374924fe74844086aab7891666",
-            "url": "https://gitlab.com/haxe-grig/grig.audio.git"
+            "dir": "src",
+            "ref": "6409f3c6d1b4c52176813d3ede86c0d34e8af2c1",
+            "url": "https://github.com/FunkinCrew/grig.audio"
         },
         {
             "name": "foxlite",
