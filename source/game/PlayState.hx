@@ -281,7 +281,7 @@ class PlayState extends MusicBeatState {
 		if (!PlayStateConfig.isStoryMode) {
 			core.config.SaveScore.saveSong(curSong, playStateConfig.score, curDifficulty);
 			new flixel.util.FlxTimer().start(0.9, (_) -> {
-				MusicBeatState.switchState(() -> new states.menus.FreeplayState());
+				modding.scripting.types.ScriptClass.switchState('ResultScreen', [playStateConfig]);
 			});
 		} else {
 			PlayStateConfig.storyScore += playStateConfig.score;
@@ -296,7 +296,7 @@ class PlayState extends MusicBeatState {
 				new flixel.util.FlxTimer().start(0.9, (_) -> {
 					PlayStateConfig.isStoryMode = false;
 					PlayStateConfig.storyScore = 0;
-					MusicBeatState.switchState(() -> new states.menus.StoryMenuState());
+					modding.scripting.types.ScriptClass.switchState('ResultScreen', [playStateConfig]);
 				});
 			}
 		}
@@ -580,9 +580,6 @@ class PlayState extends MusicBeatState {
 
 		if (stage != null)
 			stage.destroy();
-
-		if (playStateConfig != null)
-			playStateConfig.reset();
 
 		instance = null;
 		chars = null;

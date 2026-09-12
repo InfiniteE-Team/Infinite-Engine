@@ -10,14 +10,14 @@
     - [x] Chart Format
     - [x] HUD
 
-- [ ] Menus
+- [X] Menus
     - [X] TitleState
     - [X] StoryMenuState
     - [X] FreeplayState
     - [X] MainMenuState
     - [X] OptionsState (WIP)
     - [X] ModsState
-    - [ ] Result Screen
+    - [X] Result Screen
 
 - [x] Sub-Menus
     - [x] PauseMenuSubState
@@ -35,8 +35,8 @@
     - [X] Graphics Section
     - [X] Debug Section
 
-- [ ] Discord Pressence API
-    - [ ] API Custom
+- [X] Discord Pressence API
+    - [X] API Custom
 
 - [x] Assets
     - [x] Paths

@@ -107,6 +107,8 @@ class InputController {
 				playStateConfig.health += ratingType.health;
 				bestNote.rating = ratingType.rating;
 				playStateConfig.rating = ratingType.rating;
+				playStateConfig.hitNotes++;
+				playStateConfig.totalNotes++;
 
 				if (ratingType.miss == true)
 					playStateConfig.combo = 0;
@@ -147,6 +149,7 @@ class InputController {
 		playStateConfig.score += noteController.getMissScore();
 		playStateConfig.misses++;
 		playStateConfig.combo = 0;
+		playStateConfig.totalNotes++;
 	}
 
 	public function isCPUHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, noteController:NoteController, charId:String, i:Int,

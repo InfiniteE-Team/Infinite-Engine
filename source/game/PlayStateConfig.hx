@@ -19,6 +19,10 @@ class PlayStateConfig {
 
 	public var rating:String = "N/A";
 
+	public var hitNotes:Int = 0;
+
+	public var totalNotes:Int = 0;
+
 	public static var isPlaying:Bool = false;
 
 	public var isBotplay:Bool = false;
@@ -42,6 +46,8 @@ class PlayStateConfig {
 		misses = 0;
 		rating = "N/A";
 		combo = 0;
+		hitNotes = 0;
+		totalNotes = 0;
 	}
 
 	public function configRating(rating:String) {

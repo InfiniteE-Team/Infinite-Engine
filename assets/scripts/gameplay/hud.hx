@@ -27,7 +27,7 @@ function postUpdate(elapsed:Float) {
 function updateScore(elapsed:Float) {
 	intendedScore = FlxMath.lerp(intendedScore, playStateConfig.score, FlxMath.bound(elapsed * 16, 0, 1));
 
-	var displayScore:String = InfiniteUtil.formatNumber(Math.floor(intendedScore));
+	var displayScore:String = InfiniteUtil.formatNumber(Math.round(intendedScore));
 
 	if (SaveData.data.botplay)
 		scoreText.text = 'BOTPLAY';
@@ -123,7 +123,7 @@ function onRatingPopup(ratingName, combo) {
 }
 
 function _showComboNumbers(combo, pixelPart1, pixelPart2) {
-	var comboStr = Std.string(combo);
+	var comboStr = StringTools.lpad(Std.string(combo), "0", 3);
 	var separatedScore = [];
 
 	for (i in 0...comboStr.length)
@@ -136,7 +136,7 @@ function _showComboNumbers(combo, pixelPart1, pixelPart2) {
 		numScore.visible = true;
 		numScore.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + 'nums/digit-' + Std.int(i) + pixelPart2, 'image'));
 
-		numScore.x = FlxG.width * 0.55 + (43 * daLoop) - 90 + 20;
+		numScore.x = FlxG.width * 0.55 + (43 * daLoop) - 90;
 		numScore.y = FlxG.height * 0.5 + 20;
 
 		if (!isPixel) {
