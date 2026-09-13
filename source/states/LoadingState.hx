@@ -43,6 +43,12 @@ class LoadingState extends MusicBeatState {
 	override public function create() {
 		super.create();
 
+		#if HSCRIPT_ALLOWED
+		initScript();
+		script.executeAll();
+		script.call("onCreate", []);
+		#end
+
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
@@ -59,11 +65,20 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function buildUI() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onCreateCancel", []))
+			return;
+		#end
+
 		_bg = new FlxSprite().loadGraphic(Paths.getPath('menus/menuBG2', 'image'));
 		_bg.screenCenter();
 		_bg.antialiasing = SaveData.data.antialiasing;
 		_bg.scrollFactor.set(0, 0);
 		add(_bg);
+
+		#if HSCRIPT_ALLOWED
+		script.call("postBGCreate", []);
+		#end
 
 		_songLabel = new FlxText(0, FlxG.height * 0.85, FlxG.width, _curSong.toUpperCase());
 		_songLabel.setFormat(Paths.getPath('Funkin.otf', 'font'), 28, FlxColor.WHITE, CENTER);
@@ -81,6 +96,10 @@ class LoadingState extends MusicBeatState {
 		_label = new FlxText(0, _barBg.y + BAR_H + 14, FlxG.width, "Loading...");
 		_label.setFormat(null, 14, 0xFF888888, CENTER);
 		add(_label);
+
+		#if HSCRIPT_ALLOWED
+		script.call("postCreate", []);
+		#end
 	}
 
 	function collectQueue() {
@@ -205,6 +224,11 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function launchPlayState() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onLaunchPlayState", []))
+			return;
+		#end
+
 		if (_readyToGo)
 			return;
 		_readyToGo = true;
@@ -215,7 +239,17 @@ class LoadingState extends MusicBeatState {
 	override public function update(elapsed:Float) {
 		super.update(elapsed);
 
+		#if HSCRIPT_ALLOWED
+		script.call("onUpdate", [elapsed]);
+		if (script.callCancellable("onUpdateCancel", [elapsed]))
+			return;
+		#end
+
 		var t = haxe.Timer.stamp();
+
+		#if HSCRIPT_ALLOWED
+		script.call("postUpdate", [elapsed]);
+		#end
 	}
 
 	override public function destroy() {
