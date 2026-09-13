@@ -31,6 +31,8 @@ class Note extends FunkinSprite {
 
 	public var wasMissed:Bool = false;
 
+	var _lastAnimForShader:String = '';
+
 	public function new(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0,
 			?noteType:String = 'normal') {
 		super(x, y);
@@ -80,10 +82,12 @@ class Note extends FunkinSprite {
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (currentAnim != null && currentAnim != '')
+		if (currentAnim != null && currentAnim != '' && currentAnim != _lastAnimForShader) {
 			RGBShader.applyByAnimation(this, noteSkinData, currentAnim);
-
-		if (wasMissed){
+			_lastAnimForShader = currentAnim;
+		}
+		
+		if (wasMissed) {
 			alpha = 0.6;
 			mustPress = false;
 		}

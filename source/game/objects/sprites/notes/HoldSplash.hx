@@ -16,6 +16,8 @@ class HoldSplash extends FunkinSprite {
 
 	public var noteControl:game.controllers.NoteController;
 
+	var _lastAnimForShader:String = '';
+
 	public function new(keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0, ?noteType:String = 'normal') {
 		super(x, y);
 		setPosition(x, y);
@@ -44,8 +46,10 @@ class HoldSplash extends FunkinSprite {
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (currentAnim != null && currentAnim != '')
+		if (currentAnim != null && currentAnim != '' && currentAnim != _lastAnimForShader) {
 			RGBShader.applyByAnimation(this, noteSkinData, currentAnim);
+			_lastAnimForShader = currentAnim;
+		}
 
 		if (animation.curAnim != null && animation.curAnim.finished) {
 			var animName:String = animation.curAnim.name;

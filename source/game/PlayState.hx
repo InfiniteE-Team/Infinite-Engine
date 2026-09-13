@@ -190,8 +190,6 @@ class PlayState extends MusicBeatState {
 		modchartSystem = new game.modchart.ModchartSystem(noteController);
 		add(modchartSystem);
 		modchartSystem.cacheStrumBase();
-
-		// NoteController.meshSustainsActive = true;
 	}
 
 	// Code Song

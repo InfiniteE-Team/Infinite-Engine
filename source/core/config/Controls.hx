@@ -125,14 +125,22 @@ class Controls {
 		return FlxG.keys.justPressed.check(cast keyCode);
 	}
 
+	var _inputCache:Map<String, Array<Bool>> = new Map();
+
 	public function getGroupInput(groupName:String):Array<Bool> {
 		if (!keyGroups.exists(groupName))
 			return [];
-		@:privateAccess
-		return [
-			for (lane in keyGroups.get(groupName))
-				lane.exists(k -> k != FlxKey.NONE && FlxG.keys.pressed.check(k))
-		];
+		var group = keyGroups.get(groupName);
+		var cache = _inputCache.get(groupName);
+		if (cache == null) {
+			cache = [for (_ in group) false];
+			_inputCache.set(groupName, cache);
+		}
+		for (i in 0...group.length) {
+			@:privateAccess
+			cache[i] = group[i].exists(k -> k != FlxKey.NONE && FlxG.keys.pressed.check(k));
+		}
+		return cache;
 	}
 
 	public function justPressedAction(groupName:String, actionName:String):Bool {

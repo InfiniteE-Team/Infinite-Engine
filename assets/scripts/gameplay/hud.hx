@@ -136,12 +136,12 @@ function _showComboNumbers(combo, pixelPart1, pixelPart2) {
 		numScore.visible = true;
 		numScore.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + 'nums/digit-' + Std.int(i) + pixelPart2, 'image'));
 
-		numScore.x = FlxG.width * 0.55 + (43 * daLoop) - 90;
+		numScore.x = FlxG.width * 0.55 + (32 * daLoop) - 90;
 		numScore.y = FlxG.height * 0.5 + 20;
 
 		if (!isPixel) {
 			numScore.antialiasing = SaveData.data.antialiasing;
-			numScore.setGraphicSize(Std.int(numScore.width * 0.35));
+			numScore.setGraphicSize(Std.int(numScore.width * 0.38));
 		} else {
 			numScore.setGraphicSize(Std.int(numScore.width * 5.4));
 		}

@@ -38,10 +38,12 @@ class NoteController {
 
 	public var strumsByChar:Map<String, FlxTypedGroup<StrumNote>> = new Map();
 
+	// CACHED DATA FOR OPTIMIZATION
 	var _notePool:Map<String, Array<Note>> = new Map();
 	var _sustainPool:Map<String, Array<NoteSustain>> = new Map();
 	var _splashPool:Map<String, Array<NoteSplash>> = new Map();
 	var _holdsplashPool:Map<String, Array<HoldSplash>> = new Map();
+	var _holdSplashToStrum:Map<HoldSplash, StrumNote> = new Map();
 
 	public var charController:CharacterController = null;
 
@@ -427,6 +429,7 @@ class NoteController {
 		holdsplashes.add(holdsplash);
 
 		activeHoldSplashes.set(strum, holdsplash);
+		_holdSplashToStrum.set(holdsplash, strum);
 	}
 
 	public function stopHoldSplash(strum:StrumNote):Void {
@@ -444,7 +447,11 @@ class NoteController {
 
 		for (strum in activeHoldSplashes.keys()) {
 			if (activeHoldSplashes.get(strum) == holdsplash) {
-				activeHoldSplashes.remove(strum);
+				var strum = _holdSplashToStrum.get(holdsplash);
+				if (strum != null) {
+					activeHoldSplashes.remove(strum);
+					_holdSplashToStrum.remove(holdsplash);
+				}
 				break;
 			}
 		}
