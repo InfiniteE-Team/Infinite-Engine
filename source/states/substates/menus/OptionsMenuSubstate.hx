@@ -158,7 +158,9 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 
 		if (character != null) {
 			character.visible = false;
-			character.setPosition(FlxG.width - 450, FlxG.height - 500);
+			character.setPosition(FlxG.width - 450, FlxG.height - 420);
+			character.scale.set(0.7, 0.7);
+			character.updateHitbox();
 
 			if (character.layers != null) {
 				for (layer in character.layers) {
@@ -560,6 +562,11 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 			character.destroy();
 			character = null;
 		}
+
+		if (contentCam != null) {
+			FlxG.cameras.remove(contentCam, true);
+		}
+		contentCam = null;
 
 		super.destroy();
 

@@ -1,7 +1,6 @@
 package states.menus;
 
 import flixel.FlxSprite;
-import states.LoadingState;
 import flixel.text.FlxText;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
@@ -33,7 +32,7 @@ class FreeplayState extends MusicBeatState {
 
 	// song score & lerp variables
 	var scoreTxt:FlxText;
-	var songScore:Int = 0;
+	var songScore:Int = 213991;
 	var intendedScore:Int = 0;
 
 	var box:FlxSprite;
@@ -253,7 +252,7 @@ class FreeplayState extends MusicBeatState {
 			PlayStateConfig.isStoryMode = false;
 
 			new FlxTimer().start(1, function(tmr:FlxTimer) {
-				MusicBeatState.switchState(() -> new LoadingState(songSelected, curDiff), freeplayData.songData[curSelected].stickerPack ?? 'default');
+				MusicBeatState.switchState(() -> new states.LoadingState(songSelected, curDiff), freeplayData.songData[curSelected].stickerPack ?? 'default');
 			});
 		}
 
@@ -387,7 +386,13 @@ class FreeplayState extends MusicBeatState {
 
 	function updateScore():Void {
 		@:privateAccess
-		intendedScore = SaveScore.getScore(freeplayData.songData[curSelected].song, curDiff);
+		var saved:Null<Int> = SaveScore.getScore(freeplayData.songData[curSelected].song, curDiff);
+		intendedScore = saved ?? 0;
+
+		if (intendedScore == 0) {
+			songScore = 0;
+			scoreTxt.text = 'SCORE: 0';
+		}
 	}
 
 	override function beatHit(beat:Float) {

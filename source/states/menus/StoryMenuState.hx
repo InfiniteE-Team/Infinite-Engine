@@ -14,6 +14,7 @@ import core.rhythm.DiffsUtils;
 import flixel.tweens.FlxTween.FlxTweenType;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
+@:keep
 class StoryMenuState extends MusicBeatState {
 	var weeks:Array<core.json.engine.storymenu.WeekData> = [];
 	var curWeek:Int = 0;
@@ -281,11 +282,13 @@ class StoryMenuState extends MusicBeatState {
 
 		var data = weeks[curWeek];
 
-		var totalScore:Int = 0;
+		var totalScore:Int = 129494;
 		if (data.songs != null) {
 			for (song in data.songs) {
 				@:privateAccess
-				totalScore += SaveScore.getScore(song.song, curDiff);
+				var save:Null<Int> = SaveScore.getScore(song.song, curDiff);
+				var score:Int = save != null ? save : 0;
+				totalScore += score;
 			}
 		}
 		scoreText.text = 'LEVEL SCORE: $totalScore';
@@ -372,8 +375,16 @@ class StoryMenuState extends MusicBeatState {
 
 		if (weeks.length > 0) {
 			var data = weeks[curWeek];
-			@:privateAccess
-			scoreText.text = 'LEVEL SCORE: ' + SaveScore.getScore(data.week, curDiff);
+			var totalScore:Int = 0;
+			if (data.songs != null) {
+				for (song in data.songs) {
+					@:privateAccess
+					var save:Null<Int> = SaveScore.getScore(song.song, curDiff);
+					var score:Int = save != null ? save : 0;
+					totalScore += score;
+				}
+			}
+			scoreText.text = 'LEVEL SCORE: $totalScore';
 		}
 	}
 
@@ -414,16 +425,16 @@ class StoryMenuState extends MusicBeatState {
 		if (Controls.UI_UP && curWeek > 0) {
 			arrowLeft.animation.play('confirm', true);
 			arrowLeft.animation.onFinish.addOnce(_ -> {
-                arrowLeft.animation.play('idle');
-            });
+				arrowLeft.animation.play('idle');
+			});
 			curWeek--;
 			refreshWeek();
 			refreshDiff();
 		} else if (Controls.UI_DOWN && curWeek < weeks.length - 1) {
 			arrowRight.animation.play('confirm', true);
 			arrowRight.animation.onFinish.addOnce(_ -> {
-                arrowRight.animation.play('idle');
-            });
+				arrowRight.animation.play('idle');
+			});
 			curWeek++;
 			refreshWeek();
 			refreshDiff();
@@ -440,8 +451,8 @@ class StoryMenuState extends MusicBeatState {
 			var arrow = dir < 0 ? diffLeft : diffRight;
 			arrow.animation.play('confirm', true);
 			arrow.animation.onFinish.addOnce(_ -> {
-                arrow.animation.play('idle');
-            });
+				arrow.animation.play('idle');
+			});
 
 			refreshDiff();
 		}

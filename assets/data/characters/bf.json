@@ -59,7 +59,7 @@
             "looped": false
           },
           {
-            "name": "singLEFT-miss",
+            "name": "singLEFTmiss",
             "prefix": "BF NOTE LEFT MISS",
             "offsets": [
               -13,
@@ -79,7 +79,7 @@
             "looped": false
           },
           {
-            "name": "singRIGHT-miss",
+            "name": "singRIGHTmiss",
             "prefix": "BF NOTE RIGHT MISS",
             "offsets": [
               30,
@@ -99,7 +99,7 @@
             "looped": false
           },
           {
-            "name": "singUP-miss",
+            "name": "singUPmiss",
             "prefix": "BF NOTE UP MISS",
             "offsets": [
               10,
@@ -119,7 +119,7 @@
             "looped": false
           },
           {
-            "name": "singDOWN-miss",
+            "name": "singDOWNmiss",
             "prefix": "BF NOTE DOWN MISS",
             "offsets": [
               0,

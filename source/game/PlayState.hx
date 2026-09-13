@@ -173,6 +173,7 @@ class PlayState extends MusicBeatState {
 
 	function buildStrumsandNotes() {
 		noteController = new NoteController(SONG, SaveData.data.downscroll, SaveData.data.ghosttaping, script, playStateConfig, gameAudio);
+		noteController.charController = chars;
 		core.ConfigMain.controls.loadPreset(noteController.keys);
 		for (noteControl in [
 			noteController.blackBacks,
@@ -191,8 +192,6 @@ class PlayState extends MusicBeatState {
 		modchartSystem.cacheStrumBase();
 
 		// NoteController.meshSustainsActive = true;
-
-		chars.setupMissCallback(noteController);
 	}
 
 	// Code Song

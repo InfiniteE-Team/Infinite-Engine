@@ -43,6 +43,8 @@ class NoteController {
 	var _splashPool:Map<String, Array<NoteSplash>> = new Map();
 	var _holdsplashPool:Map<String, Array<HoldSplash>> = new Map();
 
+	public var charController:CharacterController = null;
+
 	var _charNotesVisible:Map<String, Bool> = new Map();
 
 	public var unspawnNotes:Array<Note> = [];
@@ -516,6 +518,8 @@ class NoteController {
 			if (note.tooLate && !note.wasMissed && !note.wasGoodHit) {
 				note.wasMissed = true;
 				note.alpha = 0.4;
+				if (charController != null)
+					charController.playMissAnim(note.direction);
 				input.onMiss(playStateConfig, this, gameAudio);
 			}
 
@@ -528,6 +532,8 @@ class NoteController {
 				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
 					note.wasMissed = true;
 					note.alpha = 0.4;
+					if (charController != null)
+						charController.playMissAnim(note.direction);
 					input.onMiss(playStateConfig, this, gameAudio);
 				}
 				toDestroy.push(note);
@@ -536,6 +542,8 @@ class NoteController {
 				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
 					note.wasMissed = true;
 					note.alpha = 0.4;
+					if (charController != null)
+						charController.playMissAnim(note.direction);
 					input.onMiss(playStateConfig, this, gameAudio);
 				}
 				toDestroy.push(note);

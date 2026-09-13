@@ -108,7 +108,7 @@ class CharacterController extends FunkinObjectRegistry {
 							note.kill();
 							if (ratingType != null && ratingType.splash)
 								noteController.spawnSplash(strums[i], i, note.noteType);
-							
+
 							setSing(char, note.direction);
 							char.isMiss = false;
 						}
@@ -157,13 +157,21 @@ class CharacterController extends FunkinObjectRegistry {
 		}
 	}
 
-	public function setupMissCallback(noteController:NoteController):Void {
-		input.isMiss = function() {
-			for (char in playerChars) {
-				var strums = noteController.getCharStrums(char.id);
-				for (i in 0...strums.length)
-					getCharMiss(char, noteController, strums, i);
-			}
+	public function playMissAnim(dir:Int):Void {
+		for (char in playerChars) {
+			var offset = _noteController?.charStrumOffsets.get(char.id) ?? 0;
+			var localDir = dir - offset;
+			if (localDir < 0 || localDir >= 4)
+				continue;
+			char.playAnim(Character.getCharAnim(dir) + 'miss', true);
+			char.isSing = false;
+			char.isMiss = true;
+			char.singCountTime = 0;
+			#if HSCRIPT_ALLOWED
+			var charScript = scriptMap.get(char.id);
+			if (charScript != null)
+				charScript.call("onNoteHitMiss", []);
+			#end
 		}
 	}
 
@@ -222,7 +230,7 @@ class CharacterController extends FunkinObjectRegistry {
 					charScript.call("onNoteHitPlayer", []);
 				#end
 			} else if (!input.isGhostTapping) {
-				char.playAnim('${Character.getCharAnim(i)}-miss', true);
+				char.playAnim(Character.getCharAnim(i) + 'miss', true);
 				char.isSing = false;
 				char.isMiss = true;
 				char.singCountTime = 0;
@@ -260,9 +268,9 @@ class CharacterController extends FunkinObjectRegistry {
 
 	public function getCharMiss(char:Character, noteController:NoteController, strums, i:Int):Void {
 		for (note in noteController.notes.members) {
-			if (note == null || !note.alive || !note.mustPress || note.strum != strums[i] || !note.tooLate)
+			if (note == null || !note.alive || !note.wasMissed || note.wasGoodHit || note.strum != strums[i])
 				continue;
-			char.playAnim('${Character.getCharAnim(note.direction)}-miss', true);
+			char.playAnim(Character.getCharAnim(note.direction) + 'miss', true);
 			char.isSing = false;
 			char.isMiss = true;
 			char.singCountTime = 0;

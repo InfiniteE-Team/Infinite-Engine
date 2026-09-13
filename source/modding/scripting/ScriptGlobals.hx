@@ -81,6 +81,8 @@ class ScriptGlobals {
 
 		Config.globalVariables.set('AudioAnalyzer', core.rhythm.audio.AudioAnalyzer);
 
+		Config.globalVariables.set('StoryMenuState', states.menus.StoryMenuState);
+
 		// Modifiers
 		Config.globalVariables.set('DrunkModifier', DrunkModifier);
 		Config.globalVariables.set('TornadoModifier', TornadoModifier);
