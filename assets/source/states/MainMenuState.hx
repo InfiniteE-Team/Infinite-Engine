@@ -90,7 +90,8 @@ class MainMenuState extends ScriptState {
 						MusicBeatState.switchState(() -> new states.menus.FreeplayState());
 					case 'credits':
 						acceptOption = true;
-						trace("In Credits");
+						MusicBeatState.switchState(() -> new states.menus.CreditsState());
+
 					case 'options':
 						openSubState(new OptionsMenuSubstate());
 				}

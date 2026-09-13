@@ -87,6 +87,11 @@ class LoadingState extends MusicBeatState {
 		var song:SongConfig = new SongConfig();
 		song.configSong(_curSong, _curSong);
 
+		if (song.songData == null) {
+			launchPlayState();
+			return;
+		}
+
 		var stageId = song.stage ?? 'stage';
 		collectStageAssets(stageId);
 
@@ -95,10 +100,10 @@ class LoadingState extends MusicBeatState {
 			collectCharAssets(charName);
 		}
 
-		if (song.gameplay?.events != null) {
-			for (event in song.gameplay.events) {
+		if (song.songData.gameplay?.events != null) {
+			for (event in song.songData.gameplay.events) {
 				if (event.name == 'Change Character') {
-					var newChar:String = Reflect.field(event.arguments, 'newCharacter');
+					var newChar:String = event.arguments != null ? Reflect.field(event.arguments, 'newCharacter') : null;
 					if (newChar != null)
 						collectCharAssets(newChar);
 				}
@@ -122,23 +127,19 @@ class LoadingState extends MusicBeatState {
 
 	function collectCharAssets(charName:String) {
 		var charData:CharacterData = FormatJson.readJson(Paths.getPath('data/characters/$charName', 'json'));
-		if (charData == null)
+		if (charData == null || charData.render == null || charData.render.layers == null)
 			return;
 
 		for (layer in charData.render.layers) {
 			if (layer.path != null)
 				enqueue('game/characters/${layer.path}');
-		}
 
-		if (charData.render.layers != null) {
-			for (layer in charData.render.layers) {
-				if (layer.anims == null)
-					continue;
-				for (anim in layer.anims) {
-					var fp = getAnimFilePath(anim);
-					if (fp != null && fp != layer.path)
-						enqueue('game/characters/$fp');
-				}
+			if (layer.anims == null)
+				continue;
+			for (anim in layer.anims) {
+				var fp = getAnimFilePath(anim);
+				if (fp != null && fp != layer.path)
+					enqueue('game/characters/$fp');
 			}
 		}
 	}
