@@ -117,6 +117,33 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		#end
 	}
 
+	public function changeCharacter(newCharacter:String):Void {
+		if (newCharacter == curCharacter)
+			return;
+
+		for (layer in layers) {
+			if (layer != null) {
+				layer.kill();
+				layer.destroy();
+			}
+		}
+		layers = [];
+		layerMap.clear();
+
+		curCharacter = newCharacter;
+		isSing = false;
+		isMiss = false;
+		singCountTime = 0;
+
+		#if HSCRIPT_ALLOWED
+		if (script != null)
+			script.destroy();
+		initScript('characters/$curCharacter');
+		#end
+
+		loadSprite();
+	}
+
 	public function playSpecialAnim(animKey:String):Bool {
 		if (characterData == null || characterData.gameplay == null || characterData.gameplay.specialAnims == null)
 			return false;

@@ -95,6 +95,16 @@ class LoadingState extends MusicBeatState {
 			collectCharAssets(charName);
 		}
 
+		if (song.gameplay?.events != null) {
+			for (event in song.gameplay.events) {
+				if (event.name == 'Change Character') {
+					var newChar:String = Reflect.field(event.arguments, 'newCharacter');
+					if (newChar != null)
+						collectCharAssets(newChar);
+				}
+			}
+		}
+
 		collectNoteSkinAssets(song.noteSkin ?? 'default');
 	}
 

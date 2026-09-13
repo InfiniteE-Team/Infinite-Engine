@@ -28,12 +28,12 @@ jobs:
             os: macos-15
             build_cmd: haxelib run lime build macos --app-version="4.0.0-${{ github.run_id}}"
             artifact_path: export/macos/bin
-          
+
           - platform: MacOS x64
             os: macos-15-intel
             build_cmd: haxelib run lime build macos --app-version="4.0.0-${{ github.run_id}}"
             artifact_path: export/macos/bin
-      
+
     steps:
       - name: Pull the New Commit
         uses: actions/checkout@v4.1.7
@@ -42,6 +42,30 @@ jobs:
         uses: krdlab/setup-haxe@master
         with:
           haxe-version: 4.3.7
+
+      - name: Cache Haxelib
+        uses: actions/cache@v4
+        with:
+          path: ~/haxelib
+          key: haxelib-${{ runner.os }}-${{ hashFiles('**/hmm.json') }}
+          restore-keys: haxelib-${{ runner.os }}-
+
+      - name: Install Linux Dependencies
+        if: matrix.platform == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgl1-mesa-dev \
+            libglu1-mesa-dev \
+            libasound2-dev \
+            libx11-dev \
+            libxext-dev \
+            libxi-dev \
+            libxrandr-dev \
+            libpulse-dev \
+            libvlc-dev \
+            libvlccore-dev \
+            vlc
 
       - name: Install Main Libraries
         run: |

@@ -59,6 +59,19 @@ class EventManager {
 
 	function handleEvent(event:EventsData) {
 		switch (event.name) {
+			case 'Change Character':
+				var charId:String = Reflect.field(event.arguments, 'char');
+				var newCharacter:String = Reflect.field(event.arguments, 'newCharacter');
+				if (charId == null || newCharacter == null) {
+					Trace.traceOnce('[EventManager] Change Character: "char" or "newCharacter" are missing from the arguments.');
+					return;
+				}
+				var char = PlayState.instance.chars.get(charId);
+				if (char == null) {
+					Trace.traceOnce('[EventManager] Change Character: char "$charId" not found');
+					return;
+				}
+				cast(char, Character).changeCharacter(newCharacter);
 			case 'Camera Follow':
 				PlayState.instance.cameraController.existsCamEvents = true;
 				var charId:String = Reflect.field(event.arguments, 'char');
