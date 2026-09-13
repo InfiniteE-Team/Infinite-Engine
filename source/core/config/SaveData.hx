@@ -41,8 +41,11 @@ class SaveData {
 		if (SaveData.data.botplay == null)
 			SaveData.data.botplay = false;
 
-		if (SaveData.data.noteKeyPresets == null){
+		if (SaveData.data.noteKeyPresets == null) {
 			var presets:haxe.DynamicAccess<Array<Array<String>>> = {};
+			var keys1:Array<Array<String>> = [["SPACE", "ENTER"]];
+			var keys2:Array<Array<String>> = [["A", "LEFT"], ["D", "RIGHT"]];
+			var keys3:Array<Array<String>> = [["A", "LEFT"], ["S", "DOWN"], ["D", "RIGHT"]];
 			var keys4:Array<Array<String>> = [["A", "LEFT"], ["S", "DOWN"], ["W", "UP"], ["D", "RIGHT"]];
 			var keys5:Array<Array<String>> = [["A"], ["S"], ["SPACE"], ["W"], ["D"]];
 			var keys6:Array<Array<String>> = [["A"], ["S"], ["D"], ["H"], ["J"], ["K"]];
@@ -50,6 +53,9 @@ class SaveData {
 			var keys8:Array<Array<String>> = [["A"], ["S"], ["D"], ["F"], ["H"], ["J"], ["K"], ["L"]];
 			var keys9:Array<Array<String>> = [["A"], ["S"], ["D"], ["F"], ["SPACE"], ["H"], ["J"], ["K"], ["L"]];
 
+			presets.set("1", keys1);
+			presets.set("2", keys2);
+			presets.set("3", keys3);
 			presets.set("4", keys4);
 			presets.set("5", keys5);
 			presets.set("6", keys6);
@@ -60,8 +66,16 @@ class SaveData {
 			SaveData.data.noteKeyPresets = presets;
 		}
 
-		if (SaveData.data.uiKeys == null)
-			SaveData.data.uiKeys = [['LEFT','A'], ['UP','W'], ['DOWN','S'], ['RIGHT','D'], ['ENTER'], ['ESCAPE']];
+		if (SaveData.data.uiKeys == null) {
+			SaveData.data.uiKeys = [
+				['LEFT', 'A'],
+				['UP', 'W'],
+				['DOWN', 'S'],
+				['RIGHT', 'D'],
+				['ENTER', 'NONE'],
+				['ESCAPE', 'NONE']
+			];
+		}
 
 		if (SaveData.data.onMod == null)
 			SaveData.data.onMod = false;

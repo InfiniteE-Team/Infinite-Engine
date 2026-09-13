@@ -27,9 +27,11 @@ class Window extends Sprite {
 		this.alpha = 0;
 		this.visible = false;
 
+		var topBarWidth = FlxG.width;
+
 		var topBar = new Sprite();
 		topBar.graphics.beginFill(0x222222);
-		topBar.graphics.drawRect(0, 0, 1280, 40);
+		topBar.graphics.drawRect(0, 0, topBarWidth, 40);
 		topBar.alpha = 0.9;
 		topBar.graphics.endFill();
 		addChild(topBar);
@@ -58,7 +60,7 @@ class Window extends Sprite {
 		iconMin.graphics.lineTo(27, 24);
 		minBtn.addChild(iconMin);
 
-		minBtn.x = 1280 - 90;
+		minBtn.x = topBarWidth - 90;
 		minBtn.y = 0;
 		minBtn.buttonMode = true;
 
@@ -80,13 +82,33 @@ class Window extends Sprite {
 			Application.current.window.minimized = true;
 		});
 
+		var closeBtn = new Sprite();
+
 		addEventListener(Event.ENTER_FRAME, function(_) {
-			var current = Application.current.window.title;
+			var win = Application.current.window;
+			var isFullscreen = win.fullscreen;
+
+			if (isFullscreen) {
+				this.visible = false;
+				this.alpha = 0;
+				return;
+			}
+
+			var current = win.title;
 			if (title.text != current)
 				title.text = current;
-		});
 
-		var closeBtn = new Sprite();
+			if (topBarWidth != FlxG.width) {
+				topBarWidth = FlxG.width;
+				topBar.graphics.clear();
+				topBar.graphics.beginFill(0x222222);
+				topBar.graphics.drawRect(0, 0, topBarWidth, 40);
+				topBar.graphics.endFill();
+
+				minBtn.x = topBarWidth - 90;
+				closeBtn.x = topBarWidth - 45;
+			}
+		});
 
 		var closeBg = new Sprite();
 		closeBg.graphics.beginFill(0xE81123);
@@ -103,7 +125,7 @@ class Window extends Sprite {
 		iconX.graphics.lineTo(18, 24);
 		closeBtn.addChild(iconX);
 
-		closeBtn.x = 1280 - 45;
+		closeBtn.x = topBarWidth - 45;
 		closeBtn.y = 0;
 		closeBtn.buttonMode = true;
 
@@ -136,6 +158,9 @@ class Window extends Sprite {
 		});
 
 		stage.addEventListener(MouseEvent.MOUSE_MOVE, function(e:MouseEvent) {
+			if (Application.current.window.fullscreen)
+				return;
+
 			if (e.stageY <= 50 || isDragging) {
 				if (!this.visible) {
 					this.visible = true;
@@ -161,6 +186,8 @@ class Window extends Sprite {
 				var win = Application.current.window;
 				win.x = Std.int(win.x + (e.stageX - offsetX));
 				win.y = Std.int(win.y + (e.stageY - offsetY));
+				offsetX = e.stageX;
+				offsetY = e.stageY;
 			}
 		});
 	}

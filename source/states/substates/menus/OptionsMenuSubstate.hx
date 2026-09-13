@@ -1,9 +1,10 @@
 package states.substates.menus;
 
 import flixel.FlxSprite;
+import game.objects.Camera;
 import flixel.text.FlxText;
-import flixel.graphics.frames.FlxAtlasFrames;
 import core.json.engine.OptionData;
+import flixel.graphics.frames.FlxAtlasFrames;
 import states.substates.menus.options.Keybind;
 
 class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
@@ -11,6 +12,14 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 	var categoryGraphics:Array<FlxSprite> = [];
 	var categories:Array<String> = ['Gameplay', 'Keybinds', 'Graphics', 'Debug'];
 	var curCategory:Int = 0;
+
+	var contentCam:Camera;
+	var keybindsMenu:states.substates.menus.options.KeybindsMenu;
+
+	static final CONTENT_X:Int = 330;
+	static final CONTENT_Y:Int = 130;
+	static final CONTENT_W:Int = 900;
+	static final CONTENT_H:Int = 412;
 
 	var categoryOptions:Map<String, Array<OptionData>> = [
 		'Gameplay' => [
@@ -90,10 +99,16 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 	override public function create() {
 		super.create();
 
-		this.camera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
+		FlxG.mouse.visible = true;
+
+		contentCam = new Camera(CONTENT_X, CONTENT_Y, CONTENT_W, CONTENT_H);
+		contentCam.bgColor = 0x00000000;
+		FlxG.cameras.add(contentCam, false);
+
+		this.camera = FlxG.cameras.list[FlxG.cameras.list.length - 2];
 
 		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF050505);
-		bg.alpha = 0.8;
+		bg.alpha = 0.7;
 		add(bg);
 
 		var limit:FlxSprite = new FlxSprite().loadGraphic(Paths.getPath('menus/options/LimitsMenu', 'image'));
@@ -178,12 +193,26 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 	}
 
 	function reloadOptions() {
+		contentCam.scroll.y = 0;
+
+		if (keybindsMenu != null) {
+			remove(keybindsMenu);
+			keybindsMenu.destroy();
+			keybindsMenu = null;
+		}
+
 		for (txt in itemTexts)
 			txt.destroy();
 		for (val in valueTexts)
 			val.destroy();
 		itemTexts = [];
 		valueTexts = [];
+
+		if (categories[curCategory] == 'Keybinds') {
+			keybindsMenu = new states.substates.menus.options.KeybindsMenu(contentCam);
+			add(keybindsMenu);
+			return;
+		}
 
 		var currentList = categoryOptions.get(categories[curCategory]);
 		if (currentList == null)
@@ -192,9 +221,10 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		for (i in 0...currentList.length) {
 			var opt = currentList[i];
 
-			var optText:FlxText = new FlxText(350, 150 + (i * 50), 0, opt.name);
+			var optText:FlxText = new FlxText(20, 20 + (i * 50), 0, opt.name);
 			optText.setFormat(Paths.getPath('Funkin.otf', 'font'), 26, 0xFFFFFFFF, "left");
 			optText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+			optText.cameras = [contentCam];
 			itemTexts.push(optText);
 			add(optText);
 
@@ -203,12 +233,13 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 
 			switch (opt.type) {
 				case CHECKBOX:
-					valSprite = new FlxSprite(FlxG.width / 2 + 150, 150 + (i * 50));
+					valSprite = new FlxSprite(CONTENT_W - 200, 20 + (i * 50));
 					valSprite.frames = Paths.getPath('menus/options/check_box', 'animated');
 					valSprite.animation.addByPrefix('uncheck', 'UnCheck0000', 24, false);
 					valSprite.animation.addByPrefix('check', 'Check0000', 24, false);
 					valSprite.animation.addByPrefix('to_check', 'To_Check', 24, false);
 					valSprite.animation.addByPrefix('to_uncheck', 'To_UnCheck', 24, false);
+					valSprite.cameras = [contentCam];
 
 					valSprite.animation.play('check', true);
 
@@ -225,32 +256,19 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 					if (displayFormat == null)
 						displayFormat = '';
 
-					var valText = new FlxText(FlxG.width / 2 + 150, 150 + (i * 50), 0, Std.string(rawValue) + displayFormat);
+					var valText = new FlxText(CONTENT_X + 375, 20 + (i * 50), 0, Std.string(rawValue) + displayFormat);
 					valText.setFormat(Paths.getPath('Funkin.otf', 'font'), 26, 0xFFFFFFFF, "right");
 					valText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 					valSprite = valText;
+					valText.cameras = [contentCam];
 					valText.text = Std.string(Reflect.field(SaveData.data, opt.saveField)) + displayFormat;
 			}
 
 			valueTexts.push(valSprite);
 			add(valSprite);
 		}
-		/*
-			if (categories[curCategory] == 'Keybinds') {
-				createKeybinds();
-		}*/
 
 		updateSelection(0);
-	}
-
-	function createKeybinds() {
-		var keys:FlxText = new FlxText(350, 150, 0, 'Keys');
-		keys.setFormat(Paths.getPath('Funkin.otf', 'font'), 26, 0xFFFFFFFF, "left");
-		keys.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
-		add(keys);
-
-		var key:Keybind = new Keybind(0, 0, 'Tecla');
-		add(key);
 	}
 
 	function updateSelection(change:Int = 0) {
@@ -276,6 +294,18 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 
 		descText.text = currentList[curSelectedOption].description;
 		updateCharacterVisibility();
+
+		var selectedY = 20 + curSelectedOption * 50;
+		var camBottom = contentCam.scroll.y + CONTENT_H;
+		var itemH = 50;
+
+		if (selectedY < contentCam.scroll.y)
+			contentCam.scroll.y = selectedY;
+		else if (selectedY + itemH > camBottom)
+			contentCam.scroll.y = selectedY + itemH - CONTENT_H;
+
+		if (curSelectedOption == 0)
+			contentCam.scroll.y = 0;
 	}
 
 	function updateVisualFocus() {
@@ -439,6 +469,16 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		var currentList = categoryOptions.get(categories[curCategory]);
 		var hasOptions = (currentList != null && currentList.length > 0);
 
+		if (categories[curCategory] == 'Keybinds' && !isCategory && keybindsMenu != null) {
+			keybindsMenu.handleInput();
+			if (Controls.BACK) {
+				isCategory = true;
+				updateVisualFocus();
+				FlxG.sound.play(Paths.getPath('menus/cancelMenu', 'sound'));
+			}
+			return;
+		}
+
 		if (Controls.UI_LEFT) {
 			if (!isCategory && hasOptions && currentList[curSelectedOption].type != CHECKBOX) {
 				updateVisualFocus();
@@ -472,10 +512,12 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		}
 
 		if (Controls.ACCEPT) {
-			if (isCategory && hasOptions) {
+			if (isCategory) {
 				FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
 				isCategory = false;
 				updateVisualFocus();
+				if (categories[curCategory] == 'Keybinds')
+					reloadOptions();
 			} else if (!isCategory && hasOptions && currentList[curSelectedOption].type == CHECKBOX) {
 				updateVisualFocus();
 				changeOptionValue(1);
@@ -489,6 +531,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 				FlxG.sound.play(Paths.getPath('menus/cancelMenu', 'sound'));
 			} else {
 				close();
+				FlxG.mouse.visible = false;
 				if (game.PlayStateConfig.isPlaying)
 					MusicBeatState.resetState();
 			}

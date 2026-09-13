@@ -102,6 +102,8 @@ class Controls {
 		var map = new Map<Int, Array<Int>>();
 		for (laneIndex in 0...keys.length) {
 			for (k in keys[laneIndex]) {
+				if (k == FlxKey.NONE)
+					continue;
 				var code:Int = k;
 				if (!map.exists(code))
 					map.set(code, []);
@@ -129,7 +131,7 @@ class Controls {
 		@:privateAccess
 		return [
 			for (lane in keyGroups.get(groupName))
-				lane.exists(k -> FlxG.keys.pressed.check(k))
+				lane.exists(k -> k != FlxKey.NONE && FlxG.keys.pressed.check(k))
 		];
 	}
 
@@ -142,7 +144,7 @@ class Controls {
 		if (index == -1 || index >= keys.length)
 			return false;
 		@:privateAccess
-		return keys[index].exists(k -> FlxG.keys.justPressed.check(k));
+		return keys[index].exists(k -> k != FlxKey.NONE && FlxG.keys.justPressed.check(k));
 	}
 
 	public function justPressed(groupName:String, index:Int):Bool {
@@ -152,7 +154,7 @@ class Controls {
 		if (index >= keys.length)
 			return false;
 		@:privateAccess
-		return keys[index].exists(k -> FlxG.keys.justPressed.check(k));
+		return keys[index].exists(k -> k != FlxKey.NONE && FlxG.keys.justPressed.check(k));
 	}
 
 	public function justReleased(groupName:String, index:Int):Bool {
@@ -162,7 +164,7 @@ class Controls {
 		if (index >= keys.length)
 			return false;
 		@:privateAccess
-		return keys[index].exists(k -> FlxG.keys.justReleased.check(k));
+		return keys[index].exists(k -> k != FlxKey.NONE && FlxG.keys.justReleased.check(k));
 	}
 
 	public function setKey(groupName:String, laneIndex:Int, keyIndex:Int, key:FlxKey):Void {
