@@ -28,6 +28,8 @@ class Paths {
 					return Library.findLib("sounds/" + fileName + '.ogg');
 				case MUSIC:
 					return Library.findLib("music/" + fileName + '.ogg');
+				case VIDEOS:
+					return Library.findLib("videos/" + fileName + '.mp4');
 				case SONG_AUDIO:
 					var songName = PlayState.instance?.curSong ?? currentSong;
 					return Library.findLib('songs/$songName/audio/$fileName.ogg');

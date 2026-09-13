@@ -25,13 +25,13 @@
     - [X] FadeTransition
 
 - [ ] Cutscenes
-    - [ ] Video Sprites
-    - [ ] Video Cutscenes
+    - [X] Video Sprites
+    - [X] Video Cutscenes
     - [ ] Dialogues
 
-- [ ] Options Menu
+- [X] Options Menu
     - [X] Gameplay Section
-    - [ ] Keyboards Section (WIP)
+    - [X] Keyboards Section (WIP)
     - [X] Graphics Section
     - [X] Debug Section
 
