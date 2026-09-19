@@ -1,7 +1,6 @@
 package states.menus;
 
 import sys.FileSystem;
-import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -11,6 +10,7 @@ import game.PlayStateConfig;
 import states.LoadingState;
 import core.config.SaveScore;
 import core.rhythm.DiffsUtils;
+import core.assets.FunkinSprite;
 import flixel.tweens.FlxTween.FlxTweenType;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
@@ -26,17 +26,17 @@ class StoryMenuState extends MusicBeatState {
 
 	var charGroup:FlxTypedGroup<states.menus.objects.WeekCharacter>;
 
-	var weekBanner:FlxSprite;
+	var weekBanner:FunkinSprite;
 
 	var tracksTitleText:FlxText;
 	var tracksGroup:FlxTypedGroup<FlxText>;
 
-	var arrowLeft:FlxSprite;
-	var arrowRight:FlxSprite;
+	var arrowLeft:FunkinSprite;
+	var arrowRight:FunkinSprite;
 
-	var diffSprite:FlxSprite;
-	var diffLeft:FlxSprite;
-	var diffRight:FlxSprite;
+	var diffSprite:FunkinSprite;
+	var diffLeft:FunkinSprite;
+	var diffRight:FunkinSprite;
 
 	public static var curDiff:Int = 0;
 
@@ -96,13 +96,13 @@ class StoryMenuState extends MusicBeatState {
 		if (script.callCancellable("onBuildBackgroundCancel", []))
 			return;
 		#end
-		var bg = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFFDCC202);
+		var bg = new flixel.FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFFDCC202);
 		add(bg);
 
-		var topBar = new FlxSprite().makeGraphic(FlxG.width, 70, FlxColor.BLACK);
+		var topBar = new flixel.FlxSprite().makeGraphic(FlxG.width, 70, FlxColor.BLACK);
 		add(topBar);
 
-		var bottomPanel = new FlxSprite().makeGraphic(FlxG.width, 275, FlxColor.BLACK);
+		var bottomPanel = new flixel.FlxSprite().makeGraphic(FlxG.width, 275, FlxColor.BLACK);
 		bottomPanel.y = FlxG.height / 2 + 125;
 		add(bottomPanel);
 	}
@@ -140,7 +140,7 @@ class StoryMenuState extends MusicBeatState {
 		if (script.callCancellable("onBuildWeekBannerCancel", []))
 			return;
 		#end
-		weekBanner = new FlxSprite();
+		weekBanner = new FunkinSprite(0, 0, true);
 		weekBanner.antialiasing = SaveData.data.antialiasing;
 		weekBanner.scrollFactor.set(0, 0);
 		add(weekBanner);
@@ -175,11 +175,11 @@ class StoryMenuState extends MusicBeatState {
 			return;
 		#end
 
-		arrowLeft = new FlxSprite();
+		arrowLeft = new FunkinSprite(0, 0, true);
 		arrowLeft.frames = Paths.getPath('menus/storymenu/ui/arrows', 'animated');
-		arrowLeft.animation.addByPrefix('idle', 'leftIdle', 24, true);
-		arrowLeft.animation.addByPrefix('confirm', 'leftConfirm', 24, false);
-		arrowLeft.animation.play('idle');
+		arrowLeft.addAnim('idle', 'leftIdle', 24, true);
+		arrowLeft.addAnim('confirm', 'leftConfirm', 24, false);
+		arrowLeft.playAnim('idle');
 		arrowLeft.x = FlxG.width / 2 - arrowLeft.width / 2;
 		arrowLeft.angle = 90;
 		arrowLeft.y = -10;
@@ -187,11 +187,11 @@ class StoryMenuState extends MusicBeatState {
 		arrowLeft.antialiasing = SaveData.data.antialiasing;
 		add(arrowLeft);
 
-		arrowRight = new FlxSprite();
+		arrowRight = new FunkinSprite(0, 0, true);
 		arrowRight.frames = Paths.getPath('menus/storymenu/ui/arrows', 'animated');
-		arrowRight.animation.addByPrefix('idle', 'rightIdle', 24, true);
-		arrowRight.animation.addByPrefix('confirm', 'rightConfirm', 24, false);
-		arrowRight.animation.play('idle');
+		arrowRight.addAnim('idle', 'rightIdle', 24, true);
+		arrowRight.addAnim('confirm', 'rightConfirm', 24, false);
+		arrowRight.playAnim('idle');
 		arrowRight.x = FlxG.width / 2 - arrowRight.width / 2;
 		arrowRight.y = FlxG.height - arrowRight.height - 20;
 		arrowRight.angle = 90;
@@ -210,27 +210,27 @@ class StoryMenuState extends MusicBeatState {
 			return;
 		#end
 
-		diffLeft = new FlxSprite();
+		diffLeft = new FunkinSprite(0, 0, true);
 		diffLeft.frames = Paths.getPath('menus/storymenu/ui/arrows', 'animated');
-		diffLeft.animation.addByPrefix('idle', 'leftIdle', 24, true);
-		diffLeft.animation.addByPrefix('confirm', 'leftConfirm', 24, false);
-		diffLeft.animation.play('idle');
+		diffLeft.addAnim('idle', 'leftIdle', 24, true);
+		diffLeft.addAnim('confirm', 'leftConfirm', 24, false);
+		diffLeft.playAnim('idle');
 		diffLeft.scale.set(0.55, 0.55);
 		diffLeft.updateHitbox();
 		diffLeft.scrollFactor.set(0, 0);
 		diffLeft.antialiasing = SaveData.data.antialiasing;
 		add(diffLeft);
 
-		diffSprite = new FlxSprite();
+		diffSprite = new FunkinSprite(0, 0, true);
 		diffSprite.antialiasing = SaveData.data.antialiasing;
 		diffSprite.scrollFactor.set(0, 0);
 		add(diffSprite);
 
-		diffRight = new FlxSprite();
+		diffRight = new FunkinSprite(0, 0, true);
 		diffRight.frames = Paths.getPath('menus/storymenu/ui/arrows', 'animated');
-		diffRight.animation.addByPrefix('idle', 'rightIdle', 24, true);
-		diffRight.animation.addByPrefix('confirm', 'rightConfirm', 24, false);
-		diffRight.animation.play('idle');
+		diffRight.addAnim('idle', 'rightIdle', 24, true);
+		diffRight.addAnim('confirm', 'rightConfirm', 24, false);
+		diffRight.playAnim('idle');
 		diffRight.scale.set(0.55, 0.55);
 		diffRight.updateHitbox();
 		diffRight.scrollFactor.set(0, 0);
@@ -302,6 +302,7 @@ class StoryMenuState extends MusicBeatState {
 			var startX = (FlxG.width / 2) - ((totalChars - 1) * spacing / 2) - 150;
 			for (i in 0...totalChars) {
 				var ch = new states.menus.objects.WeekCharacter(startX + i * spacing, 100, data.chars[i]);
+				ch.ID = i;
 				charGroup.add(ch);
 			}
 		}
@@ -475,7 +476,17 @@ class StoryMenuState extends MusicBeatState {
 			return;
 		}
 
-		var midChar = charGroup.members[Std.int(charGroup.length / 2)];
+		var midChar:states.menus.objects.WeekCharacter = null;
+		for (char in charGroup.members) {
+			if (char != null && char.ID == 1) {
+				midChar = char;
+				break;
+			}
+		}
+
+		if (midChar == null && charGroup.members.length > 0)
+			midChar = charGroup.members[0];
+
 		if (midChar != null && midChar.existsAnim('confirm'))
 			midChar.acceptWeek();
 
@@ -498,8 +509,13 @@ class StoryMenuState extends MusicBeatState {
 	override public function beatHit(beat:Float) {
 		super.beatHit(beat);
 
-		for (item in charGroup)
-			item.playAnim('idle');
+		for (item in charGroup.members) {
+			if (item != null && item.alive) {
+				if (!acceptOption || item.ID != 1) {
+					item.playAnim('idle');
+				}
+			}
+		}
 	}
 
 	override public function destroy() {

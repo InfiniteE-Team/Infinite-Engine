@@ -24,10 +24,28 @@ class PsychPorter implements FormatChartConverter {
 		var events:Array<EventsData> = [];
 
 		var notes:Array<NoteData> = [];
+		var currentBpm:Float = song.bpm ?? 120;
+		var currentTime:Float = 0.0;
+
 		for (section in (song.notes : Array<Dynamic>)) {
 			var mustHit:Bool = section.mustHitSection ?? true;
 			var sectionNotes:Array<Array<Float>> = section.sectionNotes;
 			var sectionStart:Null<Float> = null;
+
+			var sectionBpm:Float = section.bpm ?? currentBpm;
+			var changeBPM:Bool = section.changeBPM ?? false;
+
+			if (changeBPM && sectionBpm != currentBpm) {
+				events.push({
+					time: currentTime,
+					name: 'Change BPM',
+					arguments: {bpm: sectionBpm}
+				});
+				currentBpm = sectionBpm;
+			}
+
+			var sectionBeats:Float = section.sectionBeats ?? 4;
+			currentTime += (60000.0 / currentBpm) * sectionBeats;
 
 			for (note in sectionNotes) {
 				var lane = Std.int(note[1]);

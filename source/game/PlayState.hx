@@ -220,8 +220,10 @@ class PlayState extends MusicBeatState {
 
 		noteController.generateNotes(startTime, SONG);
 
-		if (SONG.songData.gameplay.events != null)
+		if (SONG.songData.gameplay.events != null) {
 			events.loadEvents(SONG.songData.gameplay.events);
+			events.updateEvents(0);
+		}
 	}
 
 	public function startCountdown() {
@@ -462,8 +464,10 @@ class PlayState extends MusicBeatState {
 		if (chars != null)
 			chars.resetAll();
 
-		if (SONG.songData.gameplay.events != null)
+		if (SONG.songData.gameplay.events != null) {
 			events.loadEvents(SONG.songData.gameplay.events);
+			events.updateEvents(0);
+		}
 
 		#if HSCRIPT_ALLOWED
 		script.call('onRewindPost', []);
@@ -488,14 +492,10 @@ class PlayState extends MusicBeatState {
 		if (startCount && !paused) {
 			RhythmCore.songPosition += elapsed * 1000;
 		} else if (gameAudio != null && gameAudio.inst != null) {
-			if (gameAudio.inst.playing && gameAudio.inst.time > 0) {
-				RhythmCore.songPosition = gameAudio.inst.time;
-			} else if (gameAudio != null && gameAudio.inst != null) {
-				if (gameAudio.inst.playing && gameAudio.inst.time > 0) {
-					RhythmCore.songPosition = flixel.math.FlxMath.lerp(RhythmCore.songPosition, gameAudio.inst.time, elapsed * 8.0);
-				} else if (!paused) {
-					RhythmCore.songPosition += elapsed * 1000;
-				}
+			if (gameAudio.inst.playing) {
+				RhythmCore.songPosition = flixel.math.FlxMath.lerp(RhythmCore.songPosition, gameAudio.inst.time, elapsed * 8.0);
+			} else if (!paused) {
+				RhythmCore.songPosition += elapsed * 1000;
 			}
 		}
 
