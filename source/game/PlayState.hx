@@ -493,7 +493,7 @@ class PlayState extends MusicBeatState {
 			RhythmCore.songPosition += elapsed * 1000;
 		} else if (gameAudio != null && gameAudio.inst != null) {
 			if (gameAudio.inst.playing) {
-				RhythmCore.songPosition = flixel.math.FlxMath.lerp(RhythmCore.songPosition, gameAudio.inst.time, elapsed * 8.0);
+				RhythmCore.songPosition = gameAudio.inst.time;
 			} else if (!paused) {
 				RhythmCore.songPosition += elapsed * 1000;
 			}
