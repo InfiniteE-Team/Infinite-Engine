@@ -10,11 +10,11 @@ class NoteSustain extends Note {
 
 	public var isHeld:Bool = false;
 
-	public var isSustainEnd:Bool = false;
-
 	public var parentNote:NoteSustain = null;
 
 	public var wasNoteHit:Bool = false;
+
+	public var isSustainEnd:Bool = false;
 
 	public function new(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0, length:Float,
 			?noteType:String = 'normal', isSustainEnd:Bool = false) {
@@ -28,9 +28,9 @@ class NoteSustain extends Note {
 		this.length = length;
 		this.isSustainEnd = isSustainEnd;
 		this.isHeld = false;
+		this.wasNoteHit = false;
 		this.parentNote = null;
-
-		clipRect = null;
+		this.clipRect = null;
 
 		reinit(strumTime, keys, x, y, noteSkinData, noteSkin, direction, noteType);
 

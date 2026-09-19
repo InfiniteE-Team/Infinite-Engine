@@ -157,6 +157,7 @@ class InputController {
 		var note = noteController.getHittableNote(charId, i, mustPress);
 		if (note != null) {
 			charStrums[i].playAnim('confirm' + i, false);
+			charStrums[i].applyShader(noteController.noteSkinData);
 			note.wasGoodHit = true;
 			note.kill();
 		}

@@ -19,6 +19,11 @@ class ScriptHandler {
 	var superInstance:Dynamic;
 	var extraVars:Map<String, Dynamic> = [];
 
+	public var hasScripts(get, never):Bool;
+
+	inline function get_hasScripts():Bool
+		return scripts.length > 0 || luaScripts.length > 0;
+
 	public function new(superInstance:Dynamic) {
 		this.superInstance = superInstance;
 	}

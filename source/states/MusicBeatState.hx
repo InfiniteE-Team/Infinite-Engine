@@ -86,6 +86,9 @@ class MusicBeatState extends State {
 				infoHelp.openUI();
 		}
 
+		if (!(Std.isOfType(FlxG.state, game.PlayState)) && FlxG.sound.music != null && FlxG.sound.music.playing)
+			core.rhythm.RhythmCore.songPosition = FlxG.sound.music.time;
+
 		t.check(stepHit, beatHit);
 	}
 

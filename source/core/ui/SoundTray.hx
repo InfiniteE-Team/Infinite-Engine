@@ -97,8 +97,8 @@ class SoundTray extends FlxSoundTray {
 			showTray();
 		}
 
-		y = smoothLerp(y, lerpYPos, elapsed, 0.768);
-		alpha = smoothLerp(alpha, alphaTarget, elapsed, 0.307);
+		y = smoothLerp(y, lerpYPos, elapsed, 0.12);
+		alpha = smoothLerp(alpha, alphaTarget, elapsed, 0.08);
 		screenCenter();
 	}
 
@@ -124,8 +124,8 @@ class SoundTray extends FlxSoundTray {
 	}
 
 	function showTray():Void {
-		_timer = 1;
-		lerpYPos = trayHeight - 60;
+		_timer = 0.6;
+		lerpYPos = trayHeight - 45;
 		if (!visible || !active)
 			y = -trayHeight - 10;
 		visible = true;

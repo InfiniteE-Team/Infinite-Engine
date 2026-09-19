@@ -490,10 +490,12 @@ class PlayState extends MusicBeatState {
 		} else if (gameAudio != null && gameAudio.inst != null) {
 			if (gameAudio.inst.playing && gameAudio.inst.time > 0) {
 				RhythmCore.songPosition = gameAudio.inst.time;
-			} else if (gameAudio.inst.playing && gameAudio.inst.time > startTime * 0.5) {
-				RhythmCore.songPosition = gameAudio.inst.time;
-			} else if (!paused) {
-				RhythmCore.songPosition += elapsed * 1000;
+			} else if (gameAudio != null && gameAudio.inst != null) {
+				if (gameAudio.inst.playing && gameAudio.inst.time > 0) {
+					RhythmCore.songPosition = flixel.math.FlxMath.lerp(RhythmCore.songPosition, gameAudio.inst.time, elapsed * 8.0);
+				} else if (!paused) {
+					RhythmCore.songPosition += elapsed * 1000;
+				}
 			}
 		}
 

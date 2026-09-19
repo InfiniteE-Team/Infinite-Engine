@@ -89,6 +89,11 @@ class NoteController {
 	var strumsVisible:Bool = true;
 	var notesVisible:Bool = true;
 
+	// cache
+	var _noteSpawnIndex:Int = 0;
+	var confirmAnims:Array<String> = [];
+	var staticAnims:Array<String> = [];
+
 	public function new(daSong:SongConfig, isDownscroll:Bool, isGhostTapping:Bool, script:ScriptHandler, playStateConfig:PlayStateConfig,
 			gameAudio:core.rhythm.audio.GameAudio) {
 		this.daSong = daSong;
@@ -168,6 +173,9 @@ class NoteController {
 		scrollSpeed = daSong.speed ?? 1.2;
 		targetScrollSpeed = scrollSpeed;
 
+		confirmAnims = [for (i in 0...keys) 'confirm$i'];
+		staticAnims = [for (i in 0...keys) 'static$i'];
+
 		// splashes
 		var splashesDataPath:String = 'noteskins/$noteSkin/splashes';
 		splashesSkinData = FormatJson.readJson(Paths.getPath('data/$splashesDataPath', "json"));
@@ -246,6 +254,8 @@ class NoteController {
 			Trace.traceOnce('songData null, generated 0 notes', true);
 			return;
 		}
+
+		_noteSpawnIndex = 0;
 
 		#if HSCRIPT_ALLOWED
 		scriptNC.call("onGenerateNotes", []);
@@ -466,7 +476,6 @@ class NoteController {
 		updateNotes(songTime);
 	}
 
-	var toDestroy:Array<Note> = [];
 	var toDestroySet:Map<Note, Bool> = new Map();
 
 	public function updateNotes(songTime:Float) {
@@ -474,28 +483,26 @@ class NoteController {
 		scriptNC.call("onNoteUpdate", [songTime]);
 		#end
 
-		while (unspawnNotes.length > 0) {
-			var note = unspawnNotes[0];
-			var isSustain = (note is NoteSustain);
+		while (_noteSpawnIndex < unspawnNotes.length) {
+			var note = unspawnNotes[_noteSpawnIndex];
+			var sustain = Std.downcast(note, NoteSustain);
 			var spawnTime = note.strumTime;
 
-			if (isSustain && cast(note, NoteSustain).isSustainEnd && cast(note, NoteSustain).parentNote != null) {
-				spawnTime = cast(note, NoteSustain).parentNote.strumTime;
+			if (sustain != null && sustain.isSustainEnd && sustain.parentNote != null) {
+				spawnTime = sustain.parentNote.strumTime;
 			}
 
 			if (spawnTime - songTime < 2000) {
 				note.visible = daSong.strumsVisible && note.strum.visible;
-				if (isSustain)
-					sustains.add(cast note);
+				if (sustain != null)
+					sustains.add(sustain);
 				else
 					notes.add(note);
-				unspawnNotes.shift();
-			} else {
+				_noteSpawnIndex++;
+			} else
 				break;
-			}
 		}
 
-		toDestroy.resize(0);
 		toDestroySet.clear();
 		activeOpponentHolds.clear();
 
@@ -506,7 +513,7 @@ class NoteController {
 				continue;
 
 			#if HSCRIPT_ALLOWED
-			if (scriptNC.callCancellable('onNoteMovementCancel', [note]))
+			if (scriptNC.hasScripts && scriptNC.callCancellable('onNoteMovementCancel', [note]))
 				continue;
 			#end
 
@@ -519,7 +526,8 @@ class NoteController {
 				note.y = note.strum.y + (timeDiff * scrollMult);
 
 			#if HSCRIPT_ALLOWED
-			scriptNC.call("onNoteMovement", [note, songTime]);
+			if (scriptNC.hasScripts)
+				scriptNC.call("onNoteMovement", [note, songTime]);
 			#end
 
 			if (note.tooLate && !note.wasMissed && !note.wasGoodHit) {
@@ -531,7 +539,6 @@ class NoteController {
 			}
 
 			if (!note.mustPress && note.wasGoodHit && !note.alive) {
-				toDestroy.push(note);
 				toDestroySet.set(note, true);
 			}
 
@@ -543,7 +550,6 @@ class NoteController {
 						charController.playMissAnim(note.direction);
 					input.onMiss(playStateConfig, this, gameAudio);
 				}
-				toDestroy.push(note);
 				toDestroySet.set(note, true);
 			} else if (isDownscroll && note.y > flixel.FlxG.height) {
 				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
@@ -553,7 +559,6 @@ class NoteController {
 						charController.playMissAnim(note.direction);
 					input.onMiss(playStateConfig, this, gameAudio);
 				}
-				toDestroy.push(note);
 				toDestroySet.set(note, true);
 			}
 		}
@@ -593,11 +598,11 @@ class NoteController {
 						spawnHoldSplash(sustain.strum, lane % keys, sustain.noteType);
 					}
 					activeOpponentHolds.set(lane, true);
-					sustain.strum.playAnim('confirm' + (lane % keys), false);
+					sustain.strum.playAnim(confirmAnims[lane % keys], false);
 				} else if (sustain.isHeld) {
 					sustain.isHeld = false;
 					stopHoldSplash(sustain.strum);
-					sustain.strum.playAnim('static' + (lane % keys), true);
+					sustain.strum.playAnim(staticAnims[lane % keys], true);
 					activeOpponentHolds.remove(lane);
 				}
 			}
@@ -611,7 +616,6 @@ class NoteController {
 
 				var body = sustain.parentNote;
 				if (body == null || toDestroySet.exists(body)) {
-					toDestroy.push(sustain);
 					toDestroySet.set(sustain, true);
 					continue;
 				}
@@ -636,14 +640,15 @@ class NoteController {
 				}
 
 				#if HSCRIPT_ALLOWED
-				scriptNC.call("onEndSustainMovement", [songTime]);
+				if (scriptNC.hasScripts)
+					scriptNC.call("onEndSustainMovement", [songTime]);
 				#end
 				continue;
 			}
 
 			// HANDLE NORMAL SUSTAINS (BODIES)
 			#if HSCRIPT_ALLOWED
-			if (scriptNC.callCancellable('onSustainMovementCancel', []))
+			if (scriptNC.hasScripts && scriptNC.callCancellable('onSustainMovementCancel', []))
 				continue;
 			#end
 
@@ -674,7 +679,8 @@ class NoteController {
 			sustain.clipRect = null;
 
 			#if HSCRIPT_ALLOWED
-			scriptNC.call("onSustainMovement", [sustain, songTime]);
+			if (scriptNC.hasScripts)
+				scriptNC.call("onSustainMovement", [sustain, songTime]);
 			#end
 
 			if (sustain.strumTime + sustain.length < songTime) {
@@ -682,13 +688,10 @@ class NoteController {
 					sustain.isHeld = false;
 					stopHoldSplash(sustain.strum);
 				}
-				toDestroy.push(sustain);
 				toDestroySet.set(sustain, true);
 			} else if (!isDownscroll && sustain.y + scaledHeight < 0) {
-				toDestroy.push(sustain);
 				toDestroySet.set(sustain, true);
 			} else if (isDownscroll && sustain.y - sustain.offset.y > flixel.FlxG.height) {
-				toDestroy.push(sustain);
 				toDestroySet.set(sustain, true);
 			}
 		}
@@ -698,9 +701,8 @@ class NoteController {
 			if (holdsplash != null && holdsplash.alive)
 				holdsplash.setPosition(strum.x, strum.y);
 		}
-		for (note in toDestroy) {
+		for (note in toDestroySet.keys())
 			destroyNotes(note);
-		}
 		#if HSCRIPT_ALLOWED
 		scriptNC.call("postNoteUpdate", [songTime]);
 		#end

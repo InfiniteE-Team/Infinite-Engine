@@ -163,7 +163,8 @@ class FunkinPreloader extends MusicBeatState {
 		progressLines.dirty = true;
 		add(progressLines);
 
-		vfdBitmap = new flash.display.Bitmap(new flash.display.BitmapData(FlxG.width, FlxG.height, true, 0xFFFFFFFF));
+		vfdBitmap = new flash.display.Bitmap(new flash.display.BitmapData(FlxG.width >> 1, FlxG.height >> 1, true, 0xFFFFFFFF));
+		vfdBitmap.scaleX = vfdBitmap.scaleY = 2.0;
 		FlxG.addChildBelowMouse(vfdBitmap);
 
 		vfdShader = new VFDOverlay();
@@ -293,41 +294,43 @@ class FunkinPreloader extends MusicBeatState {
 			return;
 		}
 
-		for (absPath in audioQueue) {
+		final MAX_THREADS = 4;
+		var queueIndex:Int = 0;
+		var activeThreads:Int = 0;
+
+		function spawnNext():Void {
+			if (queueIndex >= audioQueue.length)
+				return;
+			var absPath = audioQueue[queueIndex++];
+			activeThreads++;
+
 			sys.thread.Thread.create(function():Void {
-				if (Sound.streamedCache.exists(absPath)) {
-					haxe.MainLoop.runInMainThread(function():Void {
-						loadedAudio++;
-						labelAudio.text = 'Audio  $loadedAudio / $totalAudio';
-						checkAllDone();
-					});
-					return;
-				}
-
-				var oflSound:OflSound = null;
-
+				var oflSound:openfl.media.Sound = null;
 				try {
 					#if lime_cffi
 					var buffer = lime.media.AudioBuffer.fromFile(absPath);
 					if (buffer != null)
-						oflSound = OflSound.fromAudioBuffer(buffer);
+						oflSound = openfl.media.Sound.fromAudioBuffer(buffer);
 					#else
-					oflSound = OflSound.fromFile(absPath);
+					oflSound = openfl.media.Sound.fromFile(absPath);
 					#end
-				} catch (e:Dynamic) {
-					trace('[PreloadState] Audio decode failed: $absPath — $e');
-				}
+				} catch (e:Dynamic) {}
 
 				haxe.MainLoop.runInMainThread(function():Void {
 					if (oflSound != null && !Sound.streamedCache.exists(absPath))
 						Sound.streamedCache.set(absPath, oflSound);
 
 					loadedAudio++;
+					activeThreads--;
 					labelAudio.text = 'Audio  $loadedAudio / $totalAudio';
+					spawnNext();
 					checkAllDone();
 				});
 			});
 		}
+
+		for (_ in 0...Std.int(Math.min(MAX_THREADS, audioQueue.length)))
+			spawnNext();
 	}
 
 	/**

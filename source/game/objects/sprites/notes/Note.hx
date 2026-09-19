@@ -86,7 +86,7 @@ class Note extends FunkinSprite {
 			RGBShader.applyByAnimation(this, noteSkinData, currentAnim);
 			_lastAnimForShader = currentAnim;
 		}
-		
+
 		if (wasMissed) {
 			alpha = 0.6;
 			mustPress = false;

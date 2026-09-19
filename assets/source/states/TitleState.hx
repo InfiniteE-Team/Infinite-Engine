@@ -14,6 +14,7 @@ class TitleState extends ScriptState {
 		super.create();
 
 		MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102);
+		RhythmCore.changeBPM(102);
 
 		logo = new FlxSprite(-150, -100);
 		logo.frames = Paths.getPath('menus/title/logoBumpin', 'animated');
@@ -23,8 +24,8 @@ class TitleState extends ScriptState {
 
 		gfDance = new FlxSprite(FlxG.width * 0.4, FlxG.height * 0.07);
 		gfDance.frames = Paths.getPath('menus/title/gfDanceTitle', 'animated');
-		gfDance.animation.addByPrefix('danceLeft', 'gfDance', 24, false, [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]);
-		gfDance.animation.addByPrefix('danceRight', 'gfDance', 24, false, [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]);
+		gfDance.animation.addByPrefix('danceLeft', 'gfDance', 24, true, [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]);
+		gfDance.animation.addByPrefix('danceRight', 'gfDance', 24, true, [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]);
 		gfDance.antialiasing = SaveData.data.antialiasing;
 		add(gfDance);
 
@@ -63,12 +64,13 @@ class TitleState extends ScriptState {
 
 		danceLeft = !danceLeft;
 
-		if (gfDance != null) {
-			if (danceLeft)
-				gfDance.animation.play('danceRight', true);
-			else
-				gfDance.animation.play('danceLeft', true);
+		if (gfDance != null && beat % 2 == 0) {
+			gfDance.animation.play(danceLeft ? 'danceLeft' : 'danceRight', true);
 		}
+	}
+
+	override public function stepHit(step:Int) {
+		super.stepHit(step);
 	}
 
 	override public function destroy() {
