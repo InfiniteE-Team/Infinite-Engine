@@ -178,7 +178,7 @@ function onMissPopup() {
 	else
 		rating.loadGraphic(Paths.getPath('game/hud/normal/score/miss', 'image'));
 
-	rating.x = FlxG.width * 0.55 - 40;
+	rating.x = FlxG.width * 0.55 - 145;
 	rating.y = FlxG.height * 0.5 - 90;
 
 	if (!isPixel) {

@@ -1,0 +1,1 @@
+# ** Here you'll find all the documentation related to Haxe scripting or hxscript! ** 

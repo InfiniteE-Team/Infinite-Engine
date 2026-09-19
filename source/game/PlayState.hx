@@ -26,8 +26,11 @@ class PlayState extends MusicBeatState {
 	public var camGame:Camera;
 	public var camHUD:Camera;
 	public var camOther:Camera;
+	public var camSubtitles:Camera;
 
 	public var cameraController:CameraController;
+
+	public var subtitleManager:game.objects.Subtitle;
 
 	// Song
 	public var curSong:String = 'default';
@@ -39,8 +42,8 @@ class PlayState extends MusicBeatState {
 	public var countDown:Countdown;
 
 	// notes
-	public var gameAudio:GameAudio = new GameAudio();
-	public var events:EventManager = new EventManager();
+	public var gameAudio:GameAudio;
+	public var events:EventManager;
 	public var noteController:NoteController;
 	public var modchartSystem:game.modchart.ModchartSystem;
 
@@ -51,7 +54,7 @@ class PlayState extends MusicBeatState {
 	public var controllerHUD:HUDController;
 
 	// configs
-	public var playStateConfig:PlayStateConfig = new PlayStateConfig(); // data for health, strum line, etc
+	public var playStateConfig:PlayStateConfig; // data for health, strum line, etc
 
 	public var osuMode:Bool = false;
 
@@ -63,6 +66,9 @@ class PlayState extends MusicBeatState {
 
 	public function new(?curSong:String, ?curDifficulty:Int = 0) {
 		super();
+		gameAudio = new GameAudio();
+		events = new EventManager();
+		playStateConfig = new PlayStateConfig();
 		this.curSong = curSong;
 		this.curDifficulty = curDifficulty;
 	}
@@ -101,6 +107,10 @@ class PlayState extends MusicBeatState {
 		controllerHUD.cameras = [camHUD];
 		add(controllerHUD);
 
+		subtitleManager = new game.objects.Subtitle();
+		subtitleManager.cameras = [camSubtitles];
+		add(subtitleManager);
+
 		super.create();
 
 		buildStrumsandNotes();
@@ -126,9 +136,13 @@ class PlayState extends MusicBeatState {
 		camOther = new Camera();
 		camOther.bgColor.alpha = 0;
 
+		camSubtitles = new Camera();
+		camSubtitles.bgColor.alpha = 0;
+
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOther, false);
+		FlxG.cameras.add(camSubtitles, false);
 
 		cameraController = new CameraController(camGame, camHUD);
 	}
@@ -401,7 +415,7 @@ class PlayState extends MusicBeatState {
 		}
 		#end
 
-    	game.graphics.shaders.CustomShader.clearAll();
+		game.graphics.shaders.CustomShader.clearAll();
 
 		script.call("onRewind", []);
 
@@ -591,7 +605,7 @@ class PlayState extends MusicBeatState {
 
 		cameraController = null;
 
-    	game.graphics.shaders.CustomShader.clearAll();
+		game.graphics.shaders.CustomShader.clearAll();
 
 		super.destroy();
 	}

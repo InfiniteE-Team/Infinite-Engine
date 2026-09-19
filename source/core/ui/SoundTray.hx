@@ -1,101 +1,156 @@
 package core.ui;
 
 import flixel.system.ui.FlxSoundTray;
-import flash.display.Bitmap;
-import flash.display.BitmapData;
+import openfl.display.Bitmap;
 import openfl.utils.Assets;
+import flixel.system.FlxAssets.FlxSoundAsset;
 
+/**
+ *  Extends the default flixel soundtray, but with some art
+ *  and lil polish!
+ *
+ *  Gets added to the game in Main.hx, right after FlxGame is new'd
+ *  since it's a Sprite rather than Flixel related object
+ */
 class SoundTray extends FlxSoundTray {
-	var bg:Bitmap = null;
-	private var blocks:Array<Bitmap> = [];
-	private var volumeMaxSound:String;
+	var graphicScale:Float = 0.30;
+	var lerpYPos:Float = 0;
+	var alphaTarget:Float = 0;
+	var volumeMaxSound:FlxSoundAsset;
+	var trayHeight:Float = 0;
 
 	public function new() {
+		// calls super, then removes all children to add our own
+		// graphics
 		super();
+		removeChildren();
 
-		scaleX = 0.5;
-		scaleY = 0.5;
+		var bg:Bitmap = new Bitmap(Assets.getBitmapData(Paths.getPath("soundtray/volumebox", 'image')));
+		bg.scaleX = graphicScale;
+		bg.scaleY = graphicScale;
+		bg.smoothing = true;
+		addChild(bg);
 
-		volumeMaxSound = Paths.getPath("soundtray/VolMAX", 'sound');
-
-		while (this.numChildren > 0) {
-			this.removeChildAt(0);
-		}
-
-		var bgPath:String = Paths.getPath("soundtray/volumebox", 'image');
-
-		if (bgPath != null) {
-			var bmd:BitmapData = openfl.Assets.getBitmapData(bgPath);
-			if (bmd != null) {
-				bg = new Bitmap(bmd);
-				addChild(bg);
-			}
-		}
-
-		var blockPath:String = Paths.getPath("soundtray/bars_10", 'image');
-		var bitmapData:BitmapData = blockPath != null ? BitmapData.fromFile(blockPath) : null;
-		if (bitmapData != null) {
-			var barPreview:Bitmap = new Bitmap(bitmapData);
-			barPreview.x = 30;
-			barPreview.y = 15;
-			barPreview.alpha = 0.3;
-			addChild(barPreview);
-		}
-
-		for (i in 1...11) {
-			var blockPath2:String = Paths.getPath("soundtray/bars_" + i, 'image');
-			var bitmapData2:BitmapData = blockPath2 != null ? BitmapData.fromFile(blockPath2) : null;
-			if (bitmapData2 != null) {
-				var bar:Bitmap = new Bitmap(bitmapData2);
-				bar.x = 30;
-				bar.y = 15;
-				bar.visible = false;
-				addChild(bar);
-				blocks.push(bar);
-			}
-		}
-
-		y = (-height + 10);
+		y = -height;
 		visible = false;
-	}
 
-	override public function showAnim(volume:Float, ?sound:Dynamic, duration:Float = 1.0, label:String = "VOLUME"):Void {
-		_timer = duration;
-		y = 10;
-		visible = true;
-		active = true;
+		// makes an alpha'd version of all the bars (bar_10.png)
+		var backingBar:Bitmap = new Bitmap(Assets.getBitmapData(Paths.getPath("soundtray/bars_10", 'image')));
+		backingBar.x = 9;
+		backingBar.y = 5;
+		backingBar.scaleX = graphicScale;
+		backingBar.scaleY = graphicScale;
+		backingBar.smoothing = true;
+		addChild(backingBar);
+		backingBar.alpha = 0.4;
+
+		// clear the bars array entirely, it was initialized
+		// in the super class
+		_bars = [];
+
+		// 1...11 due to how block named the assets,
+		// we are trying to get assets bars_1-10
+		for (i in 1...11) {
+			var bar:Bitmap = new Bitmap(Assets.getBitmapData(Paths.getPath("soundtray/bars_" + i, 'image')));
+			bar.x = 9;
+			bar.y = 5;
+			bar.scaleX = graphicScale;
+			bar.scaleY = graphicScale;
+			bar.smoothing = true;
+			addChild(bar);
+			_bars.push(bar);
+		}
 
 		screenCenter();
 
-		var oldVolume:Float = FlxG.sound.volume;
-		var up:Bool = (volume > oldVolume);
+		volumeUpSound = Paths.getPath("soundtray/Volup", 'sound');
+		volumeDownSound = Paths.getPath("soundtray/Voldown", 'sound');
+		volumeMaxSound = Paths.getPath("soundtray/VolMAX", 'sound');
 
-		if (up) {
-			if (oldVolume >= 1.0 && volumeMaxSound != null)
-				FlxG.sound.play(openfl.Assets.getSound(volumeMaxSound));
-			else {
-				var snd = Paths.getPath("soundtray/Volup", 'sound');
-				if (snd != null)
-					FlxG.sound.play(openfl.Assets.getSound(snd));
+		trayHeight = height;
+		y = -trayHeight - 10;
+	}
+
+	private static inline function smoothLerp(from:Float, to:Float, elapsed:Float, halfLife:Float):Float {
+		return to + (from - to) * Math.pow(0.5, elapsed / halfLife);
+	}
+
+	override public function update(ms:Float):Void {
+		var elapsed:Float = ms / 1000.0;
+
+		// If it has volume, we want to auto-hide after 1 second (1000ms), we simply decrement a timer
+		var hasVolume:Bool = (!FlxG.sound.muted && FlxG.sound.volume > 0);
+
+		if (hasVolume) {
+			// Animate sound tray thing
+			if (_timer > 0) {
+				_timer -= elapsed;
+				if (_timer <= 0) {
+					lerpYPos = -trayHeight - 10;
+					alphaTarget = 0;
+				}
+			} else if (y <= -trayHeight) {
+				visible = false;
+				active = false;
 			}
-		} else {
-			var snd = Paths.getPath("soundtray/Voldown", 'sound');
-			if (snd != null && volume > 0)
-				FlxG.sound.play(openfl.Assets.getSound(snd));
+		} else if (!visible) {
+			showTray();
 		}
 
-		updateBars(volume);
+		y = smoothLerp(y, lerpYPos, elapsed, 0.768);
+		alpha = smoothLerp(alpha, alphaTarget, elapsed, 0.307);
+		screenCenter();
 	}
 
-	override public function screenCenter():Void {
-		x = (openfl.Lib.current.stage.stageWidth - width) / 2;
+	override function showIncrement():Void {
+		moveTrayMakeVisible(true);
+		saveVolumePreferences();
 	}
 
-	private function updateBars(volume:Float):Void {
-		var globalVolume:Int = Math.round(volume * 10);
-		for (block in blocks)
-			block.visible = false;
-		if (globalVolume > 0 && globalVolume <= blocks.length)
-			blocks[globalVolume - 1].visible = true;
+	override function showDecrement():Void {
+		moveTrayMakeVisible(false);
+		saveVolumePreferences();
+	}
+
+	function moveTrayMakeVisible(up:Bool = false):Void {
+		showTray();
+
+		if (!silent) {
+			// This is a FlxSoundAsset currently, but there is or was a Flixel PR to change this to a FlxSound or a Sound bject
+			var sound:FlxSoundAsset = FlxG.sound.volume == 1 ? volumeMaxSound : (up ? volumeUpSound : volumeDownSound);
+			if (sound != null)
+				FlxG.sound.play(sound);
+		}
+	}
+
+	function showTray():Void {
+		_timer = 1;
+		lerpYPos = trayHeight - 60;
+		if (!visible || !active)
+			y = -trayHeight - 10;
+		visible = true;
+		active = true;
+		alphaTarget = 1;
+
+		updateBars();
+	}
+
+	function updateBars():Void {
+		var globalVolume:Int = FlxG.sound.muted || FlxG.sound.volume == 0 ? 0 : Math.round(FlxG.sound.volume * 10);
+
+		for (i in 0..._bars.length)
+			_bars[i].visible = i < globalVolume;
+	}
+
+	function saveVolumePreferences():Void {
+		// Actually save when the volume is changed / modified
+		#if FLX_SAVE
+		// Save sound preferences
+		if (FlxG.save.isBound) {
+			FlxG.save.data.mute = FlxG.sound.muted;
+			FlxG.save.data.volume = FlxG.sound.volume;
+			FlxG.save.flush();
+		}
+		#end
 	}
 }
