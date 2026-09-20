@@ -13,9 +13,9 @@ class Library {
 		var modNames:Array<String> = [];
 
 		if (!FileSystem.exists(modsFolder)) {
-			try
-				FileSystem.createDirectory(modsFolder)
-			catch (e:Dynamic) {}
+			try {
+				FileSystem.createDirectory(modsFolder);
+			} catch (e:Dynamic) {}
 		}
 
 		if (FileSystem.exists(modsFolder) && FileSystem.isDirectory(modsFolder)) {

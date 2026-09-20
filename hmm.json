@@ -67,14 +67,6 @@
             "url": "https://github.com/Slushi-Github/SL-Windows-API"
         },
         {
-            "name": "haxeui-core",
-            "type": "haxelib"
-        },
-        {
-            "name": "haxeui-flixel",
-            "type": "haxelib"
-        },
-        {
             "name": "funkin.vis",
             "type": "git",
             "dir": null,

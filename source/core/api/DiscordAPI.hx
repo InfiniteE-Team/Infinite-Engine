@@ -108,11 +108,11 @@ class DiscordAPI {
 	}
 
 	private static function onDisconnected(errorCode:Int, message:cpp.ConstCharStar):Void {
-		trace(' DISCORD Client has disconnected! ($errorCode) "${cast (message, String)}"');
+		trace(' DISCORD Client has disconnected! ($errorCode) "${Std.string(message)}"');
 	}
 
 	private static function onError(errorCode:Int, message:cpp.ConstCharStar):Void {
-		trace(' DISCORD Client has received an error! ($errorCode) "${cast (message, String)}"');
+		trace(' DISCORD Client has received an error! ($errorCode) "${Std.string(message)}"');
 	}
 }
 

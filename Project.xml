@@ -21,8 +21,6 @@
 	<define name="DISCORD_ALLOWED" if="desktop"/>
 	<define name="VIDEO_ALLOWED" if="cpp"/>
 
-	<define name="haxeui_dont_impose_base_class" />
-
 	<define name="HX_WINDOWS" if="windows cpp"/>
 
 	<!-- ____________________________ Template Settings ___________________________ -->
@@ -31,7 +29,7 @@
 	<!-- ____________________________ Window Settings ___________________________ -->
 
 	<!--These window settings apply to all targets-->
-	<window width="1280" height="720" fps="1000" background="#000000" hardware="true" vsync="false" borderless="true"/>
+	<window width="1280" height="720" fps="1000" background="#000000" hardware="true" vsync="false"/>
 
 	<!--Desktop-specific-->
 	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" />
@@ -61,9 +59,6 @@
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
 	<haxelib name="sl-windows-api" if="windows"/>
-
-	<haxelib name="haxeui-core" />
-	<haxelib name="haxeui-flixel" />
 
 	<haxelib name="funkin.vis" />
 	<haxelib name="grig.audio" />

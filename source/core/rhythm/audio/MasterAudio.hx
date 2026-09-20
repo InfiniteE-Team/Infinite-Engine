@@ -22,6 +22,9 @@ class MasterAudio {
 		currentTrackPath = path;
 		RhythmCore.changeBPM(bpm);
 		FlxG.sound.playMusic(oflSound, volume, true);
+		if (FlxG.sound.music != null) {
+            FlxG.sound.music.looped = true;
+        }
 	}
 
 	// Load Stream for better ram use
