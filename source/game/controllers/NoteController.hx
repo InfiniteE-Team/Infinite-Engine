@@ -227,6 +227,10 @@ class NoteController {
 		var ps = game.PlayState.instance;
 		if (ps != null && ps.controllerHUD != null)
 			ps.controllerHUD.applyDownscroll(newDownscroll);
+
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("postApplyDownscroll", [newDownscroll]);
+		#end
 	}
 
 	public function applyMiddlescroll(newMiddlescroll:Bool):Void {
@@ -259,6 +263,10 @@ class NoteController {
 				strum.visible = strumsVis;
 			}
 		}
+
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("postApplyMiddlescroll", [newMiddlescroll]);
+		#end
 	}
 
 	public function updateLaneBackdropAlpha():Void {

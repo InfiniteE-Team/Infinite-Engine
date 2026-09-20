@@ -294,8 +294,16 @@ class PlayState extends MusicBeatState {
 			return;
 		#end
 
-		cameraController.isLock = true;
-		flixel.tweens.FlxTween.tween(cameraController.camPoint, {y: camGame.y + 200}, 1, {ease: flixel.tweens.FlxEase.quadOut});
+		cameraController.char = null;
+		var opp = cast(chars.get(Lambda.find(SONG.chars, c -> CharacterController.namesOpponent.contains(c.role))?.id), game.objects.sprites.Character);
+		var ply = cast(chars.get(Lambda.find(SONG.chars, c -> !CharacterController.namesOpponent.contains(c.role))?.id), game.objects.sprites.Character);
+
+		if (opp != null && ply != null)
+			cameraController.centerCamera(opp, ply, true);
+		else
+			cameraController.isLock = true;
+
+		flixel.tweens.FlxTween.tween(cameraController.camPoint, {y: cameraController.camPoint.y - 200}, 1, {ease: flixel.tweens.FlxEase.quadOut});
 
 		if (!PlayStateConfig.isStoryMode) {
 			core.config.SaveScore.saveSong(curSong, playStateConfig.score, curDifficulty);
