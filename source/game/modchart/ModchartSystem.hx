@@ -74,6 +74,16 @@ class ModchartSystem extends FlxBasic {
 		}
 	}
 
+	public function syncBase():Void {
+		for (i in 0..._nc.strums.length) {
+			final s = _nc.strums.members[i];
+			if (s != null){
+				_baseX[i] = s.x;
+				_baseY[i] = s.y;
+			}
+		}
+	}
+
 	public function prepareMod(tag:String, factory:Dynamic, strumIndex:Int = -1):Void {
 		if (tag == null || tag == '' || factory == null || !Reflect.isFunction(factory))
 			return;

@@ -125,18 +125,18 @@ class FunkinPreloader extends MusicBeatState {
 		var audioBarY:Float = barY + BAR_HEIGHT + BAR_GAP;
 
 		statusText = new FlxText(barX, barY - 60, BAR_WIDTH, '');
-		statusText.setFormat(Paths.getPath('DS-Digital.ttf', 'font'), 30, core.EngineData.COLOR_PRELOADER_BAR, LEFT);
+		statusText.setFormat(Paths.getPath('DS-Digital.ttf', 'font'), 30, core.system.EngineData.COLOR_PRELOADER_BAR, LEFT);
 		add(statusText);
 
 		stepText = new FlxText(barX, barY - 30, BAR_WIDTH, '');
-		stepText.setFormat(Paths.getPath('DS-Digital.ttf', 'font'), 14, core.EngineData.COLOR_PRELOADER_BAR, LEFT);
+		stepText.setFormat(Paths.getPath('DS-Digital.ttf', 'font'), 14, core.system.EngineData.COLOR_PRELOADER_BAR, LEFT);
 		add(stepText);
 
 		barBgGraphics = new FlxSprite(barX, barY).makeGraphic(BAR_WIDTH, BAR_HEIGHT, 0xFF222222);
 		add(barBgGraphics);
 
 		barGraphics = new FlxBar(barX, barY, LEFT_TO_RIGHT, BAR_WIDTH, BAR_HEIGHT, this, 'graphicsProgress', 0, 1);
-		barGraphics.createFilledBar(FlxColor.TRANSPARENT, core.EngineData.COLOR_PRELOADER_BAR);
+		barGraphics.createFilledBar(FlxColor.TRANSPARENT, core.system.EngineData.COLOR_PRELOADER_BAR);
 		add(barGraphics);
 
 		labelGraphics = new FlxText(barX, barY + BAR_HEIGHT + 10, BAR_WIDTH, 'Graphics  0 / 0');
@@ -147,7 +147,7 @@ class FunkinPreloader extends MusicBeatState {
 		add(barBgAudio);
 
 		barAudio = new FlxBar(barX, audioBarY, LEFT_TO_RIGHT, BAR_WIDTH, BAR_HEIGHT, this, 'audioProgress', 0, 1);
-		barAudio.createFilledBar(FlxColor.TRANSPARENT, core.EngineData.COLOR_PRELOADER_BAR);
+		barAudio.createFilledBar(FlxColor.TRANSPARENT, core.system.EngineData.COLOR_PRELOADER_BAR);
 		add(barAudio);
 
 		labelAudio = new FlxText(barX, audioBarY + BAR_HEIGHT + 5, BAR_WIDTH, 'Audio  0 / 0');
@@ -157,7 +157,7 @@ class FunkinPreloader extends MusicBeatState {
 		var progressLines:FlxSprite = new FlxSprite(0, FlxG.height * 0.67);
 		progressLines.makeGraphic(FlxG.width, 30, FlxColor.TRANSPARENT, true);
 		var shape:openfl.display.Shape = new openfl.display.Shape();
-		shape.graphics.lineStyle(2, core.EngineData.COLOR_PRELOADER_BAR);
+		shape.graphics.lineStyle(2, core.system.EngineData.COLOR_PRELOADER_BAR);
 		shape.graphics.drawRect(-2, 0, FlxG.width + 4, 30);
 		progressLines.pixels.draw(shape);
 		progressLines.dirty = true;

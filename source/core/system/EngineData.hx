@@ -1,4 +1,4 @@
-package core;
+package core.system;
 
 import flixel.util.FlxColor;
 

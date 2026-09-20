@@ -1,12 +1,14 @@
-package;
+package core;
 
-import core.EngineData;
+import core.system.EngineData;
 import core.ui.FPSCounter;
 import openfl.display.Sprite;
 // crash handler
+#if CRASH_HANDLER
 import haxe.CallStack;
 import openfl.events.UncaughtErrorEvent;
 import core.system.warnings.TroubleShooter;
+#end
 
 class Main extends Sprite {
 	public var fps:FPSCounter = new FPSCounter(5, 5, 0xFFFFFF);

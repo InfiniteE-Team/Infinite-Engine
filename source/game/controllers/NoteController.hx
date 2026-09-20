@@ -58,7 +58,8 @@ class NoteController {
 	public var keys:Int = 4;
 
 	var spacing:Float = 0;
-	var input:InputController = new InputController();
+
+	public var input:InputController = new InputController();
 
 	// sustains limit clipping rect
 	var _clipRect:flixel.math.FlxRect = new flixel.math.FlxRect();
@@ -70,8 +71,14 @@ class NoteController {
 
 	// configs
 	public var isDownscroll:Bool = false;
+	public var isMiddlescroll:Bool = false;
 	public var ratingData:RatingData;
 	public var worstWindow:Float = 166.0;
+
+	var _strumBaseX:Array<Float> = [];
+	var _strumBaseY:Array<Float> = [];
+	var _strumCharId:Array<String> = [];
+	var _strumIsPlayer:Array<Bool> = [];
 
 	// CACHED DATA FOR OPTIMIZATION
 	var _cachedRatings:Array<Dynamic> = [];
@@ -106,7 +113,7 @@ class NoteController {
 
 		#if HSCRIPT_ALLOWED
 		scriptNC = script;
-		scriptNC.loadFolder('scripts/noteskins/$noteSkin/');
+		scriptNC.loadFolder('scripts/noteskins/$noteSkin');
 		#end
 
 		for (i in 0...daSong.chars.length) {
@@ -189,12 +196,90 @@ class NoteController {
 
 	public function bglaneBackdrop(x:Float):flixel.FlxSprite {
 		var strumWidth:Float = (keys * 112) + (spacing * (keys - 1)) + 45;
-		if (SaveData.data.middlescroll)
+		if (isMiddlescroll)
 			x = (FlxG.width / 2) - (strumWidth / 2);
 		var back:flixel.FlxSprite = new flixel.FlxSprite(x, 0).makeGraphic(Std.int(strumWidth), FlxG.height, flixel.util.FlxColor.BLACK);
 		var alphaVal:Float = SaveData.data.laneBackdrop;
 		back.alpha = (alphaVal > 1) ? (alphaVal / 100) : alphaVal;
 		return back;
+	}
+
+	public function applyScrollDirection(newDownscroll:Bool):Void {
+		if (isDownscroll == newDownscroll)
+			return;
+		isDownscroll = newDownscroll;
+		doApplyScrollDirection(newDownscroll);
+	}
+
+	function doApplyScrollDirection(newDownscroll:Bool):Void {
+		for (i in 0...strums.members.length) {
+			var strum = strums.members[i];
+			if (strum == null)
+				continue;
+			strum.y = _strumBaseY[i] + (newDownscroll ? 500 : 0);
+		}
+		for (s in unspawnNotes)
+			if ((s is NoteSustain))
+				cast(s, NoteSustain).flipY = newDownscroll;
+		for (s in sustains.members)
+			if (s != null)
+				s.flipY = newDownscroll;
+		var ps = game.PlayState.instance;
+		if (ps != null && ps.controllerHUD != null)
+			ps.controllerHUD.applyDownscroll(newDownscroll);
+	}
+
+	public function applyMiddlescroll(newMiddlescroll:Bool):Void {
+		if (isMiddlescroll == newMiddlescroll)
+			return;
+		isMiddlescroll = newMiddlescroll;
+		doApplyMiddlescroll(newMiddlescroll);
+	}
+
+	function doApplyMiddlescroll(newMiddlescroll:Bool):Void {
+		var centerX:Float = (flixel.FlxG.width - ((keys * 112) + ((keys - 1) * spacing))) / 2 - 25;
+		for (i in 0...strums.members.length) {
+			var strum = strums.members[i];
+			if (strum == null)
+				continue;
+			var isPlayer = _strumIsPlayer[i];
+			var localLane = i % keys;
+
+			if (newMiddlescroll) {
+				if (isPlayer) {
+					strum.x = centerX + localLane * (112 + spacing);
+					strum.visible = true;
+				} else {
+					strum.visible = false;
+				}
+			} else {
+				strum.x = _strumBaseX[i];
+				var charData = Lambda.find(daSong.chars, c -> c.id == _strumCharId[i]);
+				var strumsVis = charData?.strums?.visible ?? true;
+				strum.visible = strumsVis;
+			}
+		}
+	}
+
+	public function updateLaneBackdropAlpha():Void {
+		var alphaVal:Float = SaveData.data.laneBackdrop;
+		var newAlpha:Float = (alphaVal > 1) ? (alphaVal / 100) : alphaVal;
+		for (bg in blackBacks.members) {
+			if (bg != null)
+				bg.alpha = newAlpha;
+		}
+	}
+
+	public function updateAntialiasingLive(enabled:Bool):Void {
+		var groups:Array<flixel.group.FlxGroup.FlxTypedGroup<Dynamic>> = [strums, notes, sustains, splashes, holdsplashes, blackBacks];
+		for (group in groups) {
+			if (group != null) {
+				for (item in group.members) {
+					if (item != null)
+						item.antialiasing = enabled;
+				}
+			}
+		}
 	}
 
 	public function loadGenerateStrums(x:Float, y:Float, charId:String, isPlayer:Bool) {
@@ -206,31 +291,25 @@ class NoteController {
 		var charData = Lambda.find(daSong.chars, c -> c.id == charId);
 
 		_charNotesVisible.set(charId, notesVisible);
+		isMiddlescroll = SaveData.data.middlescroll;
+		var charBaseY:Float = PlayStateConfig.strumLineY + y;
 
 		for (i in 0...keys) {
 			#if HSCRIPT_ALLOWED
 			scriptNC.call("onBuildStrums", []);
 			#end
-			var strum = new StrumNote(x + i * (112 + spacing), PlayStateConfig.strumLineY + y, noteSkinData.props, noteSkin);
+			var baseX:Float = x + i * (112 + spacing);
+			var strum = new StrumNote(baseX, charBaseY, noteSkinData.props, noteSkin);
 			strum.playAnim('static' + i);
 			strum.applyShader(noteSkinData);
-			if (isDownscroll)
-				strum.y += 500;
+			_strumBaseX.push(baseX);
+			_strumBaseY.push(charBaseY);
+			_strumCharId.push(charId);
+			_strumIsPlayer.push(isPlayer);
 
-			if (SaveData.data.middlescroll) {
-				if (isPlayer)
-					strum.x = ((FlxG.width - ((keys * 112) + ((keys - 1) * spacing))) / 2) + i * (112 + spacing) - 25;
-				else {
-					strum.visible = false;
-					strumsVisible = false;
-					notesVisible = false;
-				}
-			}
-
-			if (!PlayStateConfig.isStoryMode) {
+			if (!PlayStateConfig.isStoryMode && !PlayState.instance.isRewind) {
 				strum.alpha = 0;
-				strum.y -= 10;
-				FlxTween.tween(strum, {alpha: 1, y: strum.y + 10}, 0.5, {startDelay: 0.5 + (0.2 * i)});
+				FlxTween.tween(strum, {alpha: 1}, 0.5, {startDelay: 0.5 + (0.2 * i)});
 			}
 
 			#if HSCRIPT_ALLOWED
@@ -246,6 +325,9 @@ class NoteController {
 			scriptNC.call("postBuildStrums", []);
 			#end
 		}
+
+		doApplyScrollDirection(isDownscroll);
+		doApplyMiddlescroll(isMiddlescroll);
 	}
 
 	// Creation or Generation for Notes
@@ -570,7 +652,7 @@ class NoteController {
 			var lane = sustain.direction;
 
 			// CPU HOLD SPLASHES
-			if (!SaveData.data.middlescroll) {
+			if (!isMiddlescroll) {
 				if (!sustain.mustPress) {
 					var isWithinHold = songTime >= sustain.strumTime && songTime <= (sustain.strumTime + sustain.length);
 					if (isWithinHold) {
@@ -615,7 +697,7 @@ class NoteController {
 				#end
 
 				var body = sustain.parentNote;
-				if (body == null || toDestroySet.exists(body)) {
+				if (body == null || !body.alive || toDestroySet.exists(body)) {
 					toDestroySet.set(sustain, true);
 					continue;
 				}
@@ -624,13 +706,8 @@ class NoteController {
 				sustain.origin.y = 0;
 
 				var endHeight = sustain.frameHeight * sustain.scale.y;
-				if (isDownscroll) {
-					sustain.flipY = true;
-					sustain.y = body.y - endHeight;
-				} else {
-					sustain.flipY = false;
-					sustain.y = body.y + (body.frameHeight * body.scale.y);
-				}
+				sustain.flipY = isDownscroll;
+				sustain.y = isDownscroll ? body.y - endHeight : body.y + (body.frameHeight * body.scale.y);
 
 				var strumMidScreen = sustain.strum.y + (sustain.strum.frameHeight * 0.5) - sustain.strum.offset.y;
 				if (isDownscroll) {
@@ -701,8 +778,10 @@ class NoteController {
 			if (holdsplash != null && holdsplash.alive)
 				holdsplash.setPosition(strum.x, strum.y);
 		}
-		for (note in toDestroySet.keys())
-			destroyNotes(note);
+		for (note in toDestroySet.keys()) {
+			if (note != null)
+				destroyNotes(note);
+		}
 		#if HSCRIPT_ALLOWED
 		scriptNC.call("postNoteUpdate", [songTime]);
 		#end

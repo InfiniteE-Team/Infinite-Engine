@@ -1,4 +1,4 @@
-import core.EngineData;
+import core.system.EngineData;
 import states.substates.menus.OptionsMenuSubstate;
 import flixel.text.FlxTextBorderStyle;
 
@@ -21,7 +21,6 @@ class MainMenuState extends ScriptState {
 		var bg:FlxSprite = new FlxSprite();
 		bg.loadGraphic(Paths.getPath('menus/menuBG', 'image'));
 		bg.antialiasing = SaveData.data.antialiasing;
-		bg.scrollFactor.set();
 		bg.screenCenter();
 		add(bg);
 

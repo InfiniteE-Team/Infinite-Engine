@@ -60,40 +60,56 @@ class EventManager {
 	function handleEvent(event:EventsData) {
 		switch (event.name) {
 			case 'Change Character':
-				var charId:String = Reflect.field(event.arguments, 'char');
-				var newCharacter:String = Reflect.field(event.arguments, 'newCharacter');
+				var charId:String = event.arguments.char;
+				var newCharacter:String = event.arguments.newCharacter;
 				if (charId == null || newCharacter == null) {
 					Trace.traceOnce('[EventManager] Change Character: "char" or "newCharacter" are missing from the arguments.');
 					return;
 				}
-				var char = PlayState.instance.chars.get(charId);
+				var char = cast PlayState.instance.chars.get(charId);
 				if (char == null) {
 					Trace.traceOnce('[EventManager] Change Character: char "$charId" not found');
 					return;
 				}
-				cast(char, Character).changeCharacter(newCharacter);
+				char.changeCharacter(newCharacter);
 			case 'Camera Follow':
-				PlayState.instance.cameraController.existsCamEvents = true;
-				var charId:String = Reflect.field(event.arguments, 'char');
-				var char = PlayState.instance.chars.get(charId);
+				var charId:String = event.arguments.char;
+				var char = cast PlayState.instance.chars.get(charId);
 				if (char == null) {
 					Trace.traceOnce('[EventManager] Camera Follow char "$charId" not found');
 					return;
 				}
-				PlayState.instance.cameraController.char = cast(char, Character);
+				PlayState.instance.cameraController.existsCamEvents = true;
+				PlayState.instance.cameraController.char = char;
+			case 'Center Camera':
+				var charId1:String = event.arguments.char1;
+				var charId2:String = event.arguments.char2;
+				var isLock:Bool = event.arguments.isLock;
+				var char1 = cast PlayState.instance.chars.get(charId1);
+				var char2 = cast PlayState.instance.chars.get(charId2);
+				if (char1 == null)
+					Trace.traceOnce('[EventManager] Camera Follow char "$charId1" not found');
+				if (char2 == null)
+					Trace.traceOnce('[EventManager] Camera Follow char "$charId2" not found');
+				if (char1 == null || char2 == null)
+					return;
+				if (PlayState.instance.cameraController.existsCamEvents != true)
+					PlayState.instance.cameraController.existsCamEvents = true;
+				PlayState.instance.cameraController.centerCamera(char1, char2, isLock);
 			case 'Change Scroll Speed':
-				var newSpeed:Float = Std.parseFloat(event.arguments[0]);
+				var rawSpeed = event.arguments.speed != null ? event.arguments.speed : event.arguments[0];
+				var newSpeed:Float = Std.parseFloat(Std.string(rawSpeed));
 				if (!Math.isNaN(newSpeed)) {
 					PlayState.instance.noteController.targetScrollSpeed = newSpeed;
 				}
 			case 'Change BPM':
-				var newBPM:Float = Std.parseFloat(Reflect.field(event.arguments, 'bpm'));
+				var newBPM:Float = event.arguments.bpm;
 				if (!Math.isNaN(newBPM) && newBPM > 0) {
 					core.rhythm.RhythmCore.changeBPM(newBPM);
 				}
 			case 'Play Special Anim':
-				var charId:String = Reflect.field(event.arguments, 'char');
-				var animKey:String = Reflect.field(event.arguments, 'anim');
+				var charId = event.arguments.char;
+				var animKey = event.arguments.anim;
 				if (charId == null || animKey == null) {
 					Trace.traceOnce('[EventManager] Play Special Anim: "char" or "anim" are missing from the arguments');
 					return;

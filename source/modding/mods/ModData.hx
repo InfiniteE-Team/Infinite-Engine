@@ -29,7 +29,7 @@ class ModConfig {
 		var jsonPath = Paths.getPath('meta', 'json');
 		if (jsonPath == null || !FileSystem.exists(jsonPath)) {
 			Trace.traceOnce('The mod file "meta.json" was not found in: $jsonPath', true);
-			name = core.EngineData.name;
+			name = core.system.EngineData.name;
 			modData = null;
 			lime.app.Application.current.window.title = name;
 			return;
@@ -44,9 +44,9 @@ class ModConfig {
 		}
 
 		if (modData == null)
-			name = core.EngineData.name;
+			name = core.system.EngineData.name;
 		else
-			name = modData.name ?? core.EngineData.name;
+			name = modData.name ?? core.system.EngineData.name;
 
 		lime.app.Application.current.window.title = name;
 	}

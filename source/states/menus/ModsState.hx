@@ -1,5 +1,6 @@
 package states.menus;
 
+import game.objects.Camera;
 import core.assets.Library;
 import flixel.text.FlxText;
 import flixel.util.FlxTimer;
@@ -23,7 +24,23 @@ class ModsState extends MusicBeatState {
 
 	var changeMod:Bool = false;
 
+	var camMods:Camera;
+
 	var dragPlugin:states.menus.objects.ModDropPlugin;
+
+	static final BOX_X:Int = 140;
+	static final BOX_Y:Int = 150;
+	static final BOX_W:Int = 910;
+	static final BOX_H:Int = 412;
+
+	static final CONTENT_X:Int = 200;
+	static final CONTENT_START_Y:Int = 200;
+	static final ITEM_SPACING:Float = 110;
+
+	var scrollbar:flixel.FlxSprite;
+	var scrollbarTrack:flixel.FlxSprite;
+
+	static final CAM_SCROLL_PADDING:Float = 20;
 
 	public function new() {
 		super();
@@ -43,32 +60,35 @@ class ModsState extends MusicBeatState {
 			var modMeta = modding.mods.ModData.ModConfig.loadForMod(modName);
 			var description:String = modMeta?.description ?? '??';
 
-			var spacing:Float = 110;
+			var itemY:Float = 30 + (i * ITEM_SPACING);
 
-			var image:FunkinSprite = new FunkinSprite(200, 200 + (i * spacing), true);
+			var image:FunkinSprite = new FunkinSprite(40, itemY, true);
 			image.loadGraphic(graphic);
 			image.antialiasing = SaveData.data.antialiasing;
 			image.ID = i;
 			image.scrollFactor.set(0, 0);
 			image.scale.set(0.72, 0.72);
+			image.cameras = [camMods];
 			image.updateHitbox();
 			listGraphics.push(image);
 			add(image);
 
-			var mod:FlxText = new FlxText(330, 210 + (i * spacing), FlxG.width, ModsRegistry.mods[i].toUpperCase());
+			var mod:FlxText = new FlxText(160, itemY + 10, FlxG.width, ModsRegistry.mods[i].toUpperCase());
 			mod.setFormat(Paths.getPath('Funkin.otf', 'font'), 32, 0xFFFFFFFF, "left");
 			mod.antialiasing = SaveData.data.antialiasing;
 			mod.ID = i;
 			mod.scrollFactor.set(0, 0);
+			mod.cameras = [camMods];
 			listMods.push(mod);
 			listModTitles.push(mod);
 			add(mod);
 
-			var modDesc:FlxText = new FlxText(330, 240 + (i * spacing), FlxG.width, description);
+			var modDesc:FlxText = new FlxText(160, itemY + 40, FlxG.width, description);
 			modDesc.setFormat(Paths.getPath('Funkin.otf', 'font'), 32, 0xFFFFFFFF, "left");
 			modDesc.antialiasing = SaveData.data.antialiasing;
 			modDesc.ID = i;
 			modDesc.scrollFactor.set(0, 0);
+			modDesc.cameras = [camMods];
 			listMods.push(modDesc);
 			add(modDesc);
 		}
@@ -80,6 +100,10 @@ class ModsState extends MusicBeatState {
 		super.create();
 
 		core.rhythm.audio.MasterAudio.playMenu(Paths.getPath('menus/mod-menu-ambience/mod-menu-ambience', 'music'), 0.8, 67);
+
+		camMods = new Camera(BOX_X, BOX_Y, BOX_W, BOX_H);
+		camMods.bgColor = 0x00000000;
+		FlxG.cameras.add(camMods, false);
 
 		var bg:FunkinSprite = new FunkinSprite(0, 0, true);
 		bg.loadGraphic(Paths.getPath('menus/mods/bg', 'image'));
@@ -113,6 +137,17 @@ class ModsState extends MusicBeatState {
 		box.scale.set(0.9, 0.6);
 		box.updateHitbox();
 		add(box);
+
+		var trackW:Int = 6;
+		scrollbarTrack = new flixel.FlxSprite(700, BOX_Y + 8);
+		scrollbarTrack.makeGraphic(trackW, BOX_H - 16, 0x33FFFFFF);
+		scrollbarTrack.scrollFactor.set(0, 0);
+		add(scrollbarTrack);
+
+		scrollbar = new flixel.FlxSprite(700, BOX_Y + 8);
+		scrollbar.makeGraphic(trackW, 40, 0xFFFFFFFF);
+		scrollbar.scrollFactor.set(0, 0);
+		add(scrollbar);
 
 		if (ModsRegistry.mods.length == 0) {
 			noModsText = new FlxText(0, FlxG.height * 0.45, FlxG.width, "NO MODS FOUND");
@@ -195,6 +230,8 @@ class ModsState extends MusicBeatState {
 			listMods.resize(0);
 			listModTitles.resize(0);
 			listGraphics.resize(0);
+
+			FlxG.cameras.remove(camMods, true);
 
 			FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
 
@@ -293,6 +330,20 @@ class ModsState extends MusicBeatState {
 		if (curSelected >= ModsRegistry.mods.length)
 			curSelected = 0;
 
+		if (camMods != null && ModsRegistry.mods.length > 0) {
+			var itemCenterY:Float = CONTENT_START_Y + (curSelected * ITEM_SPACING) + (ITEM_SPACING * 0.5);
+
+			var targetScrollY:Float = itemCenterY - (BOX_H * 0.5);
+
+			var totalContentH:Float = ModsRegistry.mods.length * ITEM_SPACING;
+			var maxScroll:Float = Math.max(0, totalContentH - BOX_H + CAM_SCROLL_PADDING);
+			targetScrollY = Math.max(0, Math.min(targetScrollY, maxScroll));
+
+			camMods.scroll.y = targetScrollY;
+
+			updateScrollbar(targetScrollY, maxScroll);
+		}
+
 		for (i in 0...listModTitles.length) {
 			var baseName = ModsRegistry.mods[i].toUpperCase();
 			if (ModsRegistry.mods[i] == ModsRegistry.currentMod)
@@ -312,10 +363,38 @@ class ModsState extends MusicBeatState {
 		}
 	}
 
+	function updateScrollbar(scrollY:Float, maxScroll:Float):Void {
+		if (scrollbar == null || scrollbarTrack == null)
+			return;
+
+		var trackH:Float = BOX_H - 16;
+		var trackY:Float = BOX_Y + 8;
+
+		if (maxScroll <= 0) {
+			scrollbar.y = trackY;
+			scrollbar.makeGraphic(6, Std.int(trackH), 0xFFFFFFFF);
+			return;
+		}
+
+		var totalContentH:Float = ModsRegistry.mods.length * ITEM_SPACING;
+		var visibleRatio:Float = Math.min(1.0, BOX_H / totalContentH);
+		var thumbH:Float = Math.max(20, trackH * visibleRatio);
+
+		var scrollRatio:Float = scrollY / maxScroll;
+		var thumbY:Float = trackY + scrollRatio * (trackH - thumbH);
+
+		scrollbar.y = thumbY;
+		scrollbar.makeGraphic(6, Std.int(thumbH), 0xFFFFFFFF);
+	}
+
 	override public function destroy() {
 		if (dragPlugin != null) {
 			dragPlugin.destroy();
 		}
+		if (camMods != null) {
+			FlxG.cameras.remove(camMods, true);
+		}
+		camMods = null;
 		super.destroy();
 	}
 }

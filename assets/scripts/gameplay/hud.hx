@@ -1,39 +1,7 @@
-import utils.InfiniteUtil;
-import flixel.util.FlxStringUtil;
-import flixel.text.FlxTextBorderStyle;
-
-var scoreText:FlxText;
 var ratingPool = [];
 var numberPool = [];
 var comboPool = [];
 var missPool = [];
-
-function postCreate() {
-	scoreText = new FlxText(0, healthBarY + 30, FlxG.width, "Score: 0 // Combo Breaks: 0");
-	scoreText.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFFFFFFFF, "center");
-	scoreText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
-	scoreText.antialiasing = SaveData.data.antialiasing;
-	scoreText.scrollFactor.set(0, 0);
-	scoreText.cameras = [camHUD];
-	add(scoreText);
-}
-
-var intendedScore:Float = 0;
-
-function postUpdate(elapsed:Float) {
-	updateScore(elapsed);
-}
-
-function updateScore(elapsed:Float) {
-	intendedScore = FlxMath.lerp(intendedScore, playStateConfig.score, FlxMath.bound(elapsed * 16, 0, 1));
-
-	var displayScore:String = InfiniteUtil.formatNumber(Math.round(intendedScore));
-
-	if (SaveData.data.botplay)
-		scoreText.text = 'BOTPLAY';
-	else
-		scoreText.text = 'Score: $displayScore // Combo Breaks: ${playStateConfig.misses}';
-}
 
 function onDestroy() {
 	for (sprite in ratingPool) {
@@ -56,8 +24,6 @@ function onDestroy() {
 	comboPool = [];
 	numberPool = [];
 	missPool = [];
-	scoreText.destroy();
-	scoreText = null;
 }
 
 var PIXEL_ZOOM = 6;

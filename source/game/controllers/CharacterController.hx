@@ -28,6 +28,8 @@ class CharacterController extends FunkinObjectRegistry {
 
 	var input:InputController = new InputController();
 
+	var isGhostTapping:Bool = true;
+
 	var _noteController:NoteController;
 	var _gameAudio:GameAudio;
 	var _playStateConfig:PlayStateConfig;
@@ -40,6 +42,19 @@ class CharacterController extends FunkinObjectRegistry {
 		super(id, x, y);
 		control = core.ConfigMain.controls;
 		FlxG.stage.addEventListener(openfl.events.KeyboardEvent.KEY_DOWN, onStageKeyDown);
+	}
+
+	public function initControllers(nc:NoteController, audio:GameAudio, cfg:PlayStateConfig):Void {
+		_noteController = nc;
+		_gameAudio = audio;
+		_playStateConfig = cfg;
+		isGhostTapping = core.config.SaveData.data.ghosttaping;
+	}
+
+	public function syncGhostTapping():Void {
+		isGhostTapping = core.config.SaveData.data.ghosttaping;
+		if (_noteController != null)
+			_noteController.input.isGhostTapping = isGhostTapping;
 	}
 
 	public function loadCharacter(id:String, name:String, role:String, targetGroup:FlxTypedGroup<flixel.FlxBasic>, script:ScriptHandler):Character {
@@ -65,11 +80,6 @@ class CharacterController extends FunkinObjectRegistry {
 	}
 
 	public function processInput(noteController:NoteController, gameAudio:GameAudio, playStateConfig:PlayStateConfig) {
-		_noteController = noteController;
-		_gameAudio = gameAudio;
-		_playStateConfig = playStateConfig;
-
-		input.isGhostTapping = core.config.SaveData.data.ghosttaping;
 		for (char in playerChars) {
 			var strums = noteController.getCharStrums(char.id);
 			#if HSCRIPT_ALLOWED
@@ -77,19 +87,12 @@ class CharacterController extends FunkinObjectRegistry {
 			#end
 			for (i in 0...strums.length) {
 				if (SaveData.data.botplay) {
-					for (note in noteController.notes.members) {
-						if (note == null || !note.alive || !note.mustPress || note.wasGoodHit || note.wasMissed)
-							continue;
-						var lane = noteController.charStrumOffsets.get(char.id);
-						if (lane == null)
-							continue;
-						if (note.direction != lane + i)
-							continue;
+					var note = noteController.getHittableNote(char.id, i, true);
+					if (note != null) {
 						var diff = note.strumTime - core.rhythm.RhythmCore.songPosition;
 						if (diff <= 0) {
 							strums[i].playAnim('confirm' + i, false);
 							note.wasGoodHit = true;
-
 							var ratingType = noteController.getRatingForDiff(0);
 							if (ratingType != null) {
 								playStateConfig.score += ratingType.score;
@@ -104,7 +107,6 @@ class CharacterController extends FunkinObjectRegistry {
 								if (sustain.strum == strums[i] && sustain.strumTime == note.strumTime)
 									sustain.wasNoteHit = true;
 							}
-
 							note.kill();
 							if (ratingType != null && ratingType.splash)
 								noteController.spawnSplash(strums[i], i, note.noteType);

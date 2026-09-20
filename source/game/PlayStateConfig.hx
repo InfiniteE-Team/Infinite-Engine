@@ -2,7 +2,7 @@ package game;
 
 class PlayStateConfig {
 	// note
-	public static inline var strumLineY:Float = 50.0;
+	public static inline var strumLineY:Float = 40.0;
 
 	// gameplay
 	public var health(default, set):Float = 1.0;

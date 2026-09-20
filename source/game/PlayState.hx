@@ -59,6 +59,7 @@ class PlayState extends MusicBeatState {
 	public var osuMode:Bool = false;
 
 	public var paused:Bool = false;
+	public var isRewind:Bool = false;
 
 	public var startCount:Bool = false;
 
@@ -112,6 +113,9 @@ class PlayState extends MusicBeatState {
 		add(subtitleManager);
 
 		super.create();
+
+		RhythmCore.reset(SONG.bpmSong);
+		t.reset();
 
 		buildStrumsandNotes();
 		/*
@@ -201,6 +205,8 @@ class PlayState extends MusicBeatState {
 			add(noteControl);
 		}
 
+		chars.initControllers(noteController, gameAudio, playStateConfig);
+
 		modchartSystem = new game.modchart.ModchartSystem(noteController);
 		add(modchartSystem);
 		modchartSystem.cacheStrumBase();
@@ -227,6 +233,7 @@ class PlayState extends MusicBeatState {
 	}
 
 	public function startCountdown() {
+		isRewind = false;
 		#if HSCRIPT_ALLOWED
 		script.call("onCountdown", []);
 		#end
@@ -269,7 +276,6 @@ class PlayState extends MusicBeatState {
 		if (startTime > 0) {
 			gameAudio.setTime(startTime);
 			RhythmCore.songPosition = startTime;
-			t.reset();
 		}
 
 		gameAudio.playAll();
@@ -414,12 +420,13 @@ class PlayState extends MusicBeatState {
 		if (script != null) {
 			script.call("onDestroy", []);
 			script.destroy();
+			script = null;
 		}
 		#end
 
-		game.graphics.shaders.CustomShader.clearAll();
+		isRewind = true;
 
-		script.call("onRewind", []);
+		game.graphics.shaders.CustomShader.clearAll();
 
 		gameAudio.stopAll();
 
@@ -428,12 +435,17 @@ class PlayState extends MusicBeatState {
 		}
 
 		if (noteController != null) {
-			remove(noteController.blackBacks);
-			remove(noteController.strums);
-			remove(noteController.sustains);
-			remove(noteController.notes);
-			remove(noteController.splashes);
-			remove(noteController.holdsplashes);
+			for (noteControl in [
+				noteController.blackBacks,
+				noteController.strums,
+				noteController.sustains,
+				noteController.notes,
+				noteController.splashes,
+				noteController.holdsplashes
+			]) {
+				if (noteControl != null)
+					remove(noteControl);
+			}
 			noteController.destroy();
 			noteController = null;
 		}
@@ -442,8 +454,6 @@ class PlayState extends MusicBeatState {
 			events.destroy();
 			events = new EventManager();
 		}
-
-		buildStrumsandNotes();
 
 		RhythmCore.reset(SONG.bpmSong);
 		t.reset(); // reset steps and beats
@@ -454,9 +464,17 @@ class PlayState extends MusicBeatState {
 		#if HSCRIPT_ALLOWED
 		startScript();
 		script.call("onCreate", []);
-		modding.scripting.ScriptedVars.gameplayVars(script, this);
-		script.call("postCreate", []);
 		#end
+
+		if (controllerHUD != null) {
+			controllerHUD.destroy();
+			controllerHUD = null;
+			controllerHUD = new HUDController();
+			controllerHUD.cameras = [camHUD];
+			add(controllerHUD);
+		}
+
+		buildStrumsandNotes();
 
 		noteController.generateNotes(0, SONG);
 		startCountdown();
@@ -468,6 +486,11 @@ class PlayState extends MusicBeatState {
 			events.loadEvents(SONG.songData.gameplay.events);
 			events.updateEvents(0);
 		}
+
+		#if HSCRIPT_ALLOWED
+		modding.scripting.ScriptedVars.gameplayVars(script, this);
+		script.call("postCreate", []);
+		#end
 
 		#if HSCRIPT_ALLOWED
 		script.call('onRewindPost', []);
@@ -489,14 +512,10 @@ class PlayState extends MusicBeatState {
 			MusicBeatState.switchState(() -> new modding.editors.GameplayEditor());
 		}
 
-		if (startCount && !paused) {
+		if (!paused) {
 			RhythmCore.songPosition += elapsed * 1000;
-		} else if (gameAudio != null && gameAudio.inst != null) {
-			if (gameAudio.inst.playing) {
+			if (!startCount && gameAudio != null && gameAudio.inst != null && gameAudio.inst.playing)
 				RhythmCore.songPosition = gameAudio.inst.time;
-			} else if (!paused) {
-				RhythmCore.songPosition += elapsed * 1000;
-			}
 		}
 
 		if (gameAudio != null && chars != null && SONG != null)
@@ -551,7 +570,8 @@ class PlayState extends MusicBeatState {
 		if (beat % 4 == 0)
 			cameraController.bumpZoom();
 
-		controllerHUD.beatHit(beat);
+		if (controllerHUD != null)
+			controllerHUD.beatHit(beat);
 
 		if (!osuMode || !paused)
 			chars.danceAll();

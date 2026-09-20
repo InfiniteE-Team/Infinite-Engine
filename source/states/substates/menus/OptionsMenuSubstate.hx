@@ -16,9 +16,6 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 	var contentCam:Camera;
 	var keybindsMenu:states.substates.menus.options.KeybindsMenu;
 
-	static final CONTENT_X:Int = 330;
-	static final CONTENT_Y:Int = 130;
-	static final CONTENT_W:Int = 900;
 	static final CONTENT_H:Int = 412;
 
 	var categoryOptions:Map<String, Array<OptionData>> = [
@@ -101,7 +98,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 
 		FlxG.mouse.visible = true;
 
-		contentCam = new Camera(CONTENT_X, CONTENT_Y, CONTENT_W, CONTENT_H);
+		contentCam = new Camera(330, 130, 900, CONTENT_H);
 		contentCam.bgColor = 0x00000000;
 		FlxG.cameras.add(contentCam, false);
 
@@ -235,7 +232,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 
 			switch (opt.type) {
 				case CHECKBOX:
-					valSprite = new FlxSprite(CONTENT_W - 200, 20 + (i * 50));
+					valSprite = new FlxSprite(900 - 200, 20 + (i * 50));
 					valSprite.frames = Paths.getPath('menus/options/check_box', 'animated');
 					valSprite.animation.addByPrefix('uncheck', 'UnCheck0000', 24, false);
 					valSprite.animation.addByPrefix('check', 'Check0000', 24, false);
@@ -258,7 +255,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 					if (displayFormat == null)
 						displayFormat = '';
 
-					var valText = new FlxText(CONTENT_X + 375, 20 + (i * 50), 0, Std.string(rawValue) + displayFormat);
+					var valText = new FlxText(330 + 375, 20 + (i * 50), 0, Std.string(rawValue) + displayFormat);
 					valText.setFormat(Paths.getPath('Funkin.otf', 'font'), 26, 0xFFFFFFFF, "right");
 					valText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 					valSprite = valText;
@@ -532,10 +529,66 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 				updateVisualFocus();
 				FlxG.sound.play(Paths.getPath('menus/cancelMenu', 'sound'));
 			} else {
+				if (game.PlayStateConfig.isPlaying)
+					applyLiveChanges();
 				close();
 				FlxG.mouse.visible = false;
-				if (game.PlayStateConfig.isPlaying)
-					MusicBeatState.resetState();
+			}
+		}
+	}
+
+	function applyLiveChanges():Void {
+		var ps = game.PlayState.instance;
+		if (ps == null)
+			return;
+
+		if (ps.noteController != null)
+			ps.chars.syncGhostTapping();
+
+		if (ps.noteController != null)
+			ps.noteController.updateLaneBackdropAlpha();
+
+		ps.playStateConfig.isBotplay = SaveData.data.botplay;
+
+		ps.noteController.applyScrollDirection(SaveData.data.downscroll);
+		ps.noteController.applyMiddlescroll(SaveData.data.middlescroll);
+
+		ps.modchartSystem.syncBase();
+
+		updateAntialiasingLivePlayState(SaveData.data.antialiasing);
+	}
+
+	function updateAntialiasingLivePlayState(enabled:Bool):Void {
+		var ps = game.PlayState.instance;
+		if (ps == null)
+			return;
+
+		if (ps.noteController != null)
+			ps.noteController.updateAntialiasingLive(enabled);
+
+		if (ps.chars != null) {
+			for (charData in game.PlayState.SONG.chars) {
+				var char = cast(ps.chars.get(charData.id), game.objects.sprites.Character);
+				if (char == null)
+					continue;
+				char.antialiasing = enabled;
+				if (char.layers != null)
+					for (layer in char.layers)
+						if (layer != null)
+							layer.antialiasing = enabled;
+			}
+		}
+
+		if (ps.controllerHUD != null) {
+			for (member in ps.controllerHUD.members)
+				if (member != null && Std.isOfType(member, flixel.FlxSprite))
+					cast(member, flixel.FlxSprite).antialiasing = enabled;
+		}
+
+		if (ps.stage != null) {
+			for (member in ps.stage.members) {
+				if (member != null && Std.isOfType(member, flixel.FlxSprite))
+					cast(member, flixel.FlxSprite).antialiasing = enabled;
 			}
 		}
 	}

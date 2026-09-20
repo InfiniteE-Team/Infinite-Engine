@@ -1,7 +1,5 @@
 # Infinite-Engine (68%)
 > This engine is in heavy work in progress, therefore it will have bugs and an official version has not been released. (This engine is not intended to work with HTML targets, by the way.)
-<img width="480" height="280" alt="image" src="https://github.com/user-attachments/assets/2a8835ec-ddf4-49ed-abfe-94427bc5ebaa" />
-<img width="481" height="280" alt="image" src="https://github.com/user-attachments/assets/273392c3-9915-4564-a194-590d1661454f" />
 
 The infinite engine is an FNF engine written from scratch in HaxeFlixel.
 
@@ -12,6 +10,9 @@ The infinite engine is an FNF engine written from scratch in HaxeFlixel.
 - [flixel-animate](https://github.com/MaybeMaru/flixel-animate) by MaybeMaru
 - [SL-Windows-API](https://github.com/Slushi-Github/SL-Windows-API) by Slushi
 - [ALE-Json](https://github.com/AlejoGDOfficial/ALE-Json) by AlejoGDOfficial
+
+<img width="480" height="280" alt="image" src="https://github.com/user-attachments/assets/2a8835ec-ddf4-49ed-abfe-94427bc5ebaa" />
+<img width="481" height="280" alt="image" src="https://github.com/user-attachments/assets/273392c3-9915-4564-a194-590d1661454f" />
 
 **Infinite Team:**
 -----------------------

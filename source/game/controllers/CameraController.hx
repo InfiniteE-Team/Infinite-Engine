@@ -48,6 +48,15 @@ class CameraController {
 		}
 	}
 
+	public function centerCamera(?a:Character, ?b:Character, ?lock:Bool = true) {
+		final aCam = a.getCamPosition();
+		final bCam = b.getCamPosition();
+
+		moveCameraTo((aCam.x + bCam.x) / 2, (aCam.y + bCam.y) / 2);
+
+		isLock = lock;
+	}
+
 	public function lerpZoom(elapsed:Float):Void {
 		var lerpVal:Float = FlxMath.bound(elapsed * 3.125, 0, 1);
 		camGame.zoom = FlxMath.lerp(camGame.zoom, defaultZoom, lerpVal);

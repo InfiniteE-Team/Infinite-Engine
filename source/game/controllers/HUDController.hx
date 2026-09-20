@@ -2,15 +2,22 @@ package game.controllers;
 
 import game.PlayState;
 import game.objects.Bar;
+import flixel.text.FlxText;
 import core.assets.FunkinSprite;
 import game.objects.sprites.Icon;
 
 class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic> {
+	static inline var barYNORMAL:Float = 0.88;
+	static inline var barYDOWNSCROLL:Float = 0.10;
+
 	public var iconP1:Icon;
 	public var iconP2:Icon;
 	public var healthBarBG:FunkinSprite;
 	public var healthBar:Bar;
 	public var healthBarY:Float = 0;
+	public var scoreText:FlxText;
+
+	var intendedScore:Float = 0;
 
 	public function new() {
 		super();
@@ -18,9 +25,9 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 	}
 
 	public function createHUD() {
-		healthBarY = core.config.SaveData.data.downscroll ? FlxG.height * 0.1 : FlxG.height * 0.88;
+		healthBarY = FlxG.height * (core.config.SaveData.data.downscroll ? barYDOWNSCROLL : barYNORMAL);
 
-		healthBarBG = new FunkinSprite(0, healthBarY, true);
+		healthBarBG = new FunkinSprite(0, healthBarY + 5, true);
 		healthBarBG.loadGraphic(Paths.getPath('game/hud/healthBar', 'image'));
 		healthBarBG.scrollFactor.set(0, 0);
 		healthBarBG.x = (FlxG.width - healthBarBG.width) * 0.5;
@@ -46,6 +53,13 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 		healthBar.createFilledBar([dadColor, bfColor]);
 		add(healthBar);
 
+		scoreText = new FlxText(0, healthBarY + 30, FlxG.width, "Score: 0 // Combo Breaks: 0");
+		scoreText.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFFFFFFFF, "center");
+		scoreText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+		scoreText.antialiasing = SaveData.data.antialiasing;
+		scoreText.scrollFactor.set(0, 0);
+		add(scoreText);
+
 		for (charData in PlayState.SONG.chars) {
 			var char = cast(PlayState.instance.chars.get(charData.id));
 			if (char == null)
@@ -69,6 +83,8 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 	override public function update(elapsed:Float) {
 		super.update(elapsed);
 
+		updateScore(elapsed);
+
 		if (PlayState.instance == null || PlayState.instance.playStateConfig == null)
 			return;
 
@@ -87,6 +103,27 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 
 		_updateLosingAnim();
 		_updateIconPositions(elapsed);
+	}
+
+	function updateScore(elapsed:Float) {
+		intendedScore = flixel.math.FlxMath.lerp(intendedScore, PlayState.instance.playStateConfig.score, flixel.math.FlxMath.bound(elapsed * 16, 0, 1));
+
+		var displayScore:String = InfiniteUtil.formatNumber(Math.round(intendedScore));
+
+		if (SaveData.data.botplay)
+			scoreText.text = 'BOTPLAY';
+		else
+			scoreText.text = 'Score: $displayScore // Combo Breaks: ${PlayState.instance.playStateConfig.misses}';
+	}
+
+	public function applyDownscroll(newDownscroll:Bool):Void {
+		healthBarY = FlxG.height * (newDownscroll ? barYDOWNSCROLL : barYNORMAL);
+		if (scoreText != null)
+			scoreText.y = healthBarY + 30;
+		if (healthBarBG != null)
+			healthBarBG.y = healthBarY;
+		if (healthBar != null)
+			healthBar.y = healthBarY + 4;
 	}
 
 	function _updateLosingAnim() {
@@ -136,6 +173,8 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 
 	override function destroy() {
 		super.destroy();
+		scoreText.destroy();
+		scoreText = null;
 		iconP1 = null;
 		iconP2 = null;
 		healthBarBG = null;
