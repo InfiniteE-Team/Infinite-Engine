@@ -159,6 +159,8 @@ class ScriptGlobals {
 			// Std
 			"FileSystem" => sys.FileSystem,
 			"File" => sys.io.File,
+			// OpenFL
+			"Capabilities" => openfl.system.Capabilities,
 			// modchart
 			"ModchartSystem" => game.modchart.ModchartSystem,
 			// Shaders
