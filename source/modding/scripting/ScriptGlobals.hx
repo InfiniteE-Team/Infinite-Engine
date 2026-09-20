@@ -53,6 +53,8 @@ class ScriptGlobals {
 			'game.graphics.shaders.CustomShader',
 			// Modchart
 			'game.modchart.ModchartSystem',
+			// OpenFL
+			'openfl.system.Capabilities',
 			// Foxlite
 			'foxlite.FoxBasic',
 			'foxlite.FoxCache',

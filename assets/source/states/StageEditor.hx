@@ -1,9 +1,3 @@
-import haxe.ui.Toolkit;
-import haxe.ui.core.Screen;
-import haxe.ui.containers.VBox;
-import haxe.ui.containers.menus.Menu;
-import haxe.ui.containers.menus.MenuBar;
-
 class StageEditor extends ScriptState {
 	public var defaultZoom:Float = 0.4;
 	public var curStage:String = 'stage';
@@ -21,8 +15,6 @@ class StageEditor extends ScriptState {
 
 		initCameras();
 
-		Toolkit.init();
-
 		camEditor.zoom = defaultZoom;
 
 		editorHUD();
@@ -38,23 +30,6 @@ class StageEditor extends ScriptState {
 	}
 
 	function editorHUD() {
-		var mainLayout = new VBox();
-		mainLayout.percentWidth = 100;
-		mainLayout.percentHeight = 100;
-		mainLayout.cameras = [camHud];
-
-		// top bar
-		var menuBar = new MenuBar();
-		menuBar.percentWidth = 100;
-
-		var fileMenu = new Menu();
-		fileMenu.text = "File";
-
-		menuBar.addComponent(fileMenu);
-
-		mainLayout.addComponent(menuBar);
-
-		Screen.instance.addComponent(mainLayout);
 	}
 
 	override public function update(elapsed:Float) {

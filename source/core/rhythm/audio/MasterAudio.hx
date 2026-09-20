@@ -21,10 +21,20 @@ class MasterAudio {
 
 		currentTrackPath = path;
 		RhythmCore.changeBPM(bpm);
-		FlxG.sound.playMusic(oflSound, volume, true);
+
 		if (FlxG.sound.music != null) {
-            FlxG.sound.music.looped = true;
-        }
+			FlxG.sound.music.stop();
+			FlxG.sound.music.destroy();
+			FlxG.sound.music = null;
+		}
+
+		var sound = new flixel.sound.FlxSound();
+		sound.loadEmbedded(oflSound, true);
+		sound.volume = volume;
+		sound.persist = true;
+
+		FlxG.sound.music = sound;
+		FlxG.sound.music.play(true);
 	}
 
 	// Load Stream for better ram use

@@ -121,8 +121,10 @@ class Controls {
 	}
 
 	public function justPressedKeyCode(keyCode:Int):Bool {
-		@:privateAccess
-		return FlxG.keys.justPressed.check(cast keyCode);
+		var key:FlxKey = keyCode;
+		if (key == FlxKey.NONE || keyCode < 0)
+			return false;
+		return FlxG.keys.checkStatus(key, JUST_PRESSED);
 	}
 
 	var _inputCache:Map<String, Array<Bool>> = new Map();
