@@ -53,8 +53,6 @@ class ScriptGlobals {
 			'game.graphics.shaders.CustomShader',
 			// Modchart
 			'game.modchart.ModchartSystem',
-			// OpenFL
-			'openfl.system.Capabilities',
 			// Foxlite
 			'foxlite.FoxBasic',
 			'foxlite.FoxCache',
@@ -67,6 +65,8 @@ class ScriptGlobals {
 			'foxlite.FoxScene',
 			'foxlite.FoxShader',
 		]);
+
+		Config.globalVariables.set('Capabilities', openfl.system.Capabilities);
 
 		Config.globalVariables.set('Json', haxe.Json);
 		Config.globalVariables.set('FormatJson', FormatJson);
