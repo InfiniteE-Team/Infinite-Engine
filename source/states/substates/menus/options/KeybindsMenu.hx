@@ -349,6 +349,11 @@ class KeybindsMenu extends flixel.group.FlxGroup {
 				curRow = getRowCount() - 1;
 			else
 				curRow--;
+
+			if (curRow != -1 && curCol >= getColCount()) {
+				curCol = getColCount() - 1;
+			}
+
 			FlxG.sound.play(Paths.getPath('menus/scrollMenu', 'sound'));
 			refreshVisuals();
 			updateScroll();
@@ -361,6 +366,10 @@ class KeybindsMenu extends flixel.group.FlxGroup {
 				curRow = -1;
 			else
 				curRow++;
+
+			if (curRow != -1 && curCol >= getColCount()) {
+				curCol = getColCount() - 1;
+			}
 
 			FlxG.sound.play(Paths.getPath('menus/scrollMenu', 'sound'));
 			refreshVisuals();
