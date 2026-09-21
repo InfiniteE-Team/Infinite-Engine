@@ -1,5 +1,6 @@
 package game.objects.sprites;
 
+import sys.io.File;
 import core.assets.FunkinSprite;
 import core.json.objects.CharacterData;
 
@@ -54,11 +55,40 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		switch (curCharacter) {
 			// case 'bf':  hardcoder reference!1
 			default:
-				var charData:String = Paths.getPath('data/characters/' + curCharacter, "json");
+				var charData:String;
+
+				if (Paths.exists('data/characters/$curCharacter.json'))
+					charData = Paths.getPath('data/characters/$curCharacter', JSON);
+				else {
+					Trace.traceOnce('[Character] WARNING: No character data found for "$curCharacter" and it will be replaced to bf.json');
+					charData = Paths.getPath('data/characters/bf', JSON);
+				}
+
 				characterData = FormatJson.readJson(charData);
+
 				if (characterData == null) {
-					Trace.traceOnce('[Character] WARNING: no character data found for "$curCharacter" (expected at $charData)');
-					return;
+					Trace.traceOnce('[Character] WARNING: Character data was null, creating Dummy character');
+					characterData = {
+						meta: {
+							isPlayer: false
+						},
+
+						gameplay: {
+							position: [0, 0],
+							cameraOffset: [0, 0]
+						},
+
+						render: {
+							layers: [
+								{
+									name: 'Undefined Character',
+									path: 'bf'
+								}
+							]
+						},
+
+						icon: {}
+					}
 				}
 
 				idleAfterSing = characterData.gameplay.idleAfterSing ?? true;
@@ -69,7 +99,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 				};
 
 				if (characterData.gameplay.position != null)
-					setPosition(characterData.gameplay.position[0], characterData.gameplay.position[1]);
+					setPosition(characterData.gameplay.position[0] ?? 0, characterData.gameplay.position[1] ?? 0);
 
 				if (characterData.render.layers != null) {
 					for (layer in characterData.render.layers) {
@@ -169,14 +199,14 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		singCountTime = 0;
 
 		if (layers.length > 0) {
-			layers[0].animation.finishCallback = function(name:String) {
+			layers[0].animation.onFinish.add((name:String) -> {
 				if (name == data.anim && isSpecial) {
 					isSpecial = false;
 
 					dance();
-					layers[0].animation.finishCallback = null;
+					layers[0].animation.onFinish.removeAll();
 				}
-			};
+			});
 		}
 
 		#if HSCRIPT_ALLOWED
