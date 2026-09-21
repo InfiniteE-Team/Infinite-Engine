@@ -21,6 +21,9 @@ The infinite engine is an FNF engine written from scratch in HaxeFlixel.
 - Yuning (UI Artist)
 - Seevent (Musician)
 
+**Contributors**:
+- InaTheCat (Game Tester)
+
 Follow the official game! [Friday Night Funkin](https://github.com/FunkinCrew/Funkin) by FunkinCrew
 Some or all elements come from the original game; we do not own the game or the files extracted from it. 
 [Assets Github](https://github.com/FunkinCrew/Funkin.assets/tree/724eba9de9e76761d9cefd52169926bc51c760a5)

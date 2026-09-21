@@ -66,8 +66,6 @@ class ScriptGlobals {
 			'foxlite.FoxShader',
 		]);
 
-		Config.globalVariables.set('Capabilities', openfl.system.Capabilities);
-
 		Config.globalVariables.set('Json', haxe.Json);
 		Config.globalVariables.set('FormatJson', FormatJson);
 		Config.globalVariables.set('SaveScore', core.config.SaveScore);
@@ -84,6 +82,9 @@ class ScriptGlobals {
 		Config.globalVariables.set('AudioAnalyzer', core.rhythm.audio.AudioAnalyzer);
 
 		Config.globalVariables.set('StoryMenuState', states.menus.StoryMenuState);
+
+		// OpenFL
+		Config.globalVariables.set('Capabilities', openfl.system.Capabilities);
 
 		// Modifiers
 		Config.globalVariables.set('DrunkModifier', DrunkModifier);

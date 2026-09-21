@@ -6,7 +6,6 @@ import sys.FileSystem;
 import game.PlayState;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFramesCollection;
-import openfl.Assets;
 
 class Paths {
 	private static var pathCache = new Map<String, String>();
@@ -60,8 +59,9 @@ class Paths {
 		}
 	}
 
-	public static function exists(fileName:String):Bool
-		return Assets.exists(getPath(fileName, DEFAULT));
+	public static function exists(fileName:String):Bool {
+		return FileSystem.exists(getPath(fileName, DEFAULT));
+	}
 
 	public static function resolveScript(fileName:String):String {
 		var extensions = ['.hx', '.lua', '.hxc'];

@@ -67,28 +67,8 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 				characterData = FormatJson.readJson(charData);
 
 				if (characterData == null) {
-					Trace.traceOnce('[Character] WARNING: Character data was null, creating Dummy character');
-					characterData = {
-						meta: {
-							isPlayer: false
-						},
-
-						gameplay: {
-							position: [0, 0],
-							cameraOffset: [0, 0]
-						},
-
-						render: {
-							layers: [
-								{
-									name: 'Undefined Character',
-									path: 'bf'
-								}
-							]
-						},
-
-						icon: {}
-					}
+					Trace.traceOnce('[Character] WARNING: Character data was null, creating Dummy character', true);
+					FormatJson.getCharDataPlaceholder(characterData);
 				}
 
 				idleAfterSing = characterData.gameplay.idleAfterSing ?? true;
