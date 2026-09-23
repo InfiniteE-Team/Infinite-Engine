@@ -41,6 +41,11 @@ class Controls {
 	static inline function get_BACK()
 		return instance.justPressedAction("uiKeys", "escape");
 
+	public static var GAME_DEATH(get, never):Bool;
+
+	static inline function get_GAME_DEATH()
+		return instance.justPressedAction("uiKeys", "death");
+
 	public static inline function noteJustPressed(lane:Int):Bool {
 		return instance.justPressed("noteKeys", lane);
 	}
@@ -149,7 +154,7 @@ class Controls {
 		if (!keyGroups.exists(groupName))
 			return false;
 		var keys = keyGroups.get(groupName);
-		var actions = ["left", "up", "down", "right", "accept", "escape"];
+		var actions = ["left", "up", "down", "right", "accept", "escape", "death"];
 		var index = actions.indexOf(actionName.toLowerCase());
 		if (index == -1 || index >= keys.length)
 			return false;

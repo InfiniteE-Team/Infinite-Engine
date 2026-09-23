@@ -13,6 +13,8 @@ class GameOverSubstate extends MusicBeatSubstate {
 	var music:String = '';
 	var endSound:String = '';
 
+	var confirm:Bool = false;
+
 	public function new() {
 		super();
 	}
@@ -79,12 +81,16 @@ class GameOverSubstate extends MusicBeatSubstate {
 		script.call("onUpdate", []);
 		#end
 
+		if (confirm)
+			return;
+
 		if (char.isFinished('firstDeath')) {
 			char.playAnim('deathLoop', true);
 			FlxG.sound.playMusic(Paths.getPath('gameplay/death/' + music, 'music'));
 		}
 
 		if (Controls.ACCEPT) {
+			confirm = true;
 			char.playAnim('deathConfirm', true);
 			FlxG.sound.music?.stop();
 			FlxG.sound.play(Paths.getPath('gameplay/death/' + endSound, 'music'));
@@ -98,6 +104,7 @@ class GameOverSubstate extends MusicBeatSubstate {
 		}
 
 		if (Controls.BACK) {
+			confirm = true;
 			FlxG.sound.music?.stop();
 			close();
 			#if HSCRIPT_ALLOWED

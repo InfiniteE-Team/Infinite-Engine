@@ -73,7 +73,8 @@ class SaveData {
 				['DOWN', 'S'],
 				['RIGHT', 'D'],
 				['ENTER', 'NONE'],
-				['ESCAPE', 'NONE']
+				['ESCAPE', 'NONE'],
+				['R', 'NONE']
 			];
 		}
 

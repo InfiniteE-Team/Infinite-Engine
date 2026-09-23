@@ -12,7 +12,7 @@ function onUpdate(elapsed) {
 		MusicBeatState.switchState(() -> new modding.editors.GameplayEditor(SONG));
 	}
 
-	if (FlxG.keys.justPressed.R && !startCount)
+	if (Controls.GAME_DEATH && !startCount)
 		isDeath();
 }
 

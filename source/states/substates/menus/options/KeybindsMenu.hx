@@ -46,7 +46,7 @@ class KeybindsMenu extends flixel.group.FlxGroup {
 	static final COL_W:Float = 80;
 	static final ROW_H:Float = 70;
 
-	var uiActionNames:Array<String> = ['Left', 'Up', 'Down', 'Right', 'Accept', 'Escape'];
+	var uiActionNames:Array<String> = ['Left', 'Up', 'Down', 'Right', 'Accept', 'Escape', 'Death'];
 
 	var contentCam:game.objects.Camera;
 
@@ -305,7 +305,8 @@ class KeybindsMenu extends flixel.group.FlxGroup {
 			['DOWN', 'S'],
 			['RIGHT', 'D'],
 			['ENTER', 'NONE'],
-			['ESCAPE', 'NONE']
+			['ESCAPE', 'NONE'],
+			['R', 'NONE']
 		];
 		SaveData.flush();
 
@@ -321,6 +322,8 @@ class KeybindsMenu extends flixel.group.FlxGroup {
 		Controls.instance.setKey('uiKeys', 4, 1, FlxKey.NONE);
 		Controls.instance.setKey('uiKeys', 5, 0, FlxKey.ESCAPE);
 		Controls.instance.setKey('uiKeys', 5, 1, FlxKey.NONE);
+		Controls.instance.setKey('uiKeys', 6, 0, FlxKey.R);
+		Controls.instance.setKey('uiKeys', 6, 1, FlxKey.NONE);
 
 		buildNoteKeys();
 		buildUiKeys(BASE_Y + 80 + 2 * ROW_H + 30);
