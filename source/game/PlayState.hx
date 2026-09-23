@@ -238,27 +238,20 @@ class PlayState extends MusicBeatState {
 		script.call("onCountdown", []);
 		#end
 		startCount = true;
+
 		var crochet:Float = (60 / SONG.bpmSong) * 1000;
+		RhythmCore.songPosition = startTime > 0 ? startTime : -crochet * 4;
+
+		countDown = new Countdown(0, 0, SONG.countdown);
+		countDown.cameras = [camOther];
+		countDown.onComplete = initSong;
+
 		if (startTime > 0) {
-			RhythmCore.songPosition = startTime;
-			countDown = new Countdown(0, 0, SONG.countdown);
-			countDown.cameras = [camOther];
-			countDown.onComplete = function() {
-				initSong();
-			}
 			countDown.onComplete();
 			return;
 		}
 
-		RhythmCore.songPosition = -crochet * 4;
-
-		countDown = new Countdown(0, 0, SONG.countdown);
-		countDown.cameras = [camOther];
 		add(countDown);
-
-		countDown.onComplete = function() {
-			initSong();
-		}
 
 		if (!countDown.skipCountdown) {
 			countDown.onCountdown();
@@ -480,6 +473,13 @@ class PlayState extends MusicBeatState {
 			controllerHUD = new HUDController();
 			controllerHUD.cameras = [camHUD];
 			add(controllerHUD);
+		}
+
+		if (countDown != null) {
+			countDown.pause();
+			remove(countDown);
+			countDown.destroy();
+			countDown = null;
 		}
 
 		buildStrumsandNotes();

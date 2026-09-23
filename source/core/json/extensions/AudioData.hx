@@ -17,20 +17,20 @@ typedef AudioData = {
 class AudioConfig {
 	public function new() {}
 
-	public static function playElementAudio(audio:AudioData, ?folder:String = ''):Void {
+	public static function playElementAudio(audio:AudioData, ?folder:String = ''):flixel.sound.FlxSound {
 		if (audio == null)
-			return;
+			return null;
 
 		var path = Paths.getPath(folder + audio.path, audio.channel == 'music' ? MUSIC : SOUND);
 		if (path == null) {
 			trace('AudioConfig: path not found for ${audio.path}');
-			return;
+			return null;
 		}
 
 		var sound = openfl.media.Sound.fromFile(path);
 		if (sound == null) {
 			trace('AudioConfig: could not load the sound from $path');
-			return;
+			return null;
 		}
 
 		var isMusic = audio.channel == 'music' || audio.looped == true;
@@ -38,10 +38,12 @@ class AudioConfig {
 			FlxG.sound.playMusic(sound, audio.volume ?? 1.0, audio.looped ?? true);
 			if (audio.fadeIn != null)
 				FlxG.sound.music.fadeIn(audio.fadeIn, 0, audio.volume ?? 1.0);
+			return FlxG.sound.music;
 		} else {
 			var sfx = FlxG.sound.play(sound, audio.volume ?? 1.0, audio.looped ?? false);
 			if (sfx != null && audio.pitch != null)
 				sfx.pitch = audio.pitch;
+			return sfx;
 		}
 	}
 

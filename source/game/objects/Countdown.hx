@@ -12,6 +12,8 @@ class Countdown extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSp
 	public var count:Int = -1;
 	public var onComplete:Void->Void;
 
+	var activeSound:flixel.sound.FlxSound;
+
 	var timer:FlxTimer;
 	var activeTween:FlxTween;
 
@@ -44,7 +46,7 @@ class Countdown extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSp
 			return;
 
 		if (countStep.sound != null && countStep.sound.path != null)
-			core.json.extensions.AudioData.AudioConfig.playElementAudio(countStep.sound, 'gameplay/countdown/$curCountdown/');
+			activeSound = core.json.extensions.AudioData.AudioConfig.playElementAudio(countStep.sound, 'gameplay/countdown/$curCountdown/');
 
 		if (countStep.props != null && countStep.props.path != null) {
 			var sprite:FunkinSprite = new FunkinSprite(0, 0, true);
@@ -61,10 +63,17 @@ class Countdown extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSp
 			});
 		}
 
+		if (timer != null && !timer.finished) {
+			timer.cancel();
+			timer = null;
+		}
 		timer = new FlxTimer().start(core.rhythm.RhythmCore.crochet / 1000, function(_) onCountdown());
 	}
 
 	public function pause() {
+		if (activeSound != null)
+			activeSound.pause();
+
 		if (timer != null && !timer.finished) {
 			timer.active = false;
 		}
@@ -77,6 +86,8 @@ class Countdown extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSp
 		if (timer != null && !timer.finished) {
 			timer.active = true;
 		}
+		if (activeSound != null)
+			activeSound.play();
 		if (activeTween != null) {
 			activeTween.active = true;
 		}
@@ -86,6 +97,10 @@ class Countdown extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSp
 		if (timer != null) {
 			timer.cancel();
 			timer = null;
+		}
+		if (activeSound != null) {
+			activeSound.stop();
+			activeSound = null;
 		}
 		if (activeTween != null) {
 			activeTween.cancel();
