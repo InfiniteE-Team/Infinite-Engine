@@ -64,7 +64,7 @@
                         "prefix": "BF Dead confirm",
                         "offsets": [
                             0,
-                            0
+                            -20
                         ],
                         "framerate": 24,
                         "looped": false

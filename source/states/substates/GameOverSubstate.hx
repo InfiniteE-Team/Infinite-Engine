@@ -41,6 +41,11 @@ class GameOverSubstate extends MusicBeatSubstate {
 
 			var charYep = cast(PlayState.instance.chars.get(data.id));
 
+			if (charYep == null) {
+				trace('[GameOverSubstate] WARNING: char "${data.id}" not found in PlayState.chars');
+				continue;
+			}
+
 			gameOverData = FormatJson.readJson(Paths.getPath('data/characters/' + data.name, 'json'));
 
 			var deathCharName:String = (gameOverData != null && gameOverData.gameplay != null && gameOverData.gameplay.death != null) ? gameOverData.gameplay.death.character : data.name;
@@ -63,6 +68,8 @@ class GameOverSubstate extends MusicBeatSubstate {
 			Trace.traceOnce("ERROR: Character GameOver not loaded");
 			return;
 		}
+		for (layer in char.layers)
+			add(layer);
 		add(char);
 
 		FlxG.sound.play(Paths.getPath('gameplay/death/' + sound, 'sound'));

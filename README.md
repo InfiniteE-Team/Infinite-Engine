@@ -1,4 +1,4 @@
-# Infinite-Engine (68%)
+# Infinite-Engine (70%)
 > This engine is in heavy work in progress, therefore it will have bugs and an official version has not been released. (This engine is not intended to work with HTML targets, by the way.)
 
 The infinite engine is an FNF engine written from scratch in HaxeFlixel.

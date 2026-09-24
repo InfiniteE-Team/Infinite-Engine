@@ -15,13 +15,13 @@
     - [X] StoryMenuState
     - [X] FreeplayState
     - [X] MainMenuState
-    - [X] OptionsState (WIP)
+    - [X] OptionsState
     - [X] ModsState
     - [X] Result Screen
 
 - [x] Sub-Menus
     - [x] PauseMenuSubState
-    - [X] GameOverSubState (WIP)
+    - [X] GameOverSubState
     - [X] FadeTransition
 
 - [ ] Cutscenes
@@ -31,7 +31,7 @@
 
 - [X] Options Menu
     - [X] Gameplay Section
-    - [X] Keyboards Section (WIP)
+    - [X] Keyboards Section
     - [X] Graphics Section
     - [X] Debug Section
 
