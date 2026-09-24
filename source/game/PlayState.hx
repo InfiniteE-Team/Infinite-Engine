@@ -505,8 +505,6 @@ class PlayState extends MusicBeatState {
 		#end
 	}
 
-	//
-
 	override public function update(elapsed:Float) {
 		#if HSCRIPT_ALLOWED
 		if (script != null)
