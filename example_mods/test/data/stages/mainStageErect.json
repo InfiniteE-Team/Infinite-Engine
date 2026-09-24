@@ -66,6 +66,46 @@
             }
         },
         {
+            "type": "sprite",
+            "props": {
+                "name": "lightgreen",
+                "path": "lightgreen",
+                "position": [
+                    -180.000000000001,
+                    250
+                ],
+                "scale": [
+                    1,
+                    1
+                ],
+                "scrollFactor": [
+                    1,
+                    1
+                ],
+                "antialiasing": true
+            }
+        },
+        {
+            "type": "sprite",
+            "props": {
+                "name": "lightred",
+                "path": "lightred",
+                "position": [
+                    -105.000000000001,
+                    560
+                ],
+                "scale": [
+                    1,
+                    1
+                ],
+                "scrollFactor": [
+                    1,
+                    1
+                ],
+                "antialiasing": true
+            }
+        },
+        {
             "type": "character",
             "id": "gf",
             "position": [
@@ -156,46 +196,6 @@
                     1700
                 ],
                 "blend": "add",
-                "scrollFactor": [
-                    1,
-                    1
-                ],
-                "antialiasing": true
-            }
-        },
-        {
-            "type": "sprite",
-            "props": {
-                "name": "lightgreen",
-                "path": "lightgreen",
-                "position": [
-                    -180.000000000001,
-                    250
-                ],
-                "scale": [
-                    1,
-                    1
-                ],
-                "scrollFactor": [
-                    1,
-                    1
-                ],
-                "antialiasing": true
-            }
-        },
-        {
-            "type": "sprite",
-            "props": {
-                "name": "lightred",
-                "path": "lightred",
-                "position": [
-                    -105.000000000001,
-                    560
-                ],
-                "scale": [
-                    1,
-                    1
-                ],
                 "scrollFactor": [
                     1,
                     1
