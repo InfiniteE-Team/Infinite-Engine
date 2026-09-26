@@ -48,6 +48,11 @@ class CameraController {
 		}
 	}
 
+	public function snapCameraTo(x:Float, y:Float):Void {
+		camPoint.setPosition(x, y);
+		camGame.scroll.set(x - (camGame.width * 0.5), y - (camGame.height * 0.5));
+	}
+
 	public function centerCamera(?a:Character, ?b:Character, ?lock:Bool = true) {
 		final aCam = a.getCamPosition();
 		final bCam = b.getCamPosition();

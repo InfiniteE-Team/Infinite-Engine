@@ -13,6 +13,11 @@ class InputController {
 
 	public var isMiss:Void->Void = function() {};
 
+	public var onNoteHit:game.objects.sprites.notes.Note->Void = function(_) {};
+	public var onNoteMiss:Void->Void = function() {};
+	public var onGhostTap:Int->Void = function(_) {};
+	public var onSustainDrop:Void->Void = function() {};
+
 	public function new() {
 		control = core.ConfigMain.controls;
 	}
@@ -57,6 +62,8 @@ class InputController {
 					if (remaining > 50) {
 						sustain.wasMissed = true;
 						sustain.canBeHit = false;
+						if (onSustainDrop != null)
+							onSustainDrop();
 						onMiss(playStateConfig, noteController, gameAudio);
 					}
 				}
@@ -130,11 +137,16 @@ class InputController {
 			if (ratingType.splash)
 				noteController.spawnSplash(charStrums[i], i, bestNote.noteType);
 
+			if (onNoteHit != null)
+				onNoteHit(bestNote);
 			return bestNote;
 		} else if (!hasActiveSustain) {
 			charStrums[i].playAnim('press' + i, true);
 			if (!isGhostTapping) {
 				onMiss(playStateConfig, noteController, gameAudio);
+			} else {
+				if (onGhostTap != null)
+					onGhostTap(i);
 			}
 		}
 

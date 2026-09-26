@@ -49,6 +49,26 @@ class CharacterController extends FunkinObjectRegistry {
 		_gameAudio = audio;
 		_playStateConfig = cfg;
 		isGhostTapping = core.config.SaveData.data.ghosttaping;
+		#if HSCRIPT_ALLOWED
+		_noteController.input.onNoteHit = function(note) {
+			@:privateAccess {
+				if (PlayState.instance?.script != null)
+					PlayState.instance.script.call('onNoteHit', [note]);
+			}
+		};
+		_noteController.input.onNoteMiss = function() {
+			@:privateAccess {
+				if (PlayState.instance?.script != null)
+					PlayState.instance.script.call('onNoteMiss', []);
+			}
+		};
+		_noteController.input.onGhostTap = function(dir) {
+			@:privateAccess {
+				if (PlayState.instance?.script != null)
+					PlayState.instance.script.call('onGhostTap', [dir]);
+			}
+		};
+		#end
 	}
 
 	public function syncGhostTapping():Void {
@@ -137,7 +157,7 @@ class CharacterController extends FunkinObjectRegistry {
 					input.isCPUHit(strums, noteController, char.id, i, false);
 					#if HSCRIPT_ALLOWED
 					if (charScript != null)
-						charScript.call("onNoteHitCPU", []);
+						charScript.call("onNoteHitCPU", [note]);
 					#end
 				} else {
 					#if HSCRIPT_ALLOWED
@@ -229,7 +249,7 @@ class CharacterController extends FunkinObjectRegistry {
 				char.isMiss = false;
 				#if HSCRIPT_ALLOWED
 				if (charScript != null)
-					charScript.call("onNoteHitPlayer", []);
+					charScript.call("onNoteHitPlayer", [hitNote]);
 				#end
 			} else if (!input.isGhostTapping) {
 				char.playAnim(Character.getCharAnim(i) + 'miss', true);
@@ -279,7 +299,7 @@ class CharacterController extends FunkinObjectRegistry {
 			#if HSCRIPT_ALLOWED
 			var charScript = scriptMap.get(char.id);
 			if (charScript != null)
-				charScript.call("onNoteHitMiss", []);
+				charScript.call("onNoteHitMiss", [note]);
 			#end
 		}
 	}
@@ -330,7 +350,7 @@ class CharacterController extends FunkinObjectRegistry {
 		#if HSCRIPT_ALLOWED
 		var charScript = scriptMap.get(char.id);
 		if (charScript != null)
-			charScript.call("onSing", []);
+			charScript.call("onSing", [dir]);
 		#end
 
 		char.playAnim(Character.getCharAnim(dir), true);

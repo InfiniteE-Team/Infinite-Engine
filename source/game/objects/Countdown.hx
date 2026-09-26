@@ -32,6 +32,13 @@ class Countdown extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSp
 	public function onCountdown() {
 		count++;
 
+		#if HSCRIPT_ALLOWED
+		@:privateAccess {
+			if (PlayState.instance?.script != null)
+				PlayState.instance.script.call('onCountdownTick', [count]);
+		}
+		#end
+
 		if (countData == null || countData.countdown == null)
 			return;
 

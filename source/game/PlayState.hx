@@ -337,7 +337,7 @@ class PlayState extends MusicBeatState {
 			return;
 
 		#if HSCRIPT_ALLOWED
-		if (script.callCancellable('onPauseMenuCancel', []))
+		if (script.callCancellable('onPauseCancel', []))
 			return;
 		#end
 
@@ -355,7 +355,7 @@ class PlayState extends MusicBeatState {
 				windowMod.pauseWindow(); */
 
 		#if HSCRIPT_ALLOWED
-		script.call('onPauseMenu', []);
+		script.call('onPause', []);
 		#end
 
 		openSubState(new states.substates.menus.PauseMenuSubstate());
@@ -389,6 +389,10 @@ class PlayState extends MusicBeatState {
 		super.closeSubState();
 		paused = false;
 		RhythmCore.resume(gameAudio);
+
+		#if HSCRIPT_ALLOWED
+		script.call('onResume', []);
+		#end
 		/*
 			if (windowMod != null)
 				windowMod.resumeWindow(); */
@@ -516,9 +520,9 @@ class PlayState extends MusicBeatState {
 
 		super.update(elapsed);
 		/*
-		if (FlxG.keys.justPressed.SEVEN) {
-			modding.editors.GameplayEditor.SONG = SONG;
-			MusicBeatState.switchState(() -> new modding.editors.GameplayEditor());
+			if (FlxG.keys.justPressed.SEVEN) {
+				modding.editors.GameplayEditor.SONG = SONG;
+				MusicBeatState.switchState(() -> new modding.editors.GameplayEditor());
 		}*/
 
 		if (!paused) {
@@ -571,6 +575,11 @@ class PlayState extends MusicBeatState {
 		super.stepHit(step);
 
 		gameAudio.resyncVocals();
+
+		#if HSCRIPT_ALLOWED
+		if (stage != null)
+			stage.onStepHit(step);
+		#end
 	}
 
 	override public function beatHit(beat:Float) {
@@ -586,6 +595,8 @@ class PlayState extends MusicBeatState {
 			chars.danceAll();
 
 		#if HSCRIPT_ALLOWED
+		if (stage != null)
+			stage.onBeatHit(beat);
 		script.call('postBeatHit', [beat]);
 		#end
 	}
