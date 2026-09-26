@@ -25,6 +25,12 @@ typedef ObjectData = {
 
 	var ?antialiasing:Bool;
 
+	var ?velocityX:Float;
+	var ?velocityY:Float;
+
+	var ?repeatX:Bool;
+	var ?repeatY:Bool;
+
 	// shaders for sprites
 	var ?blend:String;
 	var ?shader:String;

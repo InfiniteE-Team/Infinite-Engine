@@ -60,13 +60,12 @@ class ModsState extends MusicBeatState {
 			var modMeta = modding.mods.ModData.ModConfig.loadForMod(modName);
 			var description:String = modMeta?.description ?? '??';
 
-			var itemY:Float = 30 + (i * ITEM_SPACING);
+			var itemY:Float = 80 + (i * ITEM_SPACING);
 
 			var image:FunkinSprite = new FunkinSprite(40, itemY, true);
 			image.loadGraphic(graphic);
 			image.antialiasing = SaveData.data.antialiasing;
 			image.ID = i;
-			image.scrollFactor.set(0, 0);
 			image.scale.set(0.72, 0.72);
 			image.cameras = [camMods];
 			image.updateHitbox();
@@ -77,7 +76,6 @@ class ModsState extends MusicBeatState {
 			mod.setFormat(Paths.getPath('Funkin.otf', 'font'), 32, 0xFFFFFFFF, "left");
 			mod.antialiasing = SaveData.data.antialiasing;
 			mod.ID = i;
-			mod.scrollFactor.set(0, 0);
 			mod.cameras = [camMods];
 			listMods.push(mod);
 			listModTitles.push(mod);
@@ -87,7 +85,6 @@ class ModsState extends MusicBeatState {
 			modDesc.setFormat(Paths.getPath('Funkin.otf', 'font'), 32, 0xFFFFFFFF, "left");
 			modDesc.antialiasing = SaveData.data.antialiasing;
 			modDesc.ID = i;
-			modDesc.scrollFactor.set(0, 0);
 			modDesc.cameras = [camMods];
 			listMods.push(modDesc);
 			add(modDesc);
@@ -331,16 +328,16 @@ class ModsState extends MusicBeatState {
 			curSelected = 0;
 
 		if (camMods != null && ModsRegistry.mods.length > 0) {
-			var itemCenterY:Float = CONTENT_START_Y + (curSelected * ITEM_SPACING) + (ITEM_SPACING * 0.5);
+			var itemY:Float = 80 + (curSelected * ITEM_SPACING);
+			var itemCenterY:Float = itemY + (ITEM_SPACING * 0.5);
 
 			var targetScrollY:Float = itemCenterY - (BOX_H * 0.5);
 
-			var totalContentH:Float = ModsRegistry.mods.length * ITEM_SPACING;
+			var totalContentH:Float = 80 + (ModsRegistry.mods.length * ITEM_SPACING);
 			var maxScroll:Float = Math.max(0, totalContentH - BOX_H + CAM_SCROLL_PADDING);
 			targetScrollY = Math.max(0, Math.min(targetScrollY, maxScroll));
 
 			camMods.scroll.y = targetScrollY;
-
 			updateScrollbar(targetScrollY, maxScroll);
 		}
 

@@ -78,11 +78,31 @@ class SaveData {
 			];
 		}
 
-		if (SaveData.data.onMod == null)
-			SaveData.data.onMod = false;
+		if (SaveData.data.onMod == null || SaveData.data.currentMod == null) {
+			var startMod:String = null;
 
-		if (SaveData.data.currentMod == null)
-			SaveData.data.currentMod = '';
+			var baseMeta = modding.mods.ModData.ModConfig.modData;
+			if (baseMeta != null && baseMeta.startingMod == true) {
+				startMod = null;
+			} else {
+				var modsFolder = core.assets.Library.modsFolder;
+				if (sys.FileSystem.exists(modsFolder)) {
+					for (mod in sys.FileSystem.readDirectory(modsFolder)) {
+						var meta = modding.mods.ModData.ModConfig.loadForMod(mod);
+						if (meta != null && meta.startingMod == true) {
+							startMod = mod;
+							break;
+						}
+					}
+				}
+			}
+
+			if (SaveData.data.onMod == null)
+				SaveData.data.onMod = startMod != null;
+
+			if (SaveData.data.currentMod == null)
+				SaveData.data.currentMod = startMod ?? '';
+		}
 
 		if (SaveData.data.logInScreen == null)
 			SaveData.data.logInScreen = true;

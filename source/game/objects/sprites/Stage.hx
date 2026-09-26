@@ -94,16 +94,28 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 			case 'animated' | 'sprite' | 'group':
 				var sprite = new FunkinSprite(0, 0);
 				sprite.loadProps(element.props, 'game/stages/$stage');
-				if (element.velocityX != null)
-					sprite.velocity.x = element.velocityX;
-				if (element.velocityY != null)
-					sprite.velocity.y = element.velocityY;
 				elements.push(sprite);
 				add(sprite);
 
 				if (element.props?.name != null)
 					objectMap.set(element.props.name, sprite);
 
+			case 'backdrop':
+				var sprite = new core.assets.FunkinBackdrop(0, 0);
+				sprite.loadProps(element.props, 'game/stages/$stage');
+				if (element.props.velocityX != null)
+					sprite.velocityX  = element.props.velocityX;
+				if (element.props.velocityY != null)
+					sprite.velocityY = element.props.velocityY;
+				if (element.props.repeatX != null)
+					sprite.repeatX = element.props.repeatX;
+				if (element.props.repeatY != null)
+					sprite.repeatY = element.props.repeatY;
+				elements.push(sprite);
+				add(sprite);
+
+				if (element.props?.name != null)
+					objectMap.set(element.props.name, sprite);
 			case 'graphic':
 				var sprite = new FunkinSprite(0, 0);
 				sprite.loadMakeGraphic(element.props);

@@ -17,7 +17,8 @@
       "music": "default/gameOver",
       "endSound": "default/gameOverEnd"
     },
-    "idleAfterSing": true
+    "idleAfterSing": true,
+    "singTime": 1
   },
   "render": {
     "layers": [

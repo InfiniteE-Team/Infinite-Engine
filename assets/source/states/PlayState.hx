@@ -1,7 +1,11 @@
 import game.PlayStateConfig;
 
 function postCreate() {
-	lime.app.Application.current.window.title = modding.mods.ModData.ModConfig.modData?.name + " - Song: " + curSong ?? "Infinite Engine" + " - Song: " + curSong;
+	var titleName:String = modding.mods.ModData.ModConfig.modData?.name;
+	if (modding.mods.ModData.ModConfig.modData?.name == null)
+		titleName = "Infinite Engine";
+
+	lime.app.Application.current.window.title = titleName + " - Song: " + curSong;
 }
 
 function onUpdate(elapsed) {
