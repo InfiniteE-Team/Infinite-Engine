@@ -2,6 +2,7 @@ package core.assets;
 
 import flixel.math.FlxPoint;
 import animate.FlxAnimateFrames;
+import openfl.display.BlendMode;
 import core.json.extensions.SpriteData.ObjectData;
 import core.json.extensions.SpriteData.AnimData;
 import flixel.graphics.frames.FlxFramesCollection;
@@ -294,7 +295,7 @@ class FunkinSprite extends animate.FlxAnimate {
 		if (props.position != null)
 			setPosition(x + props.position[0], y + props.position[1]);
 		if (props.blend != null)
-			blend = props.blend;
+			blend = @:privateAccess BlendMode.fromString(props.blend);
 		if (props.shader != null) {
 			var sh = CustomShader.loadShader(props.shader);
 			if (sh != null)

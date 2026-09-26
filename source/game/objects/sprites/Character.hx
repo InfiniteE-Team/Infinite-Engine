@@ -182,7 +182,6 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 			layers[0].animation.onFinish.add((name:String) -> {
 				if (name == data.anim && isSpecial) {
 					isSpecial = false;
-
 					dance();
 					layers[0].animation.onFinish.removeAll();
 				}
@@ -254,7 +253,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 
 		if (existsAnim('danceLeft') && existsAnim('danceRight')) {
 			isDancing = !isDancing;
-			playAnim(isDancing ? 'danceLeft' : 'danceRight', false);
+			playAnim(isDancing ? 'danceLeft' : 'danceRight', true);
 		} else if (existsAnim('idle'))
 			playAnim('idle', false);
 	}

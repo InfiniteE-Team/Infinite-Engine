@@ -12,10 +12,6 @@ function onUpdate(elapsed) {
 	if (Controls.ACCEPT)
 		pauseMenu();
 
-	if (FlxG.keys.justPressed.SEVEN) {
-		MusicBeatState.switchState(() -> new modding.editors.GameplayEditor(SONG));
-	}
-
 	if (Controls.GAME_DEATH && !startCount)
 		isDeath();
 }

@@ -104,7 +104,7 @@ class PlayState extends MusicBeatState {
 
 		add(gameAudio);
 
-		controllerHUD = new HUDController();
+		controllerHUD = new HUDController(script);
 		controllerHUD.cameras = [camHUD];
 		add(controllerHUD);
 
@@ -273,6 +273,9 @@ class PlayState extends MusicBeatState {
 
 		gameAudio.playAll();
 		RhythmCore.resume(gameAudio);
+		#if HSCRIPT_ALLOWED
+		script.call("postInitSong", []);
+		#end
 	}
 
 	var _endSongCalled:Bool = false;
@@ -470,7 +473,7 @@ class PlayState extends MusicBeatState {
 		if (controllerHUD != null) {
 			controllerHUD.destroy();
 			controllerHUD = null;
-			controllerHUD = new HUDController();
+			controllerHUD = new HUDController(script);
 			controllerHUD.cameras = [camHUD];
 			add(controllerHUD);
 		}
@@ -512,11 +515,11 @@ class PlayState extends MusicBeatState {
 		#end
 
 		super.update(elapsed);
-
+		/*
 		if (FlxG.keys.justPressed.SEVEN) {
 			modding.editors.GameplayEditor.SONG = SONG;
 			MusicBeatState.switchState(() -> new modding.editors.GameplayEditor());
-		}
+		}*/
 
 		if (!paused) {
 			RhythmCore.songPosition += elapsed * 1000;

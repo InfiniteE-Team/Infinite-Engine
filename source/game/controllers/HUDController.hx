@@ -5,8 +5,15 @@ import game.objects.Bar;
 import flixel.text.FlxText;
 import core.assets.FunkinSprite;
 import game.objects.sprites.Icon;
+#if HSCRIPT_ALLOWED
+import modding.scripting.ScriptHandler;
+#end
 
 class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic> {
+	#if HSCRIPT_ALLOWED
+	var scriptHUD:ScriptHandler;
+	#end
+
 	static inline var barYNORMAL:Float = 0.88;
 	static inline var barYDOWNSCROLL:Float = 0.10;
 
@@ -19,12 +26,18 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 
 	var intendedScore:Float = 0;
 
-	public function new() {
+	public function new(script:ScriptHandler) {
 		super();
+		#if HSCRIPT_ALLOWED
+		scriptHUD = script;
+		#end
 		createHUD();
 	}
 
 	public function createHUD() {
+		#if HSCRIPT_ALLOWED
+		scriptHUD.call("onCreateHUD", []);
+		#end
 		healthBarY = FlxG.height * (core.config.SaveData.data.downscroll ? barYDOWNSCROLL : barYNORMAL);
 
 		healthBarBG = new FunkinSprite(0, healthBarY + 5, true);
@@ -78,6 +91,9 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 				iconP2 = icon;
 		}
 		_updateIconPositions(0.016);
+		#if HSCRIPT_ALLOWED
+		scriptHUD.call("postCreateHUD", []);
+		#end
 	}
 
 	override public function update(elapsed:Float) {
@@ -124,9 +140,18 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 			healthBarBG.y = healthBarY;
 		if (healthBar != null)
 			healthBar.y = healthBarY + 4;
+
+		#if HSCRIPT_ALLOWED
+		scriptHUD.call("postApplyDownscrollHUD", [newDownscroll]);
+		#end
 	}
 
-	function _updateLosingAnim() {
+	function _updateLosingAnim():Null<Dynamic> {
+		#if HSCRIPT_ALLOWED
+		if (scriptHUD.hasScripts && scriptHUD.callCancellable('onIconAnim', []))
+			return null;
+		#end
+
 		if (iconP1 != null) {
 			var losing = PlayState.instance.playStateConfig.health < 0.4;
 			iconP1.playAnim(losing ? 'losing' : 'normal');
@@ -136,6 +161,12 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 			var losing = PlayState.instance.playStateConfig.health > 1.6;
 			iconP2.playAnim(losing ? 'losing' : 'normal');
 		}
+
+		#if HSCRIPT_ALLOWED
+		scriptHUD.call("postIconAnim", []);
+		#end
+
+		return null;
 	}
 
 	function _updateIconPositions(elapsed:Float = 0.016) {
