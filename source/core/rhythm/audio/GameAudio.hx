@@ -31,7 +31,7 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 		}
 		soundMisses = [];
 
-		inst = audio(SONG.instCustom ?? 'Inst', onfinish);
+		inst = audio('Inst' + SONG?.instPrefix, onfinish);
 		if (inst != null)
 			add(inst);
 
@@ -52,7 +52,7 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 			return;
 
 		if (SONG.vocs == null) {
-			vocals = audio('Voices', onfinish);
+			vocals = audio('Voices' + SONG?.vocPrefix, onfinish);
 			if (vocals != null) {
 				vocalsGroup.push(vocals);
 				vocalsMap.set('default', vocals);

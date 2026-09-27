@@ -56,7 +56,10 @@ class ChartPorter {
 					Reflect.setField(raw, '_girlfriend', ch.girlfriend);
 
 				if (ch.instrumental != null && ch.instrumental != '')
-					Reflect.setField(raw, '_instCustom', Std.string(ch.instrumental));
+					Reflect.setField(raw, '_instPrefix', Std.string(ch.instrumental));
+
+				if (ch.vocals != null && ch.vocals != '')
+					Reflect.setField(raw, '_vocPrefix', Std.string(ch.vocals));
 
 				var playerVocs:Array<Dynamic> = ch.playerVocals != null ? cast ch.playerVocals : [];
 				var opponentVocs:Array<Dynamic> = ch.opponentVocals != null ? cast ch.opponentVocals : [];

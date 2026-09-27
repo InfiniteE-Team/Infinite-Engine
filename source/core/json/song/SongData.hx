@@ -15,7 +15,8 @@ typedef MetaData = {
 	var ?stage:String;
 	var ?countdown:String;
 	var ?needVoices:Bool;
-	var ?instCustom:Null<String>;
+	var ?instPrefix:Null<String>;
+	var ?vocPrefix:Null<String>;
 	var ?vocs:Null<Array<String>>;
 }
 
@@ -84,7 +85,8 @@ class SongConfig {
 
 	public var strumsVisible:Bool = true;
 
-	public var instCustom:String = 'Inst';
+	public var instPrefix:String = '';
+	public var vocPrefix:String = '';
 
 	public var vocs:Array<String> = [];
 
@@ -127,7 +129,9 @@ class SongConfig {
 		needVoices = songData.meta.needVoices ?? true;
 		stage = songData.meta.stage ?? 'stage';
 		countdown = songData.meta.countdown ?? 'default';
-		instCustom = songData.meta.instCustom ?? 'Inst';
+		instPrefix = songData.meta.instPrefix ?? '';
+		vocPrefix = songData.meta.vocPrefix ?? '';
+
 		vocs = songData.meta.vocs ?? null;
 
 		for (note in songData.notes) {

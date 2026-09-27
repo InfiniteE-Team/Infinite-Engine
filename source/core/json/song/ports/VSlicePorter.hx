@@ -88,7 +88,9 @@ class VSlicePorter implements FormatChartConverter {
 		}
 		events.sort((a, b) -> a.time < b.time ? -1 : 1);
 
-		var instCustom:Null<String> = raw._instCustom;
+		var instPrefix:Null<String> = raw._instPrefix;
+
+		var vocPrefix:Null<String> = raw._vocPrefix;
 
 		var vocs:Null<Array<String>> = raw._vocs;
 
@@ -99,7 +101,8 @@ class VSlicePorter implements FormatChartConverter {
 				speed: speed,
 				needVoices: true,
 				stage: stage,
-				instCustom: instCustom,
+				instPrefix: instPrefix,
+				vocPrefix: vocPrefix,
 				vocs: vocs
 			},
 			gameplay: {
