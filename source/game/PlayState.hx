@@ -358,6 +358,12 @@ class PlayState extends MusicBeatState {
 		script.call('onPause', []);
 		#end
 
+		flixel.tweens.FlxTween.globalManager.forEach((tween:flixel.tweens.FlxTween) -> {
+			if (tween.active) {
+				tween.active = false;
+			}
+		});
+
 		openSubState(new states.substates.menus.PauseMenuSubstate());
 
 		#if HSCRIPT_ALLOWED
@@ -393,6 +399,13 @@ class PlayState extends MusicBeatState {
 		#if HSCRIPT_ALLOWED
 		script.call('onResume', []);
 		#end
+
+		flixel.tweens.FlxTween.globalManager.forEach((tween:flixel.tweens.FlxTween) -> {
+			if (!tween.active) {
+				tween.active = true;
+			}
+		});
+
 		/*
 			if (windowMod != null)
 				windowMod.resumeWindow(); */
@@ -506,6 +519,8 @@ class PlayState extends MusicBeatState {
 		modding.scripting.ScriptedVars.gameplayVars(script, this);
 		script.call("postCreate", []);
 		#end
+
+		flixel.tweens.FlxTween.cancelTweensOf(cameraController);
 
 		#if HSCRIPT_ALLOWED
 		script.call('onRewindPost', []);
@@ -628,6 +643,10 @@ class PlayState extends MusicBeatState {
 
 		if (events != null)
 			events.destroy();
+
+		if (cameraController != null) {
+			flixel.tweens.FlxTween.cancelTweensOf(cameraController);
+		}
 
 		events = null;
 
