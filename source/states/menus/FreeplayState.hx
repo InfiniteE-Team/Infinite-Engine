@@ -139,10 +139,7 @@ class FreeplayState extends MusicBeatState {
 				}
 			}
 
-			box = new FlxSprite(770, -80).makeGraphic(1, 1, 0xFF0F0F0F);
-			box.scale.set(590, 870);
-			box.updateHitbox();
-			box.angle = 10;
+			box = new FlxSprite(700, 0).loadGraphic(Paths.getPath('menus/freeplay/leftBarBFGF', 'image'));
 			box.scrollFactor.set(0, 0);
 			add(box);
 
@@ -298,6 +295,8 @@ class FreeplayState extends MusicBeatState {
 
 		updateScore();
 
+		changeMusic();
+
 		#if HSCRIPT_ALLOWED
 		script.call("postChangeDifficulty", [change]);
 		#end
@@ -309,9 +308,15 @@ class FreeplayState extends MusicBeatState {
 
 		var songSelected:String = freeplayData.songData[curSelected].song;
 		var bpm:Float = freeplayData.songData[curSelected].bpm;
+		var diffName:String = DiffsUtils.difficulties.length > 0 ? DiffsUtils.difficulties[curDiff] : '';
 
 		if (songSelected != null) {
-			core.rhythm.audio.MasterAudio.playSong(Paths.getPath('songs/' + songSelected + '/audio/Inst.ogg'), 0.6, bpm);
+			var diffInstPath = Paths.getPath('songs/$songSelected/audio/Inst-$diffName.ogg');
+			var genericInstPath = Paths.getPath('songs/$songSelected/audio/Inst.ogg');
+
+			var instPath = (diffName != '' && sys.FileSystem.exists(diffInstPath)) ? diffInstPath : genericInstPath;
+
+			core.rhythm.audio.MasterAudio.playSong(instPath, 0.6, bpm);
 		}
 
 		#if HSCRIPT_ALLOWED
@@ -335,8 +340,6 @@ class FreeplayState extends MusicBeatState {
 			curSelected = freeplayData.songData.length - 1;
 		if (curSelected >= freeplayData.songData.length)
 			curSelected = 0;
-
-		changeMusic();
 
 		for (item in songs) {
 			if (item.ID == curSelected) {
