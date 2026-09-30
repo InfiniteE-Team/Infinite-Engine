@@ -44,8 +44,8 @@ class FunkinBackdrop extends FunkinSprite {
 
 		var cam = cameras[0] ?? FlxG.camera;
 
-		var camLeft = cam.scroll.x;
-		var camTop = cam.scroll.y;
+		var camLeft = cam.scroll.x * scrollFactor.x;
+		var camTop = cam.scroll.y * scrollFactor.y;
 
 		var cols = repeatX ? Math.ceil(cam.width / cam.zoom / tileW) + 2 : 1;
 		var rows = repeatY ? Math.ceil(cam.height / cam.zoom / tileH) + 2 : 1;
@@ -55,6 +55,10 @@ class FunkinBackdrop extends FunkinSprite {
 
 		var ox = x;
 		var oy = y;
+
+		var sfx = scrollFactor.x;
+		var sfy = scrollFactor.y;
+		scrollFactor.set(0, 0);
 
 		for (row in 0...rows) {
 			for (col in 0...cols) {
@@ -66,5 +70,6 @@ class FunkinBackdrop extends FunkinSprite {
 
 		x = ox;
 		y = oy;
+		scrollFactor.set(sfx, sfy);
 	}
 }

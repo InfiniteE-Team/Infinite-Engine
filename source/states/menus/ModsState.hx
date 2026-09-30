@@ -101,6 +101,7 @@ class ModsState extends MusicBeatState {
 		camMods = new Camera(BOX_X, BOX_Y, BOX_W, BOX_H);
 		camMods.bgColor = 0x00000000;
 		FlxG.cameras.add(camMods, false);
+		this.camera = FlxG.camera;
 
 		var bg:FunkinSprite = new FunkinSprite(0, 0, true);
 		bg.loadGraphic(Paths.getPath('menus/mods/bg', 'image'));
@@ -290,6 +291,10 @@ class ModsState extends MusicBeatState {
 		}
 
 		if (Controls.BACK) {
+			if (camMods != null) {
+				FlxG.cameras.remove(camMods, true);
+			}
+
 			if (changeMod) {
 				#if DISCORD_ALLOWED
 				core.api.DiscordAPI.instance.shutdown();
