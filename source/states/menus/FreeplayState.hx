@@ -253,12 +253,19 @@ class FreeplayState extends MusicBeatState {
 
 			PlayStateConfig.isStoryMode = false;
 
+			#if HSCRIPT_ALLOWED
+			script.call("onAccept", []);
+			#end
+
 			new FlxTimer().start(1, function(tmr:FlxTimer) {
 				MusicBeatState.switchState(() -> new states.LoadingState(songSelected, curDiff), freeplayData.songData[curSelected].stickerPack ?? 'default');
 			});
 		}
 
 		if (Controls.BACK) {
+			#if HSCRIPT_ALLOWED
+			script.call("onBack", []);
+			#end
 			acceptOption = true;
 			modding.scripting.types.ScriptClass.switchState('MainMenuState');
 		}

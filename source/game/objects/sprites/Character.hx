@@ -218,6 +218,12 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		}
 	}
 
+	override public function isFinished(anim:String):Bool {
+		if (layers == null || layers.length == 0)
+			return false;
+		return layers[0].isFinished(anim);
+	}
+
 	public function getCamPosition():Point {
 		var off = cameraOffset;
 		var mid = (layers != null && layers.length > 0) ? layers[0].getMidpoint() : getMidpoint();

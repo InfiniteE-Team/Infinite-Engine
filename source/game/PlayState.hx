@@ -100,6 +100,8 @@ class PlayState extends MusicBeatState {
 		});
 		#end
 
+		titleGameplay();
+
 		buildStageandChars();
 
 		add(gameAudio);
@@ -130,6 +132,14 @@ class PlayState extends MusicBeatState {
 		modding.scripting.ScriptedVars.gameplayVars(script, this);
 		script.call("postCreate", []);
 		#end
+	}
+
+	function titleGameplay() {
+		var titleName:String = modding.mods.ModData.ModConfig.modData?.name;
+		if (modding.mods.ModData.ModConfig.modData?.name == null)
+			titleName = "Infinite Engine";
+
+		lime.app.Application.current.window.title = titleName + " - Song: " + curSong;
 	}
 
 	public function addCameras() {
@@ -580,6 +590,12 @@ class PlayState extends MusicBeatState {
 			}
 		}
 
+		if (Controls.ACCEPT)
+			pauseMenu();
+
+		if (Controls.GAME_DEATH && !startCount)
+			isDeath();
+
 		#if HSCRIPT_ALLOWED
 		if (script != null)
 			script.call("postUpdate", [elapsed]);
@@ -665,6 +681,8 @@ class PlayState extends MusicBeatState {
 		noteController = null;
 
 		cameraController = null;
+
+		lime.app.Application.current.window.title = modding.mods.ModData.ModConfig.modData?.name ?? "Infinite Engine";
 
 		game.graphics.shaders.CustomShader.clearAll();
 
