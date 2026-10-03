@@ -95,8 +95,7 @@
 	<!-- _______________________________Compiler Flags _______________________________ -->
 	<haxeflag name="--macro" value="include('foxlite')" />
 	<haxeflag name="--macro" value="include('modding.scripting.interfaces')" />
-	
-	<haxedef name="HXCPP_CLANG_PCH" value="0" if="linux" />
+
 	<compilerflag name="-D HXCPP_M64" if="cpp" />
 
 	<!-- Place custom nodes like icons here -->
