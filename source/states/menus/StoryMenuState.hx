@@ -393,7 +393,8 @@ class StoryMenuState extends MusicBeatState {
 		super.update(elapsed);
 
 		#if HSCRIPT_ALLOWED
-		script.call("onUpdate", [elapsed]);
+		if (script.hasScripts)
+			script.call("onUpdate", [elapsed]);
 		if (script.callCancellable("onUpdateCancel", [elapsed]))
 			return;
 		#end
@@ -410,7 +411,8 @@ class StoryMenuState extends MusicBeatState {
 		}
 
 		#if HSCRIPT_ALLOWED
-		script.call("postUpdate", [elapsed]);
+		if (script.hasScripts)
+			script.call("postUpdate", [elapsed]);
 		#end
 	}
 

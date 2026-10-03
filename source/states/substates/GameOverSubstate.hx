@@ -85,7 +85,8 @@ class GameOverSubstate extends MusicBeatSubstate {
 		super.update(elapsed);
 
 		#if HSCRIPT_ALLOWED
-		script.call("onUpdate", []);
+		if (script.hasScripts)
+			script.call("onUpdate", []);
 		#end
 
 		if (confirm)
@@ -120,7 +121,8 @@ class GameOverSubstate extends MusicBeatSubstate {
 		}
 
 		#if HSCRIPT_ALLOWED
-		script.call("postUpdate", []);
+		if (script.hasScripts)
+			script.call("postUpdate", []);
 		#end
 	}
 }

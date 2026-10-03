@@ -23,15 +23,16 @@ class ScriptedSpriteGroup extends core.assets.FunkinObjectRegistry {
 	override public function update(elapsed:Float) {
 		super.update(elapsed);
 		#if HSCRIPT_ALLOWED
-		script.call('onUpdate', [elapsed]);
+		if (script.hasScripts)
+			script.call('onUpdate', [elapsed]);
 		#end
 	}
 
-    override public function destroy() {
-        #if HSCRIPT_ALLOWED
+	override public function destroy() {
+		#if HSCRIPT_ALLOWED
 		script.call('onDestroy', []);
 		script.destroy();
 		script = null;
 		#end
-    }
+	}
 }

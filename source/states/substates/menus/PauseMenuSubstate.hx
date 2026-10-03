@@ -139,7 +139,8 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 
 	override public function update(elapsed:Float) {
 		#if HSCRIPT_ALLOWED
-		script.call("onUpdate", [elapsed]);
+		if (script.hasScripts)
+			script.call("onUpdate", [elapsed]);
 		#end
 
 		if (Controls.BACK) {
@@ -216,7 +217,8 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 		super.update(elapsed);
 
 		#if HSCRIPT_ALLOWED
-		script.call("postUpdate", [elapsed]);
+		if (script.hasScripts)
+			script.call("postUpdate", [elapsed]);
 		#end
 	}
 

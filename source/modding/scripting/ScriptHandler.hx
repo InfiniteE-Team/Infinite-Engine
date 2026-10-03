@@ -19,6 +19,9 @@ class ScriptHandler {
 	var superInstance:Dynamic;
 	var extraVars:Map<String, Dynamic> = [];
 
+	var callCache:Map<String, Array<Dynamic->Dynamic>> = new Map();
+	var callCancellableCache:Map<String, Array<Dynamic->Bool>> = new Map();
+
 	public var hasScripts(get, never):Bool;
 
 	inline function get_hasScripts():Bool
@@ -87,16 +90,30 @@ class ScriptHandler {
 		if (scripts == null)
 			return null;
 
-		if (name == "postCreate") {
+		var cached = callCache.get(name);
+		if (cached != null) {
+			var result:Dynamic = null;
+			for (fn in cached)
+				result = fn(args);
 			for (script in luaScripts)
-				script.registersuperInstance();
+				result = script.call(name, args);
+			return result;
 		}
 
+		var fns:Array<Dynamic->Dynamic> = [];
 		var result:Dynamic = null;
 		for (script in scripts) {
-			if (script.variables.exists(name))
-				result = script.call(name, args);
+			if (script.variables.exists(name)) {
+				var fun = script.variables.get(name);
+				if (Reflect.isFunction(fun)) {
+					fns.push(function(a) return Reflect.callMethod(script.interp, fun, a));
+					result = Reflect.callMethod(script.interp, fun, args);
+				}
+			}
 		}
+		if (fns.length > 0)
+			callCache.set(name, fns);
+
 		for (script in luaScripts)
 			result = script.call(name, args);
 		return result;
@@ -105,17 +122,39 @@ class ScriptHandler {
 	public function callCancellable(name:String, args:Array<Dynamic>):Bool {
 		if (scripts == null)
 			return false;
+
+		var cached = callCancellableCache.get(name);
+		if (cached != null) {
+			for (fn in cached)
+				if (fn(args) == true)
+					return true;
+			for (script in luaScripts)
+				if (script.callCancellable(name, args))
+					return true;
+			return false;
+		}
+
+		var fns:Array<Dynamic->Bool> = [];
 		for (script in scripts) {
 			if (script.variables.exists(name)) {
-				var result = script.call(name, args);
-				if (result == true)
-					return true;
+				var fun = script.variables.get(name);
+				if (Reflect.isFunction(fun)) {
+					fns.push(function(a) return Reflect.callMethod(script.interp, fun, a) == true);
+					if (Reflect.callMethod(script.interp, fun, args) == true) {
+						if (fns.length > 0)
+							callCancellableCache.set(name, fns);
+						return true;
+					}
+				}
 			}
 		}
-		for (script in luaScripts) {
+		if (fns.length > 0)
+			callCancellableCache.set(name, fns);
+
+		for (script in luaScripts)
 			if (script.callCancellable(name, args))
 				return true;
-		}
+
 		return false;
 	}
 
@@ -127,6 +166,8 @@ class ScriptHandler {
 	public function hotReload():Void {
 		if (paths == null)
 			return;
+		callCache.clear();
+		callCancellableCache.clear();
 		for (i in 0...paths.length) {
 			if (!sys.FileSystem.exists(paths[i]))
 				continue;
@@ -202,6 +243,8 @@ class ScriptHandler {
 		scripts = null;
 		paths = null;
 		modifiedTimes = null;
+		callCache = null;
+		callCancellableCache = null;
 		extraVars = null;
 		superInstance = null;
 		for (script in luaScripts)

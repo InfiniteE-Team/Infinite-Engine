@@ -104,7 +104,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 				var sprite = new core.assets.FunkinBackdrop(0, 0);
 				sprite.loadProps(element.props, 'game/stages/$stage');
 				if (element.props.velocityX != null)
-					sprite.velocityX  = element.props.velocityX;
+					sprite.velocityX = element.props.velocityX;
 				if (element.props.velocityY != null)
 					sprite.velocityY = element.props.velocityY;
 				if (element.props.repeatX != null)
@@ -140,7 +140,8 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 	override public function update(elapsed:Float):Void {
 		super.update(elapsed);
 		#if HSCRIPT_ALLOWED
-		stageScript.call('onUpdate', [elapsed]);
+		if (stageScript.hasScripts)
+			stageScript.call('onUpdate', [elapsed]);
 		#end
 	}
 

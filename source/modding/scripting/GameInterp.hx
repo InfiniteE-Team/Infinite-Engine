@@ -11,6 +11,8 @@ class GameInterp extends Interp {
 
 	static var fieldCache:Map<String, Map<String, Bool>> = new Map();
 
+	static var functionFieldCache:Map<String, Bool> = new Map();
+
 	public function new(?env, ?parent) {
 		super(env, parent);
 	}
@@ -56,10 +58,18 @@ class GameInterp extends Interp {
 			return variables.get(id);
 
 		if (context != null) {
-			if (staticFields.exists(id))
-				return Reflect.getProperty(Type.getClass(context), id);
-			if (instanceFields.exists(id))
-				return Reflect.getProperty(context, id);
+			if (staticFields.exists(id)) {
+				var v = Reflect.getProperty(Type.getClass(context), id);
+				if (Reflect.isFunction(v))
+					variables.set(id, v);
+				return v;
+			}
+			if (instanceFields.exists(id)) {
+				var v = Reflect.getProperty(context, id);
+				if (Reflect.isFunction(v))
+					variables.set(id, v);
+				return v;
+			}
 		}
 
 		return super.resolve(id);

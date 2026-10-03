@@ -123,7 +123,8 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		}
 
 		#if HSCRIPT_ALLOWED
-		script.call('postUpdate', [elapsed]);
+		if (script.hasScripts)
+			script.call('postUpdate', [elapsed]);
 		#end
 	}
 

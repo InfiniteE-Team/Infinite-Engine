@@ -240,7 +240,8 @@ class LoadingState extends MusicBeatState {
 		super.update(elapsed);
 
 		#if HSCRIPT_ALLOWED
-		script.call("onUpdate", [elapsed]);
+		if (script.hasScripts)
+			script.call("onUpdate", [elapsed]);
 		if (script.callCancellable("onUpdateCancel", [elapsed]))
 			return;
 		#end
@@ -248,7 +249,8 @@ class LoadingState extends MusicBeatState {
 		var t = haxe.Timer.stamp();
 
 		#if HSCRIPT_ALLOWED
-		script.call("postUpdate", [elapsed]);
+		if (script.hasScripts)
+			script.call("postUpdate", [elapsed]);
 		#end
 	}
 

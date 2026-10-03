@@ -215,7 +215,8 @@ class FreeplayState extends MusicBeatState {
 		super.update(elapsed);
 
 		#if HSCRIPT_ALLOWED
-		script.call("onUpdate", [elapsed]);
+		if (script.hasScripts)
+			script.call("onUpdate", [elapsed]);
 		#end
 
 		if (songScore != intendedScore) {
@@ -278,7 +279,8 @@ class FreeplayState extends MusicBeatState {
 		}
 
 		#if HSCRIPT_ALLOWED
-		script.call("postUpdate", [elapsed]);
+		if (script.hasScripts)
+			script.call("postUpdate", [elapsed]);
 		#end
 	}
 

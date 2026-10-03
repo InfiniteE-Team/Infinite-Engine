@@ -539,7 +539,7 @@ class PlayState extends MusicBeatState {
 
 	override public function update(elapsed:Float) {
 		#if HSCRIPT_ALLOWED
-		if (script != null)
+		if (script != null && script.hasScripts)
 			script.call("onUpdate", [elapsed]);
 		#end
 
@@ -597,7 +597,7 @@ class PlayState extends MusicBeatState {
 			isDeath();
 
 		#if HSCRIPT_ALLOWED
-		if (script != null)
+		if (script != null && script.hasScripts)
 			script.call("postUpdate", [elapsed]);
 		#end
 	}
