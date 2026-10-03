@@ -1,0 +1,132 @@
+=====================================================================
+ INFINITE ENGINE EN MAC - COMO USAR LOS ARCHIVOS
+=====================================================================
+
+Estos archivos permiten instalar y ejecutar Infinite Engine en una Mac
+(Apple Silicon M1/M2/M3... o Intel) sin escribir comandos.
+
+Que contiene la carpeta "setup/macOS":
+
+  install-mac.command     Instala todo lo necesario (una sola vez)
+  compile-mac.command     Compila el motor y lo abre
+  how-to-use.txt          Este documento
+
+Ademas, el archivo .vscode/tasks.json (en la carpeta oculta .vscode del
+proyecto) agrega botones de VS Code para compilar. Es opcional.
+
+
+---------------------------------------------------------------------
+ ANTES DE EMPEZAR
+---------------------------------------------------------------------
+
+1. Descarga el repositorio de Infinite Engine y cambia a la rama "dev".
+2. Copia la carpeta "setup" DENTRO de la carpeta principal del
+   proyecto, al lado de Project.xml y hmm.json:
+
+       Infinite-Engine/
+         setup/
+           macOS/          <- aqui van los instaladores
+         source/
+         Project.xml
+         hmm.json
+         ...
+
+   Si la carpeta esta en otro lugar, los scripts no encuentran el
+   proyecto y no funcionan.
+3. Necesitas conexion a internet y unos 5 a 10 GB libres.
+
+
+---------------------------------------------------------------------
+ PASO 1: install-mac.command  (solo la primera vez)
+---------------------------------------------------------------------
+
+Que hace:
+  - Instala Homebrew, Haxe y las librerias del proyecto.
+  - Configura Lime y las rutas necesarias.
+  - Avisa si hay un problema (por ejemplo, un Haxe de Intel mezclado
+    en un Mac Apple Silicon, o la Terminal abierta con Rosetta).
+
+Como usarlo:
+  1. Haz doble clic en install-mac.command.
+  2. Si macOS dice que no puede abrirlo: clic derecho sobre el archivo,
+     elige "Abrir" y confirma con "Abrir".
+  3. Si pide instalar las "herramientas de linea de comandos" de Apple,
+     acepta, espera a que terminen y vuelve a abrir el archivo.
+  4. Si pide tu contrasena de Mac, es para instalar Homebrew.
+  5. Espera. Tarda varios minutos. NO cierres la ventana.
+  6. Cuando diga "Listo", presiona una tecla para cerrarla.
+
+Se puede repetir sin problema si algo se interrumpio.
+
+
+---------------------------------------------------------------------
+ PASO 2: compile-mac.command  (cada vez que quieras probar el motor)
+---------------------------------------------------------------------
+
+Que hace:
+  - Compila el motor y lo abre (modo debug).
+  - Incluye el arreglo del error 'SDK "macosx26" cannot be located'.
+
+Como usarlo:
+  1. Haz doble clic en compile-mac.command.
+  2. La PRIMERA compilacion tarda varios minutos. Las siguientes son
+     mucho mas rapidas.
+  3. Cuando cierres el juego, presiona una tecla para cerrar la ventana.
+
+Para compilar desde cero: borra la carpeta "export" del proyecto y
+vuelve a abrir compile-mac.command.
+
+
+---------------------------------------------------------------------
+ USAR VISUAL STUDIO CODE (opcional)
+---------------------------------------------------------------------
+
+El archivo .vscode/tasks.json agrega tareas a VS Code que llaman a los
+mismos dos archivos de arriba.
+
+  1. Abre la carpeta del proyecto en VS Code.
+  2. Acepta instalar las extensiones recomendadas (Haxe y Lime).
+  3. Presiona Cmd + Shift + B para compilar y ejecutar.
+
+Otras tareas: menu Terminal > Run Task, y elige "Instalar dependencias"
+o "Limpiar compilacion".
+
+
+---------------------------------------------------------------------
+ SI ALGO SALE MAL
+---------------------------------------------------------------------
+
+"No se puede abrir porque es de un desarrollador no identificado"
+  -> Clic derecho sobre el archivo > Abrir > Abrir.
+
+"Permiso denegado"
+  -> Abre la Terminal en la carpeta del proyecto y ejecuta:
+       chmod +x setup/macOS/*.command
+     Si sigue bloqueado:
+       xattr -dr com.apple.quarantine setup/macOS
+
+"Primero abre install-mac.command"
+  -> Falta la instalacion. Ejecuta install-mac.command y espera a que
+     termine.
+
+Error al compilar
+  -> Los registros se guardan aqui (puedes abrirlos con la app Consola
+     o con un editor de texto):
+       ~/Library/Logs/InfiniteEngine-instalar.log
+       ~/Library/Logs/InfiniteEngine-compilar.log
+     Envia las ultimas 20 lineas a quien te esta ayudando.
+
+Empezar de cero
+  -> Borra la carpeta "export" (compilacion) o ".haxelib" (librerias
+     del proyecto) y vuelve a abrir el archivo que corresponda.
+
+
+---------------------------------------------------------------------
+ DIFERENCIAS CON WINDOWS
+---------------------------------------------------------------------
+
+  - La consola de depuracion (tecla F2) es solo de Windows. En Mac los
+    mensajes aparecen en la ventana de compile-mac.command.
+  - El modo oscuro y las esquinas redondeadas de la ventana son de
+    Windows y no existen en Mac.
+  - Los mods que usen WindowsAPI o WindowsGDI no funcionaran en Mac.
