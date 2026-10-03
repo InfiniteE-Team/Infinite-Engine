@@ -51,6 +51,10 @@ class FreeplayState extends MusicBeatState {
 		super();
 	}
 
+	// Prevenir crasheo cuando no hay canciones... - Jloor
+	inline function hasSongs():Bool
+		return freeplayData != null && freeplayData.songData != null && freeplayData.songData.length > 0;
+
 	override public function create() {
 		super.create();
 
@@ -226,7 +230,7 @@ class FreeplayState extends MusicBeatState {
 		if (acceptOption)
 			return;
 
-		if (freeplayData != null && freeplayData.songData.length > 0) {
+		if (hasSongs()) {
 			if (Controls.UI_UP)
 				changeSelection(-1);
 			if (Controls.UI_DOWN)
@@ -240,7 +244,7 @@ class FreeplayState extends MusicBeatState {
 				changeDifficulty(1);
 		}
 
-		if (Controls.ACCEPT) {
+		if (Controls.ACCEPT && hasSongs()) {
 			acceptOption = true;
 			FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
 			FlxG.camera.flash(0xFFFFFFFF, 0.4);
@@ -272,7 +276,7 @@ class FreeplayState extends MusicBeatState {
 	}
 
 	function changeDifficulty(change:Int = 0):Void {
-		if (freeplayData == null || freeplayData.songData == null)
+		if (!hasSongs())
 			return;
 
 		#if HSCRIPT_ALLOWED
@@ -325,7 +329,7 @@ class FreeplayState extends MusicBeatState {
 	}
 
 	function changeSelection(change:Int = 0):Void {
-		if (freeplayData == null || freeplayData.songData == null)
+		if (!hasSongs())
 			return;
 
 		#if HSCRIPT_ALLOWED
@@ -389,6 +393,9 @@ class FreeplayState extends MusicBeatState {
 	}
 
 	function updateScore():Void {
+		if (!hasSongs())
+			return;
+
 		@:privateAccess
 		var saved:Null<Int> = SaveScore.getScore(freeplayData.songData[curSelected].song, curDiff);
 		intendedScore = saved ?? 0;
