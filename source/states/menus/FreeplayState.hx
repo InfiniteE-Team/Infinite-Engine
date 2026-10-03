@@ -51,7 +51,7 @@ class FreeplayState extends MusicBeatState {
 		super();
 	}
 
-	// Prevenir crasheo cuando no hay canciones... - Jloor
+	// prevent crash when there are no songs... - JloorDev
 	inline function hasSongs():Bool
 		return freeplayData != null && freeplayData.songData != null && freeplayData.songData.length > 0;
 

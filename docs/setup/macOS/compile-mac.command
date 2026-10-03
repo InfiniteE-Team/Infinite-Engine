@@ -1,78 +1,78 @@
 #!/bin/bash
 # ------------------------------------------------------------------------------
-# Infinite Engine - compilar y ejecutar en macOS
+# Infinite Engine - build and run on macOS
 #
-# Doble clic para compilar el motor (modo debug) y abrirlo.
-# Requiere haber ejecutado antes install-mac.command.
+# Double-click to build the engine (debug mode) and launch it.
+# Run install-mac.command first if you haven't yet.
 #
-# La primera compilacion tarda varios minutos; las siguientes son mas rapidas.
-# Para compilar desde cero, borra la carpeta "export" y vuelve a abrir este archivo.
+# The first build takes a few minutes. After that it's much quicker.
+# For a clean build, delete the "export" folder and run this again.
 #
-# Registro: ~/Library/Logs/InfiniteEngine-compilar.log
+# Log: ~/Library/Logs/InfiniteEngine-build.log
 # ------------------------------------------------------------------------------
 
 set -eo pipefail
 
-# Busca la carpeta del proyecto (la que contiene Project.xml) subiendo desde donde
-# esta este archivo. Asi funciona en cualquier subcarpeta (por ejemplo setup/macOS).
+# Find the project root (the folder with Project.xml) by walking up from this
+# file, so it works from any subfolder, like docs/setup/macOS.
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 while [ "$ROOT" != "/" ] && [ ! -f "$ROOT/Project.xml" ]; do
   ROOT="$(dirname "$ROOT")"
 done
 cd "$ROOT"
 
-LOG="$HOME/Library/Logs/InfiniteEngine-compilar.log"
+LOG="$HOME/Library/Logs/InfiniteEngine-build.log"
 mkdir -p "$(dirname "$LOG")"
 exec > >(tee -a "$LOG") 2>&1
 
-paso()    { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
-aviso()   { printf '\033[1;33mAviso: %s\033[0m\n' "$*"; }
-pausar()  { [ -n "$INFINITE_NO_PAUSE" ] && return 0; read -n 1 -s -r -p "Presiona una tecla para cerrar esta ventana..." || true; echo; }
-fallo()   { printf '\n\033[1;31mError: %s\033[0m\n' "$*"; echo "Registro completo: $LOG"; pausar; exit 1; }
+step()   { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
+warn()   { printf '\033[1;33mHeads up: %s\033[0m\n' "$*"; }
+pause()  { [ -n "$INFINITE_NO_PAUSE" ] && return 0; read -n 1 -s -r -p "Press any key to close this window..." || true; echo; }
+fail()   { printf '\n\033[1;31mError: %s\033[0m\n' "$*"; echo "Full log: $LOG"; pause; exit 1; }
 
-trap 'fallo "Algo fallo en la linea $LINENO. Copia el texto de esta ventana (o el registro) y envialo a quien te ayuda."' ERR
+trap 'fail "Something broke on line $LINENO. Copy what you see here (or the log) and send it to whoever is helping you."' ERR
 
-echo "Infinite Engine - compilar para Mac"
-echo "Fecha: $(date)"
+echo "Infinite Engine - build for Mac"
+echo "Date: $(date)"
 
-[ "$(uname -s)" = "Darwin" ] || fallo "Esto es solo para macOS."
-{ [ -f Project.xml ] && [ -f hmm.json ]; } || fallo "No encuentro Project.xml. Este archivo debe estar dentro de la carpeta Infinite-Engine (en la carpeta setup/macOS)."
+[ "$(uname -s)" = "Darwin" ] || fail "This only works on macOS."
+{ [ -f Project.xml ] && [ -f hmm.json ]; } || fail "Can't find Project.xml. This script has to stay somewhere inside the Infinite-Engine folder."
 
 if [ "$(sysctl -n sysctl.proc_translated 2>/dev/null || echo 0)" = "1" ]; then
-  fallo "Esta Terminal esta corriendo con Rosetta (modo Intel). Desmarca 'Abrir con Rosetta' en la app Terminal y vuelve a intentarlo."
+  fail "Terminal is running under Rosetta (Intel mode). Turn off 'Open using Rosetta' in the Terminal app's info panel and try again."
 fi
 
-# --- Entorno: Homebrew, Neko y SDK de macOS -----------------------------------
+# --- Environment: Homebrew, Neko and the macOS SDK ----------------------------
 if [ "$(uname -m)" = "arm64" ]; then
   BREW_BIN="/opt/homebrew/bin/brew"
 else
   BREW_BIN="/usr/local/bin/brew"
 fi
-[ -x "$BREW_BIN" ] || fallo "No encuentro Homebrew. Abre primero install-mac.command."
+[ -x "$BREW_BIN" ] || fail "Homebrew isn't installed. Run install-mac.command first."
 eval "$("$BREW_BIN" shellenv)"
 hash -r
 
-command -v haxelib >/dev/null 2>&1 || fallo "No encuentro haxelib. Abre primero install-mac.command."
-[ -d .haxelib ] || fallo "Faltan las librerias del proyecto (carpeta .haxelib). Abre primero install-mac.command."
+command -v haxelib >/dev/null 2>&1 || fail "Can't find haxelib. Run install-mac.command first."
+[ -d .haxelib ] || fail "The project libraries are missing (no .haxelib folder). Run install-mac.command first."
 
 export NEKOPATH="$(brew --prefix)/lib/neko"
 
-# Arreglo del error 'SDK "macosx26" cannot be located': hxcpp elige mal el
-# nombre del SDK, asi que le indicamos la version exacta que tiene Xcode.
+# Fix for 'SDK "macosx26" cannot be located': hxcpp picks the wrong SDK name,
+# so we tell it the exact version Xcode has.
 MACOSX_VER="$(xcrun --sdk macosx --show-sdk-version 2>/dev/null || true)"
 if [ -n "$MACOSX_VER" ]; then
   export MACOSX_VER
-  echo "SDK de macOS: $MACOSX_VER"
+  echo "macOS SDK: $MACOSX_VER"
 else
-  aviso "No pude detectar la version del SDK de macOS; se intentara compilar igualmente."
+  warn "Couldn't detect the macOS SDK version. Trying to build anyway."
 fi
 
-# --- Compilar y ejecutar ------------------------------------------------------
-paso "Compilando y ejecutando (modo debug)"
+# --- Build and run ------------------------------------------------------------
+step "Building and running (debug mode)"
 trap - ERR
 if haxelib run lime test macos -debug; then
-  paso "El juego se cerro"
+  step "Game closed"
 else
-  fallo "La compilacion o el juego terminaron con error. Copia las ultimas lineas de esta ventana y envialas a quien te ayuda."
+  fail "The build or the game ended with an error. Copy the last lines from this window and send them to whoever is helping you."
 fi
-pausar
+pause

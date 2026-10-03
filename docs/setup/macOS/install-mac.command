@@ -1,50 +1,50 @@
 #!/bin/bash
 # ------------------------------------------------------------------------------
-# Infinite Engine - instalador para macOS (Intel y Apple Silicon)
+# Infinite Engine - macOS installer (Intel and Apple Silicon)
 #
-# Doble clic para ejecutarlo. Instala Haxe, las librerias del proyecto y Lime.
-# Solo hace falta ejecutarlo una vez (si lo repites, no pasa nada).
+# Double-click to run. It installs Haxe, the project libraries and Lime.
+# You only need to run it once, but running it again is harmless.
 #
-# Incluye arreglos para problemas conocidos de Mac:
-#   - mezcla de Haxe de Intel con Mac Apple Silicon
-#   - ruta de Neko (NEKOPATH)
-#   - Terminal abierta con Rosetta
+# It also works around a few known Mac problems:
+#   - Intel Haxe mixed in on an Apple Silicon Mac
+#   - the Neko path (NEKOPATH)
+#   - Terminal running under Rosetta
 #
-# Si algo falla, el registro completo queda en:
-#   ~/Library/Logs/InfiniteEngine-instalar.log
+# If something fails, the full log is here:
+#   ~/Library/Logs/InfiniteEngine-install.log
 # ------------------------------------------------------------------------------
 
 set -eo pipefail
 
-# Busca la carpeta del proyecto (la que contiene Project.xml) subiendo desde donde
-# esta este archivo. Asi funciona en cualquier subcarpeta (por ejemplo setup/macOS).
+# Find the project root (the folder with Project.xml) by walking up from this
+# file, so it works from any subfolder, like docs/setup/macOS.
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 while [ "$ROOT" != "/" ] && [ ! -f "$ROOT/Project.xml" ]; do
   ROOT="$(dirname "$ROOT")"
 done
 cd "$ROOT"
 
-LOG="$HOME/Library/Logs/InfiniteEngine-instalar.log"
+LOG="$HOME/Library/Logs/InfiniteEngine-install.log"
 mkdir -p "$(dirname "$LOG")"
 exec > >(tee -a "$LOG") 2>&1
 
-paso()    { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
-aviso()   { printf '\033[1;33mAviso: %s\033[0m\n' "$*"; }
-pausar()  { [ -n "$INFINITE_NO_PAUSE" ] && return 0; read -n 1 -s -r -p "Presiona una tecla para cerrar esta ventana..." || true; echo; }
-fallo()   { printf '\n\033[1;31mError: %s\033[0m\n' "$*"; echo "Registro completo: $LOG"; pausar; exit 1; }
+step()   { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
+warn()   { printf '\033[1;33mHeads up: %s\033[0m\n' "$*"; }
+pause()  { [ -n "$INFINITE_NO_PAUSE" ] && return 0; read -n 1 -s -r -p "Press any key to close this window..." || true; echo; }
+fail()   { printf '\n\033[1;31mError: %s\033[0m\n' "$*"; echo "Full log: $LOG"; pause; exit 1; }
 
-trap 'fallo "Algo fallo en la linea $LINENO. Copia el texto de esta ventana (o el registro) y envialo a quien te ayuda."' ERR
+trap 'fail "Something broke on line $LINENO. Copy what you see here (or the log) and send it to whoever is helping you."' ERR
 
-echo "Infinite Engine - instalador para Mac"
-echo "Fecha: $(date)"
+echo "Infinite Engine - Mac installer"
+echo "Date: $(date)"
 
-# --- Comprobaciones iniciales -------------------------------------------------
-[ "$(uname -s)" = "Darwin" ] || fallo "Este instalador es solo para macOS."
-{ [ -f Project.xml ] && [ -f hmm.json ]; } || fallo "No encuentro Project.xml y hmm.json. Este archivo debe estar dentro de la carpeta Infinite-Engine (en la carpeta setup/macOS)."
+# --- Quick checks -------------------------------------------------------------
+[ "$(uname -s)" = "Darwin" ] || fail "This installer only works on macOS."
+{ [ -f Project.xml ] && [ -f hmm.json ]; } || fail "Can't find Project.xml and hmm.json. This script has to stay somewhere inside the Infinite-Engine folder."
 
 ARCH="$(uname -m)"
 if [ "$(sysctl -n sysctl.proc_translated 2>/dev/null || echo 0)" = "1" ]; then
-  fallo "Esta Terminal esta corriendo con Rosetta (modo Intel) y mezclaria versiones. Cierra la Terminal, desmarca 'Abrir con Rosetta' en Informacion de la app Terminal y vuelve a abrir este archivo."
+  fail "Terminal is running under Rosetta (Intel mode), which would mix up versions. Close Terminal, turn off 'Open using Rosetta' in the Terminal app's info panel, and open this file again."
 fi
 
 if [ "$ARCH" = "arm64" ]; then
@@ -52,23 +52,23 @@ if [ "$ARCH" = "arm64" ]; then
 else
   BREW_BIN="/usr/local/bin/brew"
 fi
-echo "Arquitectura: $ARCH"
+echo "Architecture: $ARCH"
 
-# --- 1) Herramientas de Apple -------------------------------------------------
-paso "1/6 Herramientas de compilacion de Apple"
+# --- 1) Apple's command line tools --------------------------------------------
+step "1/6 Apple command line tools"
 if ! xcode-select -p >/dev/null 2>&1; then
   xcode-select --install || true
-  fallo "Se abrio la instalacion de las herramientas de Apple. Cuando termine, vuelve a abrir este archivo."
+  fail "Apple's tools installer just opened. When it finishes, open this file again."
 fi
 echo "OK: $(xcode-select -p)"
 
 # --- 2) Homebrew --------------------------------------------------------------
-paso "2/6 Homebrew"
+step "2/6 Homebrew"
 if [ ! -x "$BREW_BIN" ]; then
-  echo "Instalando Homebrew (te pedira la contrasena de tu Mac)..."
+  echo "Installing Homebrew (it'll ask for your Mac password)..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
-[ -x "$BREW_BIN" ] || fallo "No se pudo instalar Homebrew en $BREW_BIN."
+[ -x "$BREW_BIN" ] || fail "Couldn't install Homebrew at $BREW_BIN."
 eval "$("$BREW_BIN" shellenv)"
 
 ZPROFILE="$HOME/.zprofile"
@@ -79,28 +79,28 @@ fi
 echo "OK: $(brew --version | head -n 1)"
 
 # --- 3) Haxe ------------------------------------------------------------------
-paso "3/6 Haxe"
+step "3/6 Haxe"
 brew install haxe
 hash -r
 
 HAXE_BIN="$(command -v haxe || true)"
-[ -n "$HAXE_BIN" ] || fallo "Haxe no quedo instalado."
+[ -n "$HAXE_BIN" ] || fail "Haxe didn't install."
 case "$HAXE_BIN" in
   "$(brew --prefix)"/*) ;;
-  *) aviso "Se esta usando $HAXE_BIN y no el de Homebrew. Si falla, es por ese Haxe antiguo." ;;
+  *) warn "Using $HAXE_BIN instead of the Homebrew one. If the build fails, that old Haxe is probably why." ;;
 esac
 
 if [ "$ARCH" = "arm64" ]; then
   NEKO_INFO="$(file -L "$(command -v neko)")"
   case "$NEKO_INFO" in
     *arm64*) ;;
-    *) fallo "El programa neko ($(command -v neko)) no es nativo de Apple Silicon. Hay un Haxe de Intel mezclado; desinstalalo y vuelve a abrir este archivo." ;;
+    *) fail "neko ($(command -v neko)) isn't built for Apple Silicon, so there's an Intel Haxe mixed in. Uninstall it and open this file again." ;;
   esac
 fi
 echo "OK: Haxe $(haxe --version)"
 
-# --- 4) Rutas -----------------------------------------------------------------
-paso "4/6 Configurando rutas"
+# --- 4) Paths -----------------------------------------------------------------
+step "4/6 Setting up paths"
 export NEKOPATH="$(brew --prefix)/lib/neko"
 if ! grep -q "export NEKOPATH" "$ZPROFILE"; then
   echo "export NEKOPATH=\"$NEKOPATH\"" >> "$ZPROFILE"
@@ -109,18 +109,18 @@ mkdir -p "$HOME/haxelib"
 haxelib setup "$HOME/haxelib"
 echo "OK: NEKOPATH=$NEKOPATH"
 
-# --- 5) Librerias del proyecto ------------------------------------------------
-paso "5/6 Librerias del proyecto (tarda varios minutos, no cierres la ventana)"
+# --- 5) Project libraries -----------------------------------------------------
+step "5/6 Project libraries (takes a few minutes, keep the window open)"
 haxelib --global git hmm https://github.com/ALE-Psych-Crew/hmm
-haxelib --global run hmm setup || aviso "hmm setup no termino; se continua igualmente."
+haxelib --global run hmm setup || warn "hmm setup didn't finish. Carrying on anyway."
 haxelib --global run hmm install
 
 # --- 6) Lime ------------------------------------------------------------------
-paso "6/6 Lime"
-haxelib run lime setup -y || aviso "lime setup no termino; se continua igualmente."
+step "6/6 Lime"
+haxelib run lime setup -y || warn "lime setup didn't finish. Carrying on anyway."
 
-paso "Listo"
-echo "Instalacion terminada. Ahora abre compile-mac.command para compilar y ejecutar el motor."
-echo "La primera compilacion tarda varios minutos."
+step "Done"
+echo "All set. Now open compile-mac.command to build and run the engine."
+echo "The first build takes a few minutes."
 trap - ERR
-pausar
+pause

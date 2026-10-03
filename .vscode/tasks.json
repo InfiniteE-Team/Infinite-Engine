@@ -2,9 +2,9 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Infinite Engine: Compilar y ejecutar (macOS)",
+			"label": "Build & Run (macOS)",
 			"type": "shell",
-			"command": "INFINITE_NO_PAUSE=1 bash ./setup/macOS/compile-mac.command",
+			"command": "INFINITE_NO_PAUSE=1 bash ./docs/setup/macOS/compile-mac.command",
 			"group": { "kind": "build", "isDefault": true },
 			"presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
 			"problemMatcher": {
@@ -20,13 +20,13 @@
 			}
 		},
 		{
-			"label": "Infinite Engine: Instalar dependencias (macOS)",
+			"label": "Install Dependencies (macOS)",
 			"type": "shell",
-			"command": "INFINITE_NO_PAUSE=1 bash ./setup/macOS/install-mac.command",
+			"command": "INFINITE_NO_PAUSE=1 bash ./docs/setup/macOS/install-mac.command",
 			"presentation": { "reveal": "always", "panel": "dedicated", "clear": true }
 		},
 		{
-			"label": "Infinite Engine: Limpiar compilacion",
+			"label": "Clean Build",
 			"type": "shell",
 			"command": "rm -rf export",
 			"presentation": { "reveal": "silent" }
