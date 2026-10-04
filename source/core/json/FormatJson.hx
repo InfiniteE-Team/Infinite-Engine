@@ -13,7 +13,7 @@ class FormatJson {
 			return;
 		_configured = true;
 		Config.FILE_CHECKER = sys.FileSystem.exists;
-		Config.FILE_READER = sys.io.File.getContent;
+		Config.FILE_READER = core.assets.Paths.readText;
 		Config.PATH = '';
 		Config.EXTENSION = '';
 	}

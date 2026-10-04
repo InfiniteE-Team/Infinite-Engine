@@ -59,6 +59,14 @@ class Paths {
 		}
 	}
 
+	// fix BOM, invisible caracter - JloorDev
+	public static function readText(path:String):String {
+		var text = File.getContent(path);
+		if (text.length > 0 && text.charCodeAt(0) == 0xFEFF)
+			text = text.substr(1);
+		return text;
+	}
+
 	public static function exists(fileName:String):Bool {
 		return FileSystem.exists(getPath(fileName, DEFAULT));
 	}
@@ -110,9 +118,9 @@ class Paths {
 		if (folder != null && FileSystem.exists('$folder/Animation.json')) {
 			result = FlxAnimateFrames.fromAnimate(folder);
 		} else {
-			tryLib('.xml', (g, p) -> FlxAtlasFrames.fromSparrow(g, sys.io.File.getContent(p)))
-			|| tryLib('.txt', (g, p) -> FlxAtlasFrames.fromLibGdx(g, sys.io.File.getContent(p)))
-			|| tryLib('.json', (g, p) -> FlxAtlasFrames.fromTexturePackerJson(g, sys.io.File.getContent(p)))
+			tryLib('.xml', (g, p) -> FlxAtlasFrames.fromSparrow(g, readText(p)))
+			|| tryLib('.txt', (g, p) -> FlxAtlasFrames.fromLibGdx(g, readText(p)))
+			|| tryLib('.json', (g, p) -> FlxAtlasFrames.fromTexturePackerJson(g, readText(p)))
 			|| (result = graphic) != null;
 		}
 
@@ -163,17 +171,17 @@ class Paths {
 				var xmlPath = Library.findLib('images/$fileName.xml');
 				if (xmlPath != null) {
 					formatDetected = "sparrow";
-					rawData = File.getContent(xmlPath);
+					rawData = readText(xmlPath);
 				} else {
 					var jsonPath = Library.findLib('images/$fileName.json');
 					if (jsonPath != null) {
 						formatDetected = "json";
-						rawData = File.getContent(jsonPath);
+						rawData = readText(jsonPath);
 					} else {
 						var txtPath = Library.findLib('images/$fileName.txt');
 						if (txtPath != null) {
 							formatDetected = "pack";
-							rawData = File.getContent(txtPath);
+							rawData = readText(txtPath);
 						}
 					}
 				}

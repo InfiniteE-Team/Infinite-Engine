@@ -20,6 +20,9 @@ class Library {
 
 		if (FileSystem.exists(modsFolder) && FileSystem.isDirectory(modsFolder)) {
 			for (item in FileSystem.readDirectory(modsFolder)) {
+				if (item.startsWith('.') || item == '__MACOSX')
+					continue;
+
 				var fullPath = '$modsFolder/$item';
 				if (FileSystem.isDirectory(fullPath)) {
 					modNames.push(item);
@@ -34,7 +37,7 @@ class Library {
 		clearModCache();
 		ModsRegistry.mods = getAvailableMods();
 
-		Trace.traceOnce('Mods scan → cwd: ${Sys.getCwd()} | found: ${ModsRegistry.mods}');
+		trace('Mods scan → cwd: ${Sys.getCwd()} | found: ${ModsRegistry.mods}');
 
 		var savedMod = SaveData.data.currentMod;
 		var savedOnMod = SaveData.data.onMod;

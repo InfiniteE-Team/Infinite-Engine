@@ -26,9 +26,10 @@ class ModConfig {
 	public function new() {}
 
 	public static function init() {
-		var jsonPath = Paths.getPath('meta', 'json');
+		var jsonPath = core.assets.Library.findLib('data/meta.json');
+
 		if (jsonPath == null || !FileSystem.exists(jsonPath)) {
-			Trace.traceOnce('The mod file "meta.json" was not found in: $jsonPath', true);
+			trace('No meta.json found, using the engine defaults.');
 			name = core.system.EngineData.name;
 			modData = null;
 			lime.app.Application.current.window.title = name;

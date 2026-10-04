@@ -60,21 +60,21 @@ class FunkinSprite extends animate.FlxAnimate {
 
 				var xmlPath = path.substr(0, path.lastIndexOf('.')) + '.xml';
 				if (sys.FileSystem.exists(xmlPath)) {
-					frames = FlxAtlasFrames.fromSparrow(flxGraphic, sys.io.File.getContent(xmlPath));
+					frames = FlxAtlasFrames.fromSparrow(flxGraphic, Paths.readText(xmlPath));
 					_assetLoaded = true;
 					return this;
 				}
 
 				var jsonPath = path.substr(0, path.lastIndexOf('.')) + '.json';
 				if (sys.FileSystem.exists(jsonPath)) {
-					frames = FlxAtlasFrames.fromTexturePackerJson(flxGraphic, sys.io.File.getContent(jsonPath));
+					frames = FlxAtlasFrames.fromTexturePackerJson(flxGraphic, Paths.readText(jsonPath));
 					_assetLoaded = true;
 					return this;
 				}
 
 				var txtPath = path.substr(0, path.lastIndexOf('.')) + '.txt';
 				if (sys.FileSystem.exists(txtPath)) {
-					frames = FlxAtlasFrames.fromLibGdx(flxGraphic, sys.io.File.getContent(txtPath));
+					frames = FlxAtlasFrames.fromLibGdx(flxGraphic, Paths.readText(txtPath));
 					_assetLoaded = true;
 					return this;
 				}
