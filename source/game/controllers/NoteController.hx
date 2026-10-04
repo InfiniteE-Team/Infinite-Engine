@@ -34,6 +34,8 @@ class NoteController {
 	public var splashes:FlxTypedGroup<NoteSplash> = new FlxTypedGroup<NoteSplash>();
 	public var holdsplashes:FlxTypedGroup<HoldSplash> = new FlxTypedGroup<HoldSplash>();
 
+	public var noteTypeManager:NoteTypeManager;
+
 	public var activeOpponentHolds:Map<Int, Bool> = new Map();
 
 	public var strumsByChar:Map<String, FlxTypedGroup<StrumNote>> = new Map();
@@ -44,7 +46,7 @@ class NoteController {
 	var _splashPool:Map<String, Array<NoteSplash>> = new Map();
 	var _holdsplashPool:Map<String, Array<HoldSplash>> = new Map();
 	var _holdSplashToStrum:Map<HoldSplash, StrumNote> = new Map();
-	var _noteTypeSkinCache:Map<String, NoteSkinData> = [];
+	var _noteTypeCache:Map<String, core.json.objects.NoteTypeData> = new Map();
 
 	public var charController:CharacterController = null;
 
@@ -348,6 +350,9 @@ class NoteController {
 
 		_noteSpawnIndex = 0;
 
+		noteTypeManager = new NoteTypeManager();
+		noteTypeManager.initFromNotes(daSong.songData.notes);
+
 		#if HSCRIPT_ALLOWED
 		scriptNC.call("onGenerateNotes", []);
 		#end
@@ -374,14 +379,16 @@ class NoteController {
 
 			var skinForChar = charData.noteSkin ?? noteSkin;
 			var pool = _notePool.get(skinForChar);
+			var noteTypeSkin = getNoteTypeData(data.type);
 
+			var effectiveSkin:NoteSkinData = (noteTypeSkin?.visual?.noteSkin != null) ? noteTypeSkin.visual.noteSkin : noteSkinData;
 			var note:Note;
 			if (pool != null && pool.length > 0) {
 				note = pool.pop();
 				note.revive();
-				note.reinit(data.time, keys, strum.x, 0, noteSkinData, skinForChar, data.lane);
+				note.reinit(data.time, keys, strum.x, 0, effectiveSkin, skinForChar, data.lane);
 			} else {
-				note = new Note(data.time, keys, strum.x, 0, noteSkinData, skinForChar, data.lane);
+				note = new Note(data.time, keys, strum.x, 0, effectiveSkin, skinForChar, data.lane, data.type);
 			}
 
 			note.ID = globalLane;
@@ -394,10 +401,11 @@ class NoteController {
 
 			note.strum = strum;
 			note.noteControl = this;
-			note.noteType = data.type;
+			note.noteType = data.type ?? 'normal';
 
 			#if HSCRIPT_ALLOWED
 			scriptNC.call("onGenerateNote", [note]);
+			noteTypeManager.onNoteGenerate(note);
 			#end
 
 			if (data.length > 0) {
@@ -419,7 +427,7 @@ class NoteController {
 				sustain.mustPress = note.mustPress;
 				sustain.noteControl = this;
 				sustain.strum = strum;
-				sustain.noteType = data.type;
+				sustain.noteType = data.type ?? 'normal';
 				if (isDownscroll)
 					sustain.flipY = true;
 				sustain.visible = notesVis;
@@ -451,7 +459,7 @@ class NoteController {
 				sustainEnd.noteControl = this;
 				sustainEnd.strum = strum;
 				sustainEnd.parentNote = sustain;
-				sustainEnd.noteType = data.type;
+				sustainEnd.noteType = data.type ?? 'normal';
 				if (isDownscroll)
 					sustainEnd.flipY = true;
 				sustainEnd.visible = notesVis;
@@ -562,15 +570,15 @@ class NoteController {
 		_holdsplashPool.get(holdsplash.noteSkin).push(holdsplash);
 	}
 
-	function getNoteTypeSkinData(noteType:String):Null<NoteSkinData> {
+	function getNoteTypeData(noteType:String):Null<core.json.objects.NoteTypeData> {
 		if (noteType == null || noteType == 'normal' || noteType == '')
 			return null;
-		if (_noteTypeSkinCache.exists(noteType))
-			return _noteTypeSkinCache.get(noteType);
+		if (_noteTypeCache.exists(noteType))
+			return _noteTypeCache.get(noteType);
 
-		var path = Paths.getPath('data/notetypes/$noteType/strumnotes', 'json');
-		var data:NoteSkinData = path != null ? FormatJson.readJson(path) : null;
-		_noteTypeSkinCache.set(noteType, data);
+		var path = Paths.getPath('data/notetypes/$noteType', 'json');
+		var data:core.json.objects.NoteTypeData = path != null ? FormatJson.readJson(sys.io.File.getContent(path)) : null;
+		_noteTypeCache.set(noteType, data);
 		return data;
 	}
 

@@ -137,8 +137,11 @@ class InputController {
 			if (ratingType.splash)
 				noteController.spawnSplash(charStrums[i], i, bestNote.noteType);
 
-			if (onNoteHit != null)
+			if (onNoteHit != null) {
 				onNoteHit(bestNote);
+				noteController.noteTypeManager?.onNoteHit(bestNote);
+			}
+
 			return bestNote;
 		} else if (!hasActiveSustain) {
 			charStrums[i].playAnim('press' + i, true);
@@ -153,11 +156,12 @@ class InputController {
 		return null;
 	}
 
-	public function onMiss(playStateConfig:PlayStateConfig, noteController:NoteController, gameAudio:GameAudio) {
+	public function onMiss(playStateConfig:PlayStateConfig, noteController:NoteController, gameAudio:GameAudio, ?missedNote:Note) {
 		if (isMiss != null)
 			isMiss();
 		gameAudio.onMiss();
-		playStateConfig.health += noteController.getHealthDrain(null);
+		noteController.noteTypeManager?.onNoteMiss(missedNote);
+		playStateConfig.health += noteController.getHealthDrain(missedNote);
 		playStateConfig.score += noteController.getMissScore();
 		playStateConfig.misses++;
 		playStateConfig.combo = 0;
