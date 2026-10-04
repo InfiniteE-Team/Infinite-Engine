@@ -33,6 +33,8 @@ class FreeplayState extends MusicBeatState {
 
 	// song score & lerp variables
 	var scoreTxt:FlxText;
+	var scoreSprite:FlxSprite;
+
 	var songScore:Int = 213991;
 	var intendedScore:Int = 0;
 
@@ -41,7 +43,9 @@ class FreeplayState extends MusicBeatState {
 	// difficulty
 	public static var curDiff:Int = 0;
 
-	var diffTxt:FlxText;
+	var diffTxt:FlxSprite;
+	var leftArrow:FlxSprite;
+	var rightArrow:FlxSprite;
 
 	var acceptOption:Bool = false;
 
@@ -103,27 +107,33 @@ class FreeplayState extends MusicBeatState {
 		add(buildings);
 
 		if (freeplayData != null && freeplayData.songData != null) {
-			var cardImgPath:String = Paths.getPath('menus/freeplay/card', 'image');
+			var cardImgPath:flixel.graphics.frames.FlxFramesCollection = Paths.getPath('menus/freeplay/Select Song', 'animated');
 			var charDataCache:Map<String, Dynamic> = new Map();
 			for (i in 0...freeplayData.songData.length) {
-				var card:FlxSprite = new FlxSprite().loadGraphic(cardImgPath);
+				var card:FlxSprite = new FlxSprite();
+				card.frames = cardImgPath;
+				card.animation.addByPrefix('idle', 'idle', 24, false);
+				card.animation.addByPrefix('selected', 'selected', 24, true);
+				card.animation.play('idle');
+				card.scale.set(0.95, 0.95);
+				card.updateHitbox();
 				card.antialiasing = SaveData.data.antialiasing;
 				card.ID = i;
 				songs.push(card);
 				add(card);
 
-				var song:FlxText = new FlxText(300 - (i * 50), 100 + (i * 125), 0, freeplayData.songData[i].song);
-				song.setFormat(Paths.getPath('5by7.ttf', 'font'), 42, 0xFFFFFFFF);
+				var song:FlxText = new FlxText(300 - (i * 60), 100 + (i * 200), 0, freeplayData.songData[i].song);
+				song.setFormat(Paths.getPath('5by7.ttf', 'font'), 38, 0xFFFFFFFF);
 				@:privateAccess song.textField.filters = [
-					new openfl.filters.GlowFilter(FlxColor.fromString('#00ccff'), 1.0, 6, 6, 100, BitmapFilterQuality.MEDIUM)
+					new openfl.filters.GlowFilter(FlxColor.fromString('#001b3a'), 1.0, 10, 10, 100, BitmapFilterQuality.MEDIUM)
 				];
 				song.antialiasing = SaveData.data.antialiasing;
 				song.ID = i;
 				songs.push(song);
 				add(song);
 
-				card.x = song.x - 80;
-				card.y = song.y - 50;
+				card.x = song.x - 100;
+				card.y = song.y - 70;
 
 				var iconName:String = freeplayData.songData[i].icon;
 				var charData = charDataCache.get(iconName);
@@ -133,14 +143,16 @@ class FreeplayState extends MusicBeatState {
 				}
 				var icon:Icon = new Icon(false, charData);
 				if (icon != null) {
-					icon.scale.set(0.85, 0.85);
+					icon.scale.set(0.5, 0.5);
 					icon.updateHitbox();
-					icon.x = card.x - icon.width + 40;
-					icon.y = song.y / 2 + (i * 60);
+					icon.x = card.x - icon.width + 190;
+					icon.y = song.y / 2 + 30 + (i * 100);
 					icon.ID = i;
 					icons.push(icon);
 					add(icon);
 				}
+
+				song.x += 130;
 			}
 
 			box = new FlxSprite(700, 0).loadGraphic(Paths.getPath('menus/freeplay/leftBarBFGF', 'image'));
@@ -149,32 +161,65 @@ class FreeplayState extends MusicBeatState {
 
 			artistTxt = new FlxText(0, 0, 590, 'Artist: ??');
 			artistTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
-			artistTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+			artistTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 3, 1);
 			artistTxt.antialiasing = SaveData.data.antialiasing;
 			artistTxt.scrollFactor.set(0, 0);
 			add(artistTxt);
 
-			scoreTxt = new FlxText(0, 10, 0, 'SCORE:');
+			scoreTxt = new FlxText(0, 10, 0, '0');
 			scoreTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
-			scoreTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+			scoreTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 3, 1);
 			scoreTxt.antialiasing = SaveData.data.antialiasing;
 			scoreTxt.scrollFactor.set(0, 0);
 			add(scoreTxt);
 
-			diffTxt = new FlxText(950, scoreTxt.y + scoreTxt.height, 0, 'HARD');
-			diffTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
-			diffTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+			scoreSprite = new FlxSprite(910, 499);
+			scoreSprite.frames = Paths.getPath('menus/freeplay/Score Free Play', 'animated');
+			scoreSprite.animation.addByPrefix('idle', 'idle', 24, true);
+			scoreSprite.animation.play('idle');
+			scoreSprite.scrollFactor.set(0, 0);
+			scoreSprite.scale.set(0.25, 0.25);
+			scoreSprite.updateHitbox();
+			scoreSprite.antialiasing = SaveData.data.antialiasing;
+			add(scoreSprite);
+
+			diffTxt = new FlxSprite(950, scoreTxt.y + scoreTxt.height);
+			diffTxt.frames = Paths.getPath('menus/freeplay/diffs/hard', 'animated');
+			diffTxt.animation.addByPrefix('idle', 'idle', 24, true);
+			diffTxt.animation.play('idle');
+			diffTxt.scale.set(0.25, 0.25);
+			diffTxt.updateHitbox();
 			diffTxt.antialiasing = SaveData.data.antialiasing;
 			diffTxt.scrollFactor.set(0, 0);
 			add(diffTxt);
 
+			leftArrow = new FlxSprite();
+			leftArrow.frames = Paths.getPath('menus/freeplay/Arrow Left', 'animated');
+			leftArrow.animation.addByPrefix('idle', 'idle', 24, true);
+			leftArrow.animation.play('idle');
+			leftArrow.scale.set(0.5, 0.5);
+			leftArrow.updateHitbox();
+			leftArrow.antialiasing = SaveData.data.antialiasing;
+			leftArrow.scrollFactor.set(0, 0);
+			add(leftArrow);
+
+			rightArrow = new FlxSprite();
+			rightArrow.frames = Paths.getPath('menus/freeplay/Arrow Right', 'animated');
+			rightArrow.animation.addByPrefix('idle', 'idle', 24, true);
+			rightArrow.animation.play('idle');
+			rightArrow.scale.set(0.5, 0.5);
+			rightArrow.updateHitbox();
+			rightArrow.antialiasing = SaveData.data.antialiasing;
+			rightArrow.scrollFactor.set(0, 0);
+			add(rightArrow);
+
 			artistTxt.x = FlxG.width * 0.58;
 			artistTxt.y = FlxG.height * 0.64;
 
-			scoreTxt.x = 900;
-			scoreTxt.y = FlxG.height * 0.76;
+			scoreTxt.x = 1020;
+			scoreTxt.y = FlxG.height * 0.7;
 
-			diffTxt.y = FlxG.height * 0.7;
+			diffTxt.y = 40;
 
 			album = new FunkinSprite(0, 100, true);
 			album.antialiasing = SaveData.data.antialiasing;
@@ -225,7 +270,7 @@ class FreeplayState extends MusicBeatState {
 				newScore = intendedScore;
 			songScore = newScore;
 			if (freeplayData != null && freeplayData.songData != null)
-				scoreTxt.text = 'SCORE: ' + InfiniteUtil.formatNumber(songScore);
+				scoreTxt.text = InfiniteUtil.formatNumber(songScore);
 		}
 
 		if (acceptOption)
@@ -272,9 +317,9 @@ class FreeplayState extends MusicBeatState {
 		}
 
 		for (icon in icons) {
-			if (icon.scale.x > 0.85) {
-				icon.scale.x = FlxMath.lerp(icon.scale.x, 0.85, elapsed * 12);
-				icon.scale.y = FlxMath.lerp(icon.scale.y, 0.85, elapsed * 12);
+			if (icon.scale.x > 0.5) {
+				icon.scale.x = FlxMath.lerp(icon.scale.x, 0.5, elapsed * 12);
+				icon.scale.y = FlxMath.lerp(icon.scale.y, 0.5, elapsed * 12);
 			}
 		}
 
@@ -303,8 +348,22 @@ class FreeplayState extends MusicBeatState {
 
 		curDiff = flixel.math.FlxMath.minInt(curDiff, DiffsUtils.difficulties.length - 1);
 
-		diffTxt.text = '< ' + DiffsUtils.difficulties[curDiff].toUpperCase() + ' >';
-		diffTxt.x = 950;
+		if (diffTxt != null) {
+			diffTxt.frames = Paths.getPath('menus/freeplay/diffs/' + DiffsUtils.difficulties[curDiff], 'animated');
+			diffTxt.x = FlxG.width - diffTxt.width / 2 - 60;
+			diffTxt.animation.addByPrefix('idle', 'idle', 24, true);
+			diffTxt.animation.play('idle');
+		}
+
+		if (leftArrow != null) {
+			leftArrow.x = diffTxt.x - leftArrow.width - 20;
+			leftArrow.y = diffTxt.y + (diffTxt.height / 2) - (leftArrow.height / 2) - 65;
+		}
+
+		if (rightArrow != null) {
+			rightArrow.x = diffTxt.x + diffTxt.width - 350;
+			rightArrow.y = diffTxt.y + (diffTxt.height / 2) - (rightArrow.height / 2) - 65;
+		}
 
 		updateScore();
 
@@ -357,8 +416,10 @@ class FreeplayState extends MusicBeatState {
 		for (item in songs) {
 			if (item.ID == curSelected) {
 				item.alpha = 1.0;
+				item.animation.play('selected');
 			} else {
 				item.alpha = 0.6;
+				item.animation.play('idle');
 			}
 		}
 
@@ -411,7 +472,7 @@ class FreeplayState extends MusicBeatState {
 
 		if (intendedScore == 0) {
 			songScore = 0;
-			scoreTxt.text = 'SCORE: 0';
+			scoreTxt.text = '0';
 		}
 	}
 
@@ -420,7 +481,7 @@ class FreeplayState extends MusicBeatState {
 		for (icon in icons) {
 			if (icon != null) {
 				if (icon.bumpInBeats && Math.floor(beat % icon.stepTempo) == 0) {
-					icon.scale.set(1.05, 1.05);
+					icon.scale.set(0.7, 0.7);
 				}
 			}
 		}
@@ -435,6 +496,9 @@ class FreeplayState extends MusicBeatState {
 		album = null;
 		bg = null;
 		buildings = null;
+		diffTxt = null;
+		leftArrow = null;
+		rightArrow = null;
 
 		FlxG.bitmap.clearUnused();
 	}

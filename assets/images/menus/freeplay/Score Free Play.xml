@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="Score Free Play.png">
+	<!-- Created with Adobe Animate version 21.0.5.40714 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="SCORE FREE PLAY0000" x="0" y="0" width="438" height="194"/>
+	<SubTexture name="SCORE FREE PLAY0001" x="0" y="0" width="438" height="194"/>
+	<SubTexture name="SCORE FREE PLAY0002" x="0" y="194" width="437" height="194" frameX="0" frameY="0" frameWidth="438" frameHeight="194"/>
+	<SubTexture name="SCORE FREE PLAY0003" x="0" y="194" width="437" height="194" frameX="0" frameY="0" frameWidth="438" frameHeight="194"/>
+</TextureAtlas>

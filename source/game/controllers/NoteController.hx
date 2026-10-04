@@ -44,6 +44,7 @@ class NoteController {
 	var _splashPool:Map<String, Array<NoteSplash>> = new Map();
 	var _holdsplashPool:Map<String, Array<HoldSplash>> = new Map();
 	var _holdSplashToStrum:Map<HoldSplash, StrumNote> = new Map();
+	var _noteTypeSkinCache:Map<String, NoteSkinData> = [];
 
 	public var charController:CharacterController = null;
 
@@ -559,6 +560,18 @@ class NoteController {
 		if (!_holdsplashPool.exists(holdsplash.noteSkin))
 			_holdsplashPool.set(holdsplash.noteSkin, []);
 		_holdsplashPool.get(holdsplash.noteSkin).push(holdsplash);
+	}
+
+	function getNoteTypeSkinData(noteType:String):Null<NoteSkinData> {
+		if (noteType == null || noteType == 'normal' || noteType == '')
+			return null;
+		if (_noteTypeSkinCache.exists(noteType))
+			return _noteTypeSkinCache.get(noteType);
+
+		var path = Paths.getPath('data/notetypes/$noteType/strumnotes', 'json');
+		var data:NoteSkinData = path != null ? FormatJson.readJson(path) : null;
+		_noteTypeSkinCache.set(noteType, data);
+		return data;
 	}
 
 	public function update(songTime:Float) {

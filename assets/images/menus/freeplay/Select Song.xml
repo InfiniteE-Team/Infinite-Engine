@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="Select Song.png">
+	<!-- Created with Adobe Animate version 21.0.5.40714 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="idle0000" x="0" y="0" width="620" height="180"/>
+	<SubTexture name="selected0000" x="0" y="0" width="620" height="180"/>
+	<SubTexture name="selected0001" x="0" y="0" width="620" height="180"/>
+	<SubTexture name="selected0002" x="0" y="180" width="620" height="180"/>
+	<SubTexture name="selected0003" x="0" y="180" width="620" height="180"/>
+</TextureAtlas>
