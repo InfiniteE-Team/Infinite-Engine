@@ -40,7 +40,18 @@ class Trace {
         }
     }
 
-	public static function traceOnce(text:String, ?isError:Bool = false) {
+	static function origin(pos:haxe.PosInfos):String {
+		if (pos == null)
+			return '';
+
+		var cls = pos.className == null ? '?' : pos.className.split('.').pop();
+		return '[$cls.${pos.methodName}:${pos.lineNumber}] ';
+	}
+
+	public static function traceOnce(text:String, ?isError:Bool = false, ?pos:haxe.PosInfos) {
+		var plain = text;
+		text = origin(pos) + text;
+
 		if (textGroup != null && textGroup.members == null)
 			textGroup = null;
 		if (textGroup == null)
@@ -49,7 +60,7 @@ class Trace {
 		updateVisibility();
 
 		if (textGroup != null && !textGroup.visible) {
-            trace(text);
+            haxe.Log.trace(plain, pos);
             return;
         }
 
@@ -110,7 +121,7 @@ class Trace {
 			}
 		}
 
-		trace(text);
+		haxe.Log.trace(plain, pos);
 	}
 
 	static function refreshDisplay() {
