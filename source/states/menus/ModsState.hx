@@ -224,7 +224,7 @@ class ModsState extends MusicBeatState {
 		dragPacksDesc.scrollFactor.set(0, 0);
 		add(dragPacksDesc);
 
-		deleteHint = new FlxText(140, 575, FlxG.width, '');
+		deleteHint = new FlxText(141, 585, FlxG.width, '');
 		deleteHint.setFormat(Paths.getPath('Funkin.otf', 'font'), 24, 0xFFFFFFFF, "left");
 		deleteHint.antialiasing = SaveData.data.antialiasing;
 		deleteHint.scrollFactor.set(0, 0);
