@@ -8,7 +8,77 @@ import game.objects.sprites.Character;
 import modding.scripting.ScriptHandler;
 #end
 
+typedef EventField = {
+	var key:String;
+	var kind:String;
+	var ?step:Float;
+	var ?min:Float;
+	var ?max:Float;
+	var ?def:Dynamic;
+}
+
+typedef EventSchema = {
+	var name:String;
+	var fields:Array<EventField>;
+}
+
 class EventManager {
+	public static final schemas:Array<EventSchema> = [
+		{name: 'Camera Follow', fields: [{key: 'char', kind: 'char'}]},
+		{
+			name: 'Center Camera',
+			fields: [
+				{key: 'char1', kind: 'char'},
+				{key: 'char2', kind: 'char'},
+				{key: 'isLock', kind: 'bool', def: false}
+			]
+		},
+		{name: 'Change Character', fields: [{key: 'char', kind: 'char'}, {key: 'newCharacter', kind: 'charName'}]},
+		{name: 'Change Scroll Speed', fields: [{key: 'speed', kind: 'float', step: 0.1, min: 0.5, max: 6, def: 1.5}]},
+		{name: 'Change BPM', fields: [{key: 'bpm', kind: 'float', step: 1, min: 20, max: 400, def: 120}]},
+		{name: 'Play Special Anim', fields: [{key: 'char', kind: 'char'}, {key: 'anim', kind: 'text', def: 'hey'}]}
+	];
+
+	public static function schemaNames():Array<String> {
+		return [for (t in schemas) t.name];
+	}
+
+	public static function findSchema(name:String):EventSchema {
+		for (t in schemas) {
+			if (t.name == name)
+				return t;
+		}
+		return null;
+	}
+
+	public static function defaultArgs(schema:EventSchema, chars:Array<String>, bpm:Float):Dynamic {
+		var args:Dynamic = {};
+		if (schema == null)
+			return args;
+
+		for (f in schema.fields) {
+			var value:Dynamic = f.def;
+			if (value == null) {
+				switch (f.kind) {
+					case 'char':
+						value = chars.length > 0 ? chars[0] : '';
+					case 'charName':
+						value = 'bf';
+					case 'float':
+						value = 0.0;
+					case 'bool':
+						value = false;
+					default:
+						value = '';
+				}
+			}
+			if (f.key == 'bpm')
+				value = bpm;
+			Reflect.setField(args, f.key, value);
+		}
+		return args;
+	}
+
 	#if HSCRIPT_ALLOWED
 	var eventScripts:Map<String, ScriptHandler> = [];
 	#end

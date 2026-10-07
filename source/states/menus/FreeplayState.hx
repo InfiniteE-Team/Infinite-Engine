@@ -281,6 +281,17 @@ class FreeplayState extends MusicBeatState {
 				changeDifficulty(1);
 		}
 
+		if (core.ConfigMain.globalData.developerMode) {
+			if (FlxG.keys.justPressed.N)
+				modding.editors.GameplayEditor.openNew();
+ 
+			if (FlxG.keys.justPressed.E && hasSongs()) {
+				acceptOption = true;
+				var diffName:String = DiffsUtils.difficulties.length > 0 ? DiffsUtils.difficulties[curDiff] : 'normal';
+				modding.editors.GameplayEditor.open(freeplayData.songData[curSelected].song, diffName);
+			}
+		}
+
 		if (Controls.ACCEPT && hasSongs()) {
 			acceptOption = true;
 			FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));

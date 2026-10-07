@@ -48,8 +48,8 @@ class FormatJson {
 		};
 	}
 
-	public static function getCharDataPlaceholder(characterData:core.json.objects.CharacterData) {
-		characterData = {
+	public static function getCharDataPlaceholder():core.json.objects.CharacterData {
+		return {
 			meta: {
 				isPlayer: true
 			},
@@ -192,6 +192,6 @@ class FormatJson {
 				bumpInBeats: true,
 				stepTempo: 2
 			}
-		}
+		};
 	}
 }

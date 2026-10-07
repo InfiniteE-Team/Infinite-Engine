@@ -544,11 +544,11 @@ class PlayState extends MusicBeatState {
 		#end
 
 		super.update(elapsed);
-		/*
-			if (FlxG.keys.justPressed.SEVEN) {
-				modding.editors.GameplayEditor.SONG = SONG;
-				MusicBeatState.switchState(() -> new modding.editors.GameplayEditor());
-		}*/
+		
+		if (FlxG.keys.justPressed.SEVEN) {
+			modding.editors.GameplayEditor.SONG = SONG;
+			MusicBeatState.switchState(() -> new modding.editors.GameplayEditor());
+		}
 
 		if (!paused) {
 			RhythmCore.songPosition += elapsed * 1000;

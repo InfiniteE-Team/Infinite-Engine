@@ -88,6 +88,7 @@ class CharacterController extends FunkinObjectRegistry {
 		#end
 
 		registry.set(id, chars);
+		chars.layerGroup = targetGroup;
 		for (layer in chars.layers)
 			targetGroup.add(layer);
 		targetGroup.add(chars);

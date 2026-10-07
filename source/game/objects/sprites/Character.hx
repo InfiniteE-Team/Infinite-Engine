@@ -14,6 +14,8 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 
 	public var layerMap:Map<String, FunkinSprite> = new Map();
 
+	public var layerGroup:flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic> = null;
+
 	public var isPlayer:Bool = false;
 	public var isSing:Bool = false;
 	public var isMiss:Bool = false;
@@ -68,7 +70,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 
 				if (characterData == null) {
 					Trace.traceOnce('[Character] WARNING: Character data was null, creating Dummy character', true);
-					FormatJson.getCharDataPlaceholder(characterData);
+					characterData = FormatJson.getCharDataPlaceholder();
 				}
 
 				idleAfterSing = characterData.gameplay.idleAfterSing ?? true;
@@ -123,8 +125,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		}
 
 		#if HSCRIPT_ALLOWED
-		if (script.hasScripts)
-			script.call('postUpdate', [elapsed]);
+		script.call('postUpdate', [elapsed]);
 		#end
 	}
 
@@ -132,8 +133,18 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		if (newCharacter == curCharacter)
 			return;
 
+		var layerCameras:Array<flixel.FlxCamera> = null;
 		for (layer in layers) {
 			if (layer != null) {
+				layerCameras = layer.cameras;
+				break;
+			}
+		}
+
+		for (layer in layers) {
+			if (layer != null) {
+				if (layerGroup != null)
+					layerGroup.remove(layer, true);
 				layer.kill();
 				layer.destroy();
 			}
@@ -142,6 +153,10 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		layerMap.clear();
 
 		curCharacter = newCharacter;
+		setPosition(0, 0);
+		isDancing = false;
+		bopAnimExists = false;
+		isSpecial = false;
 		isSing = false;
 		isMiss = false;
 		singCountTime = 0;
@@ -153,6 +168,19 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		#end
 
 		loadSprite();
+
+		if (layerGroup != null) {
+			var at:Int = layerGroup.members.indexOf(this);
+			for (layer in layers) {
+				if (layerCameras != null)
+					layer.cameras = layerCameras;
+				if (at >= 0) {
+					layerGroup.insert(at, layer);
+					at++;
+				} else
+					layerGroup.add(layer);
+			}
+		}
 	}
 
 	public function playSpecialAnim(animKey:String):Bool {
@@ -217,12 +245,6 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 				}
 			}
 		}
-	}
-
-	override public function isFinished(anim:String):Bool {
-		if (layers == null || layers.length == 0)
-			return false;
-		return layers[0].isFinished(anim);
 	}
 
 	public function getCamPosition():Point {
