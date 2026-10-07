@@ -1737,11 +1737,12 @@ class GameplayEditor extends MusicBeatState {
 
 		var panelWasOpen:Bool = panelMode != '';
 
+		updateSinging();
+
 		if (panelMode != '') {
 			hoverBox.visible = false;
 			updatePanel(keysLocked);
 		} else if (isPlaying) {
-			updateSinging();
 			hoverBox.visible = false;
 		} else if (keysLocked) {
 			hoverBox.visible = false;

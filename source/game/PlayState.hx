@@ -547,8 +547,8 @@ class PlayState extends MusicBeatState {
 		#end
 
 		super.update(elapsed);
-		
-		if (FlxG.keys.justPressed.SEVEN) {
+
+		if (FlxG.keys.justPressed.SEVEN && core.ConfigMain.globalData.developerMode) {
 			modding.editors.GameplayEditor.SONG = SONG;
 			MusicBeatState.switchState(() -> new modding.editors.GameplayEditor());
 		}
