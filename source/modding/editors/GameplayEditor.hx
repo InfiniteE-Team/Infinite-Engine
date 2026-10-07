@@ -1665,7 +1665,7 @@ class GameplayEditor extends MusicBeatState {
 		infoHUD.updateInfoText(RhythmCore.songPosition, RhythmCore.stepInMs, RhythmCore.bpm);
 
 		if (viewToggles != null && FlxG.mouse.justPressed)
-			viewToggles.click(FlxG.mouse.screenX, FlxG.mouse.screenY);
+			viewToggles.click(FlxG.mouse.viewX, FlxG.mouse.viewY);
 
 		if (director != null) {
 			if (!isPlaying && Math.abs(RhythmCore.songPosition - previewLastPos) > 0.5)

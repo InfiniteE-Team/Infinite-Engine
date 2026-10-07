@@ -77,6 +77,9 @@ class PlayState extends MusicBeatState {
 	override public function create() {
 		instance = this;
 
+		if (FlxG.mouse != null)
+			FlxG.mouse.visible = false;
+
 		PlayStateConfig.isPlaying = true;
 
 		if (playStateConfig != null)
@@ -634,6 +637,9 @@ class PlayState extends MusicBeatState {
 
 	override public function destroy() {
 		PlayStateConfig.isPlaying = false;
+
+		if (FlxG.mouse != null)
+			FlxG.mouse.visible = true;
 
 		if (camGame != null)
 			camGame.destroy();

@@ -29,8 +29,9 @@ class MasterAudio {
 		}
 
 		var sound = new flixel.sound.FlxSound();
-		sound.loadEmbedded(oflSound, true);
+		sound.load(oflSound, true);
 		sound.volume = volume;
+		sound.looped = true;
 		sound.persist = true;
 
 		FlxG.sound.music = sound;
