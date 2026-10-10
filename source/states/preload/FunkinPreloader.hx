@@ -274,7 +274,7 @@ class FunkinPreloader extends MusicBeatState {
 					checkAllDone();
 				});
 			} catch (e:Dynamic) {
-				Trace.traceOnce('[FunkinPreloader]: Error process image/atlas: $key - $e', true);
+				Console.log('[FunkinPreloader]: Error process image/atlas: $key - $e', true);
 				loadedImages++;
 				checkAllDone();
 			}

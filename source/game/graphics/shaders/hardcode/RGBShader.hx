@@ -12,7 +12,7 @@ class RGBShader {
 			if (sys.FileSystem.exists(path)) {
 				_src = sys.io.File.getContent(path);
 			} else {
-				Trace.traceOnce('Shader not found: $path', true);
+				Console.log('Shader not found: $path', true);
 			}
 		}
 		return _src;

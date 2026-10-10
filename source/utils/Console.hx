@@ -5,7 +5,7 @@ import flixel.util.FlxTimer;
 import flixel.tweens.FlxTween;
 import flixel.group.FlxSpriteGroup;
 
-class Trace {
+class Console {
 	static var textGroup:FlxSpriteGroup;
 	static var plugin:TracePlugin;
 	static var messages:Array<{
@@ -48,7 +48,7 @@ class Trace {
 		return '[$cls.${pos.methodName}:${pos.lineNumber}] ';
 	}
 
-	public static function traceOnce(text:String, ?isError:Bool = false, ?pos:haxe.PosInfos) {
+	public static function log(text:String, ?isError:Bool = false, ?pos:haxe.PosInfos) {
 		var plain = text;
 		text = origin(pos) + text;
 

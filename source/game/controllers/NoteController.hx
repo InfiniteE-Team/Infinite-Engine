@@ -134,7 +134,7 @@ class NoteController {
 			bg.visible = strumsVisible && notesVisible;
 		}
 
-		Trace.traceOnce("Created Strums");
+		Console.log("Created Strums");
 	}
 
 	public function loadJson() {
@@ -194,7 +194,7 @@ class NoteController {
 		var holdDataPath:String = 'noteskins/$noteSkin/holdsplashes';
 		holdSkinData = FormatJson.readJson(Paths.getPath('data/$holdDataPath', "json"));
 
-		Trace.traceOnce("Note Skin JSON loaded");
+		Console.log("Note Skin JSON loaded");
 	}
 
 	public function bglaneBackdrop(x:Float):flixel.FlxSprite {
@@ -344,7 +344,7 @@ class NoteController {
 	// Creation or Generation for Notes
 	public function generateNotes(songTime:Float, daSong:SongConfig) {
 		if (daSong.songData == null) {
-			Trace.traceOnce('songData null, generated 0 notes', true);
+			Console.log('songData null, generated 0 notes', true);
 			return;
 		}
 

@@ -74,7 +74,7 @@ class MainMenuState extends ScriptState {
 			MusicBeatState.switchState(() -> new states.menus.ModsState());
 
 		if (FlxG.keys.justPressed.SEVEN)
-			ScriptClass.switchState('StageEditor');
+			MusicBeatState.switchState(() -> new modding.editors.DebugMenu());
 
 		if (accept) {
 			FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));

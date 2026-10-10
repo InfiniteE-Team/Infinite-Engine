@@ -91,7 +91,7 @@ class FunkinSprite extends animate.FlxAnimate {
 		var loaded = Paths.getPath(assetPath, 'animated');
 
 		if (loaded == null) {
-			Trace.traceOnce('FunkinSprite could not load asset "$assetPath"');
+			Console.log('FunkinSprite could not load asset "$assetPath"');
 			return;
 		}
 
@@ -324,7 +324,7 @@ class FunkinSprite extends animate.FlxAnimate {
 	public function playAnim(name:Null<String>, ?force:Bool = true) {
 		var fullName = name + (_suffixes.get(name) ?? '');
 		if (!existsAnim(fullName)) {
-			Trace.traceOnce('$name Anim Not Existed!', true);
+			Console.log('$name Anim Not Existed!', true);
 			return;
 		}
 		currentAnim = fullName;
@@ -375,7 +375,7 @@ class FunkinSprite extends animate.FlxAnimate {
 		try {
 			super.destroy();
 		} catch (e:Dynamic) {
-			Trace.traceOnce('Warning: Destroy FunkinSprite: $e');
+			Console.log('Warning: Destroy FunkinSprite: $e');
 		}
 
 		offsets = null;

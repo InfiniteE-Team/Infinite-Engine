@@ -80,7 +80,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 	public function applyCharProps(char:FunkinSprite, id:String) {
 		var props = charProps.get(id);
 		if (props == null) {
-			Trace.traceOnce('Not exist chars $id', true);
+			Console.log('Not exist chars $id', true);
 			return;
 		}
 
@@ -129,7 +129,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 				if (element.audio?.path != null)
 					core.json.extensions.AudioData.AudioConfig.playElementAudio(element.audio, 'gameplay/stages/');
 			default:
-				Trace.traceOnce('Element Type Unknown $type', true);
+				Console.log('Element Type Unknown $type', true);
 		}
 	}
 

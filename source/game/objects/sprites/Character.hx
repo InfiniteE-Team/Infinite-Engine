@@ -62,14 +62,14 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 				if (Paths.exists('data/characters/$curCharacter.json'))
 					charData = Paths.getPath('data/characters/$curCharacter', JSON);
 				else {
-					Trace.traceOnce('[Character] WARNING: No character data found for "$curCharacter" and it will be replaced to bf.json');
+					Console.log('[Character] WARNING: No character data found for "$curCharacter" and it will be replaced to bf.json');
 					charData = Paths.getPath('data/characters/bf', JSON);
 				}
 
 				characterData = FormatJson.readJson(charData);
 
 				if (characterData == null) {
-					Trace.traceOnce('[Character] WARNING: Character data was null, creating Dummy character', true);
+					Console.log('[Character] WARNING: Character data was null, creating Dummy character', true);
 					characterData = FormatJson.getCharDataPlaceholder();
 				}
 

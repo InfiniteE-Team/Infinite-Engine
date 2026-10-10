@@ -8,7 +8,7 @@ class ScriptedTypeDef {
         var path = Paths.getPath(typeDefName, 'typedefs');
 
         if (path == null || !sys.FileSystem.exists(path)) {
-            Trace.traceOnce('ScriptedTypeDef: Not found source/typedefs/$typeDefName.hx', true);
+            Console.log('ScriptedTypeDef: Not found source/typedefs/$typeDefName.hx', true);
             return null;
         }
         var content = sys.io.File.getContent(path);
@@ -18,10 +18,10 @@ class ScriptedTypeDef {
             var type = module.types.get(typeDefName);
             if (type is ScriptedTypedef)
                 return cast type;
-            Trace.traceOnce('ScriptedTypeDef: "$typeDefName" is not a typedef', true);
+            Console.log('ScriptedTypeDef: "$typeDefName" is not a typedef', true);
             return null;
         } catch (e) {
-            Trace.traceOnce('ScriptedTypeDef: Error parsing $typeDefName: ${e.message}', true);
+            Console.log('ScriptedTypeDef: Error parsing $typeDefName: ${e.message}', true);
             return null;
         }
     }

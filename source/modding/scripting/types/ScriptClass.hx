@@ -13,7 +13,7 @@ class ScriptClass {
 		var path = Paths.getPath(className, 'states');
 
 		if (path == null || !sys.FileSystem.exists(path)) {
-			Trace.traceOnce('ScriptClass: Not found source/states/$className.hx', true);
+			Console.log('ScriptClass: Not found source/states/$className.hx', true);
 			return null;
 		}
 
@@ -36,7 +36,7 @@ class ScriptClass {
 		var path = Paths.getPath(className, 'substates');
 
 		if (path == null || !sys.FileSystem.exists(path)) {
-			Trace.traceOnce('ScriptClass: Not found source/substates/$className.hx', true);
+			Console.log('ScriptClass: Not found source/substates/$className.hx', true);
 			return null;
 		}
 
@@ -71,7 +71,7 @@ class ScriptClass {
 		try {
 			module = new Module(content, className, [], path);
 		} catch (e) {
-			Trace.traceOnce('ScriptClass: parse error $className → ${e.message}', true);
+			Console.log('ScriptClass: parse error $className → ${e.message}', true);
 			return null;
 		}
 
@@ -84,12 +84,12 @@ class ScriptClass {
 
 		var type = env.resolve(className);
 		if (type == null) {
-			Trace.traceOnce('ScriptClass: Class "$className" not found in $path', true);
+			Console.log('ScriptClass: Class "$className" not found in $path', true);
 			return null;
 		}
 
 		if (!(type is hxscript.types.ScriptedClass)) {
-			Trace.traceOnce('ScriptClass: "$className" is not a class', true);
+			Console.log('ScriptClass: "$className" is not a class', true);
 			return null;
 		}
 

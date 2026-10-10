@@ -29,6 +29,7 @@ class FreeplayState extends MusicBeatState {
 	var disk:FunkinSprite;
 
 	var artistTxt:FlxText;
+	var artistSprite:FlxSprite;
 
 	// song score & lerp variables
 	var scoreTxt:FlxText;
@@ -138,12 +139,22 @@ class FreeplayState extends MusicBeatState {
 			box.scrollFactor.set(0, 0);
 			add(box);
 
-			artistTxt = new FlxText(0, 0, 590, 'Artist: ??');
+			artistTxt = new FlxText(0, 0, 590, '??');
 			artistTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
 			artistTxt.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 3, 1);
 			artistTxt.antialiasing = SaveData.data.antialiasing;
 			artistTxt.scrollFactor.set(0, 0);
 			add(artistTxt);
+
+			artistSprite = new FlxSprite(910, 459);
+			artistSprite.frames = Paths.getPath('menus/freeplay/Artist', 'animated');
+			artistSprite.animation.addByPrefix('idle', 'idle', 24, true);
+			artistSprite.animation.play('idle');
+			artistSprite.scrollFactor.set(0, 0);
+			artistSprite.scale.set(0.25, 0.25);
+			artistSprite.updateHitbox();
+			artistSprite.antialiasing = SaveData.data.antialiasing;
+			add(artistSprite);
 
 			scoreTxt = new FlxText(0, 10, 0, '0');
 			scoreTxt.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFE7E7, "center");
@@ -152,7 +163,7 @@ class FreeplayState extends MusicBeatState {
 			scoreTxt.scrollFactor.set(0, 0);
 			add(scoreTxt);
 
-			scoreSprite = new FlxSprite(910, 499);
+			scoreSprite = new FlxSprite(910, 519);
 			scoreSprite.frames = Paths.getPath('menus/freeplay/Score Free Play', 'animated');
 			scoreSprite.animation.addByPrefix('idle', 'idle', 24, true);
 			scoreSprite.animation.play('idle');
@@ -192,11 +203,14 @@ class FreeplayState extends MusicBeatState {
 			rightArrow.scrollFactor.set(0, 0);
 			add(rightArrow);
 
-			artistTxt.x = FlxG.width * 0.58;
-			artistTxt.y = FlxG.height * 0.64;
+			artistTxt.x = FlxG.width * 0.75;
+			artistTxt.y = FlxG.height * 0.645;
 
-			scoreTxt.x = 1020;
-			scoreTxt.y = FlxG.height * 0.7;
+			artistSprite.x = artistTxt.x - 80;
+			artistSprite.y = artistTxt.y - 10;
+
+			scoreTxt.x = 1025;
+			scoreTxt.y = FlxG.height * 0.725;
 
 			diffTxt.y = 40;
 
@@ -284,7 +298,7 @@ class FreeplayState extends MusicBeatState {
 		if (core.ConfigMain.globalData.developerMode) {
 			if (FlxG.keys.justPressed.N)
 				modding.editors.GameplayEditor.openNew();
- 
+
 			if (FlxG.keys.justPressed.E && hasSongs()) {
 				acceptOption = true;
 				var diffName:String = DiffsUtils.difficulties.length > 0 ? DiffsUtils.difficulties[curDiff] : 'normal';
@@ -419,9 +433,11 @@ class FreeplayState extends MusicBeatState {
 			if (item.ID == curSelected) {
 				item.alpha = 1.0;
 				item.card?.animation.play('selected');
+				item.black?.animation.play('selected');
 			} else {
 				item.alpha = 0.6;
 				item.card?.animation.play('idle');
+				item.black?.animation.play('idle');
 			}
 		}
 
@@ -433,13 +449,11 @@ class FreeplayState extends MusicBeatState {
 			}
 		}
 
-		if (artistTxt != null) {
-			if (freeplayData.songData[curSelected].artist != null)
-				artistTxt.text = 'Artist: ' + freeplayData.songData[curSelected].artist;
-			else
-				artistTxt.text = 'Artist: ??';
-
-			artistTxt.x = FlxG.width * 0.58;
+		if (artistTxt != null && artistSprite != null) {
+			artistTxt.text = freeplayData.songData[curSelected].artist ?? '??';
+			artistTxt.fieldWidth = 0;
+			artistTxt.x = artistSprite.x + artistSprite.width + 10;
+			artistTxt.y = artistSprite.y + (artistSprite.height / 2) - (artistTxt.height / 2);
 		}
 
 		updateScore();

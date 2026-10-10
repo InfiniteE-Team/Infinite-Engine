@@ -105,7 +105,7 @@ class SongConfig {
 
 		if (osuPath != null) {
 			songData = ChartPorter.tryConvertOsu(osuPath);
-			Trace.traceOnce('SongData: load Song path: $osuPath');
+			Console.log('SongData: load Song path: $osuPath');
 		}
 
 		if (songData == null) {
@@ -154,7 +154,7 @@ class SongConfig {
 		if (sys.FileSystem.exists(path)) {
 			var meta:Dynamic = FormatJson.readJson(path);
 			if (meta != null) {
-				Trace.traceOnce('SongData: V-Slice metadata loaded from $path');
+				Console.log('SongData: V-Slice metadata loaded from $path');
 				return meta;
 			}
 		}

@@ -50,7 +50,7 @@ class ScriptHandler {
 			return;
 		}
 		pendingPaths.push(path);
-		Trace.traceOnce('[ScriptHandler] find: $path');
+		Console.log('[ScriptHandler] find: $path');
 	}
 
 	public function loadFolder(folder:String):Void {
@@ -182,7 +182,7 @@ class ScriptHandler {
 		try {
 			content = sys.io.File.getContent(path);
 		} catch (e) {
-			Trace.traceOnce('[${haxe.io.Path.withoutDirectory(path)}] Cannot read file: ${e.message}');
+			Console.log('[${haxe.io.Path.withoutDirectory(path)}] Cannot read file: ${e.message}');
 			return null;
 		}
 
@@ -190,12 +190,12 @@ class ScriptHandler {
 		var script = new Script(content, scriptName, globalEnv);
 
 		script.onParsingError = function(e) {
-			Trace.traceOnce('[$scriptName] Parse error: ${e.message}');
+			Console.log('[$scriptName] Parse error: ${e.message}');
 		};
 		script.onProgramError = function(e) {
 			var d = hxscript.error.Sink.history[hxscript.error.Sink.history.length - 1];
 			var line = d != null ? '${d.line}' : '?';
-			Trace.traceOnce('[$scriptName:$line] Script error: ${e.message}');
+			Console.log('[$scriptName:$line] Script error: ${e.message}');
 		};
 
 		setupScript(script);
@@ -228,7 +228,7 @@ class ScriptHandler {
 		setupScript(scripts[i]);
 		modifiedTimes[i] = sys.FileSystem.stat(paths[i]).mtime.getTime();
 		scripts[i].call('postCreate', []);
-		Trace.traceOnce('[ScriptHandler] hot-reloaded: ${paths[i]}');
+		Console.log('[ScriptHandler] hot-reloaded: ${paths[i]}');
 	}
 
 	public function destroy():Void {

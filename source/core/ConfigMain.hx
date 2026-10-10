@@ -35,7 +35,7 @@ class ConfigMain extends flixel.FlxState {
 		globalData.configGlobal();
 
 		if (globalData.developerMode)
-			Trace.init();
+			Console.init();
 
 		if (globalData.startState != null)
 			mainState = globalData.startState;

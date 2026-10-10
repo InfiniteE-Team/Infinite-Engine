@@ -27,7 +27,7 @@ class VideoState extends FlxVideo {
 				return;
 
 			onEncounteredError.add(function(message:String) {
-				Trace.traceOnce('VLC not load: $message', true);
+				Console.log('VLC not load: $message', true);
 
 				if (errorCallback != null)
 					errorCallback(message);
@@ -50,7 +50,7 @@ class VideoState extends FlxVideo {
 					play();
 				}
 			} catch (e:Dynamic) {
-				Trace.traceOnce('VLC not load!: $e', true);
+				Console.log('VLC not load!: $e', true);
 			}
 		});
 	}

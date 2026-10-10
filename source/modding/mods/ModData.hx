@@ -41,7 +41,7 @@ class ModConfig {
 			if (modData.appIcon != null && modData.appIcon != "")
 				setAppIcon(modData.appIcon);
 		} catch (e:Dynamic) {
-			Trace.traceOnce('Error to parsed the mod: $e');
+			Console.log('Error to parsed the mod: $e');
 		}
 
 		if (modData == null)
@@ -59,7 +59,7 @@ class ModConfig {
 		try {
 			return FormatJson.readJson(metaPath);
 		} catch (e:Dynamic) {
-			Trace.traceOnce('Error parsing meta for mod $modName: $e');
+			Console.log('Error parsing meta for mod $modName: $e');
 			return null;
 		}
 	}
@@ -67,7 +67,7 @@ class ModConfig {
 	public static function setAppIcon(iconPath:String):Void {
 		#if desktop
 		if (!FileSystem.exists(iconPath)) {
-			Trace.traceOnce('The archive png not existed: $iconPath', true);
+			Console.log('The archive png not existed: $iconPath', true);
 			return;
 		}
 
@@ -78,7 +78,7 @@ class ModConfig {
 				Application.current.window.setIcon(iconImage);
 			}
 		} catch (e:Dynamic) {
-			Trace.traceOnce('Error to apply the icon: $e', true);
+			Console.log('Error to apply the icon: $e', true);
 		}
 		#end
 	}

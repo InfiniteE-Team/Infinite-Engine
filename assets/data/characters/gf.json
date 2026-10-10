@@ -8,8 +8,8 @@
 			0.0
 		],
 		"cameraOffset": [
-			0.0,
-			0.0
+			-75.0,
+			-100.0
 		],
 		"idleAfterSing": true,
 		"singTime": 8.0

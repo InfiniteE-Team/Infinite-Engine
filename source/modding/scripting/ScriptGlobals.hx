@@ -3,6 +3,7 @@ package modding.scripting;
 import hxscript.Config;
 import hxscript.setup.Boot;
 import game.modchart.modifiers.Modifiers;
+import modding.editors.DebugMenu;
 
 class ScriptGlobals {
 	static var initialized:Bool = false;
@@ -71,7 +72,10 @@ class ScriptGlobals {
 		Config.globalVariables.set('SaveScore', core.config.SaveScore);
 		Config.globalVariables.set('SaveData', core.config.SaveData);
 		Config.globalVariables.set('OptionType', core.enums.OptionType);
-		Config.globalVariables.set('Trace', Trace);
+		Config.globalVariables.set('Console', Console);
+
+		Config.globalVariables.set('FPSCounter', core.ui.FPSCounter);
+
 		Config.globalVariables.set('File', sys.io.File);
 		Config.globalVariables.set('FileSystem', sys.FileSystem);
 		Config.globalVariables.set('Camera', game.objects.Camera);
@@ -139,6 +143,7 @@ class ScriptGlobals {
 			"Paths" => core.assets.Paths,
 			"FunkinSprite" => core.assets.FunkinSprite,
 			"RhythmCore" => core.rhythm.RhythmCore,
+			"FPSCounter" => core.ui.FPSCounter,
 			// Json
 			"Json" => haxe.Json,
 			"FormatJson" => FormatJson,
@@ -153,7 +158,7 @@ class ScriptGlobals {
 			"VideoState" => states.cutscenes.VideoState,
 			"VideoSprite" => states.cutscenes.VideoSprite,
 			// Utils
-			"Trace" => Trace,
+			"Console" => Console,
 			#if windows
 			"WindowsAPI" => winapi.WindowsAPI, "WindowsGDI" => winapi.gdi.WindowsGDI, "WindowsGDIThread" => winapi.gdi.WindowsGDIThread,
 			#end

@@ -152,7 +152,7 @@ class LuaScript {
 				}
 			}
 
-			Trace.traceOnce('[LuaScript] require("$name"): not found', true);
+			Console.log('[LuaScript] require("$name"): not found', true);
 			return null;
 		});
 
@@ -164,7 +164,7 @@ class LuaScript {
 				pushHaxeClass(cls);
 				Lua.setglobal(L, varName);
 			} else {
-				Trace.traceOnce('[LuaScript] import("$classPath", "$varName"): not found', true);
+				Console.log('[LuaScript] import("$classPath", "$varName"): not found', true);
 			}
 			return null;
 		});
@@ -586,7 +586,7 @@ class LuaScript {
 	}*/
 	function traceError(context:String):Void {
 		var msg = Lua.tostring(L, -1);
-		Trace.traceOnce('[LuaScript] $path → $context: $msg', true);
+		Console.log('[LuaScript] $path → $context: $msg', true);
 	}
 
 	public function destroy():Void {

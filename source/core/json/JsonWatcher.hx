@@ -38,7 +38,7 @@ class JsonWatcher {
 			if (currentMtime > _mtimes[i]) {
 				_mtimes[i] = currentMtime;
 
-				Trace.traceOnce('JSON change detected ${_paths[i]}');
+				Console.log('JSON change detected ${_paths[i]}');
 				var cb = _callbacks[i];
 				if (cb != null)
 					cb();
@@ -64,7 +64,7 @@ class JsonWatcher {
 				_mtimes[i] = currentMtime;
 				_cooldown = COOLDOWN_SECS;
 
-				Trace.traceOnce('JSON change detected ${_paths[i]}');
+				Console.log('JSON change detected ${_paths[i]}');
 				var cb = _callbacks[i];
 				if (cb != null)
 					cb();

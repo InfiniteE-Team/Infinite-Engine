@@ -1,6 +1,6 @@
 {
   "version": "2.2.4",
-  "songName": "Fresh Erect",
+  "songName": "Fresh",
   "artist": "Kohta Takahashi (feat. Saruky)",
   "charter": "fabs + Spazkid",
   "offsets": {},
@@ -13,7 +13,7 @@
       "player": "bf",
       "girlfriend": "gf",
       "opponent": "dad",
-      "instrumental": "Inst-erect",
+      "instrumental": "-erect",
       "opponentVocals": [
         "dad-erect"
       ],

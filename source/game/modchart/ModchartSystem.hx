@@ -93,7 +93,7 @@ class ModchartSystem extends FlxBasic {
 		final result:Dynamic = Reflect.callMethod(null, factory, []);
 		final inst:BaseModifier = Std.isOfType(result, BaseModifier) ? cast result : null;
 		if (inst == null) {
-			Trace.traceOnce('[ModchartSystem] prepareMod("$tag"): factory did not return a BaseModifier', true);
+			Console.log('[ModchartSystem] prepareMod("$tag"): factory did not return a BaseModifier', true);
 			return;
 		}
 		inst.system = this;

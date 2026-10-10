@@ -133,12 +133,12 @@ class EventManager {
 				var charId:String = event.arguments.char;
 				var newCharacter:String = event.arguments.newCharacter;
 				if (charId == null || newCharacter == null) {
-					Trace.traceOnce('[EventManager] Change Character: "char" or "newCharacter" are missing from the arguments.');
+					Console.log('[EventManager] Change Character: "char" or "newCharacter" are missing from the arguments.');
 					return;
 				}
 				var char = cast PlayState.instance.chars.get(charId);
 				if (char == null) {
-					Trace.traceOnce('[EventManager] Change Character: char "$charId" not found');
+					Console.log('[EventManager] Change Character: char "$charId" not found');
 					return;
 				}
 				char.changeCharacter(newCharacter);
@@ -146,7 +146,7 @@ class EventManager {
 				var charId:String = event.arguments.char;
 				var char = cast PlayState.instance.chars.get(charId);
 				if (char == null) {
-					Trace.traceOnce('[EventManager] Camera Follow char "$charId" not found');
+					Console.log('[EventManager] Camera Follow char "$charId" not found');
 					return;
 				}
 				PlayState.instance.cameraController.existsCamEvents = true;
@@ -158,9 +158,9 @@ class EventManager {
 				var char1 = cast PlayState.instance.chars.get(charId1);
 				var char2 = cast PlayState.instance.chars.get(charId2);
 				if (char1 == null)
-					Trace.traceOnce('[EventManager] Camera Follow char "$charId1" not found');
+					Console.log('[EventManager] Camera Follow char "$charId1" not found');
 				if (char2 == null)
-					Trace.traceOnce('[EventManager] Camera Follow char "$charId2" not found');
+					Console.log('[EventManager] Camera Follow char "$charId2" not found');
 				if (char1 == null || char2 == null)
 					return;
 				if (PlayState.instance.cameraController.existsCamEvents != true)
@@ -181,12 +181,12 @@ class EventManager {
 				var charId = event.arguments.char;
 				var animKey = event.arguments.anim;
 				if (charId == null || animKey == null) {
-					Trace.traceOnce('[EventManager] Play Special Anim: "char" or "anim" are missing from the arguments');
+					Console.log('[EventManager] Play Special Anim: "char" or "anim" are missing from the arguments');
 					return;
 				}
 				var success = PlayState.instance.chars.playSpecialAnim(charId, animKey);
 				if (!success)
-					Trace.traceOnce('[EventManager] Play Special Anim: could not be reproduced "$animKey" in "$charId"');
+					Console.log('[EventManager] Play Special Anim: could not be reproduced "$animKey" in "$charId"');
 		}
 		#if HSCRIPT_ALLOWED
 		var handler = eventScripts.get(event.name);

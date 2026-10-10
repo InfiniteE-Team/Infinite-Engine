@@ -65,7 +65,7 @@ class GameOverSubstate extends MusicBeatSubstate {
 		}
 
 		if (char == null) {
-			Trace.traceOnce("ERROR: Character GameOver not loaded");
+			Console.log("ERROR: Character GameOver not loaded");
 			return;
 		}
 		for (layer in char.layers)

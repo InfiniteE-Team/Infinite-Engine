@@ -7,8 +7,8 @@ import openfl.events.Event;
 class FPSCounter extends Sprite {
 	public static var instance:FPSCounter = null;
 
-	var bg = new Shape();
-	var fps:core.ui.FPS;
+	public var bg = new Shape();
+	public var fps:core.ui.FPS;
 
 	public function new(x:Float, y:Float, color:Int) {
 		super();

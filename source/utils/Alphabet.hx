@@ -36,7 +36,7 @@ class Alphabet extends core.assets.FunkinSprite {
 			updateHitbox();
 		} else {
 			visible = false;
-			Trace.traceOnce('Alphabet: "$char" style="$style" not in atlas');
+			Console.log('Alphabet: "$char" style="$style" not in atlas');
 		}
 	}
 

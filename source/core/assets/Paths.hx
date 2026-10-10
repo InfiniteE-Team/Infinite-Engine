@@ -54,7 +54,7 @@ class Paths {
 					return Library.findLib(fileName);
 			}
 		} catch (e:Dynamic) {
-			Trace.traceOnce('Paths: "$fileName" not found: $e', true);
+			Console.log('Paths: "$fileName" not found: $e', true);
 			return null;
 		}
 	}
@@ -149,7 +149,7 @@ class Paths {
 
 		var imagePath = getPath(fileName, IMAGE);
 		if (imagePath == null) {
-			Trace.traceOnce('cacheAutoAsync: Not found $fileName', true);
+			Console.log('cacheAutoAsync: Not found $fileName', true);
 			if (onComplete != null)
 				onComplete(null);
 			return;
@@ -218,7 +218,7 @@ class Paths {
 								finalAsset = graphic;
 						}
 					} catch (e:Dynamic) {
-						Trace.traceOnce('cacheAutoAsync: Failed to parse atlas for "$fileName" ($formatDetected): $e', true);
+						Console.log('cacheAutoAsync: Failed to parse atlas for "$fileName" ($formatDetected): $e', true);
 						finalAsset = graphic;
 					}
 

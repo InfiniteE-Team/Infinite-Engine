@@ -38,7 +38,7 @@ class MenuState extends MusicBeatState {
 
 		menuData = FormatJson.readJson(Paths.getPath('data/$menu_folder', 'json'));
 		if (menuData == null || menuData.elements == null) {
-			Trace.traceOnce('MenuState: not found $menu_folder', true);
+			Console.log('MenuState: not found $menu_folder', true);
 			return;
 		}
 		buildElements(menuData.elements, null);
@@ -70,7 +70,7 @@ class MenuState extends MusicBeatState {
 				obj = buildCustomClass(el);
 
 			case _:
-				Trace.traceOnce('MenuState: unknown type "${el.type}"', true);
+				Console.log('MenuState: unknown type "${el.type}"', true);
 				return;
 		}
 
@@ -204,7 +204,7 @@ class MenuState extends MusicBeatState {
 				FlxTween.tween(spr, {alpha: 1.0}, tween.duration * 0.5, {ease: ease, startDelay: delay});
 
 			case _:
-				Trace.traceOnce('MenuState: unknown tween type "${el.type}"', true);
+				Console.log('MenuState: unknown tween type "${el.type}"', true);
 		}
 	}
 
@@ -234,7 +234,7 @@ class MenuState extends MusicBeatState {
 				FlxTween.angle(spr, spr.angle, spr.angle + 360, loop.duration, {type: FlxTweenType.LOOPING});
 
 			case _:
-				Trace.traceOnce('MenuState: frameLoop firstAnim + looped true', true);
+				Console.log('MenuState: frameLoop firstAnim + looped true', true);
 		}
 	}
 
@@ -346,7 +346,7 @@ class MenuState extends MusicBeatState {
 		//     case 'onPlayPressed':  FlxG.switchState(new PlayState());
 		//     case 'onButtonHover':  FlxG.sound.play(Paths.getPath('hover','sound));
 		// }
-		Trace.traceOnce('MenuState: action not handler -> "$action"');
+		Console.log('MenuState: action not handler -> "$action"');
 	}
 
 	override public function destroy():Void {

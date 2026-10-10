@@ -628,9 +628,10 @@ class PlayState extends MusicBeatState {
 		if (!osuMode || !paused)
 			chars.danceAll();
 
-		#if HSCRIPT_ALLOWED
 		if (stage != null)
 			stage.onBeatHit(beat);
+
+		#if HSCRIPT_ALLOWED
 		script.call('postBeatHit', [beat]);
 		#end
 	}

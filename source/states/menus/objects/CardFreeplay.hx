@@ -25,8 +25,10 @@ class CardFreeplay extends flixel.group.FlxSpriteGroup {
 
 		this.ID = ID;
 
-		black = new core.assets.FunkinSprite(60, 40, true);
-		black.loadGraphic(Paths.getPath('menus/freeplay/Screen', 'image'));
+		black = new core.assets.FunkinSprite(60, 30, true);
+		black.frames = Paths.getPath('menus/freeplay/Screen', 'animated');
+		black.addAnim('idle', 'idle', 24, false);
+		black.addAnim('selected', 'selected', 12, true);
 		black.antialiasing = SaveData.data.antialiasing;
 		black.scale.set(0.95, 0.95);
 		black.updateHitbox();
@@ -37,6 +39,15 @@ class CardFreeplay extends flixel.group.FlxSpriteGroup {
 	var scrollOffset:Float = 0.0;
 
 	public function createCard(x:Float, y:Float, songName:String, ID:Int) {
+		songText = new flixel.text.FlxText(windowX, 65, 0, songName);
+		songText.setFormat(Paths.getPath('5by7.ttf', 'font'), 38, 0xFFFFFFFF);
+		@:privateAccess songText.textField.filters = [
+			new GlowFilter(flixel.util.FlxColor.fromString('#001b3a'), 1.0, 10, 10, 100, BitmapFilterQuality.MEDIUM)
+		];
+		songText.antialiasing = SaveData.data.antialiasing;
+		songText.ID = ID;
+		add(songText);
+
 		card = new core.assets.FunkinSprite(0, 0, true);
 		card.frames = Paths.getPath('menus/freeplay/Song Select', 'animated');
 		card.animation.addByPrefix('idle', 'idle', 24, false);
@@ -46,15 +57,6 @@ class CardFreeplay extends flixel.group.FlxSpriteGroup {
 		card.updateHitbox();
 		card.ID = ID;
 		add(card);
-
-		songText = new flixel.text.FlxText(windowX, 65, 0, songName);
-		songText.setFormat(Paths.getPath('5by7.ttf', 'font'), 38, 0xFFFFFFFF);
-		@:privateAccess songText.textField.filters = [
-			new GlowFilter(flixel.util.FlxColor.fromString('#001b3a'), 1.0, 10, 10, 100, BitmapFilterQuality.MEDIUM)
-		];
-		songText.antialiasing = SaveData.data.antialiasing;
-		songText.ID = ID;
-		add(songText);
 
 		scrollOffset = 0.0;
 		songStartX = windowX;

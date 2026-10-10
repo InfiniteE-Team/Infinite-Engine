@@ -18,7 +18,7 @@ class CursorConfig extends FunkinSprite {
 		loadProps(cursorProps, 'cursor');
 
 		if (this.graphic == null || this.graphic.bitmap == null) {
-			Trace.traceOnce("CursorConfig: graphic is null, cursor not loaded", true);
+			Console.log("CursorConfig: graphic is null, cursor not loaded", true);
 			return;
 		}
 

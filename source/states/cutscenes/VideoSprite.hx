@@ -29,7 +29,7 @@ class VideoSprite extends FlxVideoSprite {
             antialiasing = SaveData.data.antialiasing; 
 
             bitmap.onEncounteredError.add(function(message:String) {
-                Trace.traceOnce('VLC not load: $message', true);
+                Console.log('VLC not load: $message', true);
 
                 if (errorCallback != null)
                     errorCallback(message);
@@ -59,7 +59,7 @@ class VideoSprite extends FlxVideoSprite {
                     play(); 
                 }
             } catch (e:Dynamic) {
-                Trace.traceOnce('VLC not load!: $e', true);
+                Console.log('VLC not load!: $e', true);
             }
         });
 	}

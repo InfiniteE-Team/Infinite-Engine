@@ -149,7 +149,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		try {
 			character = new game.objects.sprites.Character('bf', 'bf', 500, 150);
 		} catch (e:Dynamic) {
-			Trace.traceOnce('Warning: The character could not be loaded in the secondary menu. Reason: $e\n${haxe.CallStack.toString(haxe.CallStack.exceptionStack())}');
+			Console.log('Warning: The character could not be loaded in the secondary menu. Reason: $e\n${haxe.CallStack.toString(haxe.CallStack.exceptionStack())}');
 			character = null;
 		}
 

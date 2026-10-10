@@ -78,7 +78,7 @@ class PreviewEvents {
 						onCharChanged(char);
 					} catch (e:Dynamic) {
 						lastError = 'restore ${c.id}: $e';
-						Trace.traceOnce('PreviewEvents: could not restore "${c.name}": $e', true);
+						Console.log('PreviewEvents: could not restore "${c.name}": $e', true);
 					}
 				}
 				currentNames.set(c.id, c.name);
@@ -163,7 +163,7 @@ class PreviewEvents {
 			}
 		} catch (err:Dynamic) {
 			lastError = '${e.name}: $err';
-			Trace.traceOnce('PreviewEvents: event "${e.name}" failed: $err', true);
+			Console.log('PreviewEvents: event "${e.name}" failed: $err', true);
 		}
 	}
 

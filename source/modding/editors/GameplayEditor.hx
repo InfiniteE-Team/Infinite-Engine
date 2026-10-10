@@ -64,7 +64,7 @@ class GameplayEditor extends MusicBeatState {
 		try {
 			config.configSong(song, diffName);
 		} catch (e:Dynamic) {
-			trace('GameplayEditor: could not read "$song" ($diffName): $e');
+			Console.log('GameplayEditor: could not read "$song" ($diffName): $e', true);
 			config.songData = null;
 		}
 
@@ -96,7 +96,13 @@ class GameplayEditor extends MusicBeatState {
 	var playhead:flixel.FlxSprite;
 
 	var charColumnOffset:Map<String, Int> = new Map();
-	var columnLabels:Array<{id:String, text:String, role:String, column:Int, lanes:Int}> = [];
+	var columnLabels:Array<{
+		id:String,
+		text:String,
+		role:String,
+		column:Int,
+		lanes:Int
+	}> = [];
 	var noteBitmaps:Array<openfl.display.BitmapData> = [];
 
 	var arrowTemplates:Map<String, Array<game.objects.sprites.notes.Note>> = new Map();
@@ -154,6 +160,7 @@ class GameplayEditor extends MusicBeatState {
 
 	var hasAudio:Bool = false;
 	var songLength:Float = 0;
+
 	static final SILENT_MIN_MS:Float = 120000;
 
 	var startupNotes:Array<String> = [];
@@ -164,12 +171,14 @@ class GameplayEditor extends MusicBeatState {
 	var previewH:Int = 0;
 
 	static final MAX_UNDO:Int = 100;
+
 	var undoStack:Array<ChartSnapshot> = [];
 	var redoStack:Array<ChartSnapshot> = [];
 	var moveSnapshot:ChartSnapshot = null;
 
 	static final SNAPS:Array<Int> = [4, 8, 12, 16, 20, 24, 32, 48, 64];
 	static final SPEEDS:Array<Float> = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
+
 	var snapIndex:Int = 3;
 	var speedIndex:Int = 3;
 	var noteType:String = 'normal';
@@ -205,6 +214,7 @@ class GameplayEditor extends MusicBeatState {
 	var helpTopLine:flixel.FlxSprite;
 
 	static var viewState:Array<Bool> = [true, true, true, true];
+
 	var viewToggles:ViewToggles;
 
 	static final SCROLL_MS:Float = 100.0;
@@ -234,7 +244,7 @@ class GameplayEditor extends MusicBeatState {
 
 		previousLogInScreen = SaveData.data.logInScreen;
 		SaveData.data.logInScreen = false;
-		utils.Trace.updateVisibility();
+		utils.Console.updateVisibility();
 
 		if (infoHelp != null)
 			infoHelp.visible = false;
@@ -350,10 +360,14 @@ class GameplayEditor extends MusicBeatState {
 		helpText = new flixel.text.FlxText(GRID_X, FlxG.height - 70, 0, '', 12);
 		helpText.setFormat(null, 12, 0xFFE4E4EE, LEFT, OUTLINE, FlxColor.BLACK);
 		helpText.applyMarkup('<k>Click<k> note   <k>Drag down<k> sustain   <k>Drag a note<k> move   <k>Right click<k> remove   <k>Space<k> play   <k>Wheel<k> scroll\n'
-			+ '<k>Shift+Click/Drag<k> select   <k>Ctrl/Cmd+A/C/X/V<k> all/copy/cut/paste   <k>Del<k> delete   <k>Arrows<k> nudge   <k>Ctrl/Cmd+Z/Y<k> undo/redo\n'
-			+ '<k>Q/E<k> snap   <k>T<k> note type (<k>Shift+T<k> new)   <k>M<k> metronome   <k>H<k> hit sounds   <k>F<k> camera follow   <k>, .<k> speed   <k>1-4<k> panels\n'
+			+
+			'<k>Shift+Click/Drag<k> select   <k>Ctrl/Cmd+A/C/X/V<k> all/copy/cut/paste   <k>Del<k> delete   <k>Arrows<k> nudge   <k>Ctrl/Cmd+Z/Y<k> undo/redo\n'
+			+
+			'<k>Q/E<k> snap   <k>T<k> note type (<k>Shift+T<k> new)   <k>M<k> metronome   <k>H<k> hit sounds   <k>F<k> camera follow   <k>, .<k> speed   <k>1-4<k> panels\n'
 			+ '<k>EVT column<k> events   <k>Tab<k> setup (stage, characters, speed, BPM)   <k>Ctrl/Cmd+S<k> save   <k>Back<k> leave',
-			[new flixel.text.FlxText.FlxTextFormatMarkerPair(new flixel.text.FlxText.FlxTextFormat(EditorWidgets.ACCENT), '<k>')]);
+			[
+				new flixel.text.FlxText.FlxTextFormatMarkerPair(new flixel.text.FlxText.FlxTextFormat(EditorWidgets.ACCENT), '<k>')
+			]);
 		helpText.scrollFactor.set(0, 0);
 		helpText.cameras = [camHud];
 		add(helpText);
@@ -410,7 +424,12 @@ class GameplayEditor extends MusicBeatState {
 		SONG.chars = SONG.songData.gameplay.chars;
 	}
 
-	static final NEW_CHART_QUESTIONS:Array<String> = ['Song folder name (letters, numbers, - and _)', 'Difficulty (for example normal or hard)', 'BPM of the song'];
+	static final NEW_CHART_QUESTIONS:Array<String> = [
+		'Song folder name (letters, numbers, - and _)',
+		'Difficulty (for example normal or hard)',
+		'BPM of the song'
+	];
+
 	var newChartAnswers:Array<String> = ['', 'normal', '120'];
 
 	function askNewChart(step:Int):Void {
@@ -521,7 +540,13 @@ class GameplayEditor extends MusicBeatState {
 			}
 
 			charColumnOffset.set(c.id, offset);
-			columnLabels.push({id: c.id, text: c.name ?? c.id, role: c.role ?? '', column: offset, lanes: lanes});
+			columnLabels.push({
+				id: c.id,
+				text: c.name ?? c.id,
+				role: c.role ?? '',
+				column: offset,
+				lanes: lanes
+			});
 			for (lane in 0...lanes)
 				columnOwners.push({char: c.id, lane: lane});
 			offset += lanes;
@@ -622,7 +647,7 @@ class GameplayEditor extends MusicBeatState {
 
 				arrowTemplates.set(skin, lanes);
 			} catch (e:Dynamic) {
-				Trace.traceOnce('GameplayEditor: could not load note skin "$skin", using squares instead: $e', true);
+				Console.log('GameplayEditor: could not load note skin "$skin", using squares instead: $e', true);
 			}
 		}
 	}
@@ -1359,7 +1384,7 @@ class GameplayEditor extends MusicBeatState {
 				resyncPreview();
 			}
 		} catch (e:Dynamic) {
-			Trace.traceOnce('GameplayEditor: could not build the stage preview: $e', true);
+			Console.log('GameplayEditor: could not build the stage preview: $e', true);
 			startupNotes.push('The stage preview could not be built: $e');
 		}
 	}
@@ -1458,6 +1483,9 @@ class GameplayEditor extends MusicBeatState {
 		if (chars != null)
 			chars.danceAll();
 
+		if (stage != null)
+			stage.onBeatHit(beat);
+
 		if (metronome)
 			FlxG.sound.play(Paths.getPath('menus/scrollMenu', 'sound'), 0.4);
 	}
@@ -1512,7 +1540,7 @@ class GameplayEditor extends MusicBeatState {
 					icon.cameras = [camHud];
 					headerGroup.add(icon);
 				} catch (e:Dynamic) {
-					Trace.traceOnce('GameplayEditor: no icon for "${label.id}": $e', true);
+					Console.log('GameplayEditor: no icon for "${label.id}": $e', true);
 				}
 			}
 
@@ -1623,7 +1651,7 @@ class GameplayEditor extends MusicBeatState {
 			director.destroy();
 		director = null;
 		SaveData.data.logInScreen = previousLogInScreen;
-		utils.Trace.updateVisibility();
+		utils.Console.updateVisibility();
 		if (core.ui.FPSCounter.instance != null)
 			core.ui.FPSCounter.instance.updateVisibility();
 		super.destroy();
@@ -1631,6 +1659,15 @@ class GameplayEditor extends MusicBeatState {
 
 	function endSong() {
 		isPlaying = false;
+		RhythmCore.songPosition = 0;
+
+		if (hasAudio) {
+			gameAudio.setTime(0);
+			gameAudio.pauseAll();
+		}
+
+		seekNotes();
+		camEditor.scroll.y = -FlxG.height * 0.5;
 	}
 
 	override public function update(elapsed:Float) {
@@ -1731,8 +1768,17 @@ class GameplayEditor extends MusicBeatState {
 		}
 
 		if (isPlaying && totalMs > 0 && RhythmCore.songPosition >= totalMs) {
-			RhythmCore.songPosition = totalMs;
+			RhythmCore.songPosition = 0;
 			isPlaying = false;
+
+			if (hasAudio) {
+				gameAudio.setTime(0);
+				gameAudio.pauseAll();
+			}
+
+			seekNotes();
+
+			camEditor.scroll.y = -FlxG.height * 0.5;
 		}
 
 		var panelWasOpen:Bool = panelMode != '';
@@ -1800,7 +1846,12 @@ class GameplayEditor extends MusicBeatState {
 		}
 
 		if (viewToggles != null) {
-			var keys = [FlxG.keys.justPressed.ONE, FlxG.keys.justPressed.TWO, FlxG.keys.justPressed.THREE, FlxG.keys.justPressed.FOUR];
+			var keys = [
+				FlxG.keys.justPressed.ONE,
+				FlxG.keys.justPressed.TWO,
+				FlxG.keys.justPressed.THREE,
+				FlxG.keys.justPressed.FOUR
+			];
 			for (i in 0...keys.length) {
 				if (keys[i]) {
 					viewToggles.set(i, !viewToggles.get(i));
@@ -1872,7 +1923,8 @@ class GameplayEditor extends MusicBeatState {
 		var on = new flixel.text.FlxText.FlxTextFormatMarkerPair(new flixel.text.FlxText.FlxTextFormat(EditorWidgets.GOOD), '<g>');
 		var off = new flixel.text.FlxText.FlxTextFormatMarkerPair(new flixel.text.FlxText.FlxTextFormat(EditorWidgets.MUTED), '<d>');
 		toolText.applyMarkup('<c>SNAP<c> 1/${SNAPS[snapIndex]}    <c>TYPE<c> $noteType    <c>SPEED<c> x${SPEEDS[speedIndex]}\n'
-			+ '<c>METRONOME<c> ${metronome ? "<g>on<g>" : "<d>off<d>"}    <c>HIT SOUNDS<c> ${hitsounds ? "<g>on<g>" : "<d>off<d>"}    <c>CAMERA FOLLOW<c> ${follow ? "<g>on<g>" : "<d>off<d>"}',
+			+
+			'<c>METRONOME<c> ${metronome ? "<g>on<g>" : "<d>off<d>"}    <c>HIT SOUNDS<c> ${hitsounds ? "<g>on<g>" : "<d>off<d>"}    <c>CAMERA FOLLOW<c> ${follow ? "<g>on<g>" : "<d>off<d>"}',
 			[cap, on, off]);
 	}
 
@@ -2280,8 +2332,7 @@ class GameplayEditor extends MusicBeatState {
 				case 'char':
 					Reflect.setField(data.arguments, field.key, cycleName(charIds(), Std.string(current), dir));
 				case 'charName':
-					Reflect.setField(data.arguments, field.key,
-						cycleName(ChartDefaults.listNames('characters'), Std.string(current), dir));
+					Reflect.setField(data.arguments, field.key, cycleName(ChartDefaults.listNames('characters'), Std.string(current), dir));
 				case 'bool':
 					Reflect.setField(data.arguments, field.key, current != true);
 				case 'float':
