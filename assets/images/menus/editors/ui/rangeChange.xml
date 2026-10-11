@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="rangeChange.png">
+	<!-- Created with Adobe Animate version 21.0.5.40714 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="input0000" x="0" y="0" width="197" height="28"/>
+	<SubTexture name="leftArrow0000" x="197" y="0" width="12" height="24"/>
+	<SubTexture name="rightArrow0000" x="209" y="0" width="12" height="24"/>
+</TextureAtlas>

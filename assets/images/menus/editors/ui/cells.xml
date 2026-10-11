@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="cells.png">
+	<!-- Created with Adobe Animate version 21.0.5.40714 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="Cel0000" x="0" y="0" width="420" height="53"/>
+	<SubTexture name="Cel0001" x="0" y="0" width="420" height="53"/>
+	<SubTexture name="Cel0002" x="0" y="0" width="0" height="0" frameX="-216" frameY="-26" frameWidth="420" frameHeight="53"/>
+	<SubTexture name="Cel DIS0000" x="0" y="53" width="420" height="53"/>
+</TextureAtlas>

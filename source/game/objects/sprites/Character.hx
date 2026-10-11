@@ -9,6 +9,8 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 
 	public var curCharacter:String = 'bf';
 
+	public var editorMode:Bool = false;
+
 	public var characterData:CharacterData;
 	public var layers:Array<FunkinSprite> = [];
 
@@ -108,8 +110,9 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		super.update(elapsed);
 
 		for (i in 0...layers.length) {
-			layers[i].setPosition(x + (characterData.render.layers[i].position ?? [0.0, 0.0])[0],
-				y + (characterData.render.layers[i].position ?? [0.0, 0.0])[1]);
+			if (!editorMode)
+				layers[i].setPosition(x + (characterData.render.layers[i].position ?? [0.0, 0.0])[0],
+					y + (characterData.render.layers[i].position ?? [0.0, 0.0])[1]);
 		}
 
 		if ((isSing || isMiss) && !isSpecial)

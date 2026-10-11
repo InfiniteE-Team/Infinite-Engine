@@ -18,7 +18,7 @@ class MainMenuState extends ScriptState {
 
 		MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102);
 
-		var bg:FlxSprite = new FlxSprite();
+		final bg:FlxSprite = new FlxSprite();
 		bg.loadGraphic(Paths.getPath('menus/menuBG', 'image'));
 		bg.antialiasing = SaveData.data.antialiasing;
 		bg.screenCenter();

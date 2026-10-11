@@ -13,10 +13,15 @@ class DebugMenu extends MusicBeatState {
 
 		core.rhythm.audio.MasterAudio.playMenu(Paths.getPath('menus/artistic-expression/artistic-expression', 'music'), 0.6, 137);
 
+		final bg:flixel.FlxSprite = new flixel.FlxSprite().loadGraphic(Paths.getPath('menus/menuBG2', 'image'));
+		bg.antialiasing = SaveData.data.antialiasing;
+		bg.screenCenter();
+		add(bg);
+
 		for (i in 0...optionsText.length) {
-			var option = new FlxText(0, 0, FlxG.width, optionsText[i]);
-			option.setFormat(null, 16, 0xFFFFFFFF, 'center');
-			option.y = 100 + i * 30;
+			var option = new FlxText(0, 120 + i * 70, FlxG.width, optionsText[i]);
+			option.setFormat(Paths.getPath('Funkin.otf', 'font'), 42, 0xFFFFFFFF, 'center');
+			option.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 			add(option);
 			options.push(option);
 		}

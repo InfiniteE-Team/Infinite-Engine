@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="tabs.png">
+	<!-- Created with Adobe Animate version 21.0.5.40714 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="Símbolo 100000" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100001" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100002" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100003" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100004" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100005" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100006" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100007" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100008" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100009" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100010" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100011" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100012" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100013" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100014" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 100015" x="0" y="0" width="479" height="1026"/>
+	<SubTexture name="Símbolo 90000" x="0" y="1026" width="588" height="487"/>
+</TextureAtlas>
