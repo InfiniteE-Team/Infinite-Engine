@@ -22,13 +22,20 @@ class CharacterEditor extends MusicBeatState {
 	var dragOffsetY:Float = 0;
 	var hoverText:FlxText;
 
+	var sectionTab:SectionTab;
+	var tabAnimGroup:flixel.group.FlxGroup;
+	var tabLayersGroup:flixel.group.FlxGroup;
+
 	// camera on camera Editor
 	var isCamDragging:Bool = false;
 
 	// character
 	var info:FlxText;
 	var infoAnim:FlxText;
+
+	// left tab
 	var animButtons:Array<StatsButton> = [];
+	var layerButtons:Array<StatsButton> = [];
 
 	var selectedLayer:FunkinSprite = null;
 	var selectedLayerName:String = '';
@@ -63,6 +70,9 @@ class CharacterEditor extends MusicBeatState {
 		camHud.bgColor.alpha = 0;
 
 		FlxG.cameras.reset(camEditor);
+
+		camEditor.zoom = 0.9;
+
 		FlxG.cameras.add(camHud, false);
 	}
 
@@ -82,11 +92,19 @@ class CharacterEditor extends MusicBeatState {
 		selectionObj = new SelectionObj();
 		add(selectionObj);
 
+		createHUD();
+
 		char = loadCharacter('idk', curCharacter, 0, 0);
 
 		centerCameraOnChar();
 
-		createHUD();
+		if (char.characterData != null
+			&& char.characterData.render != null
+			&& char.characterData.render.layers != null
+			&& char.characterData.render.layers.length > 0) {
+			refreshAnimList(char.characterData.render.layers[0].name);
+			refreshLayerList();
+		}
 
 		FlxG.cameras.remove(camHud, false);
 		FlxG.cameras.add(camHud, false);
@@ -115,7 +133,22 @@ class CharacterEditor extends MusicBeatState {
 
 	function createHUD() {
 		// animations
+		tabAnimGroup = new flixel.group.FlxGroup();
+		tabLayersGroup = new flixel.group.FlxGroup();
+
+		sectionTab = new SectionTab(25, 30, 255, 0.3, [{label: 'ANIMATIONS'}, {label: 'LAYERS'}], camHud, (index) -> {
+			tabAnimGroup.visible = index == 0;
+			tabLayersGroup.visible = index == 1;
+		});
+		sectionTab.cameras = [camHud];
 		tabLeft();
+
+		add(tabAnimGroup);
+		add(tabLayersGroup);
+
+		add(sectionTab);
+
+		tabLayersGroup.visible = false;
 
 		hoverText = new FlxText(0, 0, 0, '');
 		hoverText.setFormat(null, 14, FlxColor.YELLOW, 'left');
@@ -132,6 +165,7 @@ class CharacterEditor extends MusicBeatState {
 			chars = sys.FileSystem.readDirectory(path).map(function(file) {
 				return StringTools.replace(file, '.json', '');
 			});
+			curCharacter = chars[0];
 		} else
 			Console.log('Chars data not loading in list');
 
@@ -162,6 +196,7 @@ class CharacterEditor extends MusicBeatState {
 				&& char.characterData.render.layers != null
 				&& char.characterData.render.layers.length > 0) {
 				refreshAnimList(char.characterData.render.layers[0].name);
+				refreshLayerList();
 			}
 
 			centerCameraOnChar();
@@ -187,25 +222,32 @@ class CharacterEditor extends MusicBeatState {
 		add(advertency);
 	}
 
+	var tab2:Tab;
+
 	function tabLeft() {
-		final tab2 = new Tab(10, 20, 'Símbolo 10');
+		tab2 = new Tab(10, 20, 'Símbolo 10');
 		tab2.cameras = [camHud];
 		add(tab2);
 
+		buildAnimTab();
+		buildLayersTab();
+	}
+
+	function buildAnimTab() {
 		final pan = new flixel.FlxSprite(0, 0).loadGraphic(Paths.getPath('menus/editors/ui/pan', 'image'));
 		pan.scrollFactor.set(0, 0);
 		pan.antialiasing = SaveData.data.antialiasing;
 		pan.scale.set(0.6, 0.6);
 		pan.updateHitbox();
 		pan.cameras = [camHud];
-		add(pan);
-		tab2.addItem(pan, 15, 20);
+		tabAnimGroup.add(pan);
+		tab2.addItem(pan, 15, 70);
 
-		infoAnim = new FlxText(30, 45, FlxG.width, "Idle [0/0]\nOffset: [0, 0]");
+		infoAnim = new FlxText(30, 95, FlxG.width, "Idle [0/0]\nOffset: [0, 0]");
 		infoAnim.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFF181818, 'left');
 		infoAnim.scrollFactor.set(0, 0);
 		infoAnim.cameras = [camHud];
-		add(infoAnim);
+		tabAnimGroup.add(infoAnim);
 
 		if (char != null
 			&& char.characterData != null
@@ -213,7 +255,25 @@ class CharacterEditor extends MusicBeatState {
 			&& char.characterData.render.layers != null
 			&& char.characterData.render.layers.length > 0) {
 			refreshAnimList(char.characterData.render.layers[0].name);
+			refreshLayerList();
 		}
+	}
+
+	function buildLayersTab() {
+		final pan = new flixel.FlxSprite(0, 0).loadGraphic(Paths.getPath('menus/editors/ui/pan', 'image'));
+		pan.scrollFactor.set(0, 0);
+		pan.antialiasing = SaveData.data.antialiasing;
+		pan.scale.set(0.6, 0.6);
+		pan.updateHitbox();
+		pan.cameras = [camHud];
+		tabLayersGroup.add(pan);
+		tab2.addItem(pan, 15, 70);
+
+		info = new FlxText(30, 95, FlxG.width, "char x: \nchar y: ");
+		info.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFF181818, 'left');
+		info.scrollFactor.set(0, 0);
+		info.cameras = [camHud];
+		tabLayersGroup.add(info);
 	}
 
 	function tabRight() {
@@ -236,13 +296,6 @@ class CharacterEditor extends MusicBeatState {
 		saveButton.cameras = [camHud];
 		add(saveButton);
 		tab.addItem(saveButton, 20, 120);
-
-		info = new FlxText(0, 0, FlxG.width, "char x: \nchar y: ");
-		info.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFFFFFFFF, 'left');
-		info.scrollFactor.set(0, 0);
-		info.cameras = [camHud];
-		add(info);
-		tab.addItem(info, 20, 160);
 	}
 
 	function importAsset(path:String) {
@@ -296,6 +349,8 @@ class CharacterEditor extends MusicBeatState {
 
 		advertency.visible = true;
 
+		refreshLayerList();
+
 		Console.log('[CharacterEditor] Layer added: $layerName');
 	}
 
@@ -312,11 +367,11 @@ class CharacterEditor extends MusicBeatState {
 
 		for (i in 0...layerData.anims.length) {
 			var name = layerData.anims[i].name;
-			var btn = new StatsButton(20, 130 + i * 40, name, null, camHud);
+			var btn = new StatsButton(20, 180 + i * 40, name, null, camHud);
 			btn.scrollFactor.set(0, 0);
 			btn.cameras = [camHud];
 			animButtons.push(btn);
-			add(btn);
+			tabAnimGroup.add(btn);
 		}
 
 		if (layerData.anims.length > 0) {
@@ -324,6 +379,26 @@ class CharacterEditor extends MusicBeatState {
 			char.playAnim(activeAnim, true);
 		} else {
 			activeAnim = '';
+		}
+	}
+
+	function refreshLayerList() {
+		for (btn in layerButtons) {
+			tabLayersGroup.remove(btn);
+			btn.destroy();
+		}
+		layerButtons = [];
+
+		if (char == null || char.characterData == null)
+			return;
+
+		for (i in 0...char.characterData.render.layers.length) {
+			var name = char.characterData.render.layers[i].name;
+			var btn = new StatsButton(20, 180 + i * 40, name, null, camHud);
+			btn.scrollFactor.set(0, 0);
+			btn.cameras = [camHud];
+			layerButtons.push(btn);
+			tabLayersGroup.add(btn);
 		}
 	}
 
@@ -427,6 +502,25 @@ class CharacterEditor extends MusicBeatState {
 						}
 					}
 				}
+			}
+
+			btn.label.color = (isHover || isActive) ? FlxColor.YELLOW : 0xAAFFFFFF;
+		}
+	}
+
+	function selectionLayers() {
+		var mouseScreen = FlxG.mouse.getViewPosition(camHud);
+		var mx = mouseScreen.x;
+		var my = mouseScreen.y;
+
+		for (btn in layerButtons) {
+			var isHover = mx >= btn.x && mx <= btn.x + btn.width && my >= btn.y && my <= btn.y + btn.height;
+			var isActive = btn.label.text == selectedLayerName;
+
+			if (isHover && FlxG.mouse.justPressed) {
+				selectedLayerName = btn.label.text;
+				selectedLayer = char.layerMap.get(selectedLayerName);
+				refreshAnimList(selectedLayerName);
 			}
 
 			btn.label.color = (isHover || isActive) ? FlxColor.YELLOW : 0xAAFFFFFF;
@@ -645,10 +739,13 @@ class CharacterEditor extends MusicBeatState {
 
 		movementMouse(hit);
 
+		sectionTab.handleInput();
+
 		handleUndoRedo();
 		adjustOffsets();
 
 		selectionAnims();
+		selectionLayers();
 
 		selectionObj.trackSprite(selectedLayer);
 
