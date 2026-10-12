@@ -109,10 +109,11 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 	override public function update(elapsed:Float):Void {
 		super.update(elapsed);
 
-		for (i in 0...layers.length) {
-			if (!editorMode)
+		if (!editorMode) {
+			for (i in 0...layers.length) {
 				layers[i].setPosition(x + (characterData.render.layers[i].position ?? [0.0, 0.0])[0],
 					y + (characterData.render.layers[i].position ?? [0.0, 0.0])[1]);
+			}
 		}
 
 		if ((isSing || isMiss) && !isSpecial)

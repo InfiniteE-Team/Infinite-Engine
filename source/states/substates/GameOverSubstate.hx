@@ -72,6 +72,9 @@ class GameOverSubstate extends MusicBeatSubstate {
 			add(layer);
 		add(char);
 
+		PlayState.instance.cameraController.isLock = false;
+		PlayState.instance.cameraController.followChar(char);
+
 		FlxG.sound.play(Paths.getPath('gameplay/death/' + sound, 'sound'));
 
 		char.playAnim('firstDeath');

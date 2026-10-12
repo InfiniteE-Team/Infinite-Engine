@@ -5,8 +5,8 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 
 class Button extends flixel.group.FlxSpriteGroup {
-	var bg:FlxSprite;
-	var label:FlxText;
+	public var bg:FlxSprite;
+	public var label:FlxText;
 
 	var onClickCallback:Void->Void;
 

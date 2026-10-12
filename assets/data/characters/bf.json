@@ -1,206 +1,206 @@
 {
-  "meta": {
-    "isPlayer": true
-  },
-  "gameplay": {
-    "position": [
-      13,
-      4
-    ],
-    "cameraOffset": [
-      -300,
-      -200
-    ],
-    "death": {
-      "character": "bf-death",
-      "sound": "default/fnf_loss_sfx",
-      "music": "default/gameOver",
-      "endSound": "default/gameOverEnd"
-    },
-    "idleAfterSing": true,
-    "singTime": 1
-  },
-  "render": {
-    "layers": [
-      {
-        "name": "char",
-        "path": "bf",
-        "position": [
-          0,
-          0
-        ],
-        "scale": [
-          1,
-          1
-        ],
-        "alpha": 1.0,
-        "visible": true,
-        "flipX": false,
-        "flipY": false,
-        "antialiasing": true,
-        "anims": [
-          {
-            "name": "idle",
-            "prefix": "BF idle dance",
-            "offsets": [
-              -13,
-              -4
-            ],
-            "framerate": 24,
-            "looped": false
-          },
-          {
-            "name": "singLEFT",
-            "prefix": "BF NOTE LEFT",
-            "offsets": [
-              -10,
-              -7
-            ],
-            "framerate": 24,
-            "looped": false
-          },
-          {
-            "name": "singLEFTmiss",
-            "prefix": "BF NOTE LEFT MISS",
-            "offsets": [
-              -13,
-              -18
-            ],
-            "framerate": 24,
-            "looped": false
-          },
-          {
-            "name": "singRIGHT",
-            "prefix": "BF NOTE RIGHT",
-            "offsets": [
-              32,
-              -11
-            ],
-            "framerate": 24,
-            "looped": false
-          },
-          {
-            "name": "singRIGHTmiss",
-            "prefix": "BF NOTE RIGHT MISS",
-            "offsets": [
-              30,
-              -24
-            ],
-            "framerate": 24,
-            "looped": false
-          },
-          {
-            "name": "singUP",
-            "prefix": "BF NOTE UP",
-            "offsets": [
-              1,
-              -76
-            ],
-            "framerate": 24,
-            "looped": false
-          },
-          {
-            "name": "singUPmiss",
-            "prefix": "BF NOTE UP MISS",
-            "offsets": [
-              10,
-              -70
-            ],
-            "framerate": 24,
-            "looped": false
-          },
-          {
-            "name": "singDOWN",
-            "prefix": "BF NOTE DOWN",
-            "offsets": [
-              2,
-              34
-            ],
-            "framerate": 24,
-            "looped": false
-          },
-          {
-            "name": "singDOWNmiss",
-            "prefix": "BF NOTE DOWN MISS",
-            "offsets": [
-              0,
-              23
-            ],
-            "framerate": 24,
-            "looped": false
-          },
-          {
-            "name": "hey",
-            "prefix": "BF HEY!!",
-            "offsets": [
-              -12,
-              -14
-            ],
-            "framerate": 24,
-            "looped": false
-          },
-          {
-            "name": "cheer",
-            "prefix": "Boyfriend YEAH cheer",
-            "offsets": [
-              30,
-              -20
-            ],
-            "framerate": 24,
-            "looped": false
-          },
-          {
-            "name": "scared",
-            "prefix": "BF idle shaking",
-            "offsets": [
-              0,
-              0
-            ],
-            "framerate": 24,
-            "looped": false
-          }
-        ]
-      }
-    ]
-  },
-  "icon": {
-    "props": {
-      "name": "bf-icon",
-      "path": "bf",
-      "flipX": false,
-      "frameScale": [
-        150,
-        150
-      ],
-      "firstAnim": "normal",
-      "anims": [
-        {
-          "name": "losing",
-          "indices": [
-            1
-          ],
-          "offsets": [
-            0,
-            0
-          ],
-          "framerate": 24,
-          "looped": false
-        },
-        {
-          "name": "normal",
-          "indices": [
-            0
-          ],
-          "offsets": [
-            0,
-            0
-          ],
-          "framerate": 24,
-          "looped": false
-        }
-      ]
-    },
-    "bumpInBeats": true,
-    "stepTempo": 2
-  }
+	"render": {
+		"layers": [
+			{
+				"position": [
+					-13,
+					-4
+				],
+				"anims": [
+					{
+						"offsets": [
+							-13,
+							-4
+						],
+						"framerate": 24,
+						"prefix": "BF idle dance",
+						"looped": false,
+						"name": "idle"
+					},
+					{
+						"offsets": [
+							-10,
+							-7
+						],
+						"framerate": 24,
+						"prefix": "BF NOTE LEFT",
+						"looped": false,
+						"name": "singLEFT"
+					},
+					{
+						"offsets": [
+							-13,
+							-18
+						],
+						"framerate": 24,
+						"prefix": "BF NOTE LEFT MISS",
+						"looped": false,
+						"name": "singLEFTmiss"
+					},
+					{
+						"offsets": [
+							32,
+							-11
+						],
+						"framerate": 24,
+						"prefix": "BF NOTE RIGHT",
+						"looped": false,
+						"name": "singRIGHT"
+					},
+					{
+						"offsets": [
+							25,
+							-18
+						],
+						"framerate": 24,
+						"prefix": "BF NOTE RIGHT MISS",
+						"looped": false,
+						"name": "singRIGHTmiss"
+					},
+					{
+						"offsets": [
+							1,
+							-76
+						],
+						"framerate": 24,
+						"prefix": "BF NOTE UP",
+						"looped": false,
+						"name": "singUP"
+					},
+					{
+						"offsets": [
+							5,
+							-74
+						],
+						"framerate": 24,
+						"prefix": "BF NOTE UP MISS",
+						"looped": false,
+						"name": "singUPmiss"
+					},
+					{
+						"offsets": [
+							2,
+							34
+						],
+						"framerate": 24,
+						"prefix": "BF NOTE DOWN",
+						"looped": false,
+						"name": "singDOWN"
+					},
+					{
+						"offsets": [
+							4,
+							17
+						],
+						"framerate": 24,
+						"prefix": "BF NOTE DOWN MISS",
+						"looped": false,
+						"name": "singDOWNmiss"
+					},
+					{
+						"offsets": [
+							-12,
+							-14
+						],
+						"framerate": 24,
+						"prefix": "BF HEY!!",
+						"looped": false,
+						"name": "hey"
+					},
+					{
+						"offsets": [
+							30,
+							-20
+						],
+						"framerate": 24,
+						"prefix": "Boyfriend YEAH cheer",
+						"looped": false,
+						"name": "cheer"
+					},
+					{
+						"offsets": [
+							0,
+							2
+						],
+						"framerate": 24,
+						"prefix": "BF idle shaking",
+						"looped": false,
+						"name": "scared"
+					}
+				],
+				"visible": true,
+				"scale": [
+					1,
+					1
+				],
+				"flipX": false,
+				"name": "char",
+				"antialiasing": true,
+				"flipY": false,
+				"path": "bf",
+				"alpha": 1
+			}
+		]
+	},
+	"gameplay": {
+		"singTime": 1,
+		"death": {
+			"endSound": "default/gameOverEnd",
+			"music": "default/gameOver",
+			"sound": "default/fnf_loss_sfx",
+			"character": "bf-death"
+		},
+		"cameraOffset": [
+			-300,
+			-200
+		],
+		"position": [
+			13,
+			4
+		],
+		"idleAfterSing": true
+	},
+	"icon": {
+		"bumpInBeats": true,
+		"props": {
+			"firstAnim": "normal",
+			"frameScale": [
+				150,
+				150
+			],
+			"path": "bf",
+			"anims": [
+				{
+					"offsets": [
+						0,
+						0
+					],
+					"framerate": 24,
+					"looped": false,
+					"name": "losing",
+					"indices": [
+						1
+					]
+				},
+				{
+					"offsets": [
+						0,
+						0
+					],
+					"framerate": 24,
+					"looped": false,
+					"name": "normal",
+					"indices": [
+						0
+					]
+				}
+			],
+			"name": "bf-icon",
+			"flipX": false
+		},
+		"stepTempo": 2
+	},
+	"meta": {
+		"isPlayer": true
+	}
 }

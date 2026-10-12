@@ -19,7 +19,7 @@ class DropDown extends FlxSpriteGroup {
 	var onChangeCallback:String->Void;
 
 	static final SCALE:Float = 0.5;
-	static final ITEM_H:Float = 51 * SCALE;
+	static final ITEM_H:Float = 52 * SCALE;
 
 	public function new(x:Float, y:Float, optionInit:String, options:Array<String>, ?onChange:String->Void, ?cam:game.objects.Camera) {
 		super(x, y);
@@ -45,8 +45,7 @@ class DropDown extends FlxSpriteGroup {
 		add(header);
 
 		headerLabel = new FlxText(header2.x + 5, 0, 150, options.length > 0 ? optionInit : '');
-		headerLabel.setFormat(null, 14, FlxColor.WHITE, 'left');
-		headerLabel.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 1);
+		headerLabel.setFormat(Paths.getPath('Funkin.otf', 'font'), 28, FlxColor.BLACK, 'left');
 		headerLabel.y = (header.height / 2) - (headerLabel.height / 2);
 		add(headerLabel);
 
@@ -62,9 +61,8 @@ class DropDown extends FlxSpriteGroup {
 			bg.visible = false;
 			add(bg);
 
-			var label = new FlxText(8, itemY + (ITEM_H - 14) / 2, bg.width - 10, options[i]);
-			label.setFormat(null, 13, FlxColor.WHITE, 'left');
-			label.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 1);
+			var label = new FlxText(8, itemY + (ITEM_H - 27) / 2, bg.width - 10, options[i]);
+			label.setFormat(Paths.getPath('Funkin.otf', 'font'), 27, FlxColor.BLACK, 'left');
 			label.visible = false;
 			add(label);
 

@@ -1,10 +1,13 @@
 package modding.editors;
 
+import flixel.math.FlxMath;
 import game.objects.Camera;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import core.assets.FunkinSprite;
 import game.objects.sprites.Character;
+import modding.editors.ui.SelectionObj;
+import core.json.editors.EditorAction;
 import flixel.addons.display.FlxGridOverlay;
 // ui
 import modding.editors.ui.*;
@@ -24,15 +27,30 @@ class CharacterEditor extends MusicBeatState {
 
 	// character
 	var info:FlxText;
-	var animButtons:Array<FlxText> = [];
+	var infoAnim:FlxText;
+	var animButtons:Array<StatsButton> = [];
 
 	var selectedLayer:FunkinSprite = null;
 	var selectedLayerName:String = '';
 	var activeAnim:String = '';
 	var importedLayers:Array<{sprite:FunkinSprite, name:String, path:String}> = [];
+	var selectionObj:SelectionObj;
+
+	// drags
+	var undoStack:Array<EditorAction> = [];
+	var redoStack:Array<EditorAction> = [];
+
+	var dragStartX:Float = 0;
+	var dragStartY:Float = 0;
+	var offsetEditing:Bool = false;
+	var offsetStartX:Float = 0;
+	var offsetStartY:Float = 0;
+	var savedUndoLength:Int = 0;
 
 	public var char:Character = null;
 	public var curCharacter:String = 'bf';
+
+	var advertency:FlxText;
 
 	public function new(curCharacter:String) {
 		super();
@@ -61,6 +79,9 @@ class CharacterEditor extends MusicBeatState {
 		grid.scrollFactor.set(0, 0);
 		add(grid);
 
+		selectionObj = new SelectionObj();
+		add(selectionObj);
+
 		char = loadCharacter('idk', curCharacter, 0, 0);
 
 		centerCameraOnChar();
@@ -78,6 +99,17 @@ class CharacterEditor extends MusicBeatState {
 		char.editorMode = true;
 		for (layer in char.layers)
 			add(layer);
+		add(char);
+
+		if (char.layers.length > 0) {
+			selectedLayer = char.layers[0];
+			for (name => sprite in char.layerMap)
+				if (sprite == selectedLayer) {
+					selectedLayerName = name;
+					break;
+				}
+		}
+
 		return char;
 	}
 
@@ -106,7 +138,22 @@ class CharacterEditor extends MusicBeatState {
 		final dd2 = new DropDown(0, 30, curCharacter, chars, function(selected) {
 			if (char == null)
 				return;
+
+			for (layer in char.layers)
+				remove(layer, true);
+			remove(char, true);
 			char.destroy();
+			char = null;
+
+			for (imported in importedLayers) {
+				remove(imported.sprite, true);
+				imported.sprite.destroy();
+			}
+			importedLayers = [];
+			clearHistory();
+			selectedLayer = null;
+			selectedLayerName = '';
+
 			curCharacter = selected;
 			char = loadCharacter('idk', selected, 0, 0);
 
@@ -130,6 +177,14 @@ class CharacterEditor extends MusicBeatState {
 		watermark.x = FlxG.width - watermark.width;
 		watermark.cameras = [camHud];
 		add(watermark);
+
+		advertency = new FlxText(20, FlxG.height * 0.9, 0, 'Unsaved Changes! - Dont forget to click the save button.');
+		advertency.setFormat(Paths.getPath('Funkin.otf', 'font'), 24, FlxColor.RED, 'left');
+		advertency.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 1);
+		advertency.scrollFactor.set(0, 0);
+		advertency.visible = false;
+		advertency.cameras = [camHud];
+		add(advertency);
 	}
 
 	function tabLeft() {
@@ -137,11 +192,20 @@ class CharacterEditor extends MusicBeatState {
 		tab2.cameras = [camHud];
 		add(tab2);
 
-		info = new FlxText(30, 40, FlxG.width, "char x: " + "\nchar y: ");
-		info.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFFFFFFFF, 'left');
-		info.scrollFactor.set(0, 0);
-		info.cameras = [camHud];
-		add(info);
+		final pan = new flixel.FlxSprite(0, 0).loadGraphic(Paths.getPath('menus/editors/ui/pan', 'image'));
+		pan.scrollFactor.set(0, 0);
+		pan.antialiasing = SaveData.data.antialiasing;
+		pan.scale.set(0.6, 0.6);
+		pan.updateHitbox();
+		pan.cameras = [camHud];
+		add(pan);
+		tab2.addItem(pan, 15, 20);
+
+		infoAnim = new FlxText(30, 45, FlxG.width, "Idle [0/0]\nOffset: [0, 0]");
+		infoAnim.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFF181818, 'left');
+		infoAnim.scrollFactor.set(0, 0);
+		infoAnim.cameras = [camHud];
+		add(infoAnim);
 
 		if (char != null
 			&& char.characterData != null
@@ -172,6 +236,13 @@ class CharacterEditor extends MusicBeatState {
 		saveButton.cameras = [camHud];
 		add(saveButton);
 		tab.addItem(saveButton, 20, 120);
+
+		info = new FlxText(0, 0, FlxG.width, "char x: \nchar y: ");
+		info.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFFFFFFFF, 'left');
+		info.scrollFactor.set(0, 0);
+		info.cameras = [camHud];
+		add(info);
+		tab.addItem(info, 20, 160);
 	}
 
 	function importAsset(path:String) {
@@ -223,6 +294,8 @@ class CharacterEditor extends MusicBeatState {
 
 		importedLayers.push({sprite: sprite, name: layerName, path: path});
 
+		advertency.visible = true;
+
 		Console.log('[CharacterEditor] Layer added: $layerName');
 	}
 
@@ -239,8 +312,7 @@ class CharacterEditor extends MusicBeatState {
 
 		for (i in 0...layerData.anims.length) {
 			var name = layerData.anims[i].name;
-			var btn = new FlxText(30, 100 + i * 32, 190, name);
-			btn.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xAAFFFFFF, 'left');
+			var btn = new StatsButton(20, 130 + i * 40, name, null, camHud);
 			btn.scrollFactor.set(0, 0);
 			btn.cameras = [camHud];
 			animButtons.push(btn);
@@ -273,18 +345,15 @@ class CharacterEditor extends MusicBeatState {
 			var mousePos = FlxG.mouse.getWorldPosition(camEditor);
 
 			if (hit != null) {
-				if (selectedLayer != null)
-					selectedLayer.color = FlxColor.WHITE;
 				selectedLayer = hit.sprite;
 				selectedLayerName = hit.name;
-				selectedLayer.color = FlxColor.YELLOW;
 				isDragging = true;
+				dragStartX = selectedLayer.x;
+				dragStartY = selectedLayer.y;
 				dragOffsetX = mousePos.x - selectedLayer.x;
 				dragOffsetY = mousePos.y - selectedLayer.y;
 				refreshAnimList(selectedLayerName);
 			} else {
-				if (selectedLayer != null)
-					selectedLayer.color = FlxColor.WHITE;
 				selectedLayer = null;
 				selectedLayerName = '';
 				isDragging = false;
@@ -299,6 +368,18 @@ class CharacterEditor extends MusicBeatState {
 						char.characterData.render.layers[i].position = [selectedLayer.x - char.x, selectedLayer.y - char.y];
 						break;
 					}
+				}
+
+				if (selectedLayer.x != dragStartX || selectedLayer.y != dragStartY) {
+					final spr = selectedLayer;
+					final fx = dragStartX;
+					final fy = dragStartY;
+					final tx = spr.x;
+					final ty = spr.y;
+					pushAction({
+						undo: () -> spr.setPosition(fx, fy),
+						redo: () -> spr.setPosition(tx, ty)
+					});
 				}
 			}
 			isDragging = false;
@@ -326,14 +407,29 @@ class CharacterEditor extends MusicBeatState {
 
 		for (btn in animButtons) {
 			var isHover = mx >= btn.x && mx <= btn.x + btn.width && my >= btn.y && my <= btn.y + btn.height;
-			var isActive = btn.text == activeAnim;
+			var isActive = btn.label.text == activeAnim;
 
 			if (isHover && FlxG.mouse.justPressed) {
-				activeAnim = btn.text;
-				char.playAnim(btn.text, true);
+				activeAnim = btn.label.text;
+				char.playAnim(btn.label.text, true);
+
+				for (layerData in char.characterData.render.layers) {
+					if (layerData.anims == null)
+						continue;
+					for (anim in layerData.anims) {
+						if (anim.name == btn.label.text) {
+							var sprite = char.layerMap.get(layerData.name);
+							if (sprite != null) {
+								selectedLayer = sprite;
+								selectedLayerName = layerData.name;
+							}
+							break;
+						}
+					}
+				}
 			}
 
-			btn.color = (isHover || isActive) ? FlxColor.YELLOW : 0xAAFFFFFF;
+			btn.label.color = (isHover || isActive) ? FlxColor.YELLOW : 0xAAFFFFFF;
 		}
 	}
 
@@ -381,29 +477,180 @@ class CharacterEditor extends MusicBeatState {
 			char.characterData.render.layers[i].position = [char.layers[i].x - char.x, char.layers[i].y - char.y];
 		}
 
+		for (layerData in char.characterData.render.layers) {
+			if (layerData.anims == null)
+				continue;
+			var sprite = char.layerMap.get(layerData.name);
+			if (sprite == null)
+				continue;
+			for (anim in layerData.anims) {
+				var offset = sprite.offsets.get(anim.name);
+				if (offset != null)
+					anim.offsets = [offset.x, offset.y];
+			}
+		}
+
 		var path = Paths.getPath('data/characters/$curCharacter', 'json');
 		var json = haxe.Json.stringify(char.characterData, null, '\t');
 		sys.io.File.saveContent(path, json);
 
 		Console.log('[CharacterEditor] Saved: $path');
 		FlxG.camera.flash(FlxColor.WHITE, 0.3);
+
+		savedUndoLength = undoStack.length;
+		updateAdvertency();
+	}
+
+	function adjustOffsets() {
+		var anyKey = Controls.UI_LEFT || Controls.UI_RIGHT || Controls.UI_UP || Controls.UI_DOWN;
+
+		if (selectedLayer != null && activeAnim != '') {
+			var offset = selectedLayer.offsets.get(activeAnim) ?? {x: 0.0, y: 0.0};
+			var step = FlxG.keys.pressed.SHIFT ? 10.0 : 1.0;
+
+			if (anyKey && !offsetEditing) {
+				offsetEditing = true;
+				offsetStartX = offset.x;
+				offsetStartY = offset.y;
+			}
+
+			if (Controls.UI_LEFT) {
+				offset.x -= step;
+				selectedLayer.offsets.set(activeAnim, offset);
+			}
+			if (Controls.UI_RIGHT) {
+				offset.x += step;
+				selectedLayer.offsets.set(activeAnim, offset);
+			}
+			if (Controls.UI_UP) {
+				offset.y -= step;
+				selectedLayer.offsets.set(activeAnim, offset);
+			}
+			if (Controls.UI_DOWN) {
+				offset.y += step;
+				selectedLayer.offsets.set(activeAnim, offset);
+			}
+
+			if (anyKey)
+				selectedLayer.playAnim(activeAnim, false);
+
+			if (!anyKey && offsetEditing) {
+				offsetEditing = false;
+				if (offset.x != offsetStartX || offset.y != offsetStartY) {
+					final spr = selectedLayer;
+					final anim = activeAnim;
+					final fx = offsetStartX;
+					final fy = offsetStartY;
+					final tx = offset.x;
+					final ty = offset.y;
+					pushAction({
+						undo: () -> applyOffset(spr, anim, fx, fy),
+						redo: () -> applyOffset(spr, anim, tx, ty)
+					});
+				}
+			}
+		} else if (!anyKey) {
+			offsetEditing = false;
+		}
+	}
+
+	function applyOffset(spr:FunkinSprite, anim:String, x:Float, y:Float) {
+		spr.offsets.set(anim, {x: x, y: y});
+		if (anim == activeAnim)
+			spr.playAnim(anim, false);
+	}
+
+	function infoOffsetsandFramerate() {
+		if (char != null) {
+			var tx = selectedLayer != null ? selectedLayer.x : char.x;
+			var ty = selectedLayer != null ? selectedLayer.y : char.y;
+			var name = selectedLayer != null ? selectedLayerName : 'char';
+			info.text = '$name x: ${FlxMath.roundDecimal(tx, 2)}\n$name y: ${FlxMath.roundDecimal(ty, 2)}';
+
+			if (selectedLayer != null) {
+				var curAnim = selectedLayer.animation.curAnim;
+				var frameIndex = curAnim != null ? curAnim.curFrame + 1 : 0;
+				var totalFrames = curAnim != null ? curAnim.numFrames : 0;
+
+				var offset = selectedLayer.offsets.get(activeAnim);
+				var ox = offset != null ? offset.x : 0.0;
+				var oy = offset != null ? offset.y : 0.0;
+
+				infoAnim.text = '$activeAnim [$frameIndex/$totalFrames]\nOffset: [${FlxMath.roundDecimal(ox, 1)}, ${FlxMath.roundDecimal(oy, 1)}]';
+			}
+		}
+	}
+
+	// drags
+	function pushAction(action:EditorAction) {
+		undoStack.push(action);
+		redoStack = [];
+		updateAdvertency();
+
+		if (undoStack.length > 100)
+			undoStack.shift();
+	}
+
+	function undo() {
+		if (undoStack.length == 0)
+			return;
+		var action = undoStack.pop();
+		action.undo();
+		redoStack.push(action);
+		updateAdvertency();
+	}
+
+	function redo() {
+		if (redoStack.length == 0)
+			return;
+		var action = redoStack.pop();
+		action.redo();
+		undoStack.push(action);
+		updateAdvertency();
+	}
+
+	function updateAdvertency() {
+		advertency.visible = (undoStack.length != savedUndoLength);
+	}
+
+	function clearHistory() {
+		undoStack = [];
+		redoStack = [];
+		savedUndoLength = 0;
+		if (advertency != null)
+			advertency.visible = false;
+	}
+
+	function handleUndoRedo() {
+		if (!FlxG.keys.pressed.CONTROL)
+			return;
+
+		if (FlxG.keys.justPressed.Z) {
+			if (FlxG.keys.pressed.SHIFT)
+				redo();
+			else
+				undo();
+		}
+
+		if (FlxG.keys.justPressed.Y)
+			redo();
 	}
 
 	override public function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (char != null) {
-			var tx = selectedLayer != null ? selectedLayer.x : char.x;
-			var ty = selectedLayer != null ? selectedLayer.y : char.y;
-			var name = selectedLayer != null ? selectedLayerName : 'char';
-			info.text = '$name x: ${flixel.math.FlxMath.roundDecimal(tx, 2)}\n$name y: ${flixel.math.FlxMath.roundDecimal(ty, 2)}';
-		}
+		infoOffsetsandFramerate();
 
 		var hit = getLayerUnderMouse();
 
 		movementMouse(hit);
 
+		handleUndoRedo();
+		adjustOffsets();
+
 		selectionAnims();
+
+		selectionObj.trackSprite(selectedLayer);
 
 		if (hit != null) {
 			hoverText.text = hit.name;
