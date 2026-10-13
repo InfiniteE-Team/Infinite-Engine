@@ -33,6 +33,10 @@ class CharacterEditor extends MusicBeatState {
 	var info:FlxText;
 	var infoAnim:FlxText;
 
+	// import error display
+	var importErrorText:FlxText;
+	var importErrorTimer:flixel.util.FlxTimer;
+
 	// left tab
 	var animButtons:Array<StatsButton> = [];
 	var layerButtons:Array<StatsButton> = [];
@@ -296,6 +300,36 @@ class CharacterEditor extends MusicBeatState {
 		saveButton.cameras = [camHud];
 		add(saveButton);
 		tab.addItem(saveButton, 20, 120);
+
+		importErrorText = new flixel.text.FlxText(FlxG.width * 0.72 + 10, 185, 270, '');
+		importErrorText.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, flixel.util.FlxColor.RED, 'left');
+		importErrorText.setBorderStyle(flixel.text.FlxText.FlxTextBorderStyle.OUTLINE, flixel.util.FlxColor.BLACK, 1);
+		importErrorText.scrollFactor.set(0, 0);
+		importErrorText.visible = false;
+		importErrorText.cameras = [camHud];
+		add(importErrorText);
+	}
+
+	function showImportError(msg:String) {
+		if (importErrorText == null) {
+			Console.log('[CharacterEditor] importErrorText is null! Error: $msg', true);
+			return;
+		}
+
+		importErrorText.text = msg;
+		importErrorText.visible = true;
+		if (importErrorTimer != null)
+			importErrorTimer.cancel();
+		importErrorTimer = new flixel.util.FlxTimer().start(5.0, _ -> {
+			if (importErrorText != null)
+				importErrorText.visible = false;
+		});
+	}
+
+	function getCharAssetDir():String {
+		var base = modding.mods.ModsRegistry.onMod
+			&& modding.mods.ModsRegistry.currentMod != '' ? '${core.assets.Library.modsFolder}/${modding.mods.ModsRegistry.currentMod}' : core.assets.Library.baseFolder;
+		return '$base/images/game/characters/$curCharacter';
 	}
 
 	function importAsset(path:String) {
@@ -303,34 +337,84 @@ class CharacterEditor extends MusicBeatState {
 			return;
 
 		var ext = path.split('.').pop().toLowerCase();
+		var baseName = haxe.io.Path.withoutExtension(haxe.io.Path.withoutDirectory(path));
+
+		var destDir = getCharAssetDir();
+		if (!sys.FileSystem.exists(destDir)) {
+			try {
+				sys.FileSystem.createDirectory(destDir);
+			} catch (e:Dynamic) {
+				showImportError('Could not create asset folder:\n$destDir');
+				Console.log('[CharacterEditor] createDirectory failed: $e', true);
+				return;
+			}
+		}
+
 		var sprite = new FunkinSprite(0, 0, true);
+		var baseNoExt = path.substr(0, path.lastIndexOf('.'));
+
+		var pngSrc:String = null;
+		var atlasSrc:String = null;
+		var atlasExt:String = null;
 
 		switch (ext) {
 			case 'png' | 'jpg' | 'jpeg':
-				var bmp = openfl.display.BitmapData.fromFile(path);
-				if (bmp == null)
-					return;
-				var graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, path);
-				sprite.loadGraphic(graphic);
+				pngSrc = path;
+				// Auto-detect companion atlas next to the PNG
+				for (candidate in ['xml', 'json']) {
+					var p = baseNoExt + '.' + candidate;
+					if (sys.FileSystem.exists(p)) {
+						atlasSrc = p;
+						atlasExt = candidate;
+						break;
+					}
+				}
 
 			case 'xml' | 'json':
-				var pngPath = path.substr(0, path.lastIndexOf('.')) + '.png';
-				if (!sys.FileSystem.exists(pngPath)) {
-					Console.log('[CharacterEditor] PNG not found: $pngPath', true);
+				atlasSrc = path;
+				atlasExt = ext;
+				pngSrc = baseNoExt + '.png';
+				if (!sys.FileSystem.exists(pngSrc)) {
+					showImportError('PNG not found:\n$baseName.png\n(put it next to the .$ext)');
+					Console.log('[CharacterEditor] PNG not found: $pngSrc', true);
 					return;
 				}
-				var frames = ext == 'xml' ? flixel.graphics.frames.FlxAtlasFrames.fromSparrow(pngPath,
-					path) : flixel.graphics.frames.FlxAtlasFrames.fromTexturePackerJson(pngPath, path);
-				if (frames == null)
-					return;
-				sprite.frames = frames;
 
 			default:
+				showImportError('Unsupported format: .$ext');
 				Console.log('[CharacterEditor] Unsupported: $ext', true);
 				return;
 		}
 
+		// Copy PNG to dest
+		var destPng = '$destDir/$baseName.png';
+		if (!sys.FileSystem.exists(destPng))
+			sys.io.File.copy(pngSrc, destPng);
+
+		if (atlasSrc != null) {
+			var destAtlas = '$destDir/$baseName.$atlasExt';
+			if (!sys.FileSystem.exists(destAtlas))
+				sys.io.File.copy(atlasSrc, destAtlas);
+
+			var frames = atlasExt == 'xml' ? flixel.graphics.frames.FlxAtlasFrames.fromSparrow(destPng,
+				destAtlas) : flixel.graphics.frames.FlxAtlasFrames.fromTexturePackerJson(destPng, destAtlas);
+			if (frames == null) {
+				showImportError('Failed to parse atlas:\n$baseName.$atlasExt');
+				Console.log('[CharacterEditor] frames null for: $atlasSrc', true);
+				return;
+			}
+			sprite.frames = frames;
+		} else {
+			var bmp = openfl.display.BitmapData.fromFile(destPng);
+			if (bmp == null) {
+				showImportError('Failed to load:\n$baseName.png');
+				return;
+			}
+			sprite.loadGraphic(flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, destPng));
+		}
+
 		var layerName = 'imported_' + importedLayers.length;
+		var layerPath = '$curCharacter/$baseName';
 
 		sprite.setPosition(char.x, char.y);
 
@@ -338,18 +422,47 @@ class CharacterEditor extends MusicBeatState {
 		char.layerMap.set(layerName, sprite);
 		char.characterData.render.layers.push({
 			name: layerName,
-			path: path,
+			path: layerPath,
 			position: [char.x, char.y],
 			anims: []
 		});
 
 		add(sprite);
 
-		importedLayers.push({sprite: sprite, name: layerName, path: path});
+		importedLayers.push({sprite: sprite, name: layerName, path: layerPath});
 
 		advertency.visible = true;
 
 		refreshLayerList();
+
+		final addedSprite = sprite;
+		final addedName = layerName;
+		final addedData = char.characterData.render.layers[char.characterData.render.layers.length - 1];
+		final addedEntry = importedLayers[importedLayers.length - 1];
+
+		pushAction({
+			undo: () -> {
+				remove(addedSprite, true);
+				char.layers.splice(char.layers.indexOf(addedSprite), 1);
+				char.layerMap.remove(addedName);
+				char.characterData.render.layers.splice(char.characterData.render.layers.indexOf(addedData), 1);
+				importedLayers = importedLayers.filter(l -> l.name != addedName);
+				if (selectedLayerName == addedName) {
+					selectedLayer = null;
+					selectedLayerName = '';
+					activeAnim = '';
+				}
+				refreshLayerList();
+			},
+			redo: () -> {
+				char.layers.push(addedSprite);
+				char.layerMap.set(addedName, addedSprite);
+				char.characterData.render.layers.push(addedData);
+				importedLayers.push(addedEntry);
+				add(addedSprite);
+				refreshLayerList();
+			}
+		});
 
 		Console.log('[CharacterEditor] Layer added: $layerName');
 	}
@@ -384,6 +497,7 @@ class CharacterEditor extends MusicBeatState {
 
 	function refreshLayerList() {
 		for (btn in layerButtons) {
+			flixel.tweens.FlxTween.cancelTweensOf(btn);
 			tabLayersGroup.remove(btn);
 			btn.destroy();
 		}
@@ -392,14 +506,116 @@ class CharacterEditor extends MusicBeatState {
 		if (char == null || char.characterData == null)
 			return;
 
-		for (i in 0...char.characterData.render.layers.length) {
+		var total = char.characterData.render.layers.length;
+
+		for (i in 0...total) {
 			var name = char.characterData.render.layers[i].name;
-			var btn = new StatsButton(20, 180 + i * 40, name, null, camHud);
+			var capturedIndex = i;
+
+			var btn = new StatsButton(20, 180 + i * 40, name, null, camHud, function(newIndex:Int) {
+				reorderLayer(capturedIndex, newIndex);
+			}, function() {
+				var sprite = char.layers[capturedIndex];
+				var layerName = char.characterData.render.layers[capturedIndex].name;
+				var layerData = char.characterData.render.layers[capturedIndex];
+				var importedEntry = importedLayers.filter(l -> l.name == layerName)[0];
+
+				final capturedSprite = sprite;
+				final capturedName = layerName;
+				final capturedData = layerData;
+				final capturedEntry = importedEntry;
+
+				remove(capturedSprite, true);
+				char.layers.splice(char.layers.indexOf(capturedSprite), 1);
+				char.layerMap.remove(capturedName);
+				char.characterData.render.layers.splice(char.characterData.render.layers.indexOf(capturedData), 1);
+				importedLayers = importedLayers.filter(l -> l.name != capturedName);
+				if (selectedLayerName == capturedName) {
+					selectedLayer = null;
+					selectedLayerName = '';
+					activeAnim = '';
+				}
+				advertency.visible = true;
+				refreshLayerList();
+
+				pushAction({
+					undo: () -> {
+						var restoreIndex = Std.int(Math.min(capturedIndex, char.layers.length));
+						char.layers.insert(restoreIndex, capturedSprite);
+						char.layerMap.set(capturedName, capturedSprite);
+						char.characterData.render.layers.insert(restoreIndex, capturedData);
+						if (capturedEntry != null)
+							importedLayers.push(capturedEntry);
+						add(capturedSprite);
+						refreshLayerList();
+					},
+					redo: () -> {
+						remove(capturedSprite, true);
+						char.layers.splice(char.layers.indexOf(capturedSprite), 1);
+						char.layerMap.remove(capturedName);
+						char.characterData.render.layers.splice(char.characterData.render.layers.indexOf(capturedData), 1);
+						importedLayers = importedLayers.filter(l -> l.name != capturedName);
+						if (selectedLayerName == capturedName) {
+							selectedLayer = null;
+							selectedLayerName = '';
+							activeAnim = '';
+						}
+						refreshLayerList();
+					}
+				});
+			});
+			btn.setDragContext(i, total, 40);
 			btn.scrollFactor.set(0, 0);
 			btn.cameras = [camHud];
 			layerButtons.push(btn);
 			tabLayersGroup.add(btn);
 		}
+	}
+
+	function reorderLayer(fromIndex:Int, toIndex:Int) {
+		if (fromIndex == toIndex)
+			return;
+
+		var layerData = char.characterData.render.layers.splice(fromIndex, 1)[0];
+		char.characterData.render.layers.insert(toIndex, layerData);
+
+		var sprite = char.layers.splice(fromIndex, 1)[0];
+		char.layers.insert(toIndex, sprite);
+
+		for (layer in char.layers)
+			remove(layer, true);
+		for (layer in char.layers)
+			add(layer);
+
+		advertency.visible = true;
+		refreshLayerList();
+
+		final from = fromIndex;
+		final to = toIndex;
+		pushAction({
+			undo: () -> {
+				var ld = char.characterData.render.layers.splice(to, 1)[0];
+				char.characterData.render.layers.insert(from, ld);
+				var spr = char.layers.splice(to, 1)[0];
+				char.layers.insert(from, spr);
+				for (layer in char.layers)
+					remove(layer, true);
+				for (layer in char.layers)
+					add(layer);
+				refreshLayerList();
+			},
+			redo: () -> {
+				var ld = char.characterData.render.layers.splice(from, 1)[0];
+				char.characterData.render.layers.insert(to, ld);
+				var spr = char.layers.splice(from, 1)[0];
+				char.layers.insert(to, spr);
+				for (layer in char.layers)
+					remove(layer, true);
+				for (layer in char.layers)
+					add(layer);
+				refreshLayerList();
+			}
+		});
 	}
 
 	function getLayerUnderMouse():Null<{name:String, sprite:FunkinSprite}> {
@@ -418,6 +634,15 @@ class CharacterEditor extends MusicBeatState {
 
 		if (FlxG.mouse.justPressed) {
 			var mousePos = FlxG.mouse.getWorldPosition(camEditor);
+			var anyLayerDragging = false;
+			for (btn in layerButtons)
+				if (btn.dragging) {
+					anyLayerDragging = true;
+					break;
+				}
+
+			if (anyLayerDragging)
+				return;
 
 			if (hit != null) {
 				selectedLayer = hit.sprite;
@@ -468,6 +693,17 @@ class CharacterEditor extends MusicBeatState {
 		}
 
 		if (isCamDragging && FlxG.mouse.pressed) {
+			var anyLayerDragging = false;
+			for (btn in layerButtons)
+				if (btn.dragging) {
+					anyLayerDragging = true;
+					break;
+				}
+			if (anyLayerDragging) {
+				isCamDragging = false;
+				return;
+			}
+
 			camEditor.scroll.x -= (FlxG.mouse.deltaViewX / camEditor.zoom) * 0.5;
 			camEditor.scroll.y -= (FlxG.mouse.deltaViewY / camEditor.zoom) * 0.5;
 			camEditor.scroll.x = Math.max(-(FlxG.width * 2), Math.min(FlxG.width * 2, camEditor.scroll.x));

@@ -8,7 +8,7 @@ class SelectionObj extends flixel.group.FlxSpriteGroup {
 	var cornerBL:FlxSprite;
 	var cornerBR:FlxSprite;
 
-	static final SIZE:Int = 62;
+	static final SIZE:Int = 84;
 	static final THICKNESS:Int = 3;
 	static final COLOR:Int = 0xFFCC1144;
 	static final PAD:Float = 4;
