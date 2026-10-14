@@ -113,6 +113,8 @@ class SongConfig {
 			if (raw == null)
 				return;
 
+			loadSeparateMeta(raw, curSong);
+
 			var meta:Dynamic = tryLoadVSliceMeta(curSong);
 			var converted = ChartPorter.tryConvert(raw, diff, meta);
 			songData = converted ?? cast raw;
@@ -122,6 +124,8 @@ class SongConfig {
 
 		if (songData == null)
 			return;
+
+		loadSeparateEvents(curSong);
 
 		songName = songData.meta.song ?? 'fresh';
 		bpmSong = songData.meta.bpm ?? 120;
@@ -147,6 +151,40 @@ class SongConfig {
 			noteSkin = chars[i].strums.noteSkin ?? 'default';
 			strumsVisible = chars[i].strums.visible ?? true;
 		}
+	}
+
+	private function loadSeparateEvents(curSong:String):Void {
+		var path = core.assets.Library.findLib('songs/$curSong/events.json');
+		if (path == null || !sys.FileSystem.exists(path))
+			return;
+
+		var raw:Dynamic = FormatJson.readJson(path);
+		if (raw == null)
+			return;
+
+		var list:Dynamic = Std.isOfType(raw, Array) ? raw : Reflect.field(raw, 'events');
+		if (list == null || !Std.isOfType(list, Array))
+			return;
+
+		if (songData.gameplay == null)
+			songData.gameplay = cast {chars: [], events: []};
+		songData.gameplay.events = cast list;
+		Console.log('SongData: events loaded from $path');
+	}
+
+	private function loadSeparateMeta(raw:Dynamic, curSong:String):Void {
+		var path = core.assets.Library.findLib('songs/$curSong/meta.json');
+		if (path == null || !sys.FileSystem.exists(path))
+			return;
+
+		var file:Dynamic = FormatJson.readJson(path);
+		if (file == null)
+			return;
+
+		var base:Dynamic = raw.meta ?? {};
+		for (key in Reflect.fields(file))
+			Reflect.setField(base, key, Reflect.field(file, key));
+		raw.meta = base;
 	}
 
 	private function tryLoadVSliceMeta(curSong:String):Dynamic {

@@ -69,21 +69,8 @@ class PreviewEvents {
 		events.sort((a, b) -> a.time < b.time ? -1 : (a.time > b.time ? 1 : 0));
 		index = 0;
 
-		for (c in charData) {
-			if (currentNames.get(c.id) != c.name) {
-				var char = charOf(c.id);
-				if (char != null) {
-					try {
-						char.changeCharacter(c.name);
-						onCharChanged(char);
-					} catch (e:Dynamic) {
-						lastError = 'restore ${c.id}: $e';
-						Console.log('PreviewEvents: could not restore "${c.name}": $e', true);
-					}
-				}
-				currentNames.set(c.id, c.name);
-			}
-		}
+		for (c in charData)
+			setCharacter(c.id, c.name, 'restore');
 
 		hasCamEvents = false;
 		locked = false;
@@ -111,6 +98,24 @@ class PreviewEvents {
 			camChar = char;
 	}
 
+	function setCharacter(id:String, name:String, why:String):Void {
+		var char = charOf(id);
+		if (char == null || name == null)
+			return;
+
+		currentNames.set(id, name);
+		if (char.curCharacter == name)
+			return;
+
+		try {
+			char.changeCharacter(name);
+			onCharChanged(char);
+		} catch (e:Dynamic) {
+			lastError = '$why $id: $e';
+			Console.log('PreviewEvents: could not put "$name" on "$id" ($why): $e', true);
+		}
+	}
+
 	function arg(e:EventsData, key:String):Dynamic {
 		return e.arguments == null ? null : Reflect.field(e.arguments, key);
 	}
@@ -122,12 +127,8 @@ class PreviewEvents {
 				case 'Change Character':
 					var id:String = arg(e, 'char');
 					var name:String = arg(e, 'newCharacter');
-					var char = charOf(id);
-					if (char != null && name != null) {
-						char.changeCharacter(name);
-						currentNames.set(id, name);
-						onCharChanged(char);
-					}
+					if (name != null)
+						setCharacter(id, name, 'event');
 				case 'Camera Follow':
 					var char = charOf(arg(e, 'char'));
 					if (char != null) {

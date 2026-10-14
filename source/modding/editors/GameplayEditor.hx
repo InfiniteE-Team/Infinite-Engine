@@ -48,9 +48,9 @@ class GameplayEditor extends MusicBeatState {
 	static final CHUNK_ROWS:Int = 64;
 
 	static final PREVIEW_SCALE:Float = 0.85;
-	static final PREVIEW_TOP:Int = 158;
+	static final PREVIEW_TOP:Int = 128;
 
-	static final HEADER_H:Int = 80;
+	static final HEADER_H:Int = 86;
 	static final HEADER_COLOR:Int = 0xFF3A3A3A;
 	static final HEADER_LINE_COLOR:Int = 0xFFCCCCCC;
 	static final ICON_SIZE:Float = 52;
@@ -64,7 +64,7 @@ class GameplayEditor extends MusicBeatState {
 		try {
 			config.configSong(song, diffName);
 		} catch (e:Dynamic) {
-			Console.log('GameplayEditor: could not read "$song" ($diffName): $e', true);
+			trace('GameplayEditor: could not read "$song" ($diffName): $e');
 			config.songData = null;
 		}
 
@@ -84,6 +84,12 @@ class GameplayEditor extends MusicBeatState {
 
 	static var askForNewChart:Bool = false;
 
+	static var resumeActive:Bool = false;
+	static var resumeDirty:Bool = false;
+	static var resumePosition:Float = 0;
+	static var resumeRow:Int = 0;
+	var removeArmed:Int = -1;
+
 	public static function openNew():Void {
 		askForNewChart = true;
 		open('untitled', 'normal', ChartDefaults.DEFAULT_BPM);
@@ -96,13 +102,7 @@ class GameplayEditor extends MusicBeatState {
 	var playhead:flixel.FlxSprite;
 
 	var charColumnOffset:Map<String, Int> = new Map();
-	var columnLabels:Array<{
-		id:String,
-		text:String,
-		role:String,
-		column:Int,
-		lanes:Int
-	}> = [];
+	var columnLabels:Array<{id:String, text:String, role:String, column:Int, lanes:Int}> = [];
 	var noteBitmaps:Array<openfl.display.BitmapData> = [];
 
 	var arrowTemplates:Map<String, Array<game.objects.sprites.notes.Note>> = new Map();
@@ -160,7 +160,6 @@ class GameplayEditor extends MusicBeatState {
 
 	var hasAudio:Bool = false;
 	var songLength:Float = 0;
-
 	static final SILENT_MIN_MS:Float = 120000;
 
 	var startupNotes:Array<String> = [];
@@ -171,14 +170,12 @@ class GameplayEditor extends MusicBeatState {
 	var previewH:Int = 0;
 
 	static final MAX_UNDO:Int = 100;
-
 	var undoStack:Array<ChartSnapshot> = [];
 	var redoStack:Array<ChartSnapshot> = [];
 	var moveSnapshot:ChartSnapshot = null;
 
 	static final SNAPS:Array<Int> = [4, 8, 12, 16, 20, 24, 32, 48, 64];
 	static final SPEEDS:Array<Float> = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
-
 	var snapIndex:Int = 3;
 	var speedIndex:Int = 3;
 	var noteType:String = 'normal';
@@ -210,12 +207,13 @@ class GameplayEditor extends MusicBeatState {
 	var railX:Float = 0;
 	var railW:Int = 0;
 	var toolCard:flixel.FlxSprite;
-	var titleText:flixel.text.FlxText;
 	var helpTopLine:flixel.FlxSprite;
 
 	static var viewState:Array<Bool> = [true, true, true, true];
-
-	var viewToggles:ViewToggles;
+	var menuBar:MenuBar;
+	var mouseUsed:Bool = false;
+	var overMenu:Bool = false;
+	var menuEscape:Bool = false;
 
 	static final SCROLL_MS:Float = 100.0;
 
@@ -244,7 +242,7 @@ class GameplayEditor extends MusicBeatState {
 
 		previousLogInScreen = SaveData.data.logInScreen;
 		SaveData.data.logInScreen = false;
-		utils.Console.updateVisibility();
+		Console.updateVisibility();
 
 		if (infoHelp != null)
 			infoHelp.visible = false;
@@ -262,12 +260,97 @@ class GameplayEditor extends MusicBeatState {
 			ready = true;
 			if (askNow)
 				askNewChart(0);
+			if (resumeActive)
+				resumeAfterRestart();
 		} catch (e:Dynamic) {
 			ready = false;
 			showFatal(e);
 		}
 
 		FlxG.mouse.visible = true;
+	}
+
+	function restartEditor():Void {
+		resumeActive = true;
+		resumeDirty = dirty;
+		resumePosition = RhythmCore.songPosition;
+		resumeRow = panelRow;
+		folder = songDir;
+		diff = chartDiff;
+		prompt.close(false);
+		setStatus('Reopening the editor with the new columns...', 0xFFFFCC33);
+		FlxG.switchState(() -> new GameplayEditor());
+	}
+
+	function resumeAfterRestart():Void {
+		resumeActive = false;
+		if (resumeDirty) {
+			dirty = true;
+			setStatus('Unsaved changes (Ctrl/Cmd+S to save)', 0xFFFFCC33);
+		}
+
+		var pos:Float = Math.max(0, resumePosition);
+		RhythmCore.songPosition = pos;
+		if (hasAudio)
+			gameAudio.setTime(pos);
+
+		openPanel('setup');
+		panelRow = Std.int(Math.max(0, Math.min(resumeRow, panelRowCount() - 1)));
+		refreshPanel();
+	}
+
+	function uniqueCharId(base:String):String {
+		var id:String = base;
+		var n:Int = 2;
+		while (charIds().contains(id))
+			id = base + (n++);
+		return id;
+	}
+
+	function addCharacter(fileName:String):Void {
+		fileName = StringTools.trim(fileName);
+		if (fileName == '')
+			return;
+
+		try {
+			var id:String = uniqueCharId(safeName(fileName, 'char'));
+			SONG.chars.push({
+				id: id,
+				name: fileName,
+				role: 'opponent',
+				strums: {position: [385, 0]}
+			});
+			SONG.songData.gameplay.chars = SONG.chars;
+			Console.log('GameplayEditor: added character "$id" ($fileName)');
+			restartEditor();
+		} catch (e:Dynamic) {
+			Console.log('GameplayEditor: could not add the character: $e', true);
+			setStatus('Could not add the character: $e', 0xFFFF5555);
+		}
+	}
+
+	function removeCharacter(index:Int):Void {
+		if (index < 0 || index >= SONG.chars.length)
+			return;
+		if (SONG.chars.length <= 1) {
+			setStatus('A chart needs at least one character.', 0xFFFF5555);
+			return;
+		}
+
+		var id:String = SONG.chars[index].id;
+		SONG.chars.splice(index, 1);
+		SONG.songData.gameplay.chars = SONG.chars;
+		SONG.songData.notes = [for (n in SONG.songData.notes) if (n.char != id) n];
+		restartEditor();
+	}
+
+	function cycleRole(index:Int):Void {
+		if (index < 0 || index >= SONG.chars.length)
+			return;
+
+		var c = SONG.chars[index];
+		c.role = cycleName(['player', 'opponent', 'gf'], c.role ?? '', 1);
+		restartEditor();
 	}
 
 	function safe(step:String, fn:() -> Void):Bool {
@@ -328,20 +411,7 @@ class GameplayEditor extends MusicBeatState {
 
 		layoutRail();
 
-		titleText = new flixel.text.FlxText(railX, 8, railW, '', 16);
-		titleText.setFormat(null, 16, FlxColor.WHITE, LEFT, OUTLINE, FlxColor.BLACK);
-		titleText.text = '$songDir  /  $chartDiff';
-		titleText.scrollFactor.set(0, 0);
-		titleText.cameras = [camHud];
-		add(titleText);
-
-		var brand = new flixel.text.FlxText(railX, 12, railW, 'GAMEPLAY EDITOR', 10);
-		brand.setFormat(null, 10, EditorWidgets.MUTED, RIGHT);
-		brand.scrollFactor.set(0, 0);
-		brand.cameras = [camHud];
-		add(brand);
-
-		infoHUD = new InfoHUD(railX, 34, railW);
+		infoHUD = new InfoHUD(railX, MenuBar.HEIGHT + 6, railW);
 		infoHUD.cameras = [camHud];
 		add(infoHUD);
 
@@ -359,23 +429,19 @@ class GameplayEditor extends MusicBeatState {
 
 		helpText = new flixel.text.FlxText(GRID_X, FlxG.height - 70, 0, '', 12);
 		helpText.setFormat(null, 12, 0xFFE4E4EE, LEFT, OUTLINE, FlxColor.BLACK);
-		helpText.applyMarkup('<k>Click<k> note   <k>Drag down<k> sustain   <k>Drag a note<k> move   <k>Right click<k> remove   <k>Space<k> play   <k>Wheel<k> scroll\n'
-			+
-			'<k>Shift+Click/Drag<k> select   <k>Ctrl/Cmd+A/C/X/V<k> all/copy/cut/paste   <k>Del<k> delete   <k>Arrows<k> nudge   <k>Ctrl/Cmd+Z/Y<k> undo/redo\n'
-			+
-			'<k>Q/E<k> snap   <k>T<k> note type (<k>Shift+T<k> new)   <k>M<k> metronome   <k>H<k> hit sounds   <k>F<k> camera follow   <k>, .<k> speed   <k>1-4<k> panels\n'
+		helpText.applyMarkup('<k>Top menus<k> everything with the mouse   <k>Click<k> note   <k>Drag down<k> sustain   <k>Drag a note<k> move   <k>Right click<k> remove   <k>Space<k> play   <k>Wheel<k> scroll\n'
+			+ '<k>Shift+Click/Drag<k> select   <k>Ctrl/Cmd+A/C/X/V<k> all/copy/cut/paste   <k>Del<k> delete   <k>Arrows<k> nudge   <k>Ctrl/Cmd+Z/Y<k> undo/redo\n'
+			+ '<k>Q/E<k> snap   <k>T<k> note type (<k>Shift+T<k> new)   <k>M<k> metronome   <k>H<k> hit sounds   <k>F<k> camera follow   <k>, .<k> speed   <k>1-4<k> panels\n'
 			+ '<k>EVT column<k> events   <k>Tab<k> setup (stage, characters, speed, BPM)   <k>Ctrl/Cmd+S<k> save   <k>Back<k> leave',
-			[
-				new flixel.text.FlxText.FlxTextFormatMarkerPair(new flixel.text.FlxText.FlxTextFormat(EditorWidgets.ACCENT), '<k>')
-			]);
+			[new flixel.text.FlxText.FlxTextFormatMarkerPair(new flixel.text.FlxText.FlxTextFormat(EditorWidgets.ACCENT), '<k>')]);
 		helpText.scrollFactor.set(0, 0);
 		helpText.cameras = [camHud];
 		add(helpText);
 
-		toolCard = EditorWidgets.card(railX, 84, railW, 38, camHud);
+		toolCard = EditorWidgets.card(railX, MenuBar.HEIGHT + 56, railW, 38, camHud);
 		add(toolCard);
 
-		toolText = new flixel.text.FlxText(railX + 12, 88, railW - 24, '', 12);
+		toolText = new flixel.text.FlxText(railX + 12, MenuBar.HEIGHT + 60, railW - 24, '', 12);
 		toolText.setFormat(null, 12, 0xFFE4E4EE, LEFT, OUTLINE, FlxColor.BLACK);
 		toolText.scrollFactor.set(0, 0);
 		toolText.cameras = [camHud];
@@ -388,13 +454,13 @@ class GameplayEditor extends MusicBeatState {
 		statusText.cameras = [camHud];
 		add(statusText);
 
-		viewToggles = new ViewToggles(railX, 128, 4, ['1 Help', '2 Time', '3 Tools', '4 Preview'], viewState, camHud);
-		viewToggles.onChange = applyView;
-		add(viewToggles);
 		applyView();
 
 		panel = new OptionPanel(railX, PREVIEW_TOP, railW, camHud);
 		add(panel);
+
+		menuBar = new MenuBar(buildMenus(), camHud);
+		add(menuBar);
 
 		refreshTools();
 
@@ -424,12 +490,7 @@ class GameplayEditor extends MusicBeatState {
 		SONG.chars = SONG.songData.gameplay.chars;
 	}
 
-	static final NEW_CHART_QUESTIONS:Array<String> = [
-		'Song folder name (letters, numbers, - and _)',
-		'Difficulty (for example normal or hard)',
-		'BPM of the song'
-	];
-
+	static final NEW_CHART_QUESTIONS:Array<String> = ['Song folder name (letters, numbers, - and _)', 'Difficulty (for example normal or hard)', 'BPM of the song'];
 	var newChartAnswers:Array<String> = ['', 'normal', '120'];
 
 	function askNewChart(step:Int):Void {
@@ -466,8 +527,6 @@ class GameplayEditor extends MusicBeatState {
 		var bpm:Float = Std.parseFloat(newChartAnswers[2]);
 		applyBpm(Math.isNaN(bpm) || bpm <= 0 ? ChartDefaults.DEFAULT_BPM : bpm);
 
-		if (titleText != null)
-			titleText.text = '$songDir  /  $chartDiff';
 		setStatus('New chart: Ctrl/Cmd+S will create ' + ChartDefaults.newChartPath(songDir, chartDiff), 0xFFFFCC33);
 	}
 
@@ -540,13 +599,7 @@ class GameplayEditor extends MusicBeatState {
 			}
 
 			charColumnOffset.set(c.id, offset);
-			columnLabels.push({
-				id: c.id,
-				text: c.name ?? c.id,
-				role: c.role ?? '',
-				column: offset,
-				lanes: lanes
-			});
+			columnLabels.push({id: c.id, text: c.name ?? c.id, role: c.role ?? '', column: offset, lanes: lanes});
 			for (lane in 0...lanes)
 				columnOwners.push({char: c.id, lane: lane});
 			offset += lanes;
@@ -1483,9 +1536,6 @@ class GameplayEditor extends MusicBeatState {
 		if (chars != null)
 			chars.danceAll();
 
-		if (stage != null)
-			stage.onBeatHit(beat);
-
 		if (metronome)
 			FlxG.sound.play(Paths.getPath('menus/scrollMenu', 'sound'), 0.4);
 	}
@@ -1512,14 +1562,14 @@ class GameplayEditor extends MusicBeatState {
 			var width:Int = label.lanes * GRID_SIZE;
 			var x:Float = GRID_X + label.column * GRID_SIZE;
 
-			var strip = new flixel.FlxSprite(x, 0).makeGraphic(width, HEADER_H, HEADER_COLOR);
+			var strip = new flixel.FlxSprite(x, MenuBar.HEIGHT).makeGraphic(width, HEADER_H, HEADER_COLOR);
 			strip.scrollFactor.set(0, 0);
 			strip.cameras = [camHud];
 			headerGroup.add(strip);
 
 			var lines:Array<Float> = i == columnLabels.length - 1 ? [x - 1, x + width - 1] : [x - 1];
 			for (lineX in lines) {
-				var line = new flixel.FlxSprite(lineX, 0).makeGraphic(2, HEADER_H, HEADER_LINE_COLOR);
+				var line = new flixel.FlxSprite(lineX, MenuBar.HEIGHT).makeGraphic(2, HEADER_H, HEADER_LINE_COLOR);
 				line.scrollFactor.set(0, 0);
 				line.cameras = [camHud];
 				headerGroup.add(line);
@@ -1534,7 +1584,7 @@ class GameplayEditor extends MusicBeatState {
 					var fit:Float = ICON_SIZE / Math.max(1, icon.frameHeight);
 					icon.scale.set(fit, fit);
 					icon.updateHitbox();
-					icon.setPosition(x + (width - icon.width) * 0.5, 2);
+					icon.setPosition(x + (width - icon.width) * 0.5, MenuBar.HEIGHT + 2);
 					icon.scrollFactor.set(0, 0);
 					icon.active = false;
 					icon.cameras = [camHud];
@@ -1544,25 +1594,40 @@ class GameplayEditor extends MusicBeatState {
 				}
 			}
 
-			var roleTxt = new flixel.text.FlxText(x, ICON_SIZE + 8, width, roleName(label.role), 12);
-			roleTxt.setFormat(null, 12, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
+			var roleTxt = new flixel.text.FlxText(x, MenuBar.HEIGHT + ICON_SIZE + 4, width, roleName(label.role), 9);
+			roleTxt.setFormat(null, 9, 0xFFBBBBCC, CENTER, OUTLINE, FlxColor.BLACK);
 			roleTxt.scrollFactor.set(0, 0);
 			roleTxt.cameras = [camHud];
 			headerGroup.add(roleTxt);
+
+			var shownName:String = label.id;
+			for (c in SONG.chars) {
+				if (c.id == label.id)
+					shownName = c.name ?? c.id;
+			}
+			var maxChars:Int = Std.int(Math.max(4, width / 8));
+			if (shownName.length > maxChars)
+				shownName = shownName.substr(0, maxChars - 1) + '.';
+
+			var nameTxt = new flixel.text.FlxText(x, MenuBar.HEIGHT + ICON_SIZE + 16, width, shownName, 13);
+			nameTxt.setFormat(null, 13, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
+			nameTxt.scrollFactor.set(0, 0);
+			nameTxt.cameras = [camHud];
+			headerGroup.add(nameTxt);
 		}
 
 		var eventX:Float = GRID_X + COLUMNS * GRID_SIZE;
-		var eventStrip = new flixel.FlxSprite(eventX, 0).makeGraphic(GRID_SIZE, HEADER_H, HEADER_COLOR);
+		var eventStrip = new flixel.FlxSprite(eventX, MenuBar.HEIGHT).makeGraphic(GRID_SIZE, HEADER_H, HEADER_COLOR);
 		eventStrip.scrollFactor.set(0, 0);
 		eventStrip.cameras = [camHud];
 		headerGroup.add(eventStrip);
 
-		var eventLine = new flixel.FlxSprite(eventX + GRID_SIZE - 1, 0).makeGraphic(2, HEADER_H, HEADER_LINE_COLOR);
+		var eventLine = new flixel.FlxSprite(eventX + GRID_SIZE - 1, MenuBar.HEIGHT).makeGraphic(2, HEADER_H, HEADER_LINE_COLOR);
 		eventLine.scrollFactor.set(0, 0);
 		eventLine.cameras = [camHud];
 		headerGroup.add(eventLine);
 
-		var eventTxt = new flixel.text.FlxText(eventX - 16, ICON_SIZE + 10, GRID_SIZE + 32, 'EVT', 10);
+		var eventTxt = new flixel.text.FlxText(eventX - 16, MenuBar.HEIGHT + ICON_SIZE + 10, GRID_SIZE + 32, 'EVT', 10);
 		eventTxt.setFormat(null, 10, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
 		eventTxt.scrollFactor.set(0, 0);
 		eventTxt.cameras = [camHud];
@@ -1626,7 +1691,28 @@ class GameplayEditor extends MusicBeatState {
 
 			SONG.songData.notes.sort((a, b) -> a.time < b.time ? -1 : (a.time > b.time ? 1 : 0));
 			SONG.songData.gameplay.events.sort((a, b) -> a.time < b.time ? -1 : (a.time > b.time ? 1 : 0));
-			sys.io.File.saveContent(path, haxe.Json.stringify(SONG.songData, null, '\t'));
+			var events = SONG.songData.gameplay.events;
+			var gameplayCopy:Dynamic = Reflect.copy(SONG.songData.gameplay);
+			Reflect.setField(gameplayCopy, 'events', []);
+			var chartCopy:Dynamic = Reflect.copy(SONG.songData);
+			Reflect.setField(chartCopy, 'gameplay', gameplayCopy);
+			Reflect.deleteField(chartCopy, 'meta');
+
+			var metaPath = core.assets.Library.findLib('songs/$songDir/meta.json');
+			if (metaPath == null || !sys.FileSystem.exists(metaPath)) {
+				metaPath = ChartDefaults.newMetaPath(songDir);
+				ChartDefaults.makeDirs(haxe.io.Path.directory(metaPath));
+			}
+
+			var eventsPath = core.assets.Library.findLib('songs/$songDir/events.json');
+			if (eventsPath == null || !sys.FileSystem.exists(eventsPath)) {
+				eventsPath = ChartDefaults.newEventsPath(songDir);
+				ChartDefaults.makeDirs(haxe.io.Path.directory(eventsPath));
+			}
+
+			sys.io.File.saveContent(metaPath, haxe.Json.stringify(SONG.songData.meta, null, '\t'));
+			sys.io.File.saveContent(eventsPath, haxe.Json.stringify({events: events}, null, '\t'));
+			sys.io.File.saveContent(path, haxe.Json.stringify(chartCopy, null, '\t'));
 
 			dirty = false;
 			leaveArmed = false;
@@ -1639,7 +1725,7 @@ class GameplayEditor extends MusicBeatState {
 					states.menus.FreeplayState.curDiff = index;
 				setStatus('Chart created: $path', 0xFF66DD66);
 			} else
-				setStatus('Saved: $path', 0xFF66DD66);
+				setStatus('Saved: $path (meta.json and events.json)', 0xFF66DD66);
 		} catch (e:Dynamic) {
 			setStatus('Could not save: $e', 0xFFFF5555);
 		}
@@ -1651,7 +1737,7 @@ class GameplayEditor extends MusicBeatState {
 			director.destroy();
 		director = null;
 		SaveData.data.logInScreen = previousLogInScreen;
-		utils.Console.updateVisibility();
+		Console.updateVisibility();
 		if (core.ui.FPSCounter.instance != null)
 			core.ui.FPSCounter.instance.updateVisibility();
 		super.destroy();
@@ -1659,15 +1745,6 @@ class GameplayEditor extends MusicBeatState {
 
 	function endSong() {
 		isPlaying = false;
-		RhythmCore.songPosition = 0;
-
-		if (hasAudio) {
-			gameAudio.setTime(0);
-			gameAudio.pauseAll();
-		}
-
-		seekNotes();
-		camEditor.scroll.y = -FlxG.height * 0.5;
 	}
 
 	override public function update(elapsed:Float) {
@@ -1701,8 +1778,12 @@ class GameplayEditor extends MusicBeatState {
 
 		infoHUD.updateInfoText(RhythmCore.songPosition, RhythmCore.stepInMs, RhythmCore.bpm);
 
-		if (viewToggles != null && FlxG.mouse.justPressed)
-			viewToggles.click(FlxG.mouse.viewX, FlxG.mouse.viewY);
+		try {
+			updateMenu(keysLocked);
+		} catch (e:Dynamic) {
+			Console.log('GameplayEditor: menu error: $e', true);
+			setStatus('Menu error: $e', 0xFFFF5555);
+		}
 
 		if (director != null) {
 			if (!isPlaying && Math.abs(RhythmCore.songPosition - previewLastPos) > 0.5)
@@ -1737,26 +1818,12 @@ class GameplayEditor extends MusicBeatState {
 		if (!keysLocked && panelMode == '')
 			updateTools();
 
-		if (!keysLocked && FlxG.keys.justPressed.SPACE) {
-			isPlaying = !isPlaying;
-			if (isPlaying) {
-				seekNotes();
-				t.reset();
-				if (hasAudio) {
-					gameAudio.setTime(RhythmCore.songPosition);
-					gameAudio.playAll();
-					applySpeed();
-					gameAudio.resyncVocals();
-				}
-			} else if (hasAudio) {
-				RhythmCore.pause(gameAudio);
-				gameAudio.pauseAll();
-			}
-		}
+		if (!keysLocked && FlxG.keys.justPressed.SPACE)
+			togglePlay();
 
 		var totalMs:Float = songLength;
 
-		if (FlxG.mouse.wheel != 0 && !isPlaying) {
+		if (FlxG.mouse.wheel != 0 && !isPlaying && !(panel != null && panel.contains(FlxG.mouse.gameX, FlxG.mouse.gameY))) {
 			var ms:Float = FlxG.keys.pressed.SHIFT ? SCROLL_MS * 4 : SCROLL_MS;
 			var delta:Float = -FlxG.mouse.wheel * ms;
 
@@ -1768,34 +1835,31 @@ class GameplayEditor extends MusicBeatState {
 		}
 
 		if (isPlaying && totalMs > 0 && RhythmCore.songPosition >= totalMs) {
-			RhythmCore.songPosition = 0;
+			RhythmCore.songPosition = totalMs;
 			isPlaying = false;
-
-			if (hasAudio) {
-				gameAudio.setTime(0);
-				gameAudio.pauseAll();
-			}
-
-			seekNotes();
-
-			camEditor.scroll.y = -FlxG.height * 0.5;
 		}
 
 		var panelWasOpen:Bool = panelMode != '';
-
-		updateSinging();
 
 		if (panelMode != '') {
 			hoverBox.visible = false;
 			updatePanel(keysLocked);
 		} else if (isPlaying) {
+			updateSinging();
 			hoverBox.visible = false;
 		} else if (keysLocked) {
 			hoverBox.visible = false;
 		} else if (FlxG.keys.justPressed.TAB && dragEntry == null && moveOrigins == null && !boxActive) {
 			openPanel('setup');
+		} else if (mouseUsed || (overMenu && dragEntry == null && moveOrigins == null && !boxActive)) {
+			hoverBox.visible = false;
 		} else {
-			updateEditing();
+			try {
+				updateEditing();
+			} catch (e:Dynamic) {
+				Console.log('GameplayEditor: editing error: $e', true);
+				setStatus('Editing error: $e', 0xFFFF5555);
+			}
 		}
 
 		camEditor.scroll.y = RhythmCore.songPosition / RhythmCore.stepInMs * GRID_SIZE - FlxG.height * 0.5;
@@ -1803,15 +1867,207 @@ class GameplayEditor extends MusicBeatState {
 		if (!keysLocked && (FlxG.keys.pressed.CONTROL || FlxG.keys.pressed.WINDOWS) && FlxG.keys.justPressed.S)
 			saveChart();
 
-		if (!keysLocked && Controls.BACK && !panelWasOpen) {
-			if (dirty && !leaveArmed) {
-				leaveArmed = true;
-				setStatus('Unsaved changes! Press back again to leave without saving, or Ctrl/Cmd+S to save.', 0xFFFF5555);
-				return;
-			}
+		if (!keysLocked && Controls.BACK && !panelWasOpen && !menuEscape)
+			requestLeave();
+	}
 
-			leaveEditor();
+	function requestLeave():Void {
+		if (dirty && !leaveArmed) {
+			leaveArmed = true;
+			setStatus('Unsaved changes! Press back again to leave without saving, or Ctrl/Cmd+S to save.', 0xFFFF5555);
+			return;
 		}
+
+		leaveEditor();
+	}
+
+	function togglePlay():Void {
+		isPlaying = !isPlaying;
+		if (isPlaying) {
+			seekNotes();
+			t.reset();
+			if (hasAudio) {
+				gameAudio.setTime(RhythmCore.songPosition);
+				gameAudio.playAll();
+				applySpeed();
+				gameAudio.resyncVocals();
+			}
+		} else if (hasAudio) {
+			RhythmCore.pause(gameAudio);
+			gameAudio.pauseAll();
+		}
+	}
+
+	static final DEBUG_INPUT:Bool = false;
+
+	function updateMenu(keysLocked:Bool):Void {
+		mouseUsed = false;
+		overMenu = false;
+		menuEscape = false;
+		if (menuBar == null)
+			return;
+
+		var title:String = '$songDir / $chartDiff' + (dirty ? '  *' : '');
+		if (DEBUG_INPUT) {
+			var wp = FlxG.mouse.getWorldPosition(camEditor, mousePoint);
+			var col:Int = Math.floor((wp.x - GRID_X) / GRID_SIZE);
+			var step:Int = Math.floor(wp.y / GRID_SIZE);
+			title = 'mouse ${FlxG.mouse.gameX},${FlxG.mouse.gameY}  col $col  step $step  menu:$overMenu  panel:"$panelMode"  locked:$keysLocked  play:$isPlaying  prompt:${prompt.active}';
+		}
+		menuBar.setRightText(title);
+
+		var mx:Float = FlxG.mouse.gameX;
+		var my:Float = FlxG.mouse.gameY;
+		overMenu = menuBar.contains(mx, my);
+		if (keysLocked)
+			return;
+
+		menuBar.hover(mx, my);
+		if (menuBar.isOpen && Controls.BACK) {
+			menuBar.close();
+			menuEscape = true;
+			return;
+		}
+		if (FlxG.mouse.justPressed)
+			mouseUsed = menuBar.click(mx, my);
+
+		if (!mouseUsed && FlxG.mouse.justPressed && panelMode == '' && !isPlaying)
+			mouseUsed = clickHeader(mx, my);
+	}
+
+	function clickHeader(mx:Float, my:Float):Bool {
+		if (my < MenuBar.HEIGHT || my >= MenuBar.HEIGHT + HEADER_H)
+			return false;
+
+		for (i in 0...columnLabels.length) {
+			var label = columnLabels[i];
+			var x:Float = GRID_X + label.column * GRID_SIZE;
+			if (mx < x || mx >= x + label.lanes * GRID_SIZE)
+				continue;
+
+			var index:Int = -1;
+			for (k in 0...SONG.chars.length) {
+				if (SONG.chars[k].id == label.id)
+					index = k;
+			}
+			if (index < 0)
+				return true;
+
+			var charIndex:Int = index;
+			openPicker('Character for ${roleName(label.role)}', ChartDefaults.listNames('characters'), SONG.chars[charIndex].name ?? '', function(name:String) {
+				setCharacterFile(charIndex, name);
+			});
+			return true;
+		}
+		return false;
+	}
+
+	function toggleView(i:Int):Void {
+		viewState[i] = !viewState[i];
+		applyView();
+	}
+
+	function toggleFollow():Void {
+		if (director == null)
+			return;
+		director.follow = !director.follow;
+		if (director.follow)
+			director.snapNow();
+		refreshTools();
+	}
+
+	function toggleMetronome():Void {
+		metronome = !metronome;
+		refreshTools();
+	}
+
+	function toggleHitsounds():Void {
+		hitsounds = !hitsounds;
+		refreshTools();
+	}
+
+	function cutSelection():Void {
+		copySelection();
+		deleteSelected();
+	}
+
+	function buildMenus():Array<MenuDef> {
+		function item(label:String, ?shortcut:String, ?action:Void->Void, ?checked:Void->Bool):MenuItem {
+			return {label: label, shortcut: shortcut, action: action, checked: checked};
+		}
+		var line:MenuItem = {label: '', separator: true};
+
+		return [
+			{
+				title: 'File',
+				items: () -> [item('Save', 'Ctrl/Cmd+S', saveChart), line, item('Leave editor', 'Esc', requestLeave)]
+			},
+			{
+				title: 'Edit',
+				items: () -> [
+					item('Undo', 'Ctrl/Cmd+Z', undo),
+					item('Redo', 'Ctrl/Cmd+Y', redo),
+					line,
+					item('Copy', 'Ctrl/Cmd+C', copySelection),
+					item('Cut', 'Ctrl/Cmd+X', cutSelection),
+					item('Paste', 'Ctrl/Cmd+V', pasteClipboard),
+					line,
+					item('Select all', 'Ctrl/Cmd+A', selectAll),
+					item('Delete selected', 'Del', deleteSelected)
+				]
+			},
+			{
+				title: 'View',
+				items: () -> [
+					item('Help bar', '1', () -> toggleView(0), () -> viewState[0]),
+					item('Time info', '2', () -> toggleView(1), () -> viewState[1]),
+					item('Tools info', '3', () -> toggleView(2), () -> viewState[2]),
+					item('Preview info', '4', () -> toggleView(3), () -> viewState[3]),
+					line,
+					item('Camera follow in preview', 'F', toggleFollow, () -> director != null && director.follow)
+				]
+			},
+			{
+				title: 'Audio',
+				items: () -> [
+					item(isPlaying ? 'Pause' : 'Play', 'Space', togglePlay),
+					line,
+					item('Metronome', 'M', toggleMetronome, () -> metronome),
+					item('Hit sounds', 'H', toggleHitsounds, () -> hitsounds),
+					line,
+					item('Playback speed: x' + SPEEDS[speedIndex]),
+					item('Slower', ',', () -> changeSpeed(-1)),
+					item('Faster', '.', () -> changeSpeed(1))
+				]
+			},
+			{
+				title: 'Chart',
+				items: () -> [
+					item('Setup: stage, characters, speed, BPM', 'Tab', () -> openPanel('setup')),
+					item('Add character...', null, openCharacterPicker),
+					line,
+					item('Snap: 1/' + SNAPS[snapIndex]),
+					item('Finer snap', 'E', () -> changeSnap(1)),
+					item('Coarser snap', 'Q', () -> changeSnap(-1)),
+					line,
+					item('Note type: ' + noteType),
+					item('Next note type', 'T', () -> cycleType(1)),
+					item('New note type...', 'Shift+T', askNewType)
+				]
+			},
+			{
+				title: 'Help',
+				items: () -> [
+					item('Click on the grid: add a note'),
+					item('Drag down from a note: sustain'),
+					item('Drag a note: move it'),
+					item('Right click: remove a note or event'),
+					item('Shift+click or drag: select notes'),
+					item('Wheel: scroll the song'),
+					item('EVT column: click to add or edit an event')
+				]
+			}
+		];
 	}
 
 	function leaveEditor():Void {
@@ -1836,40 +2092,21 @@ class GameplayEditor extends MusicBeatState {
 		if (FlxG.keys.justPressed.E)
 			changeSnap(1);
 
-		if (FlxG.keys.justPressed.M) {
-			metronome = !metronome;
-			refreshTools();
-		}
-		if (FlxG.keys.justPressed.H) {
-			hitsounds = !hitsounds;
-			refreshTools();
-		}
+		if (FlxG.keys.justPressed.M)
+			toggleMetronome();
+		if (FlxG.keys.justPressed.H)
+			toggleHitsounds();
 
-		if (viewToggles != null) {
-			var keys = [
-				FlxG.keys.justPressed.ONE,
-				FlxG.keys.justPressed.TWO,
-				FlxG.keys.justPressed.THREE,
-				FlxG.keys.justPressed.FOUR
-			];
-			for (i in 0...keys.length) {
-				if (keys[i]) {
-					viewToggles.set(i, !viewToggles.get(i));
-					applyView();
-				}
-			}
-			if (FlxG.keys.justPressed.F1) {
-				viewToggles.set(0, !viewToggles.get(0));
-				applyView();
-			}
+		var viewKeys = [FlxG.keys.justPressed.ONE, FlxG.keys.justPressed.TWO, FlxG.keys.justPressed.THREE, FlxG.keys.justPressed.FOUR];
+		for (i in 0...viewKeys.length) {
+			if (viewKeys[i])
+				toggleView(i);
 		}
+		if (FlxG.keys.justPressed.F1)
+			toggleView(0);
 
-		if (FlxG.keys.justPressed.F && director != null) {
-			director.follow = !director.follow;
-			if (director.follow)
-				director.snapNow();
-			refreshTools();
-		}
+		if (FlxG.keys.justPressed.F)
+			toggleFollow();
 
 		if (FlxG.keys.justPressed.COMMA)
 			changeSpeed(-1);
@@ -1923,8 +2160,7 @@ class GameplayEditor extends MusicBeatState {
 		var on = new flixel.text.FlxText.FlxTextFormatMarkerPair(new flixel.text.FlxText.FlxTextFormat(EditorWidgets.GOOD), '<g>');
 		var off = new flixel.text.FlxText.FlxTextFormatMarkerPair(new flixel.text.FlxText.FlxTextFormat(EditorWidgets.MUTED), '<d>');
 		toolText.applyMarkup('<c>SNAP<c> 1/${SNAPS[snapIndex]}    <c>TYPE<c> $noteType    <c>SPEED<c> x${SPEEDS[speedIndex]}\n'
-			+
-			'<c>METRONOME<c> ${metronome ? "<g>on<g>" : "<d>off<d>"}    <c>HIT SOUNDS<c> ${hitsounds ? "<g>on<g>" : "<d>off<d>"}    <c>CAMERA FOLLOW<c> ${follow ? "<g>on<g>" : "<d>off<d>"}',
+			+ '<c>METRONOME<c> ${metronome ? "<g>on<g>" : "<d>off<d>"}    <c>HIT SOUNDS<c> ${hitsounds ? "<g>on<g>" : "<d>off<d>"}    <c>CAMERA FOLLOW<c> ${follow ? "<g>on<g>" : "<d>off<d>"}',
 			[cap, on, off]);
 	}
 
@@ -2192,6 +2428,15 @@ class GameplayEditor extends MusicBeatState {
 		markDirty();
 	}
 
+	static final PICK_VISIBLE:Int = 10;
+	var pickItems:Array<String> = [];
+	var pickIndex:Int = -1;
+	var pickOffset:Int = 0;
+	var pickTitle:String = '';
+	var pickReturn:String = '';
+	var pickCurrent:String = '';
+	var pickChoose:String->Void = null;
+
 	function openPanel(mode:String):Void {
 		panelMode = mode;
 		panelRow = 0;
@@ -2203,6 +2448,7 @@ class GameplayEditor extends MusicBeatState {
 		prompt.close(false);
 		panelMode = '';
 		panelEvent = null;
+		pickChoose = null;
 		if (panel != null)
 			panel.hide();
 		refreshEventMarks();
@@ -2231,10 +2477,222 @@ class GameplayEditor extends MusicBeatState {
 
 	function panelRowCount():Int {
 		if (panelMode == 'setup')
-			return SONG.chars.length + 3;
+			return SONG.chars.length + 4;
 		if (panelMode == 'event')
-			return 2 + eventFields().length;
+			return 4 + eventFields().length;
 		return 1;
+	}
+
+	function openPicker(title:String, items:Array<String>, current:String, choose:String->Void):Void {
+		if (items.length == 0) {
+			setStatus('Nothing to choose from for "$title".', 0xFFFF5555);
+			return;
+		}
+
+		if (panelMode != 'pick')
+			pickReturn = panelMode;
+		pickTitle = title;
+		pickItems = items;
+		pickCurrent = current;
+		pickChoose = choose;
+		pickIndex = Std.int(Math.max(0, items.indexOf(current)));
+		pickOffset = Std.int(Math.max(0, Math.min(pickIndex - 3, items.length - PICK_VISIBLE)));
+		panelMode = 'pick';
+		refreshPanel();
+	}
+
+	function closePicker(chosen:Bool):Void {
+		var choose = pickChoose;
+		var value:String = pickIndex >= 0 && pickIndex < pickItems.length ? pickItems[pickIndex] : null;
+		pickChoose = null;
+		panelMode = pickReturn;
+
+		if (panelMode == '' && panel != null)
+			panel.hide();
+		else
+			refreshPanel();
+
+		if (chosen && choose != null && value != null)
+			choose(value);
+	}
+
+	function openCharacterPicker():Void {
+		openPicker('Add a character: choose its file', ChartDefaults.listNames('characters'), '', function(name:String) {
+			addCharacter(name);
+		});
+	}
+
+	function updatePicker():Void {
+		if ((Controls.BACK && !menuEscape) || FlxG.keys.justPressed.TAB) {
+			closePicker(false);
+			return;
+		}
+
+		var count:Int = pickItems.length;
+		var moved:Bool = false;
+		if (FlxG.keys.justPressed.UP) {
+			pickIndex = Std.int(Math.max(-1, pickIndex - 1));
+			moved = true;
+		}
+		if (FlxG.keys.justPressed.DOWN) {
+			pickIndex = Std.int(Math.min(count - 1, pickIndex + 1));
+			moved = true;
+		}
+		if (moved && pickIndex >= 0) {
+			if (pickIndex < pickOffset)
+				pickOffset = pickIndex;
+			if (pickIndex >= pickOffset + PICK_VISIBLE)
+				pickOffset = pickIndex - PICK_VISIBLE + 1;
+		}
+
+		var mx:Float = FlxG.mouse.gameX;
+		var my:Float = FlxG.mouse.gameY;
+		if (FlxG.mouse.wheel != 0 && panel.contains(mx, my))
+			pickOffset -= FlxG.mouse.wheel;
+		pickOffset = Std.int(Math.max(0, Math.min(pickOffset, count - PICK_VISIBLE)));
+
+		var hit = panel.hit(mx, my);
+		if (hit.row >= 0 && (FlxG.mouse.deltaViewX != 0 || FlxG.mouse.deltaViewY != 0))
+			pickIndex = hit.row == 0 ? -1 : pickOffset + hit.row - 1;
+
+		if (FlxG.keys.justPressed.ENTER) {
+			closePicker(pickIndex >= 0);
+			return;
+		}
+
+		if (!mouseUsed && FlxG.mouse.justPressed && hit.row >= 0) {
+			pickIndex = hit.row == 0 ? -1 : pickOffset + hit.row - 1;
+			closePicker(pickIndex >= 0);
+			return;
+		}
+
+		refreshPanel();
+	}
+
+	function setStage(name:String):Void {
+		SONG.songData.meta.stage = name;
+		SONG.stage = name;
+		reloadPreview();
+		markDirty();
+	}
+
+	function setCharacterFile(index:Int, name:String):Void {
+		if (index < 0 || index >= SONG.chars.length)
+			return;
+		SONG.chars[index].name = name;
+		reloadPreview();
+		markDirty();
+	}
+
+	function setEventType(name:String):Void {
+		if (panelEvent == null)
+			return;
+		pushUndoOnce();
+		panelEvent.data.name = name;
+		panelEvent.data.arguments = game.controllers.events.EventManager.defaultArgs(game.controllers.events.EventManager.findSchema(name), charIds(),
+			SONG.songData.meta.bpm);
+		lastEventName = name;
+		refreshEvent(panelEvent);
+		markDirty();
+	}
+
+	function deleteOpenEvent():Void {
+		if (panelEvent == null)
+			return;
+		var entry = panelEvent;
+		closePanel();
+		pushUndo();
+		removeEvent(entry);
+		markDirty();
+	}
+
+	function askRemoveCharacter(index:Int):Void {
+		if (index < 0 || index >= SONG.chars.length)
+			return;
+
+		if (removeArmed == index) {
+			removeArmed = -1;
+			removeCharacter(index);
+			return;
+		}
+
+		var c = SONG.chars[index];
+		var count:Int = 0;
+		for (n in SONG.songData.notes) {
+			if (n.char == c.id)
+				count++;
+		}
+		removeArmed = index;
+		setStatus('Click Sure? (or press Del) again to remove "${c.id}" and its $count notes. This cannot be undone.', 0xFFFFCC33);
+	}
+
+	function panelClick(row:Int, part:Int):Void {
+		var dir:Int = part == 1 ? -1 : (part == 2 ? 1 : 0);
+		panelRow = row;
+
+		if (panelMode == 'setup') {
+			var chars:Int = SONG.chars.length;
+			if (row == 0) {
+				if (dir != 0)
+					changeSetupRow(dir);
+				else
+					openPicker('Stage', ChartDefaults.listNames('stages'), SONG.songData.meta.stage ?? '', setStage);
+			} else if (row <= chars) {
+				var index:Int = row - 1;
+				if (part == 3)
+					cycleRole(index);
+				else if (part == 4)
+					askRemoveCharacter(index);
+				else if (dir != 0)
+					changeSetupRow(dir);
+				else
+					openPicker('Character file for "' + SONG.chars[index].id + '"', ChartDefaults.listNames('characters'), SONG.chars[index].name ?? '',
+						function(name:String) {
+							setCharacterFile(index, name);
+						});
+			} else if (row == chars + 1 || row == chars + 2) {
+				if (dir != 0)
+					changeSetupRow(dir);
+				else
+					typeRow();
+			} else if (row == chars + 3) {
+				openCharacterPicker();
+			}
+		} else if (panelMode == 'event' && panelEvent != null) {
+			var fields = eventFields();
+			if (row == 0) {
+				if (dir != 0)
+					changeEventRow(dir);
+			} else if (row == 1) {
+				if (dir != 0)
+					changeEventRow(dir);
+				else
+					openPicker('Event type', game.controllers.events.EventManager.schemaNames(), panelEvent.data.name, setEventType);
+			} else if (row < 2 + fields.length) {
+				var field = fields[row - 2];
+				var shown:Dynamic = argValue(panelEvent.data, field.key);
+				var shownText:String = shown == null ? '' : Std.string(shown);
+
+				if (dir != 0)
+					changeEventRow(dir);
+				else if (field.kind == 'char')
+					openPicker(field.key, charIds(), shownText, function(name:String) {
+						setEventField(field, name);
+					});
+				else if (field.kind == 'charName')
+					openPicker(field.key, ChartDefaults.listNames('characters'), shownText, function(name:String) {
+						setEventField(field, name);
+					});
+				else if (field.kind == 'bool')
+					changeEventRow(1);
+				else
+					typeRow();
+			} else if (row == 2 + fields.length) {
+				deleteOpenEvent();
+			} else {
+				closePanel();
+			}
+		}
 	}
 
 	function updatePanel(locked:Bool):Void {
@@ -2243,23 +2701,47 @@ class GameplayEditor extends MusicBeatState {
 			return;
 		}
 
-		if (Controls.BACK || FlxG.keys.justPressed.TAB) {
+		if (panelMode == 'pick') {
+			updatePicker();
+			return;
+		}
+
+		if ((Controls.BACK && !menuEscape) || FlxG.keys.justPressed.TAB) {
 			closePanel();
 			return;
 		}
 
 		var rows:Int = panelRowCount();
+		if (removeArmed >= 0 && panelRow != removeArmed + 1)
+			removeArmed = -1;
+
+		var hit = panel.hit(FlxG.mouse.gameX, FlxG.mouse.gameY);
+		if (hit.row >= 0 && hit.row < rows && (FlxG.mouse.deltaViewX != 0 || FlxG.mouse.deltaViewY != 0))
+			panelRow = hit.row;
+
+		if (!mouseUsed && FlxG.mouse.justPressed && hit.row >= 0 && hit.row < rows) {
+			panelClick(hit.row, hit.part);
+			refreshPanel();
+			return;
+		}
+
+		if (panelMode == 'setup' && panelRow >= 1 && panelRow <= SONG.chars.length) {
+			var index:Int = panelRow - 1;
+			if (FlxG.keys.justPressed.R) {
+				cycleRole(index);
+				return;
+			}
+			if (FlxG.keys.justPressed.DELETE)
+				askRemoveCharacter(index);
+		}
+
 		if (FlxG.keys.justPressed.UP)
 			panelRow = (panelRow + rows - 1) % rows;
 		if (FlxG.keys.justPressed.DOWN)
 			panelRow = (panelRow + 1) % rows;
 
 		if (panelMode == 'event' && panelEvent != null && FlxG.keys.justPressed.DELETE) {
-			var entry = panelEvent;
-			closePanel();
-			pushUndo();
-			removeEvent(entry);
-			markDirty();
+			deleteOpenEvent();
 			return;
 		}
 
@@ -2272,7 +2754,7 @@ class GameplayEditor extends MusicBeatState {
 		}
 
 		if (FlxG.keys.justPressed.ENTER)
-			editPanelRow();
+			panelClick(panelRow, 0);
 
 		refreshPanel();
 	}
@@ -2285,22 +2767,16 @@ class GameplayEditor extends MusicBeatState {
 			var stages = ChartDefaults.listNames('stages');
 			if (stages.length == 0)
 				return;
-			var name = cycleName(stages, SONG.songData.meta.stage, dir);
-			SONG.songData.meta.stage = name;
-			SONG.stage = name;
-			reloadPreview();
-			markDirty();
+			setStage(cycleName(stages, SONG.songData.meta.stage, dir));
 		} else if (panelRow <= chars) {
 			var names = ChartDefaults.listNames('characters');
 			if (names.length == 0)
 				return;
-			var data = SONG.chars[panelRow - 1];
-			data.name = cycleName(names, data.name, dir);
-			reloadPreview();
-			markDirty();
+			var index:Int = panelRow - 1;
+			setCharacterFile(index, cycleName(names, SONG.chars[index].name, dir));
 		} else if (panelRow == chars + 1) {
 			setSpeedValue(SONG.songData.meta.speed + dir * (big ? 1 : 0.1));
-		} else {
+		} else if (panelRow == chars + 2) {
 			applyBpm(SONG.songData.meta.bpm + dir * (big ? 10 : 1));
 		}
 	}
@@ -2311,19 +2787,17 @@ class GameplayEditor extends MusicBeatState {
 
 		var big:Bool = FlxG.keys.pressed.SHIFT;
 		var data = panelEvent.data;
+		var fields = eventFields();
 
 		if (panelRow == 0) {
 			pushUndoOnce();
 			var delta:Float = dir * snapRows() * RhythmCore.stepInMs * (big ? 4 : 1);
 			data.time = Math.max(0, Math.min(data.time + delta, (totalSteps - 1) * RhythmCore.stepInMs));
 		} else if (panelRow == 1) {
-			pushUndoOnce();
-			data.name = cycleName(game.controllers.events.EventManager.schemaNames(), data.name, dir);
-			data.arguments = game.controllers.events.EventManager.defaultArgs(game.controllers.events.EventManager.findSchema(data.name), charIds(),
-				SONG.songData.meta.bpm);
-			lastEventName = data.name;
-		} else {
-			var field = eventFields()[panelRow - 2];
+			setEventType(cycleName(game.controllers.events.EventManager.schemaNames(), data.name, dir));
+			return;
+		} else if (panelRow < 2 + fields.length) {
+			var field = fields[panelRow - 2];
 			pushUndoOnce();
 			ensureArgs(data);
 
@@ -2347,27 +2821,17 @@ class GameplayEditor extends MusicBeatState {
 					Reflect.setField(data.arguments, field.key, Math.round(value * 1000) / 1000);
 				default:
 			}
-		}
+		} else
+			return;
 
 		refreshEvent(panelEvent);
 		markDirty();
 	}
 
-	function editPanelRow():Void {
+	function typeRow():Void {
 		if (panelMode == 'setup') {
 			var chars:Int = SONG.chars.length;
-
-			if (panelRow >= 1 && panelRow <= chars) {
-				var index:Int = panelRow - 1;
-				prompt.open('Character file', SONG.chars[index].name ?? '', function(text:String) {
-					text = StringTools.trim(text);
-					if (text == '')
-						return;
-					SONG.chars[index].name = text;
-					reloadPreview();
-					markDirty();
-				});
-			} else if (panelRow == chars + 1) {
+			if (panelRow == chars + 1) {
 				prompt.open('Scroll speed', Std.string(SONG.songData.meta.speed), function(text:String) {
 					var value:Float = Std.parseFloat(text);
 					if (!Math.isNaN(value))
@@ -2380,11 +2844,8 @@ class GameplayEditor extends MusicBeatState {
 						applyBpm(value);
 				});
 			}
-		} else if (panelMode == 'event' && panelEvent != null && panelRow >= 2) {
+		} else if (panelMode == 'event' && panelEvent != null && panelRow >= 2 && panelRow < 2 + eventFields().length) {
 			var field = eventFields()[panelRow - 2];
-			if (field.kind == 'bool')
-				return;
-
 			var shown:Dynamic = argValue(panelEvent.data, field.key);
 			prompt.open(field.key, shown == null ? '' : Std.string(shown), function(text:String) {
 				setEventField(field, text);
@@ -2422,56 +2883,67 @@ class GameplayEditor extends MusicBeatState {
 	function refreshPanel():Void {
 		if (panel == null)
 			return;
-
-		var lines:Array<String> = [];
-		var rowIndex:Int = 0;
-
-		function row(label:String, value:String):Void {
-			lines.push((panelRow == rowIndex ? '> ' : '   ') + label + ': ' + value);
-			rowIndex++;
+		if (panelMode == '') {
+			panel.hide();
+			return;
 		}
+
+		var rows:Array<PanelRow> = [];
+		var footer:String = '';
+		var selected:Int = panelRow;
 
 		if (panelMode == 'setup') {
-			lines.push('SETUP');
-			lines.push('Up/Down: choose · Left/Right: change (Shift: bigger steps) · Enter: type · Tab: close');
-			lines.push('');
+			rows.push({label: 'Stage', value: SONG.songData.meta.stage ?? ChartDefaults.FALLBACK_STAGE, arrows: true});
+			for (i in 0...SONG.chars.length) {
+				var c = SONG.chars[i];
+				rows.push({
+					label: roleName(c.role) + ' (' + c.id + ')',
+					value: c.name ?? c.id,
+					arrows: true,
+					buttons: ['Role', removeArmed == i ? 'Sure?' : 'Remove']
+				});
+			}
+			rows.push({label: 'Scroll speed', value: Std.string(SONG.songData.meta.speed), arrows: true});
+			rows.push({label: 'BPM', value: Std.string(SONG.songData.meta.bpm), arrows: true});
+			rows.push({label: '+ Add character', value: '', wide: true});
 
-			row('Stage', SONG.songData.meta.stage ?? ChartDefaults.FALLBACK_STAGE);
-			for (c in SONG.chars)
-				row(roleName(c.role) + ' (' + c.id + ')', c.name ?? c.id);
-			row('Scroll speed', Std.string(SONG.songData.meta.speed));
-			row('BPM', Std.string(SONG.songData.meta.bpm));
+			footer = 'The grid follows the starting BPM; "Change BPM" events are not drawn on it.';
+			if (prompt.active)
+				footer = prompt.label + ': ' + prompt.text + '_    (Enter: accept, Esc: cancel)';
 
-			lines.push('');
-			lines.push('Changing the BPM keeps every note at its time in the song.');
-			lines.push('The grid follows this starting BPM; "Change BPM" events are not drawn on it.');
+			panel.show('SETUP', 'Click a name to choose it from a list. Use < > to change a value (Shift: bigger steps). Click a number to type it.', rows,
+				selected, footer);
 		} else if (panelMode == 'event' && panelEvent != null) {
 			var data = panelEvent.data;
-			lines.push('EVENT');
-			lines.push('Up/Down: choose · Left/Right: change · Enter: type · Del: remove event · Tab: close');
-			lines.push('');
-
-			row('Time', formatSeconds(data.time));
-			row('Type', data.name);
-
 			var fields = eventFields();
+
+			rows.push({label: 'Time', value: formatSeconds(data.time), arrows: true});
+			rows.push({label: 'Type', value: data.name, arrows: true});
 			for (f in fields) {
 				var shown:Dynamic = argValue(data, f.key);
-				row(f.key, shown == null ? '' : Std.string(shown));
+				var shownText:String = shown == null ? '' : Std.string(shown);
+				if (f.kind == 'bool')
+					shownText = shown == true ? 'on' : 'off';
+				rows.push({label: f.key, value: shownText, arrows: f.kind != 'text'});
 			}
+			rows.push({label: 'Delete this event', value: '', wide: true});
+			rows.push({label: 'Close', value: '', wide: true, dim: true});
 
-			if (game.controllers.events.EventManager.findSchema(data.name) == null) {
-				lines.push('');
-				lines.push('A custom event: edit its arguments in the chart file.');
-				lines.push(haxe.Json.stringify(data.arguments));
-			}
+			if (game.controllers.events.EventManager.findSchema(data.name) == null)
+				footer = 'A custom event: edit its arguments in the chart file. ' + haxe.Json.stringify(data.arguments);
+			if (prompt.active)
+				footer = prompt.label + ': ' + prompt.text + '_    (Enter: accept, Esc: cancel)';
+
+			panel.show('EVENT', 'Click a value to choose it from a list or type it. Use < > to change it.', rows, selected, footer);
+		} else if (panelMode == 'pick') {
+			rows.push({label: '< Back', value: '', wide: true, dim: true});
+			var last:Int = Std.int(Math.min(pickItems.length, pickOffset + PICK_VISIBLE));
+			for (i in pickOffset...last)
+				rows.push({label: (pickItems[i] == pickCurrent ? '* ' : '   ') + pickItems[i], value: '', wide: true});
+
+			selected = pickIndex < 0 ? 0 : pickIndex - pickOffset + 1;
+			footer = 'Showing ${pickOffset + 1}-$last of ${pickItems.length}. Mouse wheel or Up/Down to scroll.';
+			panel.show(pickTitle.toUpperCase(), 'Click one to choose it. Esc goes back.', rows, selected, footer);
 		}
-
-		if (prompt.active) {
-			lines.push('');
-			lines.push(prompt.label + ': ' + prompt.text + '_    (Enter: accept · Esc: cancel)');
-		}
-
-		panel.show(lines);
 	}
 }

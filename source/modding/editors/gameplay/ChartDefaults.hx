@@ -183,10 +183,22 @@ class ChartDefaults {
 	}
 
 	public static function newChartPath(songFolder:String, diff:String):String {
+		return '${songRoot()}/songs/$songFolder/charts/$diff.json';
+	}
+
+	public static function newMetaPath(songFolder:String):String {
+		return '${songRoot()}/songs/$songFolder/meta.json';
+	}
+
+	public static function newEventsPath(songFolder:String):String {
+		return '${songRoot()}/songs/$songFolder/events.json';
+	}
+
+	static function songRoot():String {
 		var root:String = Library.baseFolder;
 		if (ModsRegistry.onMod && ModsRegistry.currentMod != null && ModsRegistry.currentMod != '')
 			root = '${Library.modsFolder}/${ModsRegistry.currentMod}';
-		return '$root/songs/$songFolder/charts/$diff.json';
+		return root;
 	}
 
 	public static function makeDirs(path:String):Void {
