@@ -51,8 +51,8 @@ class GameplayEditor extends MusicBeatState {
 	static final PREVIEW_TOP:Int = 128;
 
 	static final HEADER_H:Int = 86;
-	static final HEADER_COLOR:Int = 0xFF3A3A3A;
-	static final HEADER_LINE_COLOR:Int = 0xFFCCCCCC;
+	static final HEADER_COLOR:Int = 0xFF461546;
+	static final HEADER_LINE_COLOR:Int = 0xFF8585A3;
 	static final ICON_SIZE:Float = 52;
 
 	public static var diff:String = null;
@@ -88,6 +88,7 @@ class GameplayEditor extends MusicBeatState {
 	static var resumeDirty:Bool = false;
 	static var resumePosition:Float = 0;
 	static var resumeRow:Int = 0;
+
 	var removeArmed:Int = -1;
 
 	public static function openNew():Void {
@@ -102,7 +103,13 @@ class GameplayEditor extends MusicBeatState {
 	var playhead:flixel.FlxSprite;
 
 	var charColumnOffset:Map<String, Int> = new Map();
-	var columnLabels:Array<{id:String, text:String, role:String, column:Int, lanes:Int}> = [];
+	var columnLabels:Array<{
+		id:String,
+		text:String,
+		role:String,
+		column:Int,
+		lanes:Int
+	}> = [];
 	var noteBitmaps:Array<openfl.display.BitmapData> = [];
 
 	var arrowTemplates:Map<String, Array<game.objects.sprites.notes.Note>> = new Map();
@@ -160,6 +167,7 @@ class GameplayEditor extends MusicBeatState {
 
 	var hasAudio:Bool = false;
 	var songLength:Float = 0;
+
 	static final SILENT_MIN_MS:Float = 120000;
 
 	var startupNotes:Array<String> = [];
@@ -170,12 +178,14 @@ class GameplayEditor extends MusicBeatState {
 	var previewH:Int = 0;
 
 	static final MAX_UNDO:Int = 100;
+
 	var undoStack:Array<ChartSnapshot> = [];
 	var redoStack:Array<ChartSnapshot> = [];
 	var moveSnapshot:ChartSnapshot = null;
 
 	static final SNAPS:Array<Int> = [4, 8, 12, 16, 20, 24, 32, 48, 64];
 	static final SPEEDS:Array<Float> = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
+
 	var snapIndex:Int = 3;
 	var speedIndex:Int = 3;
 	var noteType:String = 'normal';
@@ -210,6 +220,7 @@ class GameplayEditor extends MusicBeatState {
 	var helpTopLine:flixel.FlxSprite;
 
 	static var viewState:Array<Bool> = [true, true, true, true];
+
 	var menuBar:MenuBar;
 	var mouseUsed:Bool = false;
 	var overMenu:Bool = false;
@@ -430,10 +441,14 @@ class GameplayEditor extends MusicBeatState {
 		helpText = new flixel.text.FlxText(GRID_X, FlxG.height - 70, 0, '', 12);
 		helpText.setFormat(null, 12, 0xFFE4E4EE, LEFT, OUTLINE, FlxColor.BLACK);
 		helpText.applyMarkup('<k>Top menus<k> everything with the mouse   <k>Click<k> note   <k>Drag down<k> sustain   <k>Drag a note<k> move   <k>Right click<k> remove   <k>Space<k> play   <k>Wheel<k> scroll\n'
-			+ '<k>Shift+Click/Drag<k> select   <k>Ctrl/Cmd+A/C/X/V<k> all/copy/cut/paste   <k>Del<k> delete   <k>Arrows<k> nudge   <k>Ctrl/Cmd+Z/Y<k> undo/redo\n'
-			+ '<k>Q/E<k> snap   <k>T<k> note type (<k>Shift+T<k> new)   <k>M<k> metronome   <k>H<k> hit sounds   <k>F<k> camera follow   <k>, .<k> speed   <k>1-4<k> panels\n'
+			+
+			'<k>Shift+Click/Drag<k> select   <k>Ctrl/Cmd+A/C/X/V<k> all/copy/cut/paste   <k>Del<k> delete   <k>Arrows<k> nudge   <k>Ctrl/Cmd+Z/Y<k> undo/redo\n'
+			+
+			'<k>Q/E<k> snap   <k>T<k> note type (<k>Shift+T<k> new)   <k>M<k> metronome   <k>H<k> hit sounds   <k>F<k> camera follow   <k>, .<k> speed   <k>1-4<k> panels\n'
 			+ '<k>EVT column<k> events   <k>Tab<k> setup (stage, characters, speed, BPM)   <k>Ctrl/Cmd+S<k> save   <k>Back<k> leave',
-			[new flixel.text.FlxText.FlxTextFormatMarkerPair(new flixel.text.FlxText.FlxTextFormat(EditorWidgets.ACCENT), '<k>')]);
+			[
+				new flixel.text.FlxText.FlxTextFormatMarkerPair(new flixel.text.FlxText.FlxTextFormat(EditorWidgets.ACCENT), '<k>')
+			]);
 		helpText.scrollFactor.set(0, 0);
 		helpText.cameras = [camHud];
 		add(helpText);
@@ -490,7 +505,12 @@ class GameplayEditor extends MusicBeatState {
 		SONG.chars = SONG.songData.gameplay.chars;
 	}
 
-	static final NEW_CHART_QUESTIONS:Array<String> = ['Song folder name (letters, numbers, - and _)', 'Difficulty (for example normal or hard)', 'BPM of the song'];
+	static final NEW_CHART_QUESTIONS:Array<String> = [
+		'Song folder name (letters, numbers, - and _)',
+		'Difficulty (for example normal or hard)',
+		'BPM of the song'
+	];
+
 	var newChartAnswers:Array<String> = ['', 'normal', '120'];
 
 	function askNewChart(step:Int):Void {
@@ -599,7 +619,13 @@ class GameplayEditor extends MusicBeatState {
 			}
 
 			charColumnOffset.set(c.id, offset);
-			columnLabels.push({id: c.id, text: c.name ?? c.id, role: c.role ?? '', column: offset, lanes: lanes});
+			columnLabels.push({
+				id: c.id,
+				text: c.name ?? c.id,
+				role: c.role ?? '',
+				column: offset,
+				lanes: lanes
+			});
 			for (lane in 0...lanes)
 				columnOwners.push({char: c.id, lane: lane});
 			offset += lanes;
@@ -1594,7 +1620,7 @@ class GameplayEditor extends MusicBeatState {
 				}
 			}
 
-			var roleTxt = new flixel.text.FlxText(x, MenuBar.HEIGHT + ICON_SIZE + 4, width, roleName(label.role), 9);
+			var roleTxt = new flixel.text.FlxText(x, MenuBar.HEIGHT + ICON_SIZE, width, roleName(label.role), 9);
 			roleTxt.setFormat(null, 9, 0xFFBBBBCC, CENTER, OUTLINE, FlxColor.BLACK);
 			roleTxt.scrollFactor.set(0, 0);
 			roleTxt.cameras = [camHud];
@@ -1609,7 +1635,7 @@ class GameplayEditor extends MusicBeatState {
 			if (shownName.length > maxChars)
 				shownName = shownName.substr(0, maxChars - 1) + '.';
 
-			var nameTxt = new flixel.text.FlxText(x, MenuBar.HEIGHT + ICON_SIZE + 16, width, shownName, 13);
+			var nameTxt = new flixel.text.FlxText(x, MenuBar.HEIGHT + ICON_SIZE + 12, width, shownName, 13);
 			nameTxt.setFormat(null, 13, FlxColor.WHITE, CENTER, OUTLINE, FlxColor.BLACK);
 			nameTxt.scrollFactor.set(0, 0);
 			nameTxt.cameras = [camHud];
@@ -1954,9 +1980,10 @@ class GameplayEditor extends MusicBeatState {
 				return true;
 
 			var charIndex:Int = index;
-			openPicker('Character for ${roleName(label.role)}', ChartDefaults.listNames('characters'), SONG.chars[charIndex].name ?? '', function(name:String) {
-				setCharacterFile(charIndex, name);
-			});
+			openPicker('Character for ${roleName(label.role)}', ChartDefaults.listNames('characters'), SONG.chars[charIndex].name ?? '',
+				function(name:String) {
+					setCharacterFile(charIndex, name);
+				});
 			return true;
 		}
 		return false;
@@ -1993,14 +2020,23 @@ class GameplayEditor extends MusicBeatState {
 
 	function buildMenus():Array<MenuDef> {
 		function item(label:String, ?shortcut:String, ?action:Void->Void, ?checked:Void->Bool):MenuItem {
-			return {label: label, shortcut: shortcut, action: action, checked: checked};
+			return {
+				label: label,
+				shortcut: shortcut,
+				action: action,
+				checked: checked
+			};
 		}
 		var line:MenuItem = {label: '', separator: true};
 
 		return [
 			{
 				title: 'File',
-				items: () -> [item('Save', 'Ctrl/Cmd+S', saveChart), line, item('Leave editor', 'Esc', requestLeave)]
+				items: () -> [
+					item('Save', 'Ctrl/Cmd+S', saveChart),
+					line,
+					item('Leave editor', 'Esc', requestLeave)
+				]
 			},
 			{
 				title: 'Edit',
@@ -2097,7 +2133,12 @@ class GameplayEditor extends MusicBeatState {
 		if (FlxG.keys.justPressed.H)
 			toggleHitsounds();
 
-		var viewKeys = [FlxG.keys.justPressed.ONE, FlxG.keys.justPressed.TWO, FlxG.keys.justPressed.THREE, FlxG.keys.justPressed.FOUR];
+		var viewKeys = [
+			FlxG.keys.justPressed.ONE,
+			FlxG.keys.justPressed.TWO,
+			FlxG.keys.justPressed.THREE,
+			FlxG.keys.justPressed.FOUR
+		];
 		for (i in 0...viewKeys.length) {
 			if (viewKeys[i])
 				toggleView(i);
@@ -2160,7 +2201,8 @@ class GameplayEditor extends MusicBeatState {
 		var on = new flixel.text.FlxText.FlxTextFormatMarkerPair(new flixel.text.FlxText.FlxTextFormat(EditorWidgets.GOOD), '<g>');
 		var off = new flixel.text.FlxText.FlxTextFormatMarkerPair(new flixel.text.FlxText.FlxTextFormat(EditorWidgets.MUTED), '<d>');
 		toolText.applyMarkup('<c>SNAP<c> 1/${SNAPS[snapIndex]}    <c>TYPE<c> $noteType    <c>SPEED<c> x${SPEEDS[speedIndex]}\n'
-			+ '<c>METRONOME<c> ${metronome ? "<g>on<g>" : "<d>off<d>"}    <c>HIT SOUNDS<c> ${hitsounds ? "<g>on<g>" : "<d>off<d>"}    <c>CAMERA FOLLOW<c> ${follow ? "<g>on<g>" : "<d>off<d>"}',
+			+
+			'<c>METRONOME<c> ${metronome ? "<g>on<g>" : "<d>off<d>"}    <c>HIT SOUNDS<c> ${hitsounds ? "<g>on<g>" : "<d>off<d>"}    <c>CAMERA FOLLOW<c> ${follow ? "<g>on<g>" : "<d>off<d>"}',
 			[cap, on, off]);
 	}
 
@@ -2429,6 +2471,7 @@ class GameplayEditor extends MusicBeatState {
 	}
 
 	static final PICK_VISIBLE:Int = 10;
+
 	var pickItems:Array<String> = [];
 	var pickIndex:Int = -1;
 	var pickOffset:Int = 0;
@@ -2927,7 +2970,12 @@ class GameplayEditor extends MusicBeatState {
 				rows.push({label: f.key, value: shownText, arrows: f.kind != 'text'});
 			}
 			rows.push({label: 'Delete this event', value: '', wide: true});
-			rows.push({label: 'Close', value: '', wide: true, dim: true});
+			rows.push({
+				label: 'Close',
+				value: '',
+				wide: true,
+				dim: true
+			});
 
 			if (game.controllers.events.EventManager.findSchema(data.name) == null)
 				footer = 'A custom event: edit its arguments in the chart file. ' + haxe.Json.stringify(data.arguments);
@@ -2936,7 +2984,12 @@ class GameplayEditor extends MusicBeatState {
 
 			panel.show('EVENT', 'Click a value to choose it from a list or type it. Use < > to change it.', rows, selected, footer);
 		} else if (panelMode == 'pick') {
-			rows.push({label: '< Back', value: '', wide: true, dim: true});
+			rows.push({
+				label: '< Back',
+				value: '',
+				wide: true,
+				dim: true
+			});
 			var last:Int = Std.int(Math.min(pickItems.length, pickOffset + PICK_VISIBLE));
 			for (i in pickOffset...last)
 				rows.push({label: (pickItems[i] == pickCurrent ? '* ' : '   ') + pickItems[i], value: '', wide: true});

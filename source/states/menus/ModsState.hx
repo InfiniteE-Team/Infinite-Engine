@@ -36,6 +36,7 @@ class ModsState extends MusicBeatState {
 	var changeMod:Bool = false;
 
 	var camMods:Camera;
+	var camOther:Camera;
 
 	var dragPlugin:states.menus.objects.ModDropPlugin;
 
@@ -136,7 +137,10 @@ class ModsState extends MusicBeatState {
 		camMods = new Camera(BOX_X, BOX_Y, BOX_W, BOX_H);
 		camMods.bgColor = 0x00000000;
 		FlxG.cameras.add(camMods, false);
-		this.camera = FlxG.camera;
+
+		camOther = new Camera();
+		camOther.bgColor = 0x00000000;
+		FlxG.cameras.add(camOther, false);
 
 		var bg:FunkinSprite = new FunkinSprite(0, 0, true);
 		bg.loadGraphic(Paths.getPath('menus/mods/bg', 'image'));
@@ -283,11 +287,6 @@ class ModsState extends MusicBeatState {
 			noModsText = null;
 		}
 
-		FlxG.cameras.remove(camMods, true);
-		camMods = new Camera(BOX_X, BOX_Y, BOX_W, BOX_H);
-		camMods.bgColor = 0x00000000;
-		FlxG.cameras.add(camMods, false);
-
 		pendingDelete = -1;
 		lastClickIndex = -1;
 		reloadModMenu();
@@ -411,10 +410,6 @@ class ModsState extends MusicBeatState {
 			acceptSelectedMod();
 
 		if (Controls.BACK) {
-			if (camMods != null) {
-				FlxG.cameras.remove(camMods, true);
-			}
-
 			if (changeMod) {
 				#if DISCORD_ALLOWED
 				core.api.DiscordAPI.instance.shutdown();
@@ -509,7 +504,7 @@ class ModsState extends MusicBeatState {
 
 		FlxTimer.wait(2, () -> {
 			FlxG.sound.play(Paths.getPath('menus/mods/smoke-cloud', 'sound'));
-			FlxG.camera.flash(0xFFFFFFFF, 2);
+			camOther.flash(0xFFFFFFFF, 2);
 			acceptOption = false;
 
 			for (electrocuted in [boyfriend, gf]) {

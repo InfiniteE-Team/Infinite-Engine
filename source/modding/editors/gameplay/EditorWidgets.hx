@@ -9,9 +9,9 @@ import openfl.events.KeyboardEvent;
 import openfl.geom.Rectangle;
 
 class EditorWidgets {
-	public static final CARD_FILL:Int = 0xE6171720;
-	public static final CARD_BORDER:Int = 0xFF3C3C4C;
-	public static final MUTED:Int = 0xFF8C8CA0;
+	public static final CARD_FILL:Int = 0xFF461546;
+	public static final CARD_BORDER:Int = 0xFF333349;
+	public static final MUTED:Int = 0xFF8585A3;
 	public static final ACCENT:Int = 0xFFFFD866;
 	public static final GOOD:Int = 0xFF7DFF9A;
 
@@ -62,7 +62,15 @@ class EditorWidgets {
 	}
 
 	public static function eventColor(name:String):Int {
-		var palette:Array<Int> = [0xFF3B82F6, 0xFF22A06B, 0xFFD97706, 0xFFC026D3, 0xFFDC2626, 0xFF0891B2, 0xFF7C3AED];
+		var palette:Array<Int> = [
+			0xFF3B82F6,
+			0xFF22A06B,
+			0xFFD97706,
+			0xFFC026D3,
+			0xFFDC2626,
+			0xFF0891B2,
+			0xFF7C3AED
+		];
 		var hash:Int = 0;
 		var text:String = name ?? '';
 		for (i in 0...text.length) {
@@ -413,6 +421,7 @@ class MenuBar extends FlxGroup {
 	static final ROW_H:Int = 24;
 	static final SEPARATOR_H:Int = 9;
 	static final MIN_DROP_W:Int = 220;
+
 	var dropW:Int = 220;
 
 	var cam:flixel.FlxCamera;
@@ -443,7 +452,7 @@ class MenuBar extends FlxGroup {
 		this.menus = menus;
 		this.cam = cam;
 
-		place(new FlxSprite(0, 0).makeGraphic(FlxG.width, HEIGHT, 0xFF14141C));
+		place(flixel.util.FlxGradient.createGradientFlxSprite(FlxG.width, HEIGHT, [0xFF461546, 0xFF030320], 1, 90));
 		place(new FlxSprite(0, HEIGHT - 1).makeGraphic(FlxG.width, 1, EditorWidgets.CARD_BORDER));
 
 		var x:Float = 6;
