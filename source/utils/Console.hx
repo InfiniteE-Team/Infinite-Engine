@@ -95,10 +95,11 @@ class Console {
 		textGroup.add(label);
 		entry.label = label;
 
-		FlxTween.tween(label, {alpha: 1}, 0.2);
+		var fadeIn = FlxTween.tween(label, {alpha: 1}, 0.2);
 
-		entry.timer = new FlxTimer().start(DURATION, (_) -> {
-			FlxTween.tween(label, {alpha: 0}, 0.5, {
+		entry.timer = new FlxTimer();
+		entry.timer.start(DURATION, (_) -> {
+			var fadeOut = FlxTween.tween(label, {alpha: 0}, 0.5, {
 				onComplete: (_) -> {
 					messages.remove(entry);
 					textGroup.remove(label, true);
@@ -130,7 +131,7 @@ class Console {
 		var yOffset = 10.0;
 		for (m in messages) {
 			if (m.label != null) {
-				FlxTween.tween(m.label, {y: yOffset}, 0.15);
+				var t = FlxTween.tween(m.label, {y: yOffset}, 0.15);
 				yOffset += 15;
 			}
 		}
@@ -138,8 +139,10 @@ class Console {
 
 	public static function clear() {
 		for (m in messages) {
-			if (m.timer != null)
+			if (m.timer != null) {
 				m.timer.cancel();
+				m.timer.destroy();
+			}
 			FlxTween.cancelTweensOf(m.label);
 			if (m.label != null) {
 				textGroup.remove(m.label, true);

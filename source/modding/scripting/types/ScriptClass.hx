@@ -6,7 +6,10 @@ import modding.scripting.ScriptHandler;
 
 class ScriptClass {
 	public static function switchState(className:String, ?args:Array<Dynamic>):Void {
-		MusicBeatState.switchState(() -> load(className, args));
+		var state = load(className, args);
+		if (state == null)
+			return;
+		MusicBeatState.switchState(() -> state);
 	}
 
 	public static function load(className:String, ?args:Array<Dynamic>):MusicBeatState {
@@ -14,13 +17,17 @@ class ScriptClass {
 
 		if (path == null || !sys.FileSystem.exists(path)) {
 			Console.log('ScriptClass: Not found source/states/$className.hx', true);
-			return null;
+			return loadStateFallback(className, args);
 		}
 
 		var content = sys.io.File.getContent(path);
 
 		if (checkIsClass(content)) {
-			return loadAsClass(path, className, content, args);
+			var state = loadAsClass(path, className, content, args);
+			if (state != null)
+				return state;
+			// El script del mod falló — intentar fallback
+			return loadStateFallback(className, args);
 		} else {
 			var state = new MusicBeatState();
 			var handler = new ScriptHandler(state);
@@ -32,18 +39,43 @@ class ScriptClass {
 		}
 	}
 
+	static function loadStateFallback(className:String, ?args:Array<Dynamic>):MusicBeatState {
+		var basePath = '${core.assets.Library.baseFolder}/source/states/$className.hx';
+		if (sys.FileSystem.exists(basePath)) {
+			Console.log('ScriptClass: Fallback > base engine $className', true);
+			var content = sys.io.File.getContent(basePath);
+			if (checkIsClass(content)) {
+				var state:MusicBeatState = loadAsClass(basePath, className, content, args);
+				if (state != null)
+					return state;
+			}
+		}
+
+		var nativeCls = Type.resolveClass('states.$className');
+		if (nativeCls != null) {
+			Console.log('ScriptClass: Fallback > native class states.$className', true);
+			return cast Type.createInstance(nativeCls, args ?? []);
+		}
+
+		Console.log('ScriptClass: No fallback found for $className', true);
+		return null;
+	}
+
 	public static function loadSub(className:String, ?args:Array<Dynamic>):states.substates.MusicBeatSubstate {
 		var path = Paths.getPath(className, 'substates');
 
 		if (path == null || !sys.FileSystem.exists(path)) {
 			Console.log('ScriptClass: Not found source/substates/$className.hx', true);
-			return null;
+			return loadSubFallback(className, args);
 		}
 
 		var content = sys.io.File.getContent(path);
 
 		if (checkIsClass(content)) {
-			return loadAsClass(path, className, content, args);
+			var sub = loadAsClass(path, className, content, args);
+			if (sub != null)
+				return sub;
+			return loadSubFallback(className, args);
 		} else {
 			var substate = new states.substates.MusicBeatSubstate();
 			var handler = new ScriptHandler(substate);
@@ -53,6 +85,28 @@ class ScriptClass {
 			substate.script = handler;
 			return substate;
 		}
+	}
+
+	static function loadSubFallback(className:String, ?args:Array<Dynamic>):states.substates.MusicBeatSubstate {
+		var basePath = '${core.assets.Library.baseFolder}/source/substates/$className.hx';
+		if (sys.FileSystem.exists(basePath)) {
+			Console.log('ScriptClass: Fallback > base engine substate $className', true);
+			var content = sys.io.File.getContent(basePath);
+			if (checkIsClass(content)) {
+				var sub:states.substates.MusicBeatSubstate = loadAsClass(basePath, className, content, args);
+				if (sub != null)
+					return sub;
+			}
+		}
+
+		var nativeCls = Type.resolveClass('states.substates.$className');
+		if (nativeCls != null) {
+			Console.log('ScriptClass: Fallback > native substate states.substates.$className', true);
+			return cast Type.createInstance(nativeCls, args ?? []);
+		}
+
+		Console.log('ScriptClass: No fallback found for substate $className', true);
+		return null;
 	}
 
 	public static function openSubstate(className:String, ?args:Array<Dynamic>):Void {
@@ -71,7 +125,7 @@ class ScriptClass {
 		try {
 			module = new Module(content, className, [], path);
 		} catch (e) {
-			Console.log('ScriptClass: parse error $className → ${e.message}', true);
+			Console.log('ScriptClass: parse error $className > ${e.message}', true);
 			return null;
 		}
 
@@ -80,7 +134,12 @@ class ScriptClass {
 			env.addModule(mod);
 		}
 
-		env.start();
+		try {
+			env.start();
+		} catch (e) {
+			Console.log('ScriptClass: runtime error starting $className > ${e.message}', true);
+			return null;
+		}
 
 		var type = env.resolve(className);
 		if (type == null) {

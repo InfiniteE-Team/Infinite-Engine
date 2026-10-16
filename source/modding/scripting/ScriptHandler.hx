@@ -106,8 +106,8 @@ class ScriptHandler {
 			if (script.variables.exists(name)) {
 				var fun = script.variables.get(name);
 				if (Reflect.isFunction(fun)) {
-					fns.push(function(a) return Reflect.callMethod(script.interp, fun, a));
-					result = Reflect.callMethod(script.interp, fun, args);
+					fns.push(function(a) return safeCall(script, fun, a));
+					result = safeCall(script, fun, args);
 				}
 			}
 		}
@@ -139,8 +139,8 @@ class ScriptHandler {
 			if (script.variables.exists(name)) {
 				var fun = script.variables.get(name);
 				if (Reflect.isFunction(fun)) {
-					fns.push(function(a) return Reflect.callMethod(script.interp, fun, a) == true);
-					if (Reflect.callMethod(script.interp, fun, args) == true) {
+					fns.push(function(a) return safeCall(script, fun, a) == true);
+					if (safeCall(script, fun, args) == true) {
 						if (fns.length > 0)
 							callCancellableCache.set(name, fns);
 						return true;
@@ -229,6 +229,21 @@ class ScriptHandler {
 		modifiedTimes[i] = sys.FileSystem.stat(paths[i]).mtime.getTime();
 		scripts[i].call('postCreate', []);
 		Console.log('[ScriptHandler] hot-reloaded: ${paths[i]}');
+	}
+
+	function safeCall(script:Script, fun:Dynamic, args:Array<Dynamic>):Dynamic {
+		try {
+			return Reflect.callMethod(script.interp, fun, args);
+		} catch (e:haxe.Exception) {
+			var line:String = '?';
+			if (Std.isOfType(e, hxscript.error.InterpException)) {
+				var d = (cast e : hxscript.error.InterpException).toDiagnostic();
+				if (d.line > 0)
+					line = '${d.line}';
+			}
+			Console.log('[${script.name}:$line] Runtime error: ${e.message}');
+			return null;
+		}
 	}
 
 	public function destroy():Void {
