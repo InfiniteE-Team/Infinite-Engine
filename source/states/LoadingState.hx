@@ -211,7 +211,7 @@ class LoadingState extends MusicBeatState {
 	function onAllLoaded() {
 		_label.text = "¡Done!";
 
-		FlxTween.tween(_bg, {alpha: 0}, 0.35, {
+		FlxTween.tween(_bg, {alpha: 0}, 1, {
 			ease: FlxEase.quadIn,
 			onComplete: function(_) {
 				launchPlayState();

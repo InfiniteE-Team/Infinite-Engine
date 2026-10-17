@@ -54,13 +54,29 @@ class ScriptHandler {
 	}
 
 	public function loadFolder(folder:String):Void {
-		var resolved = core.assets.Library.findLib(folder);
-		if (resolved == null || !sys.FileSystem.exists(resolved))
-			return;
-		for (file in sys.FileSystem.readDirectory(resolved)) {
-			if (file.endsWith('.hx') || file.endsWith('.lua') || file.endsWith('.hxc'))
-				load('$resolved/$file');
+		var baseDir = '${core.assets.Library.baseFolder}/$folder';
+		var modDir:String = null;
+
+		if (modding.mods.ModsRegistry.onMod && modding.mods.ModsRegistry.currentMod != null && modding.mods.ModsRegistry.currentMod != '')
+			modDir = '${core.assets.Library.modsFolder}/${modding.mods.ModsRegistry.currentMod}/$folder';
+
+		var files:Map<String, String> = new Map();
+		if (sys.FileSystem.exists(baseDir) && sys.FileSystem.isDirectory(baseDir)) {
+			for (file in sys.FileSystem.readDirectory(baseDir)) {
+				if (file.endsWith('.hx') || file.endsWith('.lua') || file.endsWith('.hxc'))
+					files.set(file, '$baseDir/$file');
+			}
 		}
+
+		if (modDir != null && sys.FileSystem.exists(modDir) && sys.FileSystem.isDirectory(modDir)) {
+			for (file in sys.FileSystem.readDirectory(modDir)) {
+				if (file.endsWith('.hx') || file.endsWith('.lua') || file.endsWith('.hxc'))
+					files.set(file, '$modDir/$file');
+			}
+		}
+
+		for (resolve => path in files)
+			load(path);
 	}
 
 	public function loadTypedef(name:String):Void {

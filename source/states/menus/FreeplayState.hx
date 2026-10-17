@@ -554,6 +554,9 @@ class FreeplayState extends MusicBeatState {
 	override public function destroy() {
 		super.destroy();
 
+		if (FlxG.sound.music != null)
+			FlxG.sound.music.stop();
+
 		songs = null;
 		icons = null;
 		freeplayData = null;

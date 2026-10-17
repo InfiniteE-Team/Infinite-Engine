@@ -266,6 +266,12 @@ class GameplayEditor extends MusicBeatState {
 		var askNow:Bool = askForNewChart;
 		askForNewChart = false;
 
+		final bg = new flixel.FlxSprite().loadGraphic(Paths.getPath('menus/menuBG2', 'image'));
+		bg.antialiasing = SaveData.data.antialiasing;
+		bg.scrollFactor.set(0, 0);
+		bg.screenCenter();
+		add(bg);
+
 		try {
 			buildEditor();
 			ready = true;
