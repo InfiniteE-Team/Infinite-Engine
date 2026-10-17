@@ -7,6 +7,7 @@ class DebugMenu extends MusicBeatState {
 	var options:Array<FlxText> = [];
 	var curOption:Int = 0;
 	var optionsText:Array<String> = ['Character Editor', 'Gameplay Editor', 'Stage Editor'];
+	var isAccept:Bool = false;
 
 	override public function create() {
 		super.create();
@@ -30,6 +31,9 @@ class DebugMenu extends MusicBeatState {
 	override public function update(elapsed:Float) {
 		super.update(elapsed);
 
+		if (isAccept)
+			return;
+		
 		if (Controls.UI_UP) {
 			curOption = (curOption - 1 + options.length) % options.length;
 		} else if (Controls.UI_DOWN) {
@@ -41,20 +45,23 @@ class DebugMenu extends MusicBeatState {
 		}
 
 		if (Controls.ACCEPT) {
+			isAccept = true;
 			switch (curOption) {
 				case 0:
 					MusicBeatState.switchState(() -> new CharacterEditor('bf'));
 				case 1:
-                    Console.log("Gameplay Editor for now, it only opens during gameplay..");
+					Console.log("Gameplay Editor for now, it only opens during gameplay..");
 
-					//MusicBeatState.switchState(new GameplayEditor());
+				// MusicBeatState.switchState(new GameplayEditor());
 				case 2:
-                    Console.log("Stage Editor is not implemented yet.");
-					//MusicBeatState.switchState(new StageEditor());
+					Console.log("Stage Editor is not implemented yet.");
+					// MusicBeatState.switchState(new StageEditor());
 			}
 		}
 
-		if (Controls.BACK)
+		if (Controls.BACK) {
+			isAccept = true;
 			modding.scripting.types.ScriptClass.switchState('MainMenuState');
+		}
 	}
 }

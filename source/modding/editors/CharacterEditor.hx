@@ -61,6 +61,8 @@ class CharacterEditor extends MusicBeatState {
 	public var char:Character = null;
 	public var curCharacter:String = 'bf';
 
+	var keysLocked:Bool = false;
+
 	var advertency:FlxText;
 
 	public function new(curCharacter:String) {
@@ -217,7 +219,7 @@ class CharacterEditor extends MusicBeatState {
 		watermark.cameras = [camHud];
 		add(watermark);
 
-		advertency = new FlxText(20, FlxG.height * 0.9, 0, 'Unsaved Changes! - Dont forget to click the save button.');
+		advertency = new FlxText(20, FlxG.height * 0.9, 0, 'Unsaved Changes (Ctrl/Cmd+S to save)');
 		advertency.setFormat(Paths.getPath('Funkin.otf', 'font'), 24, FlxColor.RED, 'left');
 		advertency.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 1);
 		advertency.scrollFactor.set(0, 0);
@@ -973,12 +975,18 @@ class CharacterEditor extends MusicBeatState {
 
 		var hit = getLayerUnderMouse();
 
+		if (!keysLocked && (FlxG.keys.pressed.CONTROL || FlxG.keys.pressed.WINDOWS) && FlxG.keys.justPressed.S) {
+			saveCharacter();
+		}
+
 		movementMouse(hit);
 
 		sectionTab.handleInput();
 
 		handleUndoRedo();
-		adjustOffsets();
+
+		if (!FlxG.keys.pressed.CONTROL && !FlxG.keys.pressed.WINDOWS)
+			adjustOffsets();
 
 		selectionAnims();
 		selectionLayers();
@@ -998,7 +1006,9 @@ class CharacterEditor extends MusicBeatState {
 		if (FlxG.mouse.wheel != 0)
 			camEditor.zoom = Math.max(0.25, Math.min(3.0, camEditor.zoom + (FlxG.mouse.wheel > 0 ? 0.1 : -0.1)));
 
-		if (Controls.BACK)
+		if (Controls.BACK) {
+			keysLocked = true;
 			MusicBeatState.switchState(() -> new DebugMenu());
+		}
 	}
 }

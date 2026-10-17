@@ -297,6 +297,7 @@ class CharacterController extends FunkinObjectRegistry {
 			char.isSing = false;
 			char.isMiss = true;
 			char.singCountTime = 0;
+			cryGf();
 			#if HSCRIPT_ALLOWED
 			var charScript = scriptMap.get(char.id);
 			if (charScript != null)
@@ -332,6 +333,13 @@ class CharacterController extends FunkinObjectRegistry {
 		#if HSCRIPT_ALLOWED
 		scriptMap.remove(id);
 		#end
+	}
+
+	public function cryGf() {
+		for (gf in gfChars) {
+			if (gf.existsAnim('sad'))
+				gf.playAnim('sad');
+		}
 	}
 
 	public function resetAll() {

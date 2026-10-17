@@ -17,6 +17,7 @@ The infinite engine is an FNF engine written from scratch in HaxeFlixel.
 **Infinite Team:**
 -----------------------
 - Manux (Main Coder, and Concepts)
+- Jloor (Assistant Coder and Gameplay Editor Creator)
 - Nelson (Main Artist)
 - Yuning (UI Artist)
 - Seevent (Musician)

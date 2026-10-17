@@ -1,88 +1,88 @@
 {
-    "meta": {
-        "isPlayer": true
-    },
-    "gameplay": {
-        "position": [
-            0,
-            0
-        ],
-        "cameraOffset": [
-            0,
-            0
-        ],
-        "death": {
-            "character": "bf-death",
-            "sound": "default/fnf_loss_sfx",
-            "music": "default/gameOver",
-            "endSound": "default/gameOverEnd"
-        },
-        "idleAfterSing": true
-    },
-    "render": {
-        "layers": [
-            {
-                "name": "char",
-                "path": "bf/dead",
-                "position": [
-                    0,
-                    0
-                ],
-                "scale": [
-                    1,
-                    1
-                ],
-                "alpha": 1.0,
-                "visible": true,
-                "flipX": false,
-                "flipY": false,
-                "antialiasing": true,
-                "firstAnim": "firstDeath",
-                "anims": [
-                    {
-                        "name": "firstDeath",
-                        "prefix": "BF dies",
-                        "offsets": [
-                            0,
-                            0
-                        ],
-                        "framerate": 24,
-                        "looped": false
-                    },
-                    {
-                        "name": "deathLoop",
-                        "prefix": "BF Dead Loop",
-                        "offsets": [
-                            0,
-                            0
-                        ],
-                        "framerate": 24,
-                        "looped": true
-                    },
-                    {
-                        "name": "deathConfirm",
-                        "prefix": "BF Dead confirm",
-                        "offsets": [
-                            0,
-                            -20
-                        ],
-                        "framerate": 24,
-                        "looped": false
-                    },
-                    {
-                        "filePath": "bf/bfFakeOut",
-                        "name": "fakeoutDeath",
-                        "prefix": "fake out death BF",
-                        "offsets": [
-                            3,
-                            65
-                        ],
-                        "framerate": 24,
-                        "looped": false
-                    }
-                ]
-            }
-        ]
-    },
-    "icon": null
+	"render": {
+		"layers": [
+			{
+				"firstAnim": "firstDeath",
+				"position": [
+					0,
+					0
+				],
+				"anims": [
+					{
+						"offsets": [
+							0,
+							0
+						],
+						"framerate": 24,
+						"prefix": "BF dies",
+						"looped": false,
+						"name": "firstDeath"
+					},
+					{
+						"offsets": [
+							10,
+							7
+						],
+						"framerate": 24,
+						"prefix": "BF Dead Loop",
+						"looped": true,
+						"name": "deathLoop"
+					},
+					{
+						"offsets": [
+							10,
+							-80
+						],
+						"framerate": 24,
+						"prefix": "BF Dead confirm",
+						"looped": false,
+						"name": "deathConfirm"
+					},
+					{
+						"offsets": [
+							13,
+							3
+						],
+						"framerate": 24,
+						"filePath": "bf/bfFakeOut",
+						"prefix": "fake out death BF",
+						"looped": false,
+						"name": "fakeoutDeath"
+					}
+				],
+				"visible": true,
+				"scale": [
+					1,
+					1
+				],
+				"flipX": false,
+				"name": "char",
+				"antialiasing": true,
+				"flipY": false,
+				"path": "bf/dead",
+				"alpha": 1
+			}
+		]
+	},
+	"gameplay": {
+		"death": {
+			"endSound": "default/gameOverEnd",
+			"music": "default/gameOver",
+			"sound": "default/fnf_loss_sfx",
+			"character": "bf-death"
+		},
+		"cameraOffset": [
+			0,
+			0
+		],
+		"idleAfterSing": true,
+		"position": [
+			0,
+			0
+		]
+	},
+	"icon": null,
+	"meta": {
+		"isPlayer": true
+	}
 }
