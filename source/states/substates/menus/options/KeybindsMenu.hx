@@ -20,6 +20,9 @@ class KeybindsMenu extends flixel.group.FlxGroup {
 	var uiKeyRows:Array<FlxText> = [];
 	var uiKeySprites:Array<Array<Keybind>> = [];
 
+	var modKeyRows:Array<Array<FlxText>> = [];
+	var modKeySprites:Array<Array<Array<Keybind>>> = [];
+
 	var curRow:Int = 0;
 	var curCol:Int = 0;
 	var isListening:Bool = false;
@@ -207,6 +210,74 @@ class KeybindsMenu extends flixel.group.FlxGroup {
 		}
 	}
 
+	function buildModKeys() {
+		for (rowTexts in modKeyRows) {
+			for (t in rowTexts) {
+				remove(t);
+				t.destroy();
+			}
+		}
+		for (rowSprites in modKeySprites) {
+			for (arr in rowSprites) {
+				for (k in arr) {
+					remove(k.keyLabel);
+					k.keyLabel.destroy();
+					remove(k);
+					k.destroy();
+				}
+			}
+		}
+		modKeyRows = [];
+		modKeySprites = [];
+
+		var groups = modding.mods.ModOptionsLoader.modKeybindGroups;
+		if (groups == null || groups.length == 0)
+			return;
+
+		var uiStartY = BASE_Y + 80 + 2 * ROW_H + 30;
+		var uiSectionH = 50 + uiActionNames.length * 70;
+		var currentY = uiStartY + uiSectionH + 20;
+
+		for (group in groups) {
+			var rows:Array<FlxText> = [];
+			var sprites:Array<Array<Keybind>> = [];
+
+			var sectionLabel = makeText(BASE_X, currentY, group.label, 20);
+			sectionLabel.color = 0xFFAAAAAA;
+			rows.push(sectionLabel);
+			add(sectionLabel);
+			currentY += 40;
+
+			var savedRaw:Dynamic = Reflect.field(FlxG.save.data, group.groupName);
+			var saved:Array<Array<String>> = (savedRaw != null) ? savedRaw : [];
+
+			for (i in 0...group.actions.length) {
+				var actionLabel = makeText(BASE_X, currentY + 20, group.actions[i], 22);
+				rows.push(actionLabel);
+				add(actionLabel);
+
+				var rowSprites:Array<Keybind> = [];
+				var currentX:Float = BASE_X + 100;
+				for (set in 0...2) {
+					var keyStr = (saved[i] != null && saved[i][set] != null && saved[i][set] != 'NONE') ? saved[i][set] : '?';
+					var sprite = makeKeybindSprite(currentX, currentY, keyStr, false);
+					sprite.cameras = [contentCam];
+					sprite.keyLabel.cameras = [contentCam];
+					add(sprite);
+					add(sprite.keyLabel);
+					rowSprites.push(sprite);
+					currentX += sprite.width + 5;
+				}
+				sprites.push(rowSprites);
+				currentY += ROW_H;
+			}
+
+			modKeyRows.push(rows);
+			modKeySprites.push(sprites);
+			currentY += 20;
+		}
+	}
+
 	function makeKeybindSprite(x:Float, y:Float, keyStr:String, selected:Bool):Keybind {
 		var frameName = getFrameName(keyStr, selected);
 		var k = new Keybind(x, y, frameName);
@@ -274,6 +345,27 @@ class KeybindsMenu extends flixel.group.FlxGroup {
 				refreshKeybindSprite(uiKeySprites[i][set], keyStr, selected || listening);
 			}
 		}
+
+		var groups = modding.mods.ModOptionsLoader.modKeybindGroups;
+		var modRowOffset = keySprites.length + uiKeySprites.length;
+		var flatModRow = 0;
+		for (gi in 0...modKeySprites.length) {
+			if (gi >= groups.length)
+				break;
+			var group = groups[gi];
+			var savedRaw:Dynamic = Reflect.field(FlxG.save.data, group.groupName);
+			var saved:Array<Array<String>> = (savedRaw != null) ? savedRaw : [];
+			for (ai in 0...modKeySprites[gi].length) {
+				for (set in 0...modKeySprites[gi][ai].length) {
+					var rowIdx = modRowOffset + flatModRow;
+					var selected = !isListening && rowIdx == curRow && set == curCol;
+					var listening = isListening && rowIdx == curRow && set == curCol;
+					var keyStr = (saved[ai] != null && saved[ai][set] != null && saved[ai][set] != 'NONE') ? saved[ai][set] : '?';
+					refreshKeybindSprite(modKeySprites[gi][ai][set], keyStr, selected || listening);
+				}
+				flatModRow++;
+			}
+		}
 	}
 
 	function refreshKeybindSprite(sprite:Keybind, keyStr:String, selected:Bool) {
@@ -327,6 +419,7 @@ class KeybindsMenu extends flixel.group.FlxGroup {
 
 		buildNoteKeys();
 		buildUiKeys(BASE_Y + 80 + 2 * ROW_H + 30);
+		buildModKeys();
 		refreshVisuals();
 	}
 
@@ -440,24 +533,55 @@ class KeybindsMenu extends flixel.group.FlxGroup {
 	}
 
 	function getRowY(row:Int):Float {
-		if (row < keySprites.length) {
+		if (row < keySprites.length)
 			return BASE_Y + 80 + row * ROW_H;
-		} else {
-			var uiStartY = BASE_Y + 80 + 2 * ROW_H + 30;
-			var uiRow = row - keySprites.length;
+		var uiStartY = BASE_Y + 80 + 2 * ROW_H + 30;
+		var uiRow = row - keySprites.length;
+		if (uiRow < uiKeySprites.length)
 			return uiStartY + 35 + uiRow * 70;
+
+		var uiSectionH = 50 + uiActionNames.length * 70;
+		var modStartY = uiStartY + uiSectionH + 20;
+		var flatMod = row - keySprites.length - uiKeySprites.length;
+		var y = modStartY;
+		for (gi in 0...modKeySprites.length) {
+			y += 40;
+			if (flatMod < modKeySprites[gi].length)
+				return y + flatMod * ROW_H + 20;
+			y += modKeySprites[gi].length * ROW_H + 20;
+			flatMod -= modKeySprites[gi].length;
 		}
+		return y;
 	}
 
 	function getRowCount():Int {
-		return keySprites.length + uiKeySprites.length;
+		var modRows = 0;
+		for (arr in modKeySprites)
+			modRows += arr.length;
+		return keySprites.length + uiKeySprites.length + modRows;
 	}
 
 	function getColCount():Int {
 		return curRow < keySprites.length ? curKeyCount : 2;
 	}
 
+	function resolveModRow(row:Int):{gi:Int, ai:Int} {
+		var offset = keySprites.length + uiKeySprites.length;
+		var flat = row - offset;
+		for (gi in 0...modKeySprites.length) {
+			if (flat < modKeySprites[gi].length)
+				return {gi: gi, ai: flat};
+			flat -= modKeySprites[gi].length;
+		}
+		return {gi: 0, ai: 0};
+	}
+
 	function applyKey(key:FlxKey) {
+		if (curRow >= keySprites.length + uiKeySprites.length) {
+			applyModKey(key);
+			return;
+		}
+
 		var keyStr = key.toString();
 
 		if (curRow < keySprites.length) {
@@ -493,6 +617,34 @@ class KeybindsMenu extends flixel.group.FlxGroup {
 		}
 
 		SaveData.flush();
+		refreshVisuals();
+	}
+
+	function applyModKey(key:FlxKey) {
+		var r = resolveModRow(curRow);
+		var groups = modding.mods.ModOptionsLoader.modKeybindGroups;
+		if (r.gi >= groups.length)
+			return;
+		var group = groups[r.gi];
+		var groupName = group.groupName;
+
+		var keyStr = key.toString();
+
+		var savedRaw:Dynamic = Reflect.field(FlxG.save.data, groupName);
+		var saved:Array<Array<String>> = (savedRaw != null) ? savedRaw : [];
+		for (ai in 0...saved.length) {
+			for (set in 0...saved[ai].length) {
+				if (saved[ai][set] == keyStr && !(ai == r.ai && set == curCol)) {
+					var oldKey = FlxKey.fromString(saved[r.ai][curCol]);
+					if (oldKey != FlxKey.NONE)
+						Controls.instance.setKey(groupName, ai, set, oldKey);
+				}
+			}
+		}
+
+		Controls.instance.setKey(groupName, r.ai, curCol, key);
+		Controls.instance.flushModGroup(groupName);
+		buildModKeys();
 		refreshVisuals();
 	}
 

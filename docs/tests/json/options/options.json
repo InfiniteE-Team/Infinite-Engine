@@ -1,0 +1,27 @@
+{
+    "categories": [
+        {
+            "name": "My mod",
+            "options": [
+                {
+                    "name": "Dark mode",
+                    "description": "Darkens the background during gameplay.",
+                    "saveField": "myMod_darkMode",
+                    "type": "CHECKBOX",
+                    "default": false
+                }
+            ]
+        }
+    ],
+    "keybinds": [
+        {
+            "groupName": "myModKeys",
+            "label": "My Mod",
+            "actions": ["Dash", "Special Attack"],
+            "default": [
+                ["SHIFT"],
+                ["Z"]
+            ]
+        }
+    ]
+}

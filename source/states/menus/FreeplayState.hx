@@ -259,6 +259,54 @@ class FreeplayState extends MusicBeatState {
 
 		changeSelection(0);
 		changeDifficulty(0);
+		preloadFreeplaySongs();
+	}
+
+	function preloadFreeplaySongs():Void {
+		if (freeplayData?.songData == null)
+			return;
+
+		var queue:Array<String> = [];
+		for (songInfo in freeplayData.songData) {
+			var instPath = Paths.getPath('songs/${songInfo.song}/audio/Inst.ogg');
+			if (instPath == null)
+				continue;
+			var absPath = sys.FileSystem.absolutePath(instPath);
+			if (!core.rhythm.audio.Sound.streamedCache.exists(absPath))
+				queue.push(absPath);
+		}
+
+		if (queue.length == 0)
+			return;
+
+		final MAX = 4;
+		var idx = 0;
+
+		function next():Void {
+			if (idx >= queue.length)
+				return;
+			var absPath = queue[idx++];
+			sys.thread.Thread.create(function():Void {
+				try {
+					#if lime_cffi
+					var buf = lime.media.AudioBuffer.fromFile(absPath);
+					var snd = buf != null ? openfl.media.Sound.fromAudioBuffer(buf) : null;
+					#else
+					var snd = openfl.media.Sound.fromFile(absPath);
+					#end
+					haxe.MainLoop.runInMainThread(function():Void {
+						if (snd != null && !core.rhythm.audio.Sound.streamedCache.exists(absPath))
+							core.rhythm.audio.Sound.streamedCache.set(absPath, snd);
+						next();
+					});
+				} catch (_:Dynamic) {
+					haxe.MainLoop.runInMainThread(next);
+				}
+			});
+		}
+
+		for (_ in 0...Std.int(Math.min(MAX, queue.length)))
+			next();
 	}
 
 	override public function update(elapsed:Float) {

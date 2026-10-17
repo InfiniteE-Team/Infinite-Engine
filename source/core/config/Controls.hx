@@ -211,4 +211,30 @@ class Controls {
 		if (preset != null)
 			loadGroup("noteKeys", preset);
 	}
+
+	public function loadGroupPublic(groupName:String, savedKeys:Array<Array<String>>):Void {
+		loadGroup(groupName, savedKeys);
+	}
+
+	public function flushModGroup(groupName:String):Void {
+		var keys = keyGroups.get(groupName);
+		if (keys == null)
+			return;
+		var keyStrings = [for (lane in keys) [for (k in lane) k.toString()]];
+		Reflect.setField(FlxG.save.data, groupName, keyStrings);
+		SaveData.flush();
+	}
+
+	public function modJustPressed(groupName:String, actionIndex:Int):Bool {
+		return justPressed(groupName, actionIndex);
+	}
+
+	public function modPressed(groupName:String, actionIndex:Int):Bool {
+		var inputs = getGroupInput(groupName);
+		return inputs.length > actionIndex ? inputs[actionIndex] : false;
+	}
+
+	public function modJustReleased(groupName:String, actionIndex:Int):Bool {
+		return justReleased(groupName, actionIndex);
+	}
 }

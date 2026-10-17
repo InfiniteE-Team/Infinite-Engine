@@ -12,7 +12,7 @@ import core.rhythm.audio.Sound;
 
 /**
  * Runs immediately after ConfigMain, before the mod's initial state.
- * Scans images/, sounds/, songs/ and music/ from the active mod and base 
+ * Scans images/, sounds/, and music/ from the active mod and base 
  * assets, then bulk-caches them using `Paths.cacheAutoAsync` (graphics) 
  * and `Sound.streamedCache` (audio) so the first state switch is lag-free.
  */
@@ -199,7 +199,6 @@ class FunkinPreloader extends MusicBeatState {
 			scanForImages('$root/images', '$root/images');
 			scanForAudio('$root/sounds', '$root/sounds');
 			scanForAudio('$root/music', '$root/music');
-			scanForAudio('$root/songs', '$root/songs');
 		}
 
 		totalImages = imageQueue.length;
@@ -266,19 +265,30 @@ class FunkinPreloader extends MusicBeatState {
 			return;
 		}
 
-		for (key in imageQueue) {
+		final MAX_THREADS = 6;
+		var queueIndex:Int = 0;
+
+		function spawnNext():Void {
+			if (queueIndex >= imageQueue.length)
+				return;
+			var key = imageQueue[queueIndex++];
 			try {
 				Paths.cacheAutoAsync(key, function(_):Void {
 					loadedImages++;
 					labelGraphics.text = 'Graphics  $loadedImages / $totalImages';
+					spawnNext();
 					checkAllDone();
 				});
 			} catch (e:Dynamic) {
 				Console.log('[FunkinPreloader]: Error process image/atlas: $key - $e', true);
 				loadedImages++;
+				spawnNext();
 				checkAllDone();
 			}
 		}
+
+		for (_ in 0...Std.int(Math.min(MAX_THREADS, imageQueue.length)))
+			spawnNext();
 	}
 
 	/**

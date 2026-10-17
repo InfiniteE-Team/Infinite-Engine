@@ -174,6 +174,16 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 			character.dance();
 		}
 
+		var modOpts = modding.mods.ModOptionsLoader.load();
+		for (catName => opts in modOpts) {
+			if (!categoryOptions.exists(catName)) {
+				categories.push(catName);
+				categoryOptions.set(catName, opts);
+			} else {
+				categoryOptions.get(catName).concat(opts);
+			}
+		}
+
 		changeCategory(0);
 		updateVisualFocus();
 	}
