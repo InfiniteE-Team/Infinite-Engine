@@ -105,10 +105,10 @@
   },
   "props": {
     "name": "StrumNotes",
-    "path": "default",
+    "path": "noteStrumline",
     "position": [
-      0,
-      0
+      15,
+      20
     ],
     "scale": [
       0.7,
@@ -118,6 +118,7 @@
     "anims": [
       {
         "name": "note0-Scroll",
+        "filePath": "notes",
         "prefix": "purple0",
         "framerate": 24,
         "offsets": [
@@ -127,6 +128,7 @@
       },
       {
         "name": "note1-Scroll",
+        "filePath": "notes",
         "prefix": "blue0",
         "framerate": 24,
         "offsets": [
@@ -136,6 +138,7 @@
       },
       {
         "name": "note2-Scroll",
+        "filePath": "notes",
         "prefix": "green0",
         "framerate": 24,
         "offsets": [
@@ -145,6 +148,7 @@
       },
       {
         "name": "note3-Scroll",
+        "filePath": "notes",
         "prefix": "red0",
         "framerate": 24,
         "offsets": [
@@ -154,6 +158,7 @@
       },
       {
         "name": "note0-Hold",
+        "filePath": "hold",
         "prefix": "purple hold piece",
         "framerate": 24,
         "offsets": [
@@ -163,6 +168,7 @@
       },
       {
         "name": "note1-Hold",
+        "filePath": "hold",
         "prefix": "blue hold piece",
         "framerate": 24,
         "offsets": [
@@ -172,6 +178,7 @@
       },
       {
         "name": "note2-Hold",
+        "filePath": "hold",
         "prefix": "green hold piece",
         "framerate": 24,
         "offsets": [
@@ -181,6 +188,7 @@
       },
       {
         "name": "note3-Hold",
+        "filePath": "hold",
         "prefix": "red hold piece",
         "framerate": 24,
         "offsets": [
@@ -190,6 +198,7 @@
       },
       {
         "name": "note0-HoldEnd",
+        "filePath": "hold",
         "prefix": "purple hold end",
         "framerate": 24,
         "offsets": [
@@ -199,6 +208,7 @@
       },
       {
         "name": "note1-HoldEnd",
+        "filePath": "hold",
         "prefix": "blue hold end",
         "framerate": 24,
         "offsets": [
@@ -208,6 +218,7 @@
       },
       {
         "name": "note2-HoldEnd",
+        "filePath": "hold",
         "prefix": "green hold end",
         "framerate": 24,
         "offsets": [
@@ -217,6 +228,7 @@
       },
       {
         "name": "note3-HoldEnd",
+        "filePath": "hold",
         "framerate": 24,
         "prefix": "red hold end",
         "offsets": [
@@ -226,109 +238,109 @@
       },
       {
         "name": "static0",
-        "prefix": "arrowLEFT",
+        "prefix": "staticLeft",
         "framerate": 24,
         "offsets": [
-          0,
-          -5
+          -28,
+          -30
         ]
       },
       {
         "name": "static1",
-        "prefix": "arrowDOWN",
+        "prefix": "staticDown",
         "framerate": 24,
         "offsets": [
-          0,
-          -5
+          -28,
+          -30
         ]
       },
       {
         "name": "static2",
-        "prefix": "arrowUP",
+        "prefix": "staticUp",
         "framerate": 24,
         "offsets": [
-          0,
-          -5
+          -28,
+          -30
         ]
       },
       {
         "name": "static3",
-        "prefix": "arrowRIGHT",
+        "prefix": "staticRight",
         "framerate": 24,
         "offsets": [
-          0,
-          -5
+          -28,
+          -30
         ]
       },
       {
         "name": "press0",
-        "prefix": "left press",
+        "prefix": "pressLeft",
         "framerate": 24,
         "offsets": [
-          2,
-          -3
+          0,
+          0
         ]
       },
       {
         "name": "press1",
-        "prefix": "down press",
+        "prefix": "pressDown",
         "framerate": 24,
         "offsets": [
-          2,
-          -3
+          0,
+          0
         ]
       },
       {
         "name": "press2",
-        "prefix": "up press",
+        "prefix": "pressUp",
         "framerate": 24,
         "offsets": [
-          2,
-          -3
+          0,
+          0
         ]
       },
       {
         "name": "press3",
-        "prefix": "right press",
+        "prefix": "pressRight",
         "framerate": 24,
         "offsets": [
-          2,
-          -3
+          0,
+          0
         ]
       },
       {
         "name": "confirm0",
-        "prefix": "left confirm",
+        "prefix": "confirmLeft",
         "framerate": 24,
         "offsets": [
-          -25,
+          -28,
           -30
         ]
       },
       {
         "name": "confirm1",
-        "prefix": "down confirm",
+        "prefix": "confirmDown",
         "framerate": 24,
         "offsets": [
-          -25,
+          -28,
           -30
         ]
       },
       {
         "name": "confirm2",
-        "prefix": "up confirm",
+        "prefix": "confirmUp",
         "framerate": 24,
         "offsets": [
-          -25,
+          -28,
           -30
         ]
       },
       {
         "name": "confirm3",
-        "prefix": "right confirm",
+        "prefix": "confirmRight",
         "framerate": 24,
         "offsets": [
-          -25,
+          -28,
           -30
         ]
       }

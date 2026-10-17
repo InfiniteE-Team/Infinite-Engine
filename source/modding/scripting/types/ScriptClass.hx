@@ -26,7 +26,7 @@ class ScriptClass {
 			var state = loadAsClass(path, className, content, args);
 			if (state != null)
 				return state;
-			// El script del mod falló — intentar fallback
+			// The mod script failed — attempting fallback (Manux)
 			return loadStateFallback(className, args);
 		} else {
 			var state = new MusicBeatState();
