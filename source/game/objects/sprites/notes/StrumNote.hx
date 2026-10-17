@@ -12,6 +12,12 @@ class StrumNote extends FunkinSprite {
 
 	var noteSkinData:NoteSkinData = null;
 
+	public var laneIndex:Int = 0;
+
+	public var confirmHoldTimer:Float = -1;
+
+	private var _confirmDuration:Float = 0.25;
+
 	public function new(x:Float, y:Float, props:ObjectData, noteSkin:String) {
 		super();
 		this.noteSkin = noteSkin;
@@ -29,8 +35,26 @@ class StrumNote extends FunkinSprite {
 			RGBShader.applyByAnimation(this, noteSkinData, currentAnim);
 	}
 
+	public function startConfirm():Void {
+		playAnim('confirm' + laneIndex, true);
+		if (animation.curAnim != null && animation.curAnim.numFrames > 0) {
+			var fps:Float = animation.curAnim.frameRate > 0 ? animation.curAnim.frameRate : 24.0;
+			_confirmDuration = animation.curAnim.numFrames / fps;
+		}
+		confirmHoldTimer = 0.0;
+	}
+
 	override function update(elapsed:Float) {
 		super.update(elapsed);
+
+		if (confirmHoldTimer >= 0) {
+			confirmHoldTimer += elapsed;
+			if (confirmHoldTimer >= _confirmDuration) {
+				confirmHoldTimer = -1;
+				playAnim('static' + laneIndex, true);
+			}
+		}
+
 		if (noteSkinData == null)
 			return;
 

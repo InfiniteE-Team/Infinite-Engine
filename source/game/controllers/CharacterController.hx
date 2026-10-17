@@ -112,7 +112,7 @@ class CharacterController extends FunkinObjectRegistry {
 					if (note != null) {
 						var diff = note.strumTime - core.rhythm.RhythmCore.songPosition;
 						if (diff <= 0) {
-							strums[i].playAnim('confirm' + i, false);
+							strums[i].startConfirm();
 							note.wasGoodHit = true;
 							var ratingType = noteController.getRatingForDiff(0);
 							if (ratingType != null) {
@@ -129,6 +129,7 @@ class CharacterController extends FunkinObjectRegistry {
 									sustain.wasNoteHit = true;
 							}
 							note.kill();
+							strums[i].confirmHoldTimer = 0;
 							if (ratingType != null && ratingType.splash)
 								noteController.spawnSplash(strums[i], i, note.noteType);
 
@@ -140,7 +141,7 @@ class CharacterController extends FunkinObjectRegistry {
 					var holdingActive = globalLane != null && noteController.activeOpponentHolds.exists(globalLane + i);
 					if (holdingActive)
 						strums[i].playAnim('confirm' + i, false);
-					else
+					else if (strums[i].confirmHoldTimer < 0)
 						strums[i].playAnim('static' + i, true);
 				} else {
 					updatePlayerLane(char, strums, i, noteController, gameAudio, playStateConfig);
@@ -167,10 +168,12 @@ class CharacterController extends FunkinObjectRegistry {
 					#end
 					var globalLane = noteController.charStrumOffsets.get(char.id);
 					var holdingActive = globalLane != null && noteController.activeOpponentHolds.exists(globalLane + i);
-					if (holdingActive)
+					if (holdingActive) {
 						strums[i].playAnim('confirm' + i, false);
-					else
+						strums[i].confirmHoldTimer = -1;
+					} else if (strums[i].confirmHoldTimer < 0) {
 						strums[i].playAnim('static' + i, true);
+					}
 					#if HSCRIPT_ALLOWED
 					if (charScript != null)
 						charScript.call("postNoteSustainCPU", []);
@@ -212,7 +215,7 @@ class CharacterController extends FunkinObjectRegistry {
 				var holdingActive = globalLane != null && noteController.activeOpponentHolds.exists(globalLane + i);
 				if (holdingActive)
 					setSing(char, globalLane + i);
-				else
+				else if (strums[i].confirmHoldTimer < 0)
 					strums[i].playAnim('static' + i, true);
 			}
 		}

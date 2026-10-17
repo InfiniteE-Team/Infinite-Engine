@@ -311,6 +311,7 @@ class NoteController {
 			#end
 			var baseX:Float = x + i * (112 + spacing);
 			var strum = new StrumNote(baseX, charBaseY, noteSkinData.props, noteSkin);
+			strum.laneIndex = i;
 			strum.playAnim('static' + i);
 			strum.applyShader(noteSkinData);
 			_strumBaseX.push(baseX);

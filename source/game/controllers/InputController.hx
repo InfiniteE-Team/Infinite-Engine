@@ -133,6 +133,7 @@ class InputController {
 
 			bestNote.kill();
 			charStrums[i].playAnim('confirm' + i, false);
+			charStrums[i].confirmHoldTimer = -1;
 
 			if (ratingType.splash)
 				noteController.spawnSplash(charStrums[i], i, bestNote.noteType);
@@ -172,7 +173,7 @@ class InputController {
 			mustPress:Bool = false) {
 		var note = noteController.getHittableNote(charId, i, mustPress);
 		if (note != null) {
-			charStrums[i].playAnim('confirm' + i, false);
+			charStrums[i].startConfirm();
 			charStrums[i].applyShader(noteController.noteSkinData);
 			note.wasGoodHit = true;
 			note.kill();
