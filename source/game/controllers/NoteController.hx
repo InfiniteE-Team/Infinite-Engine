@@ -1,7 +1,6 @@
 package game.controllers;
 
 import game.PlayStateConfig;
-import flixel.tweens.FlxTween;
 // song
 import core.json.song.SongData.SongConfig;
 import core.json.engine.GlobalData.GlobalConfig;
@@ -322,7 +321,7 @@ class NoteController {
 
 			if (!PlayStateConfig.isStoryMode && !PlayState.instance.isRewind) {
 				strum.alpha = 0;
-				FlxTween.tween(strum, {alpha: 1}, 0.5, {startDelay: 0.5 + (0.2 * i)});
+				flixel.tweens.FlxTween.tween(strum, {alpha: 1}, 0.5, {startDelay: 0.5 + (0.2 * i)});
 			}
 
 			#if HSCRIPT_ALLOWED

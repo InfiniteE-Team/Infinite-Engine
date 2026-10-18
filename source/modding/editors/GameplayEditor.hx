@@ -1606,7 +1606,7 @@ class GameplayEditor extends MusicBeatState {
 			chars.danceAll();
 
 		if (metronome)
-			FlxG.sound.play(Paths.getPath('editors/ge/metronome' + FlxG.random.int(1, 2), 'sound'), 0.45);
+			FlxG.sound.play(Paths.getPath('editors/ge/metronome' + FlxG.random.int(1, 2), 'sound'), 0.5);
 	}
 
 	function assignCamera(obj:flixel.FlxBasic, cam:flixel.FlxCamera):Void {

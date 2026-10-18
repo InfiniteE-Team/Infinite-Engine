@@ -32,7 +32,8 @@ class MusicBeatState extends State {
 		#end
 		super.create();
 
-		t = new core.rhythm.RhythmTracker();
+		if (t == null)
+			t = new core.rhythm.RhythmTracker();
 
 		if (core.ConfigMain.globalData.developerMode) {
 			infoHelp = new InfoHelpDebug(FlxG.width - 300, 0, 0);
@@ -77,10 +78,10 @@ class MusicBeatState extends State {
 
 		if (core.ConfigMain.globalData.developerMode) {
 			if (FlxG.keys.justPressed.F5) {
-				MusicBeatState.resetState();
 				#if HSCRIPT_ALLOWED
 				script.hotReload();
 				#end
+				MusicBeatState.resetState();
 			}
 			if (FlxG.keys.justPressed.F4)
 				infoHelp.openUI();
