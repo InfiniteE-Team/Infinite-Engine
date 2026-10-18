@@ -150,7 +150,7 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 				reloadMenuOptions();
 			} else {
 				resumeFunction();
-				#if HSCRIPT_ALLOWED script.call("ExitMenu", []); #end
+				close();
 			}
 		}
 

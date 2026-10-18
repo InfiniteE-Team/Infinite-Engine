@@ -85,8 +85,15 @@ class FunkinSprite extends animate.FlxAnimate {
 		return super.loadGraphic(graphic, animated, frameWidth, frameHeight, unique, key);
 	}
 
+	static inline function joinPath(folder:String, file:String):String
+		return folder == '' ? file : '$folder/$file';
+
+	var _baseOffset:Point = {x: 0, y: 0};
+
 	public function loadProps(props:ObjectData, path:String):Void {
-		var assetPath = '$path/${props.path}';
+		if (props.folder != null)
+			path = props.folder;
+		var assetPath = joinPath(path, props.path);
 
 		var loaded = Paths.getPath(assetPath, 'animated');
 
@@ -140,6 +147,11 @@ class FunkinSprite extends animate.FlxAnimate {
 				finalIndices = offset > 0 ? anim.indices.map(i -> i + offset) : anim.indices;
 			}
 
+			if (anim.frameScale != null && animPath != null && finalIndices != null && !isAnimate) {
+				animation.add(fullAnimName, finalIndices, anim.framerate ?? 24, anim.looped ?? true);
+				continue;
+			}
+
 			var targetPrefix = (anim.prefix != null && anim.prefix != "") ? anim.prefix : anim.name;
 
 			addAnim(fullAnimName, targetPrefix, anim.framerate ?? 24, anim.looped ?? true, finalIndices);
@@ -151,6 +163,10 @@ class FunkinSprite extends animate.FlxAnimate {
 		if (props.firstAnim != null)
 			playAnim(props.firstAnim, true);
 		updateHitbox();
+		if (props.keepHitboxOffset == true) {
+			_baseOffset = {x: offset.x, y: offset.y};
+			activeOffsets(getAnimOffset());
+		}
 
 		if (graphic != null && graphic.bitmap != null) {
 			graphic.bitmap.disposeImage(); // clears RAM to use only the memory in VRAM
@@ -164,7 +180,10 @@ class FunkinSprite extends animate.FlxAnimate {
 
 		if (isAnimate) {
 			if (hasIndices) {
-				this.anim.addBySymbolIndices(name, prefix, indices, fps, looped);
+				if (hasFrameLabel(prefix))
+					this.anim.addByFrameLabelIndices(name, prefix, indices, fps, looped);
+				else
+					this.anim.addBySymbolIndices(name, prefix, indices, fps, looped);
 			} else {
 				if (hasFrameLabel(prefix)) {
 					this.anim.addByFrameLabel(name, prefix, fps, looped);
@@ -213,7 +232,7 @@ class FunkinSprite extends animate.FlxAnimate {
 	}
 
 	private function loadAtlasOffsets(props:ObjectData, path:String):Map<String, Int> {
-		var assetPath = '$path/${props.path}';
+		var assetPath = joinPath(path, props.path);
 		if (cacheOffsets.exists(assetPath))
 			return cacheOffsets.get(assetPath);
 
@@ -227,18 +246,19 @@ class FunkinSprite extends animate.FlxAnimate {
 				continue;
 			merged.set(animPath, true);
 
-			var extra = Paths.getAnimated('$path/$animPath');
+			var extra = Paths.getAnimated(joinPath(path, animPath));
 			if (extra == null)
 				continue;
 
 			if (extra is FlxAtlasFrames) {
 				offsets.set(animPath, atlas.frames.length);
 				atlas.addAtlas(cast extra);
-			} else if (extra is String) {
+			} else if (extra is String || extra is flixel.graphics.FlxGraphic) {
 				var fScale = getAnimFrameScale(props.anims, animPath);
 				if (fScale == null)
 					continue;
-				var tileFrames = FlxTileFrames.fromGraphic(FlxG.bitmap.add(cast(extra, String)), FlxPoint.get(fScale[0], fScale[1]));
+				var tileGraphic:flixel.graphics.FlxGraphic = (extra is String) ? FlxG.bitmap.add(cast(extra, String)) : cast extra;
+				var tileFrames = FlxTileFrames.fromGraphic(tileGraphic, FlxPoint.get(fScale[0], fScale[1]));
 				var offsetIdx = atlas.frames.length;
 				for (frame in (tileFrames.frames : Array<Dynamic>))
 					atlas.frames.push(frame);
@@ -260,7 +280,7 @@ class FunkinSprite extends animate.FlxAnimate {
 				continue;
 			merged.set(animPath, true);
 
-			var extra = Paths.getAnimated('$path/$animPath');
+			var extra = Paths.getAnimated(joinPath(path, animPath));
 			if (extra == null || !(extra is FlxAnimateFrames))
 				continue;
 
@@ -282,10 +302,8 @@ class FunkinSprite extends animate.FlxAnimate {
 	}
 
 	public function loadMakeGraphic(props:ObjectData):Void {
-		var color:String = '';
-		if (props.color != null)
-			color = props.color;
-		makeGraphic(Std.int(props.scale[0]), Std.int(props.scale[1]), color);
+		var color:Null<flixel.util.FlxColor> = props.color != null ? flixel.util.FlxColor.fromString(props.color) : null;
+		makeGraphic(Std.int(props.scale[0]), Std.int(props.scale[1]), color ?? flixel.util.FlxColor.WHITE);
 		loadParams(props);
 		updateHitbox();
 		_assetLoaded = true;
@@ -351,7 +369,7 @@ class FunkinSprite extends animate.FlxAnimate {
 	}
 
 	public function activeOffsets(off:Point)
-		offset.set(0 - off.x, 0 - off.y);
+		offset.set(_baseOffset.x - off.x, _baseOffset.y - off.y);
 
 	override public function draw():Void {
 		if (!_assetLoaded)
