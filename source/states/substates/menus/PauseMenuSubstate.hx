@@ -15,7 +15,13 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 	var options:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Options', 'Exit to Menu'];
 	var defaultOptions:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Options', 'Exit to Menu'];
 
-	var tips:Array<String> = ["wey tienes que darle a las flechitas no seas bobis"];
+	var tips:Array<String> = [
+		"Stay calm, the rhythm flows better without stress.",
+		"Beep, bop, skdoo bep!",
+		"Practice makes perfect (and avoids frustration).",
+		"Are you sure you don't need a break?",
+		"Follow the rhythm, not just the keys."
+	];
 
 	var curSelect:Int = 0;
 
