@@ -24,7 +24,16 @@ typedef EventSchema = {
 
 class EventManager {
 	public static final schemas:Array<EventSchema> = [
-		{name: 'Camera Follow', fields: [{key: 'char', kind: 'char'}]},
+		{
+			name: 'Camera Follow',
+			fields: [
+				{key: 'char', kind: 'char'},
+				{key: 'x', kind: 'float', step: 10, min: -5000, max: 5000, def: 0},
+				{key: 'y', kind: 'float', step: 10, min: -5000, max: 5000, def: 0},
+				{key: 'duration', kind: 'float', step: 1, min: 0, max: 256, def: 4},
+				{key: 'ease', kind: 'text', def: 'CLASSIC'}
+			]
+		},
 		{
 			name: 'Center Camera',
 			fields: [
@@ -34,10 +43,45 @@ class EventManager {
 			]
 		},
 		{name: 'Change Character', fields: [{key: 'char', kind: 'char'}, {key: 'newCharacter', kind: 'charName'}]},
-		{name: 'Change Scroll Speed', fields: [{key: 'speed', kind: 'float', step: 0.1, min: 0.5, max: 6, def: 1.5}]},
+		{
+			name: 'Change Scroll Speed',
+			fields: [
+				{key: 'speed', kind: 'float', step: 0.1, min: 0.5, max: 6, def: 1.5},
+				{key: 'duration', kind: 'float', step: 1, min: 0, max: 256, def: 0},
+				{key: 'ease', kind: 'text', def: 'linear'}
+			]
+		},
 		{name: 'Change BPM', fields: [{key: 'bpm', kind: 'float', step: 1, min: 20, max: 400, def: 120}]},
-		{name: 'Play Special Anim', fields: [{key: 'char', kind: 'char'}, {key: 'anim', kind: 'text', def: 'hey'}]}
+		{name: 'Play Special Anim', fields: [{key: 'char', kind: 'char'}, {key: 'anim', kind: 'text', def: 'hey'}]},
+		{
+			name: 'Zoom Camera',
+			fields: [
+				{key: 'zoom', kind: 'float', step: 0.05, min: 0.1, max: 5, def: 1},
+				{key: 'duration', kind: 'float', step: 1, min: 0, max: 256, def: 4},
+				{key: 'ease', kind: 'text', def: 'expoOut'},
+				{key: 'mode', kind: 'text', def: 'stage'}
+			]
+		},
+		{name: 'Change Note Skin', fields: [{key: 'char', kind: 'char'}, {key: 'skin', kind: 'text', def: 'default'}]},
+		{
+			name: 'Play Video',
+			fields: [{key: 'video', kind: 'text', def: ''}, {key: 'camera', kind: 'text', def: 'other'}]
+		},
+		{
+			name: 'Camera Bop',
+			fields: [
+				{key: 'rate', kind: 'float', step: 1, min: 0, max: 16, def: 4},
+				{key: 'intensity', kind: 'float', step: 0.1, min: 0, max: 5, def: 1}
+			]
+		}
 	];
+
+	public static function easeByName(name:String):Null<flixel.tweens.FlxEase.EaseFunction> {
+		if (name == null)
+			return flixel.tweens.FlxEase.linear;
+		var f = Reflect.field(flixel.tweens.FlxEase, name);
+		return Reflect.isFunction(f) ? f : null;
+	}
 
 	public static function schemaNames():Array<String> {
 		return [for (t in schemas) t.name];
@@ -84,6 +128,7 @@ class EventManager {
 	#end
 
 	public var pendingEvents:Array<EventsData> = [];
+	public var videos:SongVideos = new SongVideos();
 	public var onEvent:(EventsData) -> Void = null;
 
 	public function new() {}
@@ -115,6 +160,7 @@ class EventManager {
 		pendingEvents.sort((a, b) -> Std.int(a.time - b.time));
 
 		onEvent = handleEvent;
+		videos.preload(events);
 
 		#if HSCRIPT_ALLOWED
 		initEventScripts(events);
@@ -147,13 +193,16 @@ class EventManager {
 				}
 			case 'Camera Follow':
 				var charId:String = event.arguments.char;
-				var char = cast PlayState.instance.chars.get(charId);
-				if (char == null) {
+				var char:Character = charId != null && charId != '' ? cast PlayState.instance.chars.get(charId) : null;
+				if (charId != null && charId != '' && char == null) {
 					Console.log('[EventManager] Camera Follow char "$charId" not found');
 					return;
 				}
+				var easeName:String = event.arguments.ease ?? 'CLASSIC';
+				var steps:Float = event.arguments.duration ?? 4.0;
 				PlayState.instance.cameraController.existsCamEvents = true;
-				PlayState.instance.cameraController.char = char;
+				PlayState.instance.cameraController.focusOn(char, event.arguments.x ?? 0.0, event.arguments.y ?? 0.0,
+					steps * core.rhythm.RhythmCore.stepInMs / 1000, easeName == 'CLASSIC' ? null : easeByName(easeName), easeName == 'INSTANT');
 			case 'Center Camera':
 				var charId1:String = event.arguments.char1;
 				var charId2:String = event.arguments.char2;
@@ -173,7 +222,12 @@ class EventManager {
 				var rawSpeed = event.arguments.speed != null ? event.arguments.speed : event.arguments[0];
 				var newSpeed:Float = Std.parseFloat(Std.string(rawSpeed));
 				if (!Math.isNaN(newSpeed)) {
-					PlayState.instance.noteController.targetScrollSpeed = newSpeed;
+					if (event.arguments.duration == null)
+						PlayState.instance.noteController.targetScrollSpeed = newSpeed;
+					else {
+						var steps:Float = event.arguments.duration;
+						PlayState.instance.noteController.tweenScrollSpeed(newSpeed, steps * core.rhythm.RhythmCore.stepInMs / 1000, easeByName(event.arguments.ease));
+					}
 				}
 			case 'Change BPM':
 				var newBPM:Float = event.arguments.bpm;
@@ -190,7 +244,28 @@ class EventManager {
 				var success = PlayState.instance.chars.playSpecialAnim(charId, animKey);
 				if (!success)
 					Console.log('[EventManager] Play Special Anim: could not be reproduced "$animKey" in "$charId"');
+			case 'Zoom Camera':
+				var cam = PlayState.instance.cameraController;
+				var zoom:Float = event.arguments.zoom ?? 1.0;
+				if (event.arguments.mode != 'direct')
+					zoom *= cam.stageZoom;
+				var steps:Float = event.arguments.duration ?? 4.0;
+				cam.zoomTo(zoom, steps * core.rhythm.RhythmCore.stepInMs / 1000, easeByName(event.arguments.ease));
+			case 'Change Note Skin':
+				var charId:String = event.arguments.char;
+				var skin:String = event.arguments.skin;
+				if (!PlayState.instance.noteController.changeCharSkin(charId, skin))
+					Console.log('[EventManager] Change Note Skin: char "$charId" or skin "$skin" not found');
+			case 'Play Video':
+				var name:String = event.arguments.video;
+				if (name == null || name == '' || !videos.play(name, event.arguments.camera ?? 'other'))
+					Console.log('[EventManager] Play Video: could not play "$name"');
+			case 'Camera Bop':
+				var cam = PlayState.instance.cameraController;
+				cam.bopEvery = Std.int(event.arguments.rate ?? 4);
+				cam.bopIntensity = event.arguments.intensity ?? 1.0;
 		}
+		modding.vslice.VSliceHooks.songEvent(event);
 		#if HSCRIPT_ALLOWED
 		var handler = eventScripts.get(event.name);
 		if (handler != null)
@@ -207,6 +282,7 @@ class EventManager {
 	}
 
 	public function destroy() {
+		videos.destroy();
 		pendingEvents = null;
 		onEvent = null;
 		#if HSCRIPT_ALLOWED

@@ -2,9 +2,8 @@ package states.cutscenes;
 
 #if VIDEO_ALLOWED
 import hxvlc.util.Handle;
-import hxvlc.flixel.FlxVideoSprite;
 
-class VideoSprite extends FlxVideoSprite {
+class VideoSprite extends SafeVideoSprite {
 	public var finishCallback:Void->Void;
 	public var errorCallback:String->Void;
 	public var loadCallback:Void->Void;

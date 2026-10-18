@@ -23,6 +23,22 @@ class CameraController {
 
 	public var lerp:Float = 0.04;
 
+	public var stageZoom:Float = 1.0;
+	public var bopEvery:Int = 4;
+	public var bopIntensity:Float = 1.0;
+
+	var zoomTween:flixel.tweens.FlxTween;
+
+	public var focusX:Float = 0;
+	public var focusY:Float = 0;
+
+	var focusTween:flixel.tweens.FlxTween;
+	var focusProgress:Float = 0;
+	var focusStartX:Float = 0;
+	var focusStartY:Float = 0;
+	var fixedX:Float = 0;
+	var fixedY:Float = 0;
+
 	public function new(camGame:Camera, camHUD:Camera) {
 		this.camGame = camGame;
 		this.camHUD = camHUD;
@@ -34,7 +50,18 @@ class CameraController {
 	}
 
 	public function update(elapsed:Float):Void {
-		followChar(char);
+		if (focusTween != null) {
+			var tx = fixedX, ty = fixedY;
+			if (char != null) {
+				var pos = char.getCamPosition();
+				tx = pos.x + focusX;
+				ty = pos.y + focusY;
+			}
+			moveCameraTo(FlxMath.lerp(focusStartX, tx, focusProgress), FlxMath.lerp(focusStartY, ty, focusProgress));
+		} else if (!isLock && char != null) {
+			var pos = char.getCamPosition();
+			moveCameraTo(pos.x + focusX, pos.y + focusY);
+		}
 
 		lerpZoom(elapsed);
 	}
@@ -54,6 +81,7 @@ class CameraController {
 	}
 
 	public function centerCamera(?a:Character, ?b:Character, ?lock:Bool = true) {
+		cancelFocusTween();
 		final aCam = a.getCamPosition();
 		final bCam = b.getCamPosition();
 
@@ -72,9 +100,59 @@ class CameraController {
 		if (!zoomEnabled)
 			return;
 		if (camGame.zoom < 1.35) {
-			camGame.zoom += 0.015;
-			camHUD.zoom += 0.03;
+			camGame.zoom += 0.015 * bopIntensity;
+			camHUD.zoom += 0.03 * bopIntensity;
 		}
+	}
+
+	public function zoomTo(target:Float, duration:Float, ?ease:flixel.tweens.FlxEase.EaseFunction):Void {
+		zoomTween?.cancel();
+		if (duration <= 0 || ease == null) {
+			defaultZoom = target;
+			camGame.zoom = target;
+			return;
+		}
+		zoomTween = flixel.tweens.FlxTween.num(defaultZoom, target, duration, {ease: ease}, v -> defaultZoom = v);
+	}
+
+	public function focusOn(target:Null<Character>, x:Float, y:Float, duration:Float, ?ease:flixel.tweens.FlxEase.EaseFunction, snap:Bool = false):Void {
+		cancelFocusTween();
+		isLock = false;
+		char = target;
+		focusX = target != null ? x : 0;
+		focusY = target != null ? y : 0;
+
+		var dest = target != null ? target.getCamPosition() : null;
+		var destX = dest != null ? dest.x + x : x;
+		var destY = dest != null ? dest.y + y : y;
+		fixedX = x;
+		fixedY = y;
+
+		if (snap || (ease != null && duration <= 0)) {
+			snapCameraTo(destX, destY);
+			return;
+		}
+		if (ease == null) {
+			moveCameraTo(destX, destY);
+			return;
+		}
+
+		focusStartX = camGame.scroll.x + camGame.width * 0.5;
+		focusStartY = camGame.scroll.y + camGame.height * 0.5;
+		focusProgress = 0;
+		camGame.followLerp = 1;
+		focusTween = flixel.tweens.FlxTween.num(0, 1, duration, {
+			ease: ease,
+			onComplete: _ -> cancelFocusTween()
+		}, v -> focusProgress = v);
+	}
+
+	function cancelFocusTween():Void {
+		if (focusTween == null)
+			return;
+		focusTween.cancel();
+		focusTween = null;
+		camGame.followLerp = lerp;
 	}
 
 	public function moveCameraTo(x:Float, y:Float) {
@@ -82,6 +160,8 @@ class CameraController {
 	}
 
 	public function destroy() {
+		zoomTween?.cancel();
+		focusTween?.cancel();
 		if (camPoint != null)
 			camPoint.destroy();
 		camPoint = null;
