@@ -84,7 +84,7 @@ class ModsState extends MusicBeatState {
 			var modName = ModsRegistry.mods[i];
 			var modsFolder = core.assets.Library.modsFolder;
 
-			var graphic = '$modsFolder/$modName/images/iconMod.png';
+			var graphic = '$modsFolder/$modName/images/iconMod.png' ?? '$modsFolder/$modName/_polymod_icon.png';
 			if (!sys.FileSystem.exists(graphic))
 				graphic = Paths.getPath('menus/mods/fallback-icon', 'image');
 
@@ -246,7 +246,7 @@ class ModsState extends MusicBeatState {
 			FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
 
 			rebuildModMenu();
-		});
+		}, camOther);
 	}
 
 	function fitText(txt:FlxText, full:String, maxWidth:Float, suffix:String = ''):Void {
