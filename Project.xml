@@ -41,6 +41,7 @@
 
 	<set name="BUILD_DIR" value="export" />
 	<source path="source" />
+	<source path="source/modding/vslice/api" />
 
 	<assets path="assets"/>
 
