@@ -26,6 +26,7 @@ class FreeplayState extends MusicBeatState {
 	var freeplayData:core.json.engine.FreeplayData;
 
 	var album:FunkinSprite;
+	static final ALBUM_WINDOW:Array<Int> = [80, 50, 642, 595];
 	var disk:FunkinSprite;
 
 	var artistTxt:FlxText;
@@ -76,7 +77,7 @@ class FreeplayState extends MusicBeatState {
 
 		core.rhythm.audio.MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102);
 
-		freeplayData = FormatJson.readJson(Paths.getPath('songs/listSong', 'json'));
+		freeplayData = modding.vslice.VSlice.isActive() ? modding.vslice.VSliceSongs.freeplay() : FormatJson.readJson(Paths.getPath('songs/listSong', 'json'));
 
 		#if HSCRIPT_ALLOWED
 		if (script.callCancellable("onCreateCancel", []))
@@ -116,13 +117,13 @@ class FreeplayState extends MusicBeatState {
 				var iconName:String = freeplayData.songData[i].icon;
 				var charData = charDataCache.get(iconName);
 				if (charData == null) {
-					charData = FormatJson.readJson(Paths.getPath('data/characters/' + iconName, 'json'));
+					charData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('data/characters/' + iconName, 'json'));
 					charDataCache.set(iconName, charData);
 				}
 
 				var icon:Icon = new Icon(false, charData);
 				if (icon != null) {
-					icon.scale.set(0.48, 0.48);
+					icon.scale.set(0.48 * icon.baseScale, 0.48 * icon.baseScale);
 					icon.updateHitbox();
 					icon.alpha = 0.7;
 					icon.x = card.x - icon.width + 165;
@@ -381,9 +382,9 @@ class FreeplayState extends MusicBeatState {
 		}
 
 		for (icon in icons) {
-			if (icon.scale.x > 0.48) {
-				icon.scale.x = FlxMath.lerp(icon.scale.x, 0.48, elapsed * 12);
-				icon.scale.y = FlxMath.lerp(icon.scale.y, 0.48, elapsed * 12);
+			if (icon.scale.x > 0.48 * icon.baseScale) {
+				icon.scale.x = FlxMath.lerp(icon.scale.x, 0.48 * icon.baseScale, elapsed * 12);
+				icon.scale.y = FlxMath.lerp(icon.scale.y, 0.48 * icon.baseScale, elapsed * 12);
 			}
 		}
 
@@ -507,8 +508,18 @@ class FreeplayState extends MusicBeatState {
 		updateScore();
 
 		if (album != null) {
-			album.loadGraphic(Paths.getPath('menus/freeplay/albums/' + freeplayData.songData[curSelected].album, 'image'));
-			album.x = FlxG.width * 0.925 - album.width;
+			var albumName = freeplayData.songData[curSelected].album;
+			var albumPath = albumName == null ? null : Paths.getPath(albumName.indexOf('/') >= 0 ? albumName : 'menus/freeplay/albums/' + albumName, 'image');
+			album.visible = albumPath != null;
+			if (albumPath != null) {
+				album.loadGraphic(albumPath);
+				var sx = disk != null ? disk.scale.x : 0.5;
+				var sy = disk != null ? disk.scale.y : 0.5;
+				album.setGraphicSize(Std.int(ALBUM_WINDOW[2] * sx), Std.int(ALBUM_WINDOW[3] * sy));
+				album.updateHitbox();
+				album.x = (disk != null ? disk.x : FlxG.width * 0.96 - 370) + ALBUM_WINDOW[0] * sx;
+				album.y = (disk != null ? disk.y : 90) + ALBUM_WINDOW[1] * sy;
+			}
 		}
 
 		if (songs.length > 0) {
@@ -545,7 +556,7 @@ class FreeplayState extends MusicBeatState {
 		for (icon in icons) {
 			if (icon != null) {
 				if (icon.bumpInBeats && Math.floor(beat % icon.stepTempo) == 0) {
-					icon.scale.set(0.56, 0.56);
+					icon.scale.set(0.56 * icon.baseScale, 0.56 * icon.baseScale);
 				}
 			}
 		}

@@ -251,16 +251,21 @@ class StoryMenuState extends MusicBeatState {
 	}
 
 	function loadAllWeeks() {
-		var resolved = Paths.getPath('data/storymenu/weeks');
-		if (resolved == null || !FileSystem.exists(resolved))
-			return;
+		if (modding.vslice.VSlice.isActive()) {
+			for (week in modding.vslice.VSliceSongs.weeks())
+				weeks.push(week);
+		} else {
+			var resolved = Paths.getPath('data/storymenu/weeks');
+			if (resolved == null || !FileSystem.exists(resolved))
+				return;
 
-		for (file in FileSystem.readDirectory(resolved)) {
-			if (!file.endsWith('.json'))
-				continue;
-			var data:core.json.engine.storymenu.WeekData = FormatJson.readJson(Paths.getPath('data/storymenu/weeks/$file'));
-			if (data != null)
-				weeks.push(data);
+			for (file in FileSystem.readDirectory(resolved)) {
+				if (!file.endsWith('.json'))
+					continue;
+				var data:core.json.engine.storymenu.WeekData = FormatJson.readJson(Paths.getPath('data/storymenu/weeks/$file'));
+				if (data != null)
+					weeks.push(data);
+			}
 		}
 
 		weeks.sort((a, b) -> a.priority - b.priority);

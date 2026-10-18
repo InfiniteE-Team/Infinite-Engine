@@ -17,6 +17,7 @@ class VSlicePorter implements FormatChartConverter {
 		var player:String = raw._player ?? 'bf';
 		var opponent:String = raw._opponent ?? 'dad';
 		var girlfriend:String = raw._girlfriend ?? 'gf';
+		var noteSkin:Null<String> = modding.vslice.VSliceNoteStyles.skinFor(raw._noteStyle);
 
 		var diff:Null<String> = raw._diff;
 		var notesObj:Dynamic = raw.notes;
@@ -53,7 +54,7 @@ class VSlicePorter implements FormatChartConverter {
 			var isOpponent = d >= 4;
 
 			notes.push({
-				char: isOpponent ? opponent : player,
+				char: isOpponent ? 'dad' : 'bf',
 				lane: lane,
 				time: t,
 				type: 'normal',
@@ -69,21 +70,16 @@ class VSlicePorter implements FormatChartConverter {
 				var evTime:Float = ev.t ?? 0.0;
 				var evVal:Dynamic = ev.v ?? {};
 
-				if (evName == 'FocusCamera') {
-					var charIdx:Int = evVal.char ?? 0;
-					var focusChar = charIdx == 0 ? player : opponent;
-					events.push({
-						time: evTime,
-						name: 'Camera Follow',
-						arguments: {char: focusChar}
-					});
-				} else {
-					events.push({
-						time: evTime,
-						name: evName,
-						arguments: evVal
-					});
+				var mapped = mapEvent(evName, evVal, speed);
+				if (mapped != null) {
+					mapped.args.vsKind = evName;
+					mapped.args.vsValue = evVal;
 				}
+				events.push({
+					time: evTime,
+					name: mapped?.name ?? evName,
+					arguments: mapped?.args ?? evVal
+				});
 			}
 		}
 		events.sort((a, b) -> a.time < b.time ? -1 : 1);
@@ -108,7 +104,7 @@ class VSlicePorter implements FormatChartConverter {
 			gameplay: {
 				chars: [
 					{
-						id: girlfriend,
+						id: 'gf',
 						name: girlfriend,
 						role: 'gf',
 						strums: {
@@ -118,19 +114,21 @@ class VSlicePorter implements FormatChartConverter {
 						}
 					},
 					{
-						id: player,
+						id: 'bf',
 						name: player,
 						role: 'player',
 						strums: {
-							position: [720, 0]
+							position: [720, 0],
+							noteSkin: noteSkin
 						}
 					},
 					{
-						id: opponent,
+						id: 'dad',
 						name: opponent,
 						role: 'opponent',
 						strums: {
-							position: [50, 0]
+							position: [50, 0],
+							noteSkin: noteSkin
 						}
 					}
 				],
@@ -151,19 +149,19 @@ class VSlicePorter implements FormatChartConverter {
 			gameplay: {
 				chars: [
 					{
-						id: girlfriend,
+						id: 'gf',
 						name: girlfriend,
 						role: 'gf',
 						strums: {position: [0, 0], visible: false, notesVisible: false}
 					},
 					{
-						id: player,
+						id: 'bf',
 						name: player,
 						role: 'player',
 						strums: {position: [720, 0]}
 					},
 					{
-						id: opponent,
+						id: 'dad',
 						name: opponent,
 						role: 'opponent',
 						strums: {position: [50, 0]}
@@ -173,5 +171,54 @@ class VSlicePorter implements FormatChartConverter {
 			},
 			notes: []
 		};
+	}
+
+	static function mapEvent(name:String, v:Dynamic, songSpeed:Float):Null<{name:String, args:Dynamic}> {
+		switch (name) {
+			case 'FocusCamera':
+				var charIdx:Int = v.char ?? 0;
+				return {name: 'Camera Follow', args: {
+					char: charIdx < 0 ? '' : (charIdx == 0 ? 'bf' : (charIdx == 2 ? 'gf' : 'dad')),
+					x: v.x ?? 0.0,
+					y: v.y ?? 0.0,
+					duration: v.duration ?? 4.0,
+					ease: easeName(v.ease ?? 'CLASSIC', v.easeDir)
+				}};
+			case 'ZoomCamera':
+				return {name: 'Zoom Camera', args: {
+					zoom: v.zoom ?? 1.0,
+					duration: v.duration ?? 4.0,
+					ease: easeName(v.ease, v.easeDir),
+					mode: v.mode ?? 'direct'
+				}};
+			case 'SetCameraBop':
+				return {name: 'Camera Bop', args: {rate: v.rate ?? 4, intensity: v.intensity ?? 1.0}};
+			case 'PlayAnimation':
+				var target:String = Std.string(v.target ?? 'bf');
+				var char = switch (target) {
+					case 'boyfriend' | 'bf' | 'player': 'bf';
+					case 'girlfriend' | 'gf': 'gf';
+					case 'dad' | 'opponent': 'dad';
+					default: target;
+				};
+				return {name: 'Play Special Anim', args: {char: char, anim: v.anim}};
+			case 'ScrollSpeed':
+				var scroll:Float = v.scroll ?? 1.0;
+				return {name: 'Change Scroll Speed', args: {
+					speed: v.absolute == true ? scroll : scroll * songSpeed,
+					duration: v.duration ?? 4.0,
+					ease: easeName(v.ease ?? 'linear', v.easeDir)
+				}};
+			default:
+				return null;
+		}
+	}
+
+	static function easeName(ease:String, dir:String):String {
+		if (ease == null)
+			return 'linear';
+		if (ease == 'INSTANT' || ease == 'CLASSIC' || ease == 'linear' || dir == null || dir == '')
+			return ease;
+		return ease + dir;
 	}
 }

@@ -45,6 +45,8 @@ class ChartPorter {
 			var pd:Dynamic = meta.playData;
 			if (pd.stage != null)
 				Reflect.setField(raw, '_stage', pd.stage);
+			if (pd.noteStyle != null)
+				Reflect.setField(raw, '_noteStyle', pd.noteStyle);
 
 			if (pd.characters != null) {
 				var ch:Dynamic = pd.characters;
@@ -56,7 +58,7 @@ class ChartPorter {
 					Reflect.setField(raw, '_girlfriend', ch.girlfriend);
 
 				if (ch.instrumental != null && ch.instrumental != '')
-					Reflect.setField(raw, '_instPrefix', Std.string(ch.instrumental));
+					Reflect.setField(raw, '_instPrefix', '-' + Std.string(ch.instrumental)); // V-Slice names it Inst-<id>.ogg -JloorDev
 
 				if (ch.vocals != null && ch.vocals != '')
 					Reflect.setField(raw, '_vocPrefix', Std.string(ch.vocals));
@@ -64,11 +66,11 @@ class ChartPorter {
 				var playerVocs:Array<Dynamic> = ch.playerVocals != null ? cast ch.playerVocals : [];
 				var opponentVocs:Array<Dynamic> = ch.opponentVocals != null ? cast ch.opponentVocals : [];
 				if (playerVocs.length > 0 || opponentVocs.length > 0) {
-					var stems:Array<String> = [];
-					for (id in playerVocs)
-						stems.push('Voices-' + Std.string(id));
-					for (id in opponentVocs)
-						stems.push('Voices-' + Std.string(id));
+					var stems:Array<String> = [
+						'',
+						playerVocs.length > 0 ? 'Voices-' + Std.string(playerVocs[0]) : '',
+						opponentVocs.length > 0 ? 'Voices-' + Std.string(opponentVocs[0]) : ''
+					];
 					Reflect.setField(raw, '_vocs', stems);
 				}
 			}

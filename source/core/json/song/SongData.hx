@@ -110,12 +110,18 @@ class SongConfig {
 
 		if (songData == null) {
 			var raw:Dynamic = FormatJson.readJson(Paths.getPath(baseFile, 'json'));
+			var meta:Dynamic = null;
+			if (raw == null && modding.vslice.VSlice.isActive()) {
+				raw = modding.vslice.VSliceSongs.chart(curSong);
+				meta = modding.vslice.VSliceSongs.metadata(curSong);
+			}
 			if (raw == null)
 				return;
 
 			loadSeparateMeta(raw, curSong);
 
-			var meta:Dynamic = tryLoadVSliceMeta(curSong);
+			if (meta == null)
+				meta = tryLoadVSliceMeta(curSong);
 			var converted = ChartPorter.tryConvert(raw, diff, meta);
 			songData = converted ?? cast raw;
 
@@ -189,7 +195,7 @@ class SongConfig {
 
 	private function tryLoadVSliceMeta(curSong:String):Dynamic {
 		var path = core.assets.Library.findLib('songs/$curSong/$curSong-metadata.json');
-		if (sys.FileSystem.exists(path)) {
+		if (path != null && sys.FileSystem.exists(path)) {
 			var meta:Dynamic = FormatJson.readJson(path);
 			if (meta != null) {
 				Console.log('SongData: V-Slice metadata loaded from $path');

@@ -63,9 +63,16 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 			return;
 		} else {
 			if (SONG.chars != null) {
+				var usedStems:Array<String> = [];
 				for (i in 0...SONG.chars.length) {
 					var charName = SONG.chars[i].id;
-					var charVoc = i < SONG.vocs.length ? audio(SONG.vocs[i], onfinish) : null;
+					var stem = i < SONG.vocs.length ? SONG.vocs[i] : null;
+					var file = stem != null && stem != '' ? voiceStem(stem) : null;
+					if (file != null && usedStems.contains(file))
+						file = null;
+					if (file != null)
+						usedStems.push(file);
+					var charVoc = file != null ? audio(file, onfinish) : null;
 
 					if (charVoc != null) {
 						vocalsGroup.push(charVoc);
@@ -132,6 +139,13 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 			randomMiss.volume = FlxG.random.float(0.1, 0.2);
 			randomMiss.play(true);
 		}
+	}
+
+	function voiceStem(stem:String):String {
+		var name = stem;
+		while (Paths.getPath(name, 'songAudio') == null && name.lastIndexOf('-') > 0)
+			name = name.substr(0, name.lastIndexOf('-'));
+		return name;
 	}
 
 	public function audio(path:String, onfinish:() -> Void):Sound {

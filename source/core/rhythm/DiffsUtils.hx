@@ -15,13 +15,16 @@ class DiffsUtils {
 		difficulties = [];
 		var diffsDir = core.assets.Library.findLib('songs/$curSong/charts/');
 
-		if (FileSystem.exists(diffsDir)) {
+		if (diffsDir != null && FileSystem.exists(diffsDir)) {
 			for (file in sys.FileSystem.readDirectory(diffsDir)) {
 				var diffName = file.replace('.json', '').replace('.osu', '');
 				if (!difficulties.contains(diffName))
 					difficulties.push(diffName);
 			}
 		}
+
+		if (difficulties.length == 0 && modding.vslice.VSlice.isActive())
+			difficulties = modding.vslice.VSliceSongs.difficulties(curSong);
 
 		difficulties.sort(function(a:String, b:String):Int {
 			var iA = defaultOrder.indexOf(a.toLowerCase());

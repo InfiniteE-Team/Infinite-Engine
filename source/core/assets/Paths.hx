@@ -32,7 +32,7 @@ class Paths {
 					return Library.findLib("videos/" + fileName + '.mp4');
 				case SONG_AUDIO:
 					var songName = PlayState.instance?.curSong ?? currentSong;
-					return Library.findLib('songs/$songName/audio/$fileName.ogg');
+					return Library.findLib('songs/$songName/audio/$fileName.ogg') ?? Library.findLib('songs/$songName/$fileName.ogg');
 				case ANIMATED:
 					return getAnimated(fileName);
 				case XML:
@@ -73,9 +73,16 @@ class Paths {
 
 	public static function resolveScript(fileName:String):String {
 		var extensions = ['.hx', '.lua', '.hxc'];
-		for (ext in extensions) {
-			if (FileSystem.exists(fileName + ext)) {
-				return fileName + ext;
+		var roots = [Library.baseFolder];
+		if (modding.mods.ModsRegistry.onMod && modding.mods.ModsRegistry.currentMod != null && modding.mods.ModsRegistry.currentMod != '')
+			roots.unshift('${Library.modsFolder}/${modding.mods.ModsRegistry.currentMod}');
+		var skipHxc = modding.vslice.VSlice.isActive();
+		for (root in roots) {
+			for (ext in extensions) {
+				if (skipHxc && ext == '.hxc')
+					continue;
+				if (FileSystem.exists('$root/$fileName$ext'))
+					return fileName + ext;
 			}
 		}
 		return fileName + '.hx';
@@ -155,37 +162,30 @@ class Paths {
 			return;
 		}
 
+		var formatDetected = "image";
+		var folderPath:String = null;
+		var atlasPath:String = null;
+		var animFolder = Library.findLib('images/$fileName');
+		if (animFolder != null && FileSystem.exists('$animFolder/Animation.json')) {
+			formatDetected = "animate";
+			folderPath = animFolder;
+		} else {
+			for (kind in [["sparrow", ".xml"], ["json", ".json"], ["pack", ".txt"]]) {
+				atlasPath = Library.findLib('images/$fileName${kind[1]}');
+				if (atlasPath != null) {
+					formatDetected = kind[0];
+					break;
+				}
+			}
+		}
+
 		// CPU / RAM
 		sys.thread.Thread.create(function() {
 			var img = lime.graphics.Image.fromFile(imagePath);
-
-			var formatDetected = "image";
 			var rawData:String = null;
-			var folderPath:String = null;
-
-			var animFolder = Library.findLib('images/$fileName');
-			if (animFolder != null && FileSystem.exists('$animFolder/Animation.json')) {
-				formatDetected = "animate";
-				folderPath = animFolder;
-			} else {
-				var xmlPath = Library.findLib('images/$fileName.xml');
-				if (xmlPath != null) {
-					formatDetected = "sparrow";
-					rawData = readText(xmlPath);
-				} else {
-					var jsonPath = Library.findLib('images/$fileName.json');
-					if (jsonPath != null) {
-						formatDetected = "json";
-						rawData = readText(jsonPath);
-					} else {
-						var txtPath = Library.findLib('images/$fileName.txt');
-						if (txtPath != null) {
-							formatDetected = "pack";
-							rawData = readText(txtPath);
-						}
-					}
-				}
-			}
+			try {
+				rawData = atlasPath != null ? readText(atlasPath) : null;
+			} catch (e:Dynamic) {}
 
 			// VRAM
 			haxe.MainLoop.runInMainThread(function() {
