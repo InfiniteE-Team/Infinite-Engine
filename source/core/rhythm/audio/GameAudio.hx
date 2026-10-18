@@ -25,6 +25,8 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 		clear();
 		inst = null;
 		vocals = null;
+		vocalsGroup = [];
+		vocalsMap = new Map();
 		for (miss in soundMisses) {
 			FlxG.sound.list.remove(miss, true);
 			miss.destroy();
@@ -62,12 +64,12 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 		} else {
 			if (SONG.chars != null) {
 				for (i in 0...SONG.chars.length) {
-					var charName = SONG.chars[i];
-					var charVoc = audio(SONG.vocs[i], onfinish);
+					var charName = SONG.chars[i].id;
+					var charVoc = i < SONG.vocs.length ? audio(SONG.vocs[i], onfinish) : null;
 
 					if (charVoc != null) {
 						vocalsGroup.push(charVoc);
-						vocalsMap.set(Std.string(charName), charVoc);
+						vocalsMap.set(charName, charVoc);
 						add(charVoc);
 					}
 				}
@@ -80,9 +82,8 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 	public function playAll():Void {
 		if (inst == null)
 			return;
-		if (vocals != null) {
-			vocals.time = inst.time;
-		}
+		for (voice in vocalsGroup)
+			voice.time = inst.time;
 		forEachAlive(function(s:FlxSound) if (s != null)
 			s.play());
 	}
@@ -109,7 +110,7 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 			return;
 
 		for (voice in vocalsGroup) {
-			if (vocals == null || !vocals.playing)
+			if (voice == null || vocals == null || !vocals.playing)
 				continue;
 
 			if (Math.abs(voice.time - inst.time) > 20) {

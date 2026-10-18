@@ -19,8 +19,7 @@ class ScriptHandler {
 	var superInstance:Dynamic;
 	var extraVars:Map<String, Dynamic> = [];
 
-	var callCache:Map<String, Array<Dynamic->Dynamic>> = new Map();
-	var callCancellableCache:Map<String, Array<Dynamic->Bool>> = new Map();
+	var callCache:Map<String, Array<{script:Script, fun:Dynamic}>> = new Map();
 
 	public var hasScripts(get, never):Bool;
 
@@ -100,36 +99,16 @@ class ScriptHandler {
 			modifiedTimes.push(sys.FileSystem.stat(path).mtime.getTime());
 		}
 		pendingPaths = [];
+		callCache.clear();
 	}
 
 	public function call(name:String, args:Array<Dynamic>):Dynamic {
 		if (scripts == null)
 			return null;
 
-		var cached = callCache.get(name);
-		if (cached != null) {
-			var result:Dynamic = null;
-			for (fn in cached)
-				result = fn(args);
-			for (script in luaScripts)
-				result = script.call(name, args);
-			return result;
-		}
-
-		var fns:Array<Dynamic->Dynamic> = [];
 		var result:Dynamic = null;
-		for (script in scripts) {
-			if (script.variables.exists(name)) {
-				var fun = script.variables.get(name);
-				if (Reflect.isFunction(fun)) {
-					fns.push(function(a) return safeCall(script, fun, a));
-					result = safeCall(script, fun, args);
-				}
-			}
-		}
-		if (fns.length > 0)
-			callCache.set(name, fns);
-
+		for (fn in hookFns(name))
+			result = safeCall(fn.script, fn.fun, args);
 		for (script in luaScripts)
 			result = script.call(name, args);
 		return result;
@@ -139,39 +118,31 @@ class ScriptHandler {
 		if (scripts == null)
 			return false;
 
-		var cached = callCancellableCache.get(name);
-		if (cached != null) {
-			for (fn in cached)
-				if (fn(args) == true)
-					return true;
-			for (script in luaScripts)
-				if (script.callCancellable(name, args))
-					return true;
-			return false;
-		}
-
-		var fns:Array<Dynamic->Bool> = [];
-		for (script in scripts) {
-			if (script.variables.exists(name)) {
-				var fun = script.variables.get(name);
-				if (Reflect.isFunction(fun)) {
-					fns.push(function(a) return safeCall(script, fun, a) == true);
-					if (safeCall(script, fun, args) == true) {
-						if (fns.length > 0)
-							callCancellableCache.set(name, fns);
-						return true;
-					}
-				}
-			}
-		}
-		if (fns.length > 0)
-			callCancellableCache.set(name, fns);
-
+		for (fn in hookFns(name))
+			if (safeCall(fn.script, fn.fun, args) == true)
+				return true;
 		for (script in luaScripts)
 			if (script.callCancellable(name, args))
 				return true;
-
 		return false;
+	}
+
+	// cache empty hooks too, most run every frame and no script uses them -JloorDev
+	function hookFns(name:String):Array<{script:Script, fun:Dynamic}> {
+		var cached = callCache.get(name);
+		if (cached != null)
+			return cached;
+
+		var fns:Array<{script:Script, fun:Dynamic}> = [];
+		for (script in scripts) {
+			if (script.variables.exists(name)) {
+				var fun = script.variables.get(name);
+				if (Reflect.isFunction(fun))
+					fns.push({script: script, fun: fun});
+			}
+		}
+		callCache.set(name, fns);
+		return fns;
 	}
 
 	public function exposeStatics(cls:Class<Dynamic>):Void {
@@ -182,8 +153,6 @@ class ScriptHandler {
 	public function hotReload():Void {
 		if (paths == null)
 			return;
-		callCache.clear();
-		callCancellableCache.clear();
 		for (i in 0...paths.length) {
 			if (!sys.FileSystem.exists(paths[i]))
 				continue;
@@ -191,6 +160,7 @@ class ScriptHandler {
 			if (mtime > modifiedTimes[i])
 				reload(i);
 		}
+		callCache.clear();
 	}
 
 	function buildScript(path:String):Null<Script> {
@@ -275,7 +245,6 @@ class ScriptHandler {
 		paths = null;
 		modifiedTimes = null;
 		callCache = null;
-		callCancellableCache = null;
 		extraVars = null;
 		superInstance = null;
 		for (script in luaScripts)

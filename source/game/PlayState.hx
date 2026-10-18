@@ -180,15 +180,7 @@ class PlayState extends MusicBeatState {
 
 		for (data in SONG.chars) {
 			chars.loadCharacter(data.id, data.name, data.role, stage.charLayer, script);
-			stage.applyCharProps(chars.get(data.id), data.id);
-			var stageProps = stage.charProps.get(data.id);
-			if (stageProps?.camPos != null) {
-				var char = cast(chars.get(data.id), game.objects.sprites.Character);
-				if (char != null) {
-					char.cameraOffset.x += stageProps.camPos[0];
-					char.cameraOffset.y += stageProps.camPos[1];
-				}
-			}
+			applyStageProps(cast(chars.get(data.id), game.objects.sprites.Character), data.id);
 		}
 
 		var opponentData = Lambda.find(SONG.chars, c -> CharacterController.namesOpponent.contains(c.role)) ?? (SONG.chars.length > 0 ? SONG.chars[0] : null);
@@ -200,6 +192,18 @@ class PlayState extends MusicBeatState {
 		#if HSCRIPT_ALLOWED
 		script.call("postBuildStage", []);
 		#end
+	}
+
+	// reapply stage pos + camPos, Change Character resets them -JloorDev
+	public function applyStageProps(char:game.objects.sprites.Character, id:String):Void {
+		if (char == null || stage == null)
+			return;
+		stage.applyCharProps(char, id);
+		var stageProps = stage.charProps.get(id);
+		if (stageProps?.camPos != null) {
+			char.cameraOffset.x += stageProps.camPos[0];
+			char.cameraOffset.y += stageProps.camPos[1];
+		}
 	}
 
 	function buildStrumsandNotes() {
@@ -550,6 +554,9 @@ class PlayState extends MusicBeatState {
 
 		if (FlxG.keys.justPressed.SEVEN && core.ConfigMain.globalData.developerMode) {
 			modding.editors.GameplayEditor.SONG = SONG;
+			// instance is null when the editor opens, so I pass folder and diff here -JloorDev
+			modding.editors.GameplayEditor.folder = curSong;
+			modding.editors.GameplayEditor.diff = DiffsUtils.difficulties[curDifficulty];
 			MusicBeatState.switchState(() -> new modding.editors.GameplayEditor());
 		}
 

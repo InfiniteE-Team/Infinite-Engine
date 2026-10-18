@@ -27,6 +27,8 @@ class InfiniteUtil {
 	public static function updateFramerate() {
 		FlxG.updateFramerate = core.config.SaveData.data.framerate;
 		FlxG.drawFramerate = core.config.SaveData.data.framerate;
+		// fixed timestep = slow motion if the PC can't hold the fps, set here since FlxG.reset() turns it back on -JloorDev
+		FlxG.fixedTimestep = false;
 	}
 
 	public static function resolveEase(name:Null<String>):Float->Float {

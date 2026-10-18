@@ -18,6 +18,9 @@ typedef NoteEntry = {
 	var mark:flixel.FlxSprite;
 
 	var typeMark:flixel.FlxSprite;
+
+	// same as being in `selected`, but O(1) to check on big charts -JloorDev
+	var ?isSelected:Bool;
 }
 
 typedef EventEntry = {
@@ -123,7 +126,6 @@ class GameplayEditor extends MusicBeatState {
 	var previewLabel:flixel.text.FlxText;
 	var previewDirty:Bool = false;
 	var previewLastPos:Float = -1;
-	var previewSignature:String = '';
 
 	var columnOwners:Array<{char:String, lane:Int}> = [];
 	var noteEntries:Array<NoteEntry> = [];
@@ -748,9 +750,9 @@ class GameplayEditor extends MusicBeatState {
 			return null;
 
 		var arrow = new flixel.FlxSprite();
+		// grid arrows never animate, so just reuse the template frame -JloorDev
 		arrow.frames = tpl.frames;
-		arrow.animation.copyFrom(tpl.animation);
-		arrow.animation.play('note$lane-Scroll');
+		arrow.frame = tpl.frame;
 		arrow.shader = tpl.shader;
 
 		if (arrow.frameWidth <= 0 || arrow.frameHeight <= 0) {
@@ -825,7 +827,7 @@ class GameplayEditor extends MusicBeatState {
 		updateTail(entry);
 		refreshTypeMark(entry);
 
-		if (selected.contains(entry))
+		if (entry.isSelected == true)
 			showMark(entry);
 	}
 
@@ -838,6 +840,32 @@ class GameplayEditor extends MusicBeatState {
 		}
 		entry.mark = null;
 		entry.typeMark = null;
+	}
+
+	// remove() is O(n) per sprite, so I rebuild the group once for bulk deletes -JloorDev
+	function purgeSprites(entries:Array<NoteEntry>):Void {
+		var doomed:Map<flixel.FlxBasic, Bool> = new Map();
+		for (e in entries) {
+			for (spr in [e.head, e.tail, e.mark, e.typeMark])
+				if (spr != null)
+					doomed.set(spr, true);
+			e.mark = null;
+			e.typeMark = null;
+		}
+		var keep = [for (m in noteGroup.members) if (m != null && !doomed.exists(m)) m];
+		noteGroup.clear();
+		for (m in keep)
+			noteGroup.add(m);
+		for (spr in doomed.keys())
+			spr.destroy();
+	}
+
+	function wipeGroup(group:flixel.group.FlxGroup):Void {
+		var old = group.members.copy();
+		group.clear();
+		for (m in old)
+			if (m != null)
+				m.destroy();
 	}
 
 	function placeEntry(entry:NoteEntry):Void {
@@ -888,12 +916,10 @@ class GameplayEditor extends MusicBeatState {
 		closePanel();
 		clearSelection();
 
-		for (e in noteEntries.copy())
-			destroySprites(e);
+		wipeGroup(noteGroup);
 		noteEntries = [];
 
-		for (e in eventEntries.copy())
-			destroyEventSprites(e);
+		wipeGroup(eventGroup);
 		eventEntries = [];
 
 		SONG.songData.notes = [for (n in snap.notes) Reflect.copy(n)];
@@ -929,7 +955,9 @@ class GameplayEditor extends MusicBeatState {
 	}
 
 	function removeEntry(entry:NoteEntry, refresh:Bool = true):Void {
-		selected.remove(entry);
+		if (entry.isSelected == true)
+			selected.remove(entry);
+		entry.isSelected = false;
 		SONG.songData.notes.remove(entry.data);
 		noteEntries.remove(entry);
 		destroySprites(entry);
@@ -953,13 +981,17 @@ class GameplayEditor extends MusicBeatState {
 	}
 
 	function selectEntry(entry:NoteEntry):Void {
-		if (selected.contains(entry))
+		if (entry.isSelected == true)
 			return;
+		entry.isSelected = true;
 		selected.push(entry);
 		showMark(entry);
 	}
 
 	function deselectEntry(entry:NoteEntry):Void {
+		if (entry.isSelected != true)
+			return;
+		entry.isSelected = false;
 		selected.remove(entry);
 		if (entry.mark != null)
 			entry.mark.visible = false;
@@ -967,6 +999,7 @@ class GameplayEditor extends MusicBeatState {
 
 	function clearSelection():Void {
 		for (e in selected) {
+			e.isSelected = false;
 			if (e.mark != null)
 				e.mark.visible = false;
 		}
@@ -983,8 +1016,12 @@ class GameplayEditor extends MusicBeatState {
 			return;
 
 		pushUndo();
-		for (e in selected.copy())
-			removeEntry(e, false);
+		var doomed = selected;
+		clearSelection();
+		var gone:Map<core.json.song.SongData.NoteData, Bool> = [for (e in doomed) e.data => true];
+		SONG.songData.notes = [for (n in SONG.songData.notes) if (!gone.exists(n)) n];
+		noteEntries = [for (e in noteEntries) if (!gone.exists(e.data)) e];
+		purgeSprites(doomed);
 
 		prepareSinging();
 		markDirty();
@@ -1267,7 +1304,7 @@ class GameplayEditor extends MusicBeatState {
 		if (FlxG.mouse.justPressedRight) {
 			var found = findEntry(column, p.y, true);
 			if (found != null) {
-				if (selected.contains(found) && selected.length > 1) {
+				if (found.isSelected == true && selected.length > 1) {
 					deleteSelected();
 				} else {
 					pushUndo();
@@ -1286,7 +1323,7 @@ class GameplayEditor extends MusicBeatState {
 
 		if (FlxG.keys.pressed.SHIFT) {
 			if (existing != null) {
-				if (selected.contains(existing))
+				if (existing.isSelected == true)
 					deselectEntry(existing);
 				else
 					selectEntry(existing);
@@ -1302,7 +1339,7 @@ class GameplayEditor extends MusicBeatState {
 		}
 
 		if (existing != null) {
-			if (!selected.contains(existing)) {
+			if (existing.isSelected != true) {
 				clearSelection();
 				selectEntry(existing);
 			}
@@ -1684,6 +1721,7 @@ class GameplayEditor extends MusicBeatState {
 	}
 
 	function markDirty():Void {
+		previewDirty = true;
 		dirty = true;
 		leaveArmed = false;
 		setStatus('Unsaved changes (Ctrl/Cmd+S to save)', 0xFFFFCC33);
@@ -1821,13 +1859,6 @@ class GameplayEditor extends MusicBeatState {
 			if (!isPlaying && Math.abs(RhythmCore.songPosition - previewLastPos) > 0.5)
 				previewDirty = true;
 
-			if (!isPlaying) {
-				var signature:String = haxe.Json.stringify(SONG.songData?.gameplay?.events ?? []);
-				if (signature != previewSignature) {
-					previewSignature = signature;
-					previewDirty = true;
-				}
-			}
 			previewLastPos = RhythmCore.songPosition;
 
 			if (previewDirty && !isPlaying) {

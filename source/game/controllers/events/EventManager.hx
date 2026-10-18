@@ -141,7 +141,10 @@ class EventManager {
 					Console.log('[EventManager] Change Character: char "$charId" not found');
 					return;
 				}
-				char.changeCharacter(newCharacter);
+				if (char.curCharacter != newCharacter) {
+					char.changeCharacter(newCharacter);
+					PlayState.instance.applyStageProps(char, charId);
+				}
 			case 'Camera Follow':
 				var charId:String = event.arguments.char;
 				var char = cast PlayState.instance.chars.get(charId);

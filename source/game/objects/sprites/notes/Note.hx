@@ -30,6 +30,7 @@ class Note extends FunkinSprite {
 	private var noteSkinData:NoteSkinData = null;
 
 	public var wasMissed:Bool = false;
+	public var missAnimPlayed:Bool = false;
 
 	var _lastAnimForShader:String = '';
 
@@ -63,6 +64,7 @@ class Note extends FunkinSprite {
 		mustPress = false;
 		tooLate = false;
 		wasMissed = false;
+		missAnimPlayed = false;
 		rating = 'sick';
 		strum = null;
 		noteControl = null;

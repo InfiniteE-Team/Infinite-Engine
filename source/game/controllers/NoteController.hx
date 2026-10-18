@@ -117,6 +117,7 @@ class NoteController {
 		#if HSCRIPT_ALLOWED
 		scriptNC = script;
 		scriptNC.loadFolder('scripts/noteskins/$noteSkin');
+		scriptNC.executeAll();
 		#end
 
 		for (i in 0...daSong.chars.length) {
@@ -578,7 +579,7 @@ class NoteController {
 			return _noteTypeCache.get(noteType);
 
 		var path = Paths.getPath('data/notetypes/$noteType', 'json');
-		var data:core.json.objects.NoteTypeData = path != null ? FormatJson.readJson(sys.io.File.getContent(path)) : null;
+		var data:core.json.objects.NoteTypeData = path != null ? FormatJson.readJson(path) : null;
 		_noteTypeCache.set(noteType, data);
 		return data;
 	}
@@ -595,6 +596,8 @@ class NoteController {
 		scriptNC.call("onNoteUpdate", [songTime]);
 		#end
 
+		// spawn earlier on slow scroll speeds so notes don't pop in on screen -JloorDev
+		var spawnWindow:Float = Math.max(2000, (flixel.FlxG.height + 200) / (0.45 * Math.max(0.1, Math.min(scrollSpeed, targetScrollSpeed))));
 		while (_noteSpawnIndex < unspawnNotes.length) {
 			var note = unspawnNotes[_noteSpawnIndex];
 			var sustain = Std.downcast(note, NoteSustain);
@@ -604,8 +607,8 @@ class NoteController {
 				spawnTime = sustain.parentNote.strumTime;
 			}
 
-			if (spawnTime - songTime < 2000) {
-				note.visible = daSong.strumsVisible && note.strum.visible;
+			if (spawnTime - songTime < spawnWindow) {
+				note.visible = note.strum.visible && (_charNotesVisible.get(_strumCharId[note.direction]) ?? true);
 				if (sustain != null)
 					sustains.add(sustain);
 				else

@@ -294,8 +294,9 @@ class CharacterController extends FunkinObjectRegistry {
 
 	public function getCharMiss(char:Character, noteController:NoteController, strums, i:Int):Void {
 		for (note in noteController.notes.members) {
-			if (note == null || !note.alive || !note.wasMissed || note.wasGoodHit || note.strum != strums[i])
+			if (note == null || !note.alive || !note.wasMissed || note.wasGoodHit || note.missAnimPlayed || note.strum != strums[i])
 				continue;
+			note.missAnimPlayed = true;
 			char.playAnim(Character.getCharAnim(note.direction) + 'miss', true);
 			char.isSing = false;
 			char.isMiss = true;

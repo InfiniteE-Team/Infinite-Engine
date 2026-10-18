@@ -69,8 +69,20 @@ class PreviewEvents {
 		events.sort((a, b) -> a.time < b.time ? -1 : (a.time > b.time ? 1 : 0));
 		index = 0;
 
+		// pick the final char first, before it loaded each sheet twice per scroll -JloorDev
+		var wanted:Map<String, String> = new Map();
 		for (c in charData)
-			setCharacter(c.id, c.name, 'restore');
+			wanted.set(c.id, c.name);
+		var last:Int = 0;
+		while (last < events.length && events[last].time <= pos) {
+			var e = events[last++];
+			var id:String = arg(e, 'char');
+			var name:String = arg(e, 'newCharacter');
+			if (e.name == 'Change Character' && id != null && name != null && wanted.exists(id))
+				wanted.set(id, name);
+		}
+		for (id => name in wanted)
+			setCharacter(id, name, 'restore');
 
 		hasCamEvents = false;
 		locked = false;
@@ -78,8 +90,11 @@ class PreviewEvents {
 		camChar = charOf(camCharId);
 		lastEvent = '';
 
-		while (index < events.length && events[index].time <= pos) {
-			fire(events[index], true);
+		while (index < last) {
+			if (events[index].name != 'Change Character')
+				fire(events[index], true);
+			else
+				lastEvent = events[index].name;
 			index++;
 		}
 

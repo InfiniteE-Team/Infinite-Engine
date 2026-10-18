@@ -301,7 +301,7 @@ class OptionPanel extends FlxGroup {
 			v.bg.setPosition(boxX + 8, y);
 			v.bg.color = i == selected ? 0xFF3A3A5C : 0xFF20202C;
 
-			v.label.fieldWidth = wide ? boxW - 32 : boxW * 0.36;
+			setWidth(v.label, wide ? boxW - 32 : boxW * 0.36);
 			v.label.text = r.label;
 			v.label.color = r.dim == true ? EditorWidgets.MUTED : FlxColor.WHITE;
 			v.label.setPosition(boxX + 16, y + 5);
@@ -314,8 +314,10 @@ class OptionPanel extends FlxGroup {
 			v.right.setPosition(valueX() + valueW() - 14, y + 4);
 
 			v.value.visible = !wide;
-			v.value.fieldWidth = arrows ? valueW() - 40 : valueW();
-			v.value.alignment = arrows ? flixel.text.FlxText.FlxTextAlign.CENTER : flixel.text.FlxText.FlxTextAlign.LEFT;
+			setWidth(v.value, arrows ? valueW() - 40 : valueW());
+			var align:flixel.text.FlxText.FlxTextAlign = arrows ? CENTER : LEFT;
+			if (v.value.alignment != align)
+				v.value.alignment = align;
 			v.value.text = r.value;
 			v.value.setPosition(valueX() + (arrows ? 20 : 0), y + 5);
 
@@ -342,6 +344,12 @@ class OptionPanel extends FlxGroup {
 		bg.setPosition(boxX, boxY);
 		bg.visible = true;
 		isOpen = true;
+	}
+
+	// show() runs every frame and these setters redraw the text even if nothing changed -JloorDev
+	static function setWidth(t:FlxText, w:Float):Void {
+		if (t.fieldWidth != w)
+			t.fieldWidth = w;
 	}
 
 	function setRowVisible(v:PanelRowView, on:Bool):Void {
