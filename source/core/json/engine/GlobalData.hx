@@ -42,6 +42,9 @@ class GlobalConfig {
 	public static var globalScripts:modding.scripting.ScriptHandler = new modding.scripting.ScriptHandler(null);
 
 	public function loadGlobalScripts():Void {
+		globalScripts.call('onDestroy', []);
+		globalScripts.destroy();
+		globalScripts = new modding.scripting.ScriptHandler(null);
 		globalScripts.loadFolder('scripts/global');
 	}
 }

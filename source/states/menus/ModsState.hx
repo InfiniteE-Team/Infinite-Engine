@@ -309,7 +309,7 @@ class ModsState extends MusicBeatState {
 			deleteHint.text = 'PRESS DELETE AGAIN TO REMOVE ' + ModsRegistry.mods[pendingDelete].toUpperCase() + ' (MOVING CANCELS)';
 			deleteHint.color = 0xFFFF5555;
 		} else {
-			deleteHint.text = 'PRESS DELETE TO REMOVE THE SELECTED MOD';
+			deleteHint.text = 'PRESS DELETE TO REMOVE THE SELECTED MOD\nACCEPT THE ACTIVE MOD AGAIN TO PLAY THE BASE GAME';
 			deleteHint.color = 0xFFFFFFFF;
 		}
 	}
@@ -493,8 +493,8 @@ class ModsState extends MusicBeatState {
 
 		acceptOption = true;
 
-		if (ModsRegistry.currentMod == ModsRegistry.mods[curSelected]) {
-			FlxG.sound.play(Paths.getPath('menus/cancelMenu', 'sound'));
+		if (ModsRegistry.onMod && ModsRegistry.currentMod == ModsRegistry.mods[curSelected]) {
+			disableMods();
 			acceptOption = false;
 			return;
 		}
@@ -539,6 +539,19 @@ class ModsState extends MusicBeatState {
 		changeMod = true;
 	}
 
+	function disableMods():Void {
+		ModsRegistry.onMod = false;
+		ModsRegistry.currentMod = '';
+
+		SaveData.data.currentMod = '';
+		SaveData.data.onMod = false;
+		SaveData.flush();
+
+		FlxG.sound.play(Paths.getPath('menus/cancelMenu', 'sound'));
+		changeSelection(0);
+		changeMod = true;
+	}
+
 	function changeSelection(change:Int = 0):Void {
 		curSelected += change;
 
@@ -563,7 +576,7 @@ class ModsState extends MusicBeatState {
 		for (i in 0...entries.length) {
 			var entry = entries[i];
 
-			var suffix = ModsRegistry.mods[i] == ModsRegistry.currentMod ? ' (SELECTED)' : '';
+			var suffix = ModsRegistry.onMod && ModsRegistry.mods[i] == ModsRegistry.currentMod ? ' (SELECTED)' : '';
 			var label = ModsRegistry.mods[i].toUpperCase() + suffix;
 			if (entry.shownTitle != label) {
 				fitText(entry.title, ModsRegistry.mods[i].toUpperCase(), TITLE_MAX_WIDTH, suffix);

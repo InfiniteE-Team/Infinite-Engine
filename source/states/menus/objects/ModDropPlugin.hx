@@ -133,12 +133,20 @@ class ModDropPlugin {
 		return StringTools.startsWith(clean, "__MACOSX/") || clean == ".DS_Store" || StringTools.endsWith(clean, "/.DS_Store");
 	}
 
+	static final MOD_CONTENT_FOLDERS:Array<String> = [
+		'data', 'songs', 'images', 'scripts', 'sounds', 'music', 'shaders', 'videos', 'fonts', 'source'
+	];
+
 	function installModZIP(root:String, destination:String):Bool {
+		var created:Array<String> = [];
 		try {
 			var file = File.read(root);
 			var entries = Reader.readZip(file);
 			file.close();
 
+			var tops:Array<String> = [];
+			var loose:Bool = false;
+			var hasFolders:Bool = false;
 			for (entry in entries) {
 				if (isJunkZipEntry(entry.fileName))
 					continue;
@@ -150,27 +158,47 @@ class ModDropPlugin {
 
 				var cleanName = entry.fileName.split("\\").join("/");
 				var slash = cleanName.indexOf("/");
-				if (slash > 0) {
-					var topFolder = cleanName.substr(0, slash);
-					if (FileSystem.exists(Path.join([destination, topFolder]))) {
-						rejectInstall(topFolder);
-						return false;
-					}
+				if (slash <= 0)
+					continue;
+				hasFolders = true;
+				var top = cleanName.substr(0, slash);
+				if (MOD_CONTENT_FOLDERS.contains(top.toLowerCase()))
+					loose = true;
+				if (!tops.contains(top))
+					tops.push(top);
+			}
+			if (!hasFolders)
+				loose = true;
+
+			var prefix:String = loose ? Path.withoutExtension(Path.withoutDirectory(root.split("\\").join("/"))) : null;
+			var targets:Array<String> = prefix != null ? [prefix] : tops;
+			if (targets.length == 0) {
+				trace("MOD FORMAT ERROR! The zip is empty: " + root);
+				return false;
+			}
+			for (target in targets) {
+				if (FileSystem.exists(Path.join([destination, target]))) {
+					rejectInstall(target);
+					return false;
 				}
 			}
 
 			var modsRoot = Path.addTrailingSlash(Path.normalize(destination));
+			created = targets.copy();
 
 			for (entry in entries) {
 				var fileName = entry.fileName;
 
 				if (isJunkZipEntry(fileName))
 					continue;
+				if (prefix == null && fileName.split("\\").join("/").indexOf("/") <= 0)
+					continue;
 
-				var fullPath = Path.join([destination, fileName]);
+				var fullPath = prefix != null ? Path.join([destination, prefix, fileName]) : Path.join([destination, fileName]);
 
 				if (!StringTools.startsWith(Path.normalize(fullPath), modsRoot)) {
 					rejectUnsafe(fileName);
+					cleanup(destination, created);
 					return false;
 				}
 
@@ -188,10 +216,36 @@ class ModDropPlugin {
 			}
 			trace("Mod extracted successfully!");
 		} catch (e:Dynamic) {
-			trace("Error extracting: " + e);
+			trace("Error extracting, the half-installed mod was removed: " + e);
+			FlxG.sound.play(Paths.getPath('menus/cancelMenu', 'sound'));
+			cleanup(destination, created);
+			return false;
 		}
 
 		return true;
+	}
+
+	function cleanup(destination:String, created:Array<String>):Void {
+		for (target in created) {
+			if (!FileSystem.exists(Path.join([destination, target])))
+				continue;
+			try {
+				deleteFolder(Path.join([destination, target]));
+			} catch (e:Dynamic) {
+				trace('Could not clean up "$target": $e');
+			}
+		}
+	}
+
+	function deleteFolder(path:String):Void {
+		for (entry in FileSystem.readDirectory(path)) {
+			var child = Path.join([path, entry]);
+			if (FileSystem.isDirectory(child))
+				deleteFolder(child);
+			else
+				FileSystem.deleteFile(child);
+		}
+		FileSystem.deleteDirectory(path);
 	}
 
 	function copyDirectory(source:String, destination:String, depth:Int = 0):Void {

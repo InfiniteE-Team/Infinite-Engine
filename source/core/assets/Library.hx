@@ -46,8 +46,8 @@ class Library {
 			ModsRegistry.currentMod = savedMod;
 			ModsRegistry.onMod = savedOnMod != null ? savedOnMod : true;
 		} else {
-			ModsRegistry.onMod = (ModsRegistry.mods.length > 0);
-			ModsRegistry.currentMod = ModsRegistry.mods.length > 0 ? ModsRegistry.mods[0] : '';
+			ModsRegistry.onMod = false;
+			ModsRegistry.currentMod = '';
 		}
 	}
 
@@ -64,6 +64,12 @@ class Library {
 					@:privateAccess
 					Paths.pathCache.set(file, currentModPath);
 					return currentModPath;
+				}
+				var sharedPath = '$modsFolder/${ModsRegistry.currentMod}/shared/$file';
+				if (modding.vslice.VSlice.isActive() && FileSystem.exists(sharedPath)) {
+					@:privateAccess
+					Paths.pathCache.set(file, sharedPath);
+					return sharedPath;
 				}
 			}
 		}
