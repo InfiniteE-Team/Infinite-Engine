@@ -90,6 +90,9 @@ class PlayState extends MusicBeatState {
 		SONG = new SongConfig();
 		SONG.configSong(curSong, DiffsUtils.difficulties[curDifficulty]);
 
+		modding.vslice.VSliceHooks.reset();
+		funkin.play.PlayState.instance = modding.vslice.VSlice.isActive() ? new funkin.play.PlayState(null, curSong) : null;
+
 		#if HSCRIPT_ALLOWED
 		startScript();
 		script.call("onCreate", []);
@@ -171,6 +174,7 @@ class PlayState extends MusicBeatState {
 
 		stage = new Stage(SONG.stage);
 		cameraController.defaultZoom = stage.defaultZoom;
+		cameraController.stageZoom = stage.defaultZoom;
 		if (!osuMode)
 			add(stage);
 
@@ -189,9 +193,22 @@ class PlayState extends MusicBeatState {
 				cameraController.char = cast(chars.get(opponentData.id), game.objects.sprites.Character);
 		}
 
+		loadVSliceSong();
+
 		#if HSCRIPT_ALLOWED
 		script.call("postBuildStage", []);
 		#end
+	}
+
+	function loadVSliceSong():Void {
+		if (funkin.play.PlayState.instance == null)
+			return;
+		var song = modding.vslice.VSliceScripts.loadSongScript(curSong);
+		if (song == null)
+			return;
+		funkin.play.PlayState.instance.currentSongScript = song;
+		modding.vslice.VSliceHooks.register(song);
+		modding.vslice.VSliceHooks.call(song, 'onCreate', modding.vslice.VSliceHooks.event('CREATE'));
 	}
 
 	// reapply stage pos + camPos, Change Character resets them -JloorDev
@@ -247,10 +264,38 @@ class PlayState extends MusicBeatState {
 			events.loadEvents(SONG.songData.gameplay.events);
 			events.updateEvents(0);
 		}
+		modding.vslice.VSliceHooks.dispatch('onSongLoaded', modding.vslice.VSliceHooks.event('SONG_LOADED'));
 	}
 
-	public function startCountdown() {
+	var vsliceCountdownHeld:Bool = false;
+	var skipVSliceCountdown:Bool = false;
+	var vsliceHeldTime:Float = 0;
+	var vsliceHeldFailures:Int = 0;
+
+	public function resumeVSliceCountdown(force:Bool = false):Void {
+		if (!vsliceCountdownHeld)
+			return;
+		vsliceCountdownHeld = false;
+		startCountdown(force);
+	}
+
+	public function startCountdown(skipVSlice:Bool = false) {
 		isRewind = false;
+		var countdownEvent = modding.vslice.VSliceHooks.event('COUNTDOWN_START');
+		if (!skipVSlice)
+			modding.vslice.VSliceHooks.dispatch('onCountdownStart', countdownEvent);
+		if (countdownEvent.eventCanceled == true && funkin.play.PlayState.instance?.isInCountdown == true) {
+			countdownEvent.eventCanceled = false;
+			skipVSliceCountdown = true;
+		}
+		if (countdownEvent.eventCanceled == true) {
+			vsliceCountdownHeld = true;
+			vsliceHeldTime = 0;
+			vsliceHeldFailures = modding.vslice.VSliceHooks.failures;
+			return;
+		}
+		if (funkin.play.PlayState.instance != null)
+			funkin.play.PlayState.instance.isInCountdown = true;
 		#if HSCRIPT_ALLOWED
 		script.call("onCountdown", []);
 		#end
@@ -270,7 +315,9 @@ class PlayState extends MusicBeatState {
 
 		add(countDown);
 
-		if (!countDown.skipCountdown) {
+		var skipThis = countDown.skipCountdown || skipVSliceCountdown;
+		skipVSliceCountdown = false;
+		if (!skipThis) {
 			countDown.onCountdown();
 			if (chars != null)
 				chars.danceAll();
@@ -290,6 +337,10 @@ class PlayState extends MusicBeatState {
 
 		gameAudio.playAll();
 		RhythmCore.resume(gameAudio);
+		if (funkin.play.PlayState.instance != null)
+			funkin.play.PlayState.instance.isInCountdown = false;
+		modding.vslice.VSliceHooks.dispatch('onCountdownEnd', modding.vslice.VSliceHooks.event('COUNTDOWN_END'));
+		modding.vslice.VSliceHooks.dispatch('onSongStart', modding.vslice.VSliceHooks.event('SONG_STARTED'));
 		#if HSCRIPT_ALLOWED
 		script.call("postInitSong", []);
 		#end
@@ -306,6 +357,8 @@ class PlayState extends MusicBeatState {
 		if (script.callCancellable('onEndSongCancel', []))
 			return;
 		#end
+
+		modding.vslice.VSliceHooks.dispatch('onSongEnd', modding.vslice.VSliceHooks.event('SONG_END'));
 
 		cameraController.char = null;
 		var opp = cast(chars.get(Lambda.find(SONG.chars, c -> CharacterController.namesOpponent.contains(c.role))?.id), game.objects.sprites.Character);
@@ -374,6 +427,8 @@ class PlayState extends MusicBeatState {
 		#if HSCRIPT_ALLOWED
 		script.call('onPause', []);
 		#end
+		modding.vslice.VSliceHooks.dispatch('onPause', modding.vslice.VSliceHooks.event('PAUSE'));
+		events?.videos.pause();
 
 		flixel.tweens.FlxTween.globalManager.forEach((tween:flixel.tweens.FlxTween) -> {
 			if (tween.active) {
@@ -395,6 +450,8 @@ class PlayState extends MusicBeatState {
 		#end
 
 		PlayStateConfig.blueBalled++;
+		modding.vslice.VSliceHooks.dispatch('onGameOver', modding.vslice.VSliceHooks.event('GAME_OVER'));
+		events?.videos.pause();
 
 		persistentUpdate = false;
 		persistentDraw = false;
@@ -416,6 +473,8 @@ class PlayState extends MusicBeatState {
 		#if HSCRIPT_ALLOWED
 		script.call('onResume', []);
 		#end
+		modding.vslice.VSliceHooks.dispatch('onResume', modding.vslice.VSliceHooks.event('RESUME'));
+		events?.videos.resume();
 
 		flixel.tweens.FlxTween.globalManager.forEach((tween:flixel.tweens.FlxTween) -> {
 			if (!tween.active) {
@@ -463,6 +522,12 @@ class PlayState extends MusicBeatState {
 		#end
 
 		isRewind = true;
+
+		modding.vslice.VSliceHooks.dispatch('onSongRetry', modding.vslice.VSliceHooks.event('SONG_RETRY'));
+		if (chars != null)
+			for (c in chars.registry)
+				if (Std.isOfType(c, game.objects.sprites.Character) && cast(c, game.objects.sprites.Character).vslice != null)
+					modding.vslice.VSliceHooks.call(cast(c, game.objects.sprites.Character).vslice, 'resetCharacter', true);
 
 		game.graphics.shaders.CustomShader.clearAll();
 
@@ -552,6 +617,23 @@ class PlayState extends MusicBeatState {
 
 		super.update(elapsed);
 
+		if (!paused)
+			modding.vslice.VSliceHooks.dispatch('onUpdate', modding.vslice.VSliceHooks.event('UPDATE', {elapsed: elapsed}));
+
+		if (vsliceCountdownHeld && !paused) {
+			vsliceHeldTime += elapsed;
+			if (modding.vslice.VSliceHooks.failures > vsliceHeldFailures || vsliceHeldTime > 60) {
+				Console.log('[V-Slice] the song script held the countdown and its cutscene did not finish, starting the song', true);
+				if (camHUD != null) {
+					camHUD.visible = true;
+					camHUD.alpha = 1;
+				}
+				if (funkin.play.PlayState.instance != null)
+					funkin.play.PlayState.instance.isInCutscene = false;
+				resumeVSliceCountdown(true);
+			}
+		}
+
 		if (FlxG.keys.justPressed.SEVEN && core.ConfigMain.globalData.developerMode) {
 			modding.editors.GameplayEditor.SONG = SONG;
 			// instance is null when the editor opens, so I pass folder and diff here -JloorDev
@@ -616,6 +698,8 @@ class PlayState extends MusicBeatState {
 		super.stepHit(step);
 
 		gameAudio.resyncVocals();
+		modding.vslice.VSliceHooks.dispatch('onStepHit', modding.vslice.VSliceHooks.event('SONG_STEP_HIT', {step: step}));
+		funkin.Conductor.stepHit.dispatch();
 
 		#if HSCRIPT_ALLOWED
 		if (stage != null)
@@ -626,7 +710,7 @@ class PlayState extends MusicBeatState {
 	override public function beatHit(beat:Float) {
 		super.beatHit(beat);
 
-		if (beat % 4 == 0)
+		if (cameraController.bopEvery > 0 && beat % cameraController.bopEvery == 0)
 			cameraController.bumpZoom();
 
 		if (controllerHUD != null)
@@ -637,6 +721,8 @@ class PlayState extends MusicBeatState {
 
 		if (stage != null)
 			stage.onBeatHit(beat);
+		modding.vslice.VSliceHooks.dispatch('onBeatHit', modding.vslice.VSliceHooks.event('SONG_BEAT_HIT', {beat: Std.int(beat), step: Std.int(beat * 4)}));
+		funkin.Conductor.beatHit.dispatch();
 
 		#if HSCRIPT_ALLOWED
 		script.call('postBeatHit', [beat]);
@@ -645,6 +731,10 @@ class PlayState extends MusicBeatState {
 
 	override public function destroy() {
 		PlayStateConfig.isPlaying = false;
+
+		var songScript = funkin.play.PlayState.instance?.currentSongScript;
+		if (songScript != null)
+			modding.vslice.VSliceHooks.call(songScript, 'onDestroy', modding.vslice.VSliceHooks.event('DESTROY'));
 
 		if (FlxG.mouse != null)
 			FlxG.mouse.visible = true;
@@ -701,5 +791,7 @@ class PlayState extends MusicBeatState {
 		game.graphics.shaders.CustomShader.clearAll();
 
 		super.destroy();
+		modding.vslice.VSliceHooks.reset();
+		funkin.play.PlayState.instance = null;
 	}
 }

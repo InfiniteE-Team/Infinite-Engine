@@ -83,18 +83,19 @@
 	<haxedef name="DEBUG_CONSOLE" />
 
 	<haxedef name="hxscript_hl" />
-	<haxedef name="hxscript_host" value="modding,game,states,core,utils" />
+	<haxedef name="hxscript_host" value="modding,game,states,core,utils,funkin" />
 	<haxedef name="hxscript_no_hl_bridges" />
 
 	<haxedef name="HXCPP_CHECK_POINTER" if="desktop" />
     <haxedef name="HXCPP_STACK_LINE" if="desktop" />
 
 	<!--HxScript-->
-	<haxedef name="hxscript_host" value="modding,game,states,core,utils" />
+	<haxedef name="hxscript_host" value="modding,game,states,core,utils,funkin" />
 
 	<!-- _______________________________Compiler Flags _______________________________ -->
 	<haxeflag name="--macro" value="include('foxlite')" />
 	<haxeflag name="--macro" value="include('modding.scripting.interfaces')" />
+	<haxeflag name="--macro" value="include('funkin', true, ['funkin.vis'])" />
 	
 	<compilerflag value="-DHXCPP_CLANG_PCH=0" if="linux" />
 	<compilerflag name="-D HXCPP_M64" if="cpp" />
