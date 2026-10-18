@@ -53,12 +53,19 @@ function onRatingPopup(ratingName, combo) {
 	ratingSprite.alpha = 1;
 	ratingSprite.visible = true;
 
-	ratingSprite.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + ratingName + pixelPart2, 'image'));
+	var skinRating = instance?.noteController?.popupImage('ratings', ratingName);
+	if (skinRating != null)
+		ratingSprite.loadGraphic(skinRating.path);
+	else
+		ratingSprite.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + ratingName + pixelPart2, 'image'));
 
 	ratingSprite.x = FlxG.width * 0.55 - 160;
 	ratingSprite.y = FlxG.height * 0.5 - 90;
 
-	if (!isPixel) {
+	if (skinRating != null) {
+		ratingSprite.scale.set(skinRating.scale, skinRating.scale);
+		ratingSprite.antialiasing = !skinRating.pixel && SaveData.data.antialiasing;
+	} else if (!isPixel) {
 		ratingSprite.setGraphicSize(Std.int(ratingSprite.width * 0.7));
 		ratingSprite.antialiasing = SaveData.data.antialiasing;
 	} else {
@@ -100,12 +107,19 @@ function _showComboNumbers(combo, pixelPart1, pixelPart2) {
 		var numScore = _getFromPool(numberPool);
 		numScore.alpha = 1;
 		numScore.visible = true;
-		numScore.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + 'nums/digit-' + Std.int(i) + pixelPart2, 'image'));
+		var skinDigit = instance?.noteController?.popupImage('numbers', Std.string(Std.int(i)));
+		if (skinDigit != null)
+			numScore.loadGraphic(skinDigit.path);
+		else
+			numScore.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + 'nums/digit-' + Std.int(i) + pixelPart2, 'image'));
 
 		numScore.x = FlxG.width * 0.55 + (32 * daLoop) - 90;
 		numScore.y = FlxG.height * 0.5 + 20;
 
-		if (!isPixel) {
+		if (skinDigit != null) {
+			numScore.scale.set(skinDigit.scale, skinDigit.scale);
+			numScore.antialiasing = !skinDigit.pixel && SaveData.data.antialiasing;
+		} else if (!isPixel) {
 			numScore.antialiasing = SaveData.data.antialiasing;
 			numScore.setGraphicSize(Std.int(numScore.width * 0.38));
 		} else {

@@ -1,5 +1,7 @@
 package game.controllers;
 
+import game.objects.sprites.notes.NoteSkins;
+
 import game.PlayStateConfig;
 // song
 import core.json.song.SongData.SongConfig;
@@ -24,6 +26,83 @@ class NoteController {
 	public var holdSkinData:NoteSkinData;
 
 	public var noteSkin:String = 'default';
+	public var popupsData:Dynamic = null;
+
+	var _skinParts:Map<String, Dynamic> = new Map();
+
+	public function skinPart(skin:String, part:String):Dynamic {
+		var key = '$skin|$part';
+		if (!_skinParts.exists(key)) {
+			var data = NoteSkins.read(skin, part);
+			data ??= skin != noteSkin ? skinPart(noteSkin, part) : (skin != NoteSkins.DEFAULT ? NoteSkins.read(NoteSkins.DEFAULT, part) : null);
+			_skinParts.set(key, data);
+		}
+		return _skinParts.get(key);
+	}
+
+	public function charSkin(charId:String):String {
+		var c = Lambda.find(daSong.chars, c -> c.id == charId);
+		var skin:String = c?.strums?.noteSkin;
+		return skin != null && skin != '' ? skin : noteSkin;
+	}
+
+	public function changeCharSkin(charId:String, skin:String):Bool {
+		var charData = Lambda.find(daSong.chars, c -> c.id == charId);
+		var group = strumsByChar.get(charId);
+		if (charData == null || group == null || !NoteSkins.exists(skin))
+			return false;
+		if (charData.strums == null)
+			charData.strums = {};
+		charData.strums.noteSkin = skin;
+
+		var data:NoteSkinData = skinPart(skin, 'strumnotes');
+		for (strum in group.members) {
+			if (strum == null)
+				continue;
+			var keepAlpha = strum.alpha;
+			var keepVisible = strum.visible;
+			strum.noteSkin = skin;
+			strum.loadSprite(strum.x, strum.y, data.props);
+			strum.playAnim('static' + strum.laneIndex, true);
+			strum.applyShader(data);
+			strum.alpha = keepAlpha;
+			strum.visible = keepVisible;
+		}
+		doApplyScrollDirection(isDownscroll);
+		doApplyMiddlescroll(isMiddlescroll);
+
+		var reskin = (n:Note) -> {
+			if (n == null || n.wasGoodHit || group.members.indexOf(n.strum) < 0)
+				return;
+			var lane = n.direction;
+			n.direction = lane % keys;
+			n.noteSkin = skin;
+			@:privateAccess n.noteSkinData = data;
+			n.loadSprite(data);
+			n.direction = lane;
+		};
+		for (n in notes.members)
+			reskin(n);
+		for (n in sustains.members)
+			reskin(n);
+		for (n in unspawnNotes)
+			reskin(n);
+
+		var ps = game.PlayState.instance;
+		if (ps?.modchartSystem != null)
+			ps.modchartSystem.syncBase();
+		return true;
+	}
+
+	public function popupImage(kind:String, key:String):Dynamic {
+		var group:Dynamic = popupsData != null ? Reflect.field(popupsData, kind) : null;
+		var entry:Dynamic = group != null ? Reflect.field(group, key) : null;
+		if (entry?.path == null)
+			return null;
+		var folder:String = popupsData.folder ?? NoteSkins.imageFolder(noteSkin, 'popups');
+		var path = Paths.getPath(folder + entry.path, 'image');
+		return path != null ? {path: path, scale: entry.scale ?? 1.0, pixel: entry.pixel == true} : null;
+	}
 	public var noteType:String = 'normal';
 
 	public var blackBacks:FlxTypedGroup<flixel.FlxSprite> = new FlxTypedGroup<flixel.FlxSprite>();
@@ -139,14 +218,19 @@ class NoteController {
 
 	public function loadJson() {
 		globalData = core.ConfigMain.globalData;
-		if (daSong != null && daSong.noteSkin != null)
+		var player = daSong != null ? Lambda.find(daSong.chars, c -> CharacterController.namesPlayer.contains(c.role)) : null;
+		if (player?.strums?.noteSkin != null && player.strums.noteSkin != '')
+			noteSkin = player.strums.noteSkin;
+		else if (daSong != null && daSong.noteSkin != null)
 			noteSkin = daSong.noteSkin;
 		else if (globalData != null)
 			noteSkin = globalData.noteSkin;
+		if (!NoteSkins.exists(noteSkin)) {
+			Console.log('[NoteController] note skin "$noteSkin" not found, using ${NoteSkins.DEFAULT}', true);
+			noteSkin = NoteSkins.DEFAULT;
+		}
 
-		// strumnotes
-		var noteDataPath:String = 'noteskins/$noteSkin/strumnotes';
-		noteSkinData = FormatJson.readJson(Paths.getPath('data/$noteDataPath', "json"));
+		noteSkinData = skinPart(noteSkin, 'strumnotes');
 
 		var ratingPath = Paths.getPath('data/ratings', 'json');
 		ratingData = FormatJson.readJson(ratingPath);
@@ -186,13 +270,10 @@ class NoteController {
 		confirmAnims = [for (i in 0...keys) 'confirm$i'];
 		staticAnims = [for (i in 0...keys) 'static$i'];
 
-		// splashes
-		var splashesDataPath:String = 'noteskins/$noteSkin/splashes';
-		splashesSkinData = FormatJson.readJson(Paths.getPath('data/$splashesDataPath', "json"));
+		splashesSkinData = skinPart(noteSkin, 'splashes');
+		holdSkinData = skinPart(noteSkin, 'holdsplashes');
 
-		// hold splashes
-		var holdDataPath:String = 'noteskins/$noteSkin/holdsplashes';
-		holdSkinData = FormatJson.readJson(Paths.getPath('data/$holdDataPath', "json"));
+		popupsData = NoteSkins.read(noteSkin, 'popups');
 
 		Console.log("Note Skin JSON loaded");
 	}
@@ -310,10 +391,12 @@ class NoteController {
 			scriptNC.call("onBuildStrums", []);
 			#end
 			var baseX:Float = x + i * (112 + spacing);
-			var strum = new StrumNote(baseX, charBaseY, noteSkinData.props, noteSkin);
+			var skin = charSkin(charId);
+			var skinData:NoteSkinData = skinPart(skin, 'strumnotes');
+			var strum = new StrumNote(baseX, charBaseY, skinData.props, skin);
 			strum.laneIndex = i;
 			strum.playAnim('static' + i);
-			strum.applyShader(noteSkinData);
+			strum.applyShader(skinData);
 			_strumBaseX.push(baseX);
 			_strumBaseY.push(charBaseY);
 			_strumCharId.push(charId);
@@ -378,11 +461,12 @@ class NoteController {
 			if (strum == null)
 				continue;
 
-			var skinForChar = charData.noteSkin ?? noteSkin;
+			var skinForChar = charSkin(charData.id);
+			var charSkinData:NoteSkinData = skinPart(skinForChar, 'strumnotes');
 			var pool = _notePool.get(skinForChar);
 			var noteTypeSkin = getNoteTypeData(data.type);
 
-			var effectiveSkin:NoteSkinData = (noteTypeSkin?.visual?.noteSkin != null) ? noteTypeSkin.visual.noteSkin : noteSkinData;
+			var effectiveSkin:NoteSkinData = (noteTypeSkin?.visual?.noteSkin != null) ? noteTypeSkin.visual.noteSkin : charSkinData;
 			var note:Note;
 			if (pool != null && pool.length > 0) {
 				note = pool.pop();
@@ -417,9 +501,9 @@ class NoteController {
 				if (sustainPool != null && sustainPool.length > 0) {
 					sustain = sustainPool.pop();
 					sustain.revive();
-					sustain.reinitSustain(data.time, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, totalLength, data.type, false);
+					sustain.reinitSustain(data.time, keys, strum.x, 0, charSkinData, skinForChar, data.lane, totalLength, data.type, false);
 				} else {
-					sustain = new NoteSustain(data.time, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, totalLength, data.type, false);
+					sustain = new NoteSustain(data.time, keys, strum.x, 0, charSkinData, skinForChar, data.lane, totalLength, data.type, false);
 				}
 
 				sustain.ID = globalLane;
@@ -448,9 +532,9 @@ class NoteController {
 				if (sustainPool != null && sustainPool.length > 0) {
 					sustainEnd = sustainPool.pop();
 					sustainEnd.revive();
-					sustainEnd.reinitSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, 0, data.type, true);
+					sustainEnd.reinitSustain(data.time + data.length, keys, strum.x, 0, charSkinData, skinForChar, data.lane, 0, data.type, true);
 				} else {
-					sustainEnd = new NoteSustain(data.time + data.length, keys, strum.x, 0, noteSkinData, skinForChar, data.lane, 0, data.type, true);
+					sustainEnd = new NoteSustain(data.time + data.length, keys, strum.x, 0, charSkinData, skinForChar, data.lane, 0, data.type, true);
 				}
 
 				sustainEnd.ID = globalLane;
@@ -489,21 +573,25 @@ class NoteController {
 	}
 
 	public function spawnSplash(strum:StrumNote, direction:Int, noteType:String = 'normal'):Void {
-		var pool = _splashPool.get(noteSkin);
+		var skin = strum.noteSkin;
+		var data:NoteSkinData = skinPart(skin, 'splashes');
+		var pool = _splashPool.get(skin);
 		var splash:NoteSplash;
 
 		if (pool != null && pool.length > 0) {
 			splash = pool.pop();
 			splash.revive();
 		} else {
-			splash = new NoteSplash(keys, strum.x, strum.y, splashesSkinData, noteSkin, direction, noteType);
+			splash = new NoteSplash(keys, strum.x, strum.y, data, skin, direction, noteType);
 		}
 
 		splash.random = Std.int(Math.random() * 2);
 		splash.direction = direction;
 		splash.noteControl = this;
+		splash.noteSkin = skin;
+		splash.noteSkinData = data;
 		splash.setPosition(strum.x, strum.y);
-		splash.loadSprite(splashesSkinData);
+		splash.loadSprite(data);
 		splashes.add(splash);
 	}
 
@@ -522,20 +610,24 @@ class NoteController {
 		if (activeHoldSplashes.exists(strum))
 			return;
 
-		var pool = _holdsplashPool.get(noteSkin);
+		var skin = strum.noteSkin;
+		var data:NoteSkinData = skinPart(skin, 'holdsplashes');
+		var pool = _holdsplashPool.get(skin);
 		var holdsplash:HoldSplash;
 
 		if (pool != null && pool.length > 0) {
 			holdsplash = pool.pop();
 			holdsplash.revive();
 		} else {
-			holdsplash = new HoldSplash(keys, strum.x + strum.offset.x, strum.y + strum.offset.y, holdSkinData, noteSkin, direction, noteType);
+			holdsplash = new HoldSplash(keys, strum.x + strum.offset.x, strum.y + strum.offset.y, data, skin, direction, noteType);
 		}
 
 		holdsplash.direction = direction;
 		holdsplash.noteControl = this;
+		holdsplash.noteSkin = skin;
+		holdsplash.noteSkinData = data;
 		holdsplash.setPosition(strum.x, strum.y);
-		holdsplash.loadSprite(holdSkinData);
+		holdsplash.loadSprite(data);
 		holdsplashes.add(holdsplash);
 
 		activeHoldSplashes.set(strum, holdsplash);
@@ -581,6 +673,17 @@ class NoteController {
 		var data:core.json.objects.NoteTypeData = path != null ? FormatJson.readJson(path) : null;
 		_noteTypeCache.set(noteType, data);
 		return data;
+	}
+
+	var scrollTween:flixel.tweens.FlxTween;
+
+	public function tweenScrollSpeed(target:Float, duration:Float, ?ease:flixel.tweens.FlxEase.EaseFunction):Void {
+		scrollTween?.cancel();
+		if (duration <= 0 || ease == null) {
+			scrollSpeed = targetScrollSpeed = target;
+			return;
+		}
+		scrollTween = flixel.tweens.FlxTween.num(scrollSpeed, target, duration, {ease: ease}, v -> scrollSpeed = targetScrollSpeed = v);
 	}
 
 	public function update(songTime:Float) {

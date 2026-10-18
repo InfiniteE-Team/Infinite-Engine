@@ -724,7 +724,7 @@ class GameplayEditor extends MusicBeatState {
 				continue;
 
 			try {
-				var skinData:core.json.objects.NoteSkinData = FormatJson.readJson(Paths.getPath('data/noteskins/$skin/strumnotes', 'json'));
+				var skinData:core.json.objects.NoteSkinData = game.objects.sprites.notes.NoteSkins.read(skin, 'strumnotes');
 				if (skinData == null)
 					continue;
 
@@ -1663,7 +1663,11 @@ class GameplayEditor extends MusicBeatState {
 				}
 			}
 
-			var roleTxt = new flixel.text.FlxText(x, MenuBar.HEIGHT + ICON_SIZE, width, roleName(label.role), 9);
+			var skinName:String = SONG.noteSkin;
+			for (c in SONG.chars)
+				if (c.id == label.id && c.strums?.noteSkin != null && c.strums.noteSkin != '')
+					skinName = c.strums.noteSkin;
+			var roleTxt = new flixel.text.FlxText(x, MenuBar.HEIGHT + ICON_SIZE, width, roleName(label.role) + ' · ' + skinName, 9);
 			roleTxt.setFormat(null, 9, 0xFFBBBBCC, CENTER, OUTLINE, FlxColor.BLACK);
 			roleTxt.scrollFactor.set(0, 0);
 			roleTxt.cameras = [camHud];
@@ -1996,9 +2000,11 @@ class GameplayEditor extends MusicBeatState {
 
 		if (!mouseUsed && FlxG.mouse.justPressed && panelMode == '' && !isPlaying)
 			mouseUsed = clickHeader(mx, my);
+		if (!mouseUsed && FlxG.mouse.justPressedRight && panelMode == '' && !isPlaying)
+			mouseUsed = clickHeader(mx, my, true);
 	}
 
-	function clickHeader(mx:Float, my:Float):Bool {
+	function clickHeader(mx:Float, my:Float, pickSkin:Bool = false):Bool {
 		if (my < MenuBar.HEIGHT || my >= MenuBar.HEIGHT + HEADER_H)
 			return false;
 
@@ -2017,6 +2023,17 @@ class GameplayEditor extends MusicBeatState {
 				return true;
 
 			var charIndex:Int = index;
+			if (pickSkin) {
+				var c = SONG.chars[charIndex];
+				openPicker('Note skin for ${roleName(label.role)}', game.objects.sprites.notes.NoteSkins.list(), c.strums?.noteSkin ?? SONG.noteSkin,
+					function(skin:String) {
+						if (c.strums == null)
+							c.strums = {};
+						c.strums.noteSkin = skin;
+						restartEditor();
+					});
+				return true;
+			}
 			openPicker('Character for ${roleName(label.role)}', ChartDefaults.listNames('characters'), SONG.chars[charIndex].name ?? '',
 				function(name:String) {
 					setCharacterFile(charIndex, name);
