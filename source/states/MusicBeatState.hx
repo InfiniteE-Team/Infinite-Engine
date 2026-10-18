@@ -35,7 +35,7 @@ class MusicBeatState extends State {
 		if (t == null)
 			t = new core.rhythm.RhythmTracker();
 
-		if (core.ConfigMain.globalData.developerMode) {
+		if (core.ConfigMain.globalData.developerMode && infoHelp == null)  {
 			infoHelp = new InfoHelpDebug(FlxG.width - 300, 0, 0);
 			add(infoHelp);
 		}

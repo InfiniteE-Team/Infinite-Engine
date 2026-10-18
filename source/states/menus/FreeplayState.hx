@@ -26,7 +26,9 @@ class FreeplayState extends MusicBeatState {
 	var freeplayData:core.json.engine.FreeplayData;
 
 	var album:FunkinSprite;
+
 	static final ALBUM_WINDOW:Array<Int> = [80, 50, 642, 595];
+
 	var disk:FunkinSprite;
 
 	var artistTxt:FlxText;
@@ -269,7 +271,7 @@ class FreeplayState extends MusicBeatState {
 
 		var queue:Array<String> = [];
 		for (songInfo in freeplayData.songData) {
-			var instPath = Paths.getPath('songs/${songInfo.song}/audio/Inst.ogg');
+			var instPath = Paths.getPath('songs/${songInfo.song}/audio/Inst.ogg') ?? Paths.getPath('songs/${songInfo.song}/Inst.ogg');
 			if (instPath == null)
 				continue;
 			var absPath = sys.FileSystem.absolutePath(instPath);
@@ -446,10 +448,9 @@ class FreeplayState extends MusicBeatState {
 		var songSelected:String = freeplayData.songData[curSelected].song;
 		var bpm:Float = freeplayData.songData[curSelected].bpm;
 		var diffName:String = DiffsUtils.difficulties.length > 0 ? DiffsUtils.difficulties[curDiff] : '';
-
 		if (songSelected != null) {
-			var diffInstPath = Paths.getPath('songs/$songSelected/audio/Inst-$diffName.ogg');
-			var genericInstPath = Paths.getPath('songs/$songSelected/audio/Inst.ogg');
+			var diffInstPath = Paths.getPath('songs/$songSelected/audio/Inst-$diffName.ogg') ?? Paths.getPath('songs/$songSelected/Inst-$diffName.ogg');
+			var genericInstPath = Paths.getPath('songs/$songSelected/audio/Inst.ogg') ?? Paths.getPath('songs/$songSelected/Inst.ogg');
 
 			var instPath = (diffName != '' && sys.FileSystem.exists(diffInstPath)) ? diffInstPath : genericInstPath;
 

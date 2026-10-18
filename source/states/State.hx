@@ -15,11 +15,14 @@ class State extends flixel.FlxState {
 
 	override public function create() {
 		super.create();
-		tweenManager = new flixel.tweens.FlxTween.FlxTweenManager();
-		timerManager = new flixel.util.FlxTimer.FlxTimerManager();
-
-		add(tweenManager);
-		add(timerManager);
+		if (tweenManager == null) {
+			tweenManager = new flixel.tweens.FlxTween.FlxTweenManager();
+			add(tweenManager);
+		}
+		if (timerManager == null) {
+			timerManager = new flixel.util.FlxTimer.FlxTimerManager();
+			add(timerManager);
+		}
 
 		core.config.CursorConfig.refresh();
 	}
