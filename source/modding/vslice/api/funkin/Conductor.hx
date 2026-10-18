@@ -21,6 +21,18 @@ class Conductor {
 
 	public function update(?songPosition:Float, ?applyOffsets:Bool):Void {}
 
+	public function getBeatTimeInMs(?beat:Float):Float {
+		if (beat == null)
+			beat = currentBeat;
+		return RhythmCore.getBeatTimeInMs(beat);
+	}
+
+	public function getStepTimeInMs(?step:Float):Float {
+		if (step == null)
+			step = currentStep;
+		return RhythmCore.getStepTimeInMs(step);
+	}
+
 	function get_songPosition():Float
 		return RhythmCore.songPosition;
 

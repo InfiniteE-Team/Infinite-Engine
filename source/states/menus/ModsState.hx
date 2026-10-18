@@ -84,7 +84,10 @@ class ModsState extends MusicBeatState {
 			var modName = ModsRegistry.mods[i];
 			var modsFolder = core.assets.Library.modsFolder;
 
-			var graphic = '$modsFolder/$modName/images/iconMod.png' ?? '$modsFolder/$modName/_polymod_icon.png';
+			var graphic:String = '$modsFolder/$modName/images/iconMod.png';
+			if (!sys.FileSystem.exists(graphic)) {
+				graphic = '$modsFolder/$modName/_polymod_icon.png';
+			}
 			if (!sys.FileSystem.exists(graphic))
 				graphic = Paths.getPath('menus/mods/fallback-icon', 'image');
 
@@ -96,7 +99,7 @@ class ModsState extends MusicBeatState {
 			var image:FunkinSprite = new FunkinSprite(40, itemY, true);
 			image.loadGraphic(graphic);
 			image.antialiasing = SaveData.data.antialiasing;
-			image.scale.set(0.72, 0.72);
+			image.setGraphicSize(95, 95);
 			image.cameras = [camMods];
 			image.updateHitbox();
 			add(image);

@@ -19,6 +19,14 @@ class RhythmCore {
 
 	public static function changeSignaturesBPM() {}
 
+	public static function getBeatTimeInMs(beat:Float):Float {
+		return beat * RhythmCore.crochet;
+	}
+
+	public static function getStepTimeInMs(step:Float):Float {
+		return step * RhythmCore.stepInMs;
+	}
+
 	public static function pause(gameAudio:core.rhythm.audio.GameAudio):Void {
 		FlxG.sound.pause();
 		if (gameAudio.inst != null)
