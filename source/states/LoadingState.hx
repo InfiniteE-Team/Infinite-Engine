@@ -104,7 +104,7 @@ class LoadingState extends MusicBeatState {
 
 	function collectQueue() {
 		var song:SongConfig = new SongConfig();
-		song.configSong(_curSong, _curSong);
+		song.configSong(_curSong, core.rhythm.DiffsUtils.difficulties[_curDifficulty]);
 
 		if (song.songData == null) {
 			launchPlayState();
@@ -133,40 +133,45 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function collectStageAssets(stageName:String) {
-		var stageData:StageData = FormatJson.readJson(Paths.getPath('data/stages/$stageName', 'json'));
-		if (stageData == null)
+		var stageData:StageData = modding.vslice.VSliceStages.readStage(Paths.getPath('data/stages/$stageName', 'json'));
+		if (stageData == null || stageData.elements == null)
 			return;
 
 		for (el in stageData.elements) {
 			if (el.props == null || el.props.path == null)
 				continue;
-			enqueue('game/stages/$stageName/${el.props.path}');
+			var folder = el.props.folder ?? 'game/stages/$stageName';
+			enqueue(folder == '' ? el.props.path : '$folder/${el.props.path}');
 		}
 	}
 
 	function collectCharAssets(charName:String) {
-		var charData:CharacterData = FormatJson.readJson(Paths.getPath('data/characters/$charName', 'json'));
+		var charData:CharacterData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('data/characters/$charName', 'json'));
 		if (charData == null || charData.render == null || charData.render.layers == null)
 			return;
 
 		for (layer in charData.render.layers) {
+			var folder = layer.folder ?? 'game/characters';
+			inline function inFolder(file:String)
+				return folder == '' ? file : '$folder/$file';
+
 			if (layer.path != null)
-				enqueue('game/characters/${layer.path}');
+				enqueue(inFolder(layer.path));
 
 			if (layer.anims == null)
 				continue;
 			for (anim in layer.anims) {
 				var fp = getAnimFilePath(anim);
 				if (fp != null && fp != layer.path)
-					enqueue('game/characters/$fp');
+					enqueue(inFolder(fp));
 			}
 		}
 	}
 
 	function collectNoteSkinAssets(skinName:String) {
-		var noteSkinData:NoteSkinData = FormatJson.readJson(Paths.getPath('data/noteskins/$skinName/strumnotes', "json"));
+		var noteSkinData:NoteSkinData = game.objects.sprites.notes.NoteSkins.read(skinName, 'strumnotes');
 		if (noteSkinData != null && noteSkinData.props != null && noteSkinData.props.path != null)
-			enqueue('game/noteskins/$skinName/strumnotes/${noteSkinData.props.path}');
+			enqueue(noteSkinData.props.folder != null ? noteSkinData.props.path : 'game/noteskins/$skinName/strumnotes/${noteSkinData.props.path}');
 	}
 
 	inline function enqueue(path:String) {

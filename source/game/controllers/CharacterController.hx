@@ -82,6 +82,8 @@ class CharacterController extends FunkinObjectRegistry {
 			return cast(get(id), Character);
 		}
 		chars = new Character(id, name);
+		chars.isPlayer = namesPlayer.contains(role);
+		chars.applyPlayerFlip();
 
 		#if HSCRIPT_ALLOWED
 		scriptMap.set(id, script);
@@ -135,6 +137,7 @@ class CharacterController extends FunkinObjectRegistry {
 
 							setSing(char, note.direction);
 							char.isMiss = false;
+							modding.vslice.VSliceHooks.dispatch('onNoteHit', modding.vslice.VSliceHooks.noteEvent('NOTE_HIT', note, note.rating));
 						}
 					}
 					var globalLane = noteController.charStrumOffsets.get(char.id);
@@ -157,6 +160,7 @@ class CharacterController extends FunkinObjectRegistry {
 				var note = noteController.getHittableNote(char.id, i, false);
 				if (note != null) {
 					input.isCPUHit(strums, noteController, char.id, i, false);
+					modding.vslice.VSliceHooks.dispatch('onNoteHit', modding.vslice.VSliceHooks.noteEvent('NOTE_HIT', note, 'sick'));
 					#if HSCRIPT_ALLOWED
 					if (charScript != null)
 						charScript.call("onNoteHitCPU", [note]);
@@ -251,11 +255,13 @@ class CharacterController extends FunkinObjectRegistry {
 			if (hitNote != null) {
 				setSing(char, hitNote.direction);
 				char.isMiss = false;
+				modding.vslice.VSliceHooks.dispatch('onNoteHit', modding.vslice.VSliceHooks.noteEvent('NOTE_HIT', hitNote, hitNote.rating));
 				#if HSCRIPT_ALLOWED
 				if (charScript != null)
 					charScript.call("onNoteHitPlayer", [hitNote]);
 				#end
 			} else if (!input.isGhostTapping) {
+				modding.vslice.VSliceHooks.dispatch('onNoteGhostMiss', modding.vslice.VSliceHooks.event('NOTE_GHOST_MISS', {dir: i, hasMissed: true, playAnim: true}));
 				char.playAnim(Character.getCharAnim(i) + 'miss', true);
 				char.isSing = false;
 				char.isMiss = true;
@@ -297,6 +303,7 @@ class CharacterController extends FunkinObjectRegistry {
 			if (note == null || !note.alive || !note.wasMissed || note.wasGoodHit || note.missAnimPlayed || note.strum != strums[i])
 				continue;
 			note.missAnimPlayed = true;
+			modding.vslice.VSliceHooks.dispatch('onNoteMiss', modding.vslice.VSliceHooks.noteEvent('NOTE_MISS', note));
 			char.playAnim(Character.getCharAnim(note.direction) + 'miss', true);
 			char.isSing = false;
 			char.isMiss = true;

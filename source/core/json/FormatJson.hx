@@ -44,7 +44,8 @@ class FormatJson {
 		return {
 			props: customData.props != null ? customData.props : null,
 			bumpInBeats: customData.bumpInBeats != null ? customData.bumpInBeats : true,
-			stepTempo: customData.stepTempo != null ? customData.stepTempo : 2.0
+			stepTempo: customData.stepTempo != null ? customData.stepTempo : 2.0,
+			size: customData.size
 		};
 	}
 

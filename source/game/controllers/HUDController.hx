@@ -111,9 +111,9 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 			return;
 
 		for (icon in [iconP1, iconP2]) {
-			if (icon.scale.x > 1.0) {
-				icon.scale.x = flixel.math.FlxMath.lerp(icon.scale.x, 1.0, elapsed * 12);
-				icon.scale.y = flixel.math.FlxMath.lerp(icon.scale.y, 1.0, elapsed * 12);
+			if (icon.scale.x > icon.baseScale) {
+				icon.scale.x = flixel.math.FlxMath.lerp(icon.scale.x, icon.baseScale, elapsed * 12);
+				icon.scale.y = flixel.math.FlxMath.lerp(icon.scale.y, icon.baseScale, elapsed * 12);
 			}
 		}
 
@@ -198,7 +198,7 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 			return;
 		for (icon in [iconP1, iconP2]) {
 			if (icon.bumpInBeats && Math.floor(beat % icon.stepTempo) == 0)
-				icon.scale.set(1.2, 1.2);
+				icon.scale.set(1.2 * icon.baseScale, 1.2 * icon.baseScale);
 		}
 	}
 

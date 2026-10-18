@@ -12,6 +12,7 @@ typedef CharacterData = {
 // meta for chars
 typedef MetaData = {
 	var ?isPlayer:Bool;
+	var ?flipAsPlayer:Bool;
 }
 
 // gameplay for chars
@@ -43,4 +44,5 @@ typedef IconData = {
 	var ?bumpInBeats:Bool;
 	var ?stepTempo:Float;
 	var ?healthBarColor:String;
+	var ?size:Float;
 }

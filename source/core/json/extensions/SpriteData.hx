@@ -6,6 +6,8 @@ import haxe.extern.EitherType;
 typedef ObjectData = {
 	var name:String;
 	var ?path:String;
+	var ?folder:String;
+	var ?keepHitboxOffset:Bool;
 	var ?position:Array<Float>;
 
 	var ?scale:Array<Float>;
@@ -42,6 +44,7 @@ typedef ObjectData = {
 	var ?frameScale:Array<Int>;
 
 	var ?bopAnims:Array<String>;
+	var ?danceEvery:Float;
 }
 
 // Data for anims

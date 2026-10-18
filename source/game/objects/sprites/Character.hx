@@ -32,6 +32,51 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 
 	public var cameraOffset:Point = {x: 0, y: 0};
 
+	public var zIndex:Int = 0;
+	public var danceEvery:Float = 1;
+	public var characterId(get, never):String;
+	public var cameraFocusPoint(get, never):flixel.math.FlxPoint;
+
+	function get_characterId():String
+		return curCharacter;
+
+	function get_cameraFocusPoint():flixel.math.FlxPoint {
+		var p = getCamPosition();
+		return flixel.math.FlxPoint.weak(p.x, p.y);
+	}
+
+	public function playAnimation(name:String, restart:Bool = false, ignoreOther:Bool = false, reversed:Bool = false):Void
+		playAnim(name, restart);
+
+	public var vslice:funkin.play.character.BaseCharacter = null;
+
+	var _vsliceAnim:String = '';
+	var _vsliceBroken:Map<String, Bool> = new Map();
+
+	function vsliceFailed(method:String, e:Dynamic):Void {
+		_vsliceBroken.set(method, true);
+		Console.log('[V-Slice] $curCharacter.$method failed, using the engine one from now on: $e', true);
+	}
+	var _vsliceFinished:Bool = false;
+
+	function attachVSlice():Void {
+		detachVSlice();
+		if (editorMode || !modding.vslice.VSlice.isActive() || !Std.isOfType(FlxG.state, game.PlayState))
+			return;
+		vslice = modding.vslice.VSliceScripts.attachCharacter(this);
+		modding.vslice.VSliceHooks.register(vslice);
+		modding.vslice.VSliceHooks.call(vslice, 'onCreate', modding.vslice.VSliceHooks.event('CREATE'));
+	}
+
+	function detachVSlice():Void {
+		if (vslice == null)
+			return;
+		modding.vslice.VSliceHooks.call(vslice, 'onDestroy', modding.vslice.VSliceHooks.event('DESTROY'));
+		modding.vslice.VSliceHooks.unregister(vslice);
+		vslice.host = null;
+		vslice = null;
+	}
+
 	var singTime:Float = 2;
 
 	static final CHAR_ANIMS:Array<String> = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
@@ -68,7 +113,12 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 					charData = Paths.getPath('data/characters/bf', JSON);
 				}
 
-				characterData = FormatJson.readJson(charData);
+				characterData = modding.vslice.VSliceCharacters.readCharacter(charData);
+
+				if (characterData != null && (characterData.render == null || characterData.gameplay == null)) {
+					Console.log('[Character] WARNING: "$curCharacter" is not a character format the engine reads, using bf', true);
+					characterData = FormatJson.readJson('${core.assets.Library.baseFolder}/data/characters/bf.json');
+				}
 
 				if (characterData == null) {
 					Console.log('[Character] WARNING: Character data was null, creating Dummy character', true);
@@ -97,9 +147,18 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 				}
 		}
 
+		applyPlayerFlip();
+		attachVSlice();
+
 		#if HSCRIPT_ALLOWED
 		script.call('postCreate', []);
 		#end
+	}
+
+	public function applyPlayerFlip():Void {
+		if (isPlayer && characterData?.meta?.flipAsPlayer == true)
+			for (layer in layers)
+				layer.flipX = !layer.flipX;
 	}
 
 	public function getLayer(name:String):FunkinSprite {
@@ -116,8 +175,32 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 			}
 		}
 
+		if (isSpecial && layers.length > 0) {
+			var cur = layers[0].currentAnim;
+			if (cur != specialAnimName) {
+				isSpecial = false;
+				specialAnimName = null;
+			} else if (layers[0].isFinished(cur)) {
+				isSpecial = false;
+				specialAnimName = null;
+				dance();
+			}
+		}
+
 		if ((isSing || isMiss) && !isSpecial)
 			singCountTime += elapsed;
+
+		if (vslice != null && layers.length > 0) {
+			var cur = layers[0].currentAnim;
+			if (cur != _vsliceAnim) {
+				_vsliceAnim = cur;
+				_vsliceFinished = false;
+			}
+			var finished = cur != null && cur != '' && layers[0].isFinished(cur);
+			if (finished && !_vsliceFinished)
+				modding.vslice.VSliceHooks.call(vslice, 'onAnimationFinished', cur);
+			_vsliceFinished = finished;
+		}
 
 		if ((isSing || isMiss) && !isSpecial) {
 			var beatLengthSecs = core.rhythm.RhythmCore.crochet / 1000.0;
@@ -187,48 +270,52 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		}
 	}
 
+	var specialAnimName:String = null;
+
 	public function playSpecialAnim(animKey:String):Bool {
-		if (characterData == null || characterData.gameplay == null || characterData.gameplay.specialAnims == null)
+		var data:Dynamic = characterData?.gameplay?.specialAnims != null ? Reflect.field(characterData.gameplay.specialAnims, animKey) : null;
+		var animName:String = data != null ? data.anim : animKey;
+		if (animName == null || !existsAnim(animName))
 			return false;
 
-		var data:Dynamic = Reflect.field(characterData.gameplay.specialAnims, animKey);
-		if (data == null)
-			return false;
-
-		var canInterrupt = data.interrupt ?? false;
+		var canInterrupt = data != null ? (data.interrupt ?? false) : true;
 		if (!canInterrupt && (isSing || isMiss))
 			return false;
 
 		#if HSCRIPT_ALLOWED
-		if (script.callCancellable('onSpecialAnim', [animKey, data.anim]))
+		if (script.callCancellable('onSpecialAnim', [animKey, animName]))
 			return false;
 		#end
 
-		var force = data.force ?? true;
-		playAnim(data.anim, force);
+		var force = data != null ? (data.force ?? true) : true;
+		playAnim(animName, force);
 		isSpecial = true;
 		isSing = false;
 		isMiss = false;
 		singCountTime = 0;
-
-		if (layers.length > 0) {
-			layers[0].animation.onFinish.add((name:String) -> {
-				if (name == data.anim && isSpecial) {
-					isSpecial = false;
-					dance();
-					layers[0].animation.onFinish.removeAll();
-				}
-			});
-		}
+		specialAnimName = layers.length > 0 ? layers[0].currentAnim : animName;
 
 		#if HSCRIPT_ALLOWED
-		script.call('postSpecialAnim', [animKey, data.anim]);
+		script.call('postSpecialAnim', [animKey, animName]);
 		#end
 
 		return true;
 	}
 
 	override public function playAnim(name:String, ?force:Bool = true) {
+		if (vslice != null && !_vsliceBroken.exists('playAnimation')) {
+			_vsliceAnim = '';
+			try {
+				vslice.playAnimation(name, force);
+				return;
+			} catch (e:Dynamic) {
+				vsliceFailed('playAnimation', e);
+			}
+		}
+		playAnimRaw(name, force);
+	}
+
+	public function playAnimRaw(name:String, ?force:Bool = true) {
 		#if HSCRIPT_ALLOWED
 		if (script.callCancellable('onPlayAnim', [name, force]))
 			return;
@@ -278,6 +365,15 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 			return;
 		#end
 
+		if (vslice != null && !_vsliceBroken.exists('dance')) {
+			try {
+				vslice.dance(false);
+				return;
+			} catch (e:Dynamic) {
+				vsliceFailed('dance', e);
+			}
+		}
+
 		for (layer in characterData.render.layers) {
 			if (layer.bopAnims != null) {
 				if (existsAnim(layer.bopAnims[0])) {
@@ -304,6 +400,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 	}
 
 	override public function destroy() {
+		detachVSlice();
 		for (layer in layers)
 			layer.destroy();
 		layers = [];

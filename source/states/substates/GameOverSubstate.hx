@@ -9,9 +9,9 @@ class GameOverSubstate extends MusicBeatSubstate {
 	var char:Character = null;
 	var gameOverData:CharacterData;
 
-	var sound:String = '';
-	var music:String = '';
-	var endSound:String = '';
+	var sound:String = 'default/fnf_loss_sfx';
+	var music:String = 'default/gameOver';
+	var endSound:String = 'default/gameOverEnd';
 
 	var confirm:Bool = false;
 
@@ -21,6 +21,7 @@ class GameOverSubstate extends MusicBeatSubstate {
 
 	override public function create() {
 		super.create();
+		funkin.play.GameOverSubState.instance = new funkin.play.GameOverSubState(this);
 
 		#if HSCRIPT_ALLOWED
 		script.call("onCreate", []);
@@ -46,19 +47,24 @@ class GameOverSubstate extends MusicBeatSubstate {
 				continue;
 			}
 
-			gameOverData = FormatJson.readJson(Paths.getPath('data/characters/' + data.name, 'json'));
+			gameOverData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('data/characters/' + data.name, 'json'));
 
 			var deathCharName:String = (gameOverData != null && gameOverData.gameplay != null && gameOverData.gameplay.death != null) ? gameOverData.gameplay.death.character : data.name;
 
-			char = new Character(data.id, deathCharName, charYep.x, charYep.y);
+			char = new Character(data.id, deathCharName);
+			char.isPlayer = true;
+			char.applyPlayerFlip();
+
+			var alivePos = charYep.characterData?.gameplay?.position;
+			char.setPosition(charYep.x - (alivePos != null ? alivePos[0] ?? 0 : 0) + char.x, charYep.y - (alivePos != null ? alivePos[1] ?? 0 : 0) + char.y);
 
 			if (PlayState.instance.cameraController != null)
 				PlayState.instance.cameraController.followChar(char);
 
 			if (gameOverData != null && gameOverData.gameplay != null && gameOverData.gameplay.death != null) {
-				sound = gameOverData.gameplay.death?.sound ?? 'default/fnf_loss_sfx';
-				music = gameOverData.gameplay.death?.music ?? 'default/gameOver';
-				endSound = gameOverData.gameplay.death?.endSound ?? 'default/gameOverEnd';
+				sound = gameOverData.gameplay.death.sound ?? sound;
+				music = gameOverData.gameplay.death.music ?? music;
+				endSound = gameOverData.gameplay.death.endSound ?? endSound;
 			}
 
 			break;
@@ -95,6 +101,9 @@ class GameOverSubstate extends MusicBeatSubstate {
 		if (confirm)
 			return;
 
+		if (char != null)
+			PlayState.instance?.cameraController?.followChar(char);
+
 		if (char.isFinished('firstDeath')) {
 			char.playAnim('deathLoop', true);
 			FlxG.sound.playMusic(Paths.getPath('gameplay/death/' + music, 'music'));
@@ -127,5 +136,11 @@ class GameOverSubstate extends MusicBeatSubstate {
 		if (script.hasScripts)
 			script.call("postUpdate", []);
 		#end
+	}
+
+	override public function destroy() {
+		if (funkin.play.GameOverSubState.instance?.engine == this)
+			funkin.play.GameOverSubState.instance = null;
+		super.destroy();
 	}
 }

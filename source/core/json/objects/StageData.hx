@@ -23,4 +23,7 @@ typedef StageElement = {
 	var ?id:String;
 	var ?position:Array<Float>;
 	var ?camPos:Array<Float>;
+	var ?anchorFeet:Bool;
+	var ?alpha:Float;
+	var ?zIndex:Int;
 }
