@@ -96,9 +96,9 @@
 	<haxeflag name="--macro" value="include('foxlite')" />
 	<haxeflag name="--macro" value="include('modding.scripting.interfaces')" />
 	<haxeflag name="--macro" value="include('funkin', true, ['funkin.vis'])" />
-	
+
 	<compilerflag value="-DHXCPP_CLANG_PCH=0" if="linux" />
-	<compilerflag name="-D HXCPP_M64" if="cpp" />
+	<compilerflag value="-D HXCPP_M64" if="cpp" />
 
 	<!-- Place custom nodes like icons here -->
 	<icon path="assets/icon.png" />
