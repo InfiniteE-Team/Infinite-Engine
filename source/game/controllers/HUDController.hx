@@ -122,6 +122,11 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 	}
 
 	function updateScore(elapsed:Float) {
+		#if HSCRIPT_ALLOWED
+		if (scriptHUD.hasScripts && scriptHUD.callCancellable('onUpdateScore', [elapsed]))
+			return;
+		#end
+
 		intendedScore = flixel.math.FlxMath.lerp(intendedScore, PlayState.instance.playStateConfig.score, flixel.math.FlxMath.bound(elapsed * 16, 0, 1));
 
 		var displayScore:String = InfiniteUtil.formatNumber(Math.round(intendedScore));
