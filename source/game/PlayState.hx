@@ -45,7 +45,7 @@ class PlayState extends MusicBeatState {
 	public var curSong(get, never):String;
 
 	private function get_curSong():String {
-		return SongConfig.getSongName(songFolder);
+		return SONG?.songName ?? SongConfig.getSongName(songFolder);
 	}
 
 	public var curDifficulty:Int = 0;

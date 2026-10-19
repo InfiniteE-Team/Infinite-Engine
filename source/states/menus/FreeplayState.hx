@@ -257,7 +257,7 @@ class FreeplayState extends MusicBeatState {
 		script.call("postCreate", []);
 		#end
 
-		var totalHeight:Float = (freeplayData != null && freeplayData.songData != null) ? freeplayData.songData.length * 125 + 300 : FlxG.height;
+		var totalHeight:Float = (freeplayData != null && freeplayData.songData != null) ? (freeplayData.songData.length * 200) + 400 : FlxG.height;
 		var totalWidth:Float = (freeplayData != null && freeplayData.songData != null) ? FlxG.width + freeplayData.songData.length * 50 + 200 : FlxG.width;
 		FlxG.camera.setScrollBoundsRect(-totalWidth, 0, totalWidth * 2, totalHeight, true);
 

@@ -160,47 +160,28 @@ class SongConfig {
 	}
 
 	public static function getSongName(songFolder:String):String {
-		var songVariations = [
-			songFolder,
-			songFolder.toLowerCase(),
-			songFolder.toUpperCase(),
-			songFolder.substr(0, 1).toUpperCase() + songFolder.substr(1).toLowerCase()
-		];
-
-		var foundMeta:Dynamic = null;
-
-		for (name in songVariations) {
-			for (lib in ['assets', 'mods']) {
-				var candidate = '$lib/songs/$name/charts';
-				if (sys.FileSystem.exists(candidate)) {
-					var files = sys.FileSystem.readDirectory(candidate);
-					for (file in files) {
-						if (StringTools.endsWith(file, '.json')) {
-							var diffName = file.substr(0, file.length - 5);
-							var baseFile = 'songs/$name/charts/$diffName';
-							var raw:Dynamic = FormatJson.readJson(Paths.getPath(baseFile, 'json'));
-							if (raw != null) {
-								foundMeta = raw;
-								break;
-							}
-						}
-					}
-				}
-				if (foundMeta != null)
-					break;
-			}
-			if (foundMeta != null)
-				break;
+		var metaPath = core.assets.Library.findLib('songs/$songFolder/meta.json');
+		if (metaPath != null) {
+			var file:Dynamic = FormatJson.readJson(metaPath);
+			if (file?.song != null)
+				return file.song;
 		}
 
-		if (foundMeta == null && modding.vslice.VSlice.isActive())
-			foundMeta = modding.vslice.VSliceSongs.chart(songFolder);
+		if (modding.vslice.VSlice.isActive()) {
+			var meta:Dynamic = modding.vslice.VSliceSongs.metadata(songFolder);
+			if (meta?.songName != null)
+				return meta.songName;
+		}
 
-		if (foundMeta != null) {
-			if (Reflect.hasField(foundMeta, 'meta') && foundMeta.meta != null) {
-				var meta = foundMeta.meta;
-				if (Reflect.hasField(meta, 'song') && meta.song != null)
-					return meta.song;
+		var chartsPath = core.assets.Library.findLib('songs/$songFolder/charts');
+		if (chartsPath != null) {
+			for (file in sys.FileSystem.readDirectory(chartsPath)) {
+				if (StringTools.endsWith(file, '.json')) {
+					var raw:Dynamic = FormatJson.readJson('$chartsPath/$file');
+					if (raw?.meta?.song != null)
+						return raw.meta.song;
+					break;
+				}
 			}
 		}
 

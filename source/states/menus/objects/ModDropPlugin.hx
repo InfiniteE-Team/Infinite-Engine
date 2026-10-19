@@ -50,6 +50,7 @@ class ModDropPlugin {
 		dropIndicator = new core.assets.FunkinSprite(0, 0, true);
 		dropIndicator.loadGraphic(Paths.getPath('menus/mods/drop-hover', 'image'));
 		dropIndicator.visible = false;
+		dropIndicator.scale.set(0.95, 0.95);
 		dropIndicator.updateHitbox();
 		dropIndicator.screenCenter();
 		parentState.add(dropIndicator);

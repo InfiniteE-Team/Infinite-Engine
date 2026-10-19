@@ -247,7 +247,6 @@ class ModsState extends MusicBeatState {
 
 		dragPlugin = new states.menus.objects.ModDropPlugin(this, () -> {
 			FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
-
 			rebuildModMenu();
 		}, camOther);
 	}

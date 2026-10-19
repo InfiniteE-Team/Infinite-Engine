@@ -1,6 +1,5 @@
 package game.objects.sprites;
 
-import sys.io.File;
 import core.assets.FunkinSprite;
 import core.json.objects.CharacterData;
 
@@ -57,6 +56,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		_vsliceBroken.set(method, true);
 		Console.log('[V-Slice] $curCharacter.$method failed, using the engine one from now on: $e', true);
 	}
+
 	var _vsliceFinished:Bool = false;
 
 	function attachVSlice():Void {
@@ -104,36 +104,51 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		switch (curCharacter) {
 			// case 'bf':  hardcoder reference!1
 			default:
-				var charData:String;
+				var charPath:String = 'data/characters/$curCharacter';
+				var isBf:Bool = (curCharacter == 'bf');
 
-				if (Paths.exists('data/characters/$curCharacter.json'))
-					charData = Paths.getPath('data/characters/$curCharacter', JSON);
-				else {
+				if (!Paths.exists('$charPath.json')) {
 					Console.log('[Character] WARNING: No character data found for "$curCharacter" and it will be replaced to bf.json');
-					charData = Paths.getPath('data/characters/bf', JSON);
+					charPath = 'data/characters/bf';
+					isBf = true;
 				}
 
-				characterData = modding.vslice.VSliceCharacters.readCharacter(charData);
+				characterData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath(charPath, JSON));
 
 				if (characterData != null && (characterData.render == null || characterData.gameplay == null)) {
 					Console.log('[Character] WARNING: "$curCharacter" is not a character format the engine reads, using bf', true);
-					characterData = FormatJson.readJson('${core.assets.Library.baseFolder}/data/characters/bf.json');
+					charPath = 'data/characters/bf';
+					characterData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath(charPath, JSON));
+					isBf = true;
 				}
 
 				if (characterData == null) {
 					Console.log('[Character] WARNING: Character data was null, creating Dummy character', true);
 					characterData = FormatJson.getCharDataPlaceholder();
+					isBf = true;
 				}
 
 				idleAfterSing = characterData.gameplay.idleAfterSing ?? true;
 				singTime = characterData.gameplay.singTime ?? 2;
-				cameraOffset = {
-					x: characterData.gameplay.cameraOffset != null ? characterData.gameplay.cameraOffset[0] : 0,
-					y: characterData.gameplay.cameraOffset != null ? characterData.gameplay.cameraOffset[1] : 0
-				};
 
-				if (characterData.gameplay.position != null)
-					setPosition(characterData.gameplay.position[0] ?? 0, characterData.gameplay.position[1] ?? 0);
+				var camOff = characterData.gameplay.cameraOffset;
+				cameraOffset = {
+					x: camOff != null ? (camOff[0] ?? 0) : 0,
+					y: camOff != null ? (camOff[1] ?? 0) : 0
+				};
+				if (isBf && modding.vslice.VSlice.isActive()) {
+					var pos = characterData.gameplay.position;
+					if (pos != null) {
+						pos[0] = (pos[0] ?? 0) + 50;
+						pos[1] = (pos[1] ?? 0) + 100;
+					}
+					cameraOffset.x += 180;
+					cameraOffset.y += 150;
+				}
+
+				var gameplayPos = characterData.gameplay.position;
+				if (gameplayPos != null)
+					setPosition(gameplayPos[0] ?? 0, gameplayPos[1] ?? 0);
 
 				if (characterData.render.layers != null) {
 					for (layer in characterData.render.layers) {

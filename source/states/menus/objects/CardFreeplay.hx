@@ -13,12 +13,13 @@ class CardFreeplay extends flixel.group.FlxSpriteGroup {
 	var scrollSpeed:Float = 60.0;
 	var pauseTimer:Float = 0.0;
 	var pauseDuration:Float = 1.5;
-	var scrolling:Bool = false;
+
+	var scrollDirection:Int = 1;
 
 	var windowX:Float = 210;
-	var windowW:Float = 392;
+	var windowW:Float = 300;
 
-	var _clipRect:openfl.geom.Rectangle = new openfl.geom.Rectangle(0, 0, 392, 80);
+	var _clipRect:openfl.geom.Rectangle = new openfl.geom.Rectangle(0, 0, 300, 80);
 
 	public function new(x:Float, y:Float, ID:Int) {
 		super(x, y);
@@ -59,44 +60,42 @@ class CardFreeplay extends flixel.group.FlxSpriteGroup {
 		add(card);
 
 		scrollOffset = 0.0;
-		songStartX = windowX;
-		songFullWidth = songText.width;
-		pauseTimer = pauseDuration;
-		scrolling = false;
-		@:privateAccess songText.textField.scrollRect = _clipRect;
+        songStartX = windowX;
+        songFullWidth = songText.width;
+        pauseTimer = pauseDuration;
+        scrollDirection = 1;
+        @:privateAccess songText.textField.scrollRect = _clipRect;
 	}
 
 	var atEnd:Bool = false;
 
 	override public function update(elapsed:Float) {
-		super.update(elapsed);
+        super.update(elapsed);
 
-		if (songText == null || songFullWidth <= windowW)
-			return;
+        if (songText == null || songFullWidth <= windowW)
+            return;
 
-		if (pauseTimer > 0) {
-			pauseTimer -= elapsed;
-			if (pauseTimer <= 0 && atEnd) {
-				scrollOffset = 0.0;
-				_clipRect.x = 0;
-				@:privateAccess songText.textField.scrollRect = _clipRect;
-				atEnd = false;
-				pauseTimer = pauseDuration;
-			}
-			return;
-		}
+        if (pauseTimer > 0) {
+            pauseTimer -= elapsed;
+            return;
+        }
 
-		scrollOffset += scrollSpeed * elapsed;
-		_clipRect.x = scrollOffset;
-		@:privateAccess songText.textField.scrollRect = _clipRect;
+        scrollOffset += scrollSpeed * elapsed * scrollDirection;
 
-		var maxScroll = songFullWidth - windowW + 20;
-		if (scrollOffset >= maxScroll) {
-			scrollOffset = maxScroll;
-			_clipRect.x = scrollOffset;
-			@:privateAccess songText.textField.scrollRect = _clipRect;
-			atEnd = true;
-			pauseTimer = pauseDuration;
-		}
-	}
+        var maxScroll = songFullWidth - windowW + 20;
+
+        if (scrollDirection == 1 && scrollOffset >= maxScroll) {
+            scrollOffset = maxScroll;
+            scrollDirection = -1;
+            pauseTimer = pauseDuration;
+        } 
+        else if (scrollDirection == -1 && scrollOffset <= 0) {
+            scrollOffset = 0;
+            scrollDirection = 1;
+            pauseTimer = pauseDuration;
+        }
+
+        _clipRect.x = scrollOffset;
+        @:privateAccess songText.textField.scrollRect = _clipRect;
+    }
 }
