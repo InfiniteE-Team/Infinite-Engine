@@ -11,9 +11,9 @@ class DiffsUtils {
 
 	public function new() {}
 
-	public static function getDifficulty(curSong:String) {
+	public static function getDifficulty(songFolder:String) {
 		difficulties = [];
-		var diffsDir = core.assets.Library.findLib('songs/$curSong/charts/');
+		var diffsDir = core.assets.Library.findLib('songs/$songFolder/charts/');
 
 		if (diffsDir != null && FileSystem.exists(diffsDir)) {
 			for (file in sys.FileSystem.readDirectory(diffsDir)) {
@@ -24,7 +24,7 @@ class DiffsUtils {
 		}
 
 		if (difficulties.length == 0 && modding.vslice.VSlice.isActive())
-			difficulties = modding.vslice.VSliceSongs.difficulties(curSong);
+			difficulties = modding.vslice.VSliceSongs.difficulties(songFolder);
 
 		difficulties.sort(function(a:String, b:String):Int {
 			var iA = defaultOrder.indexOf(a.toLowerCase());

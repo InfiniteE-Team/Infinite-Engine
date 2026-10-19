@@ -14,7 +14,7 @@ import flixel.tweens.FlxEase;
 
 class LoadingState extends MusicBeatState {
 	// config
-	var _curSong:String;
+	var songFolder:String;
 	var _curDifficulty:Int;
 
 	var _total:Int = 0;
@@ -34,9 +34,9 @@ class LoadingState extends MusicBeatState {
 	static inline var BAR_W:Int = 640;
 	static inline var BAR_H:Int = 10;
 
-	public function new(curSong:String, curDifficulty:Int = 0) {
+	public function new(songFolder:String, curDifficulty:Int = 0) {
 		super();
-		_curSong = curSong;
+		this.songFolder = songFolder;
 		_curDifficulty = curDifficulty;
 	}
 
@@ -80,7 +80,7 @@ class LoadingState extends MusicBeatState {
 		script.call("postBGCreate", []);
 		#end
 
-		_songLabel = new FlxText(0, FlxG.height * 0.85, FlxG.width, _curSong.toUpperCase());
+		_songLabel = new FlxText(0, FlxG.height * 0.85, FlxG.width, SongConfig.getSongName(songFolder.toUpperCase()));
 		_songLabel.setFormat(Paths.getPath('Funkin.otf', 'font'), 28, FlxColor.WHITE, CENTER);
 		_songLabel.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 		_songLabel.alpha = 0.9;
@@ -104,7 +104,7 @@ class LoadingState extends MusicBeatState {
 
 	function collectQueue() {
 		var song:SongConfig = new SongConfig();
-		song.configSong(_curSong, core.rhythm.DiffsUtils.difficulties[_curDifficulty]);
+		song.configSong(songFolder, core.rhythm.DiffsUtils.difficulties[_curDifficulty]);
 
 		if (song.songData == null) {
 			launchPlayState();
@@ -238,7 +238,7 @@ class LoadingState extends MusicBeatState {
 			return;
 		_readyToGo = true;
 
-		MusicBeatState.switchState(() -> new PlayState(_curSong, _curDifficulty));
+		MusicBeatState.switchState(() -> new PlayState(songFolder, _curDifficulty));
 	}
 
 	override public function update(elapsed:Float) {

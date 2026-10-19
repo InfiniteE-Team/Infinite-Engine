@@ -97,7 +97,7 @@ class MasterAudio {
 		}
 
 		var sound = new flixel.sound.FlxSound();
-		sound.loadStream(path);
+		sound.loadFromURL(path);
 		sound.volume = volume;
 		sound.looped = true;
 		sound.persist = true;

@@ -246,7 +246,7 @@ class GameplayEditor extends MusicBeatState {
 	override public function create() {
 		super.create();
 
-		songDir = folder != null && folder != '' ? folder : (game.PlayState.instance?.curSong ?? SONG?.songName ?? 'untitled');
+		songDir = folder != null && folder != '' ? folder : (game.PlayState.instance?.songFolder ?? SONG?.songName ?? 'untitled');
 		folder = null;
 		chartDiff = pickDiffName();
 		diff = null;

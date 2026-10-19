@@ -171,7 +171,6 @@ class PlayState {
 	public function startCountdown():Void
 		engine()?.resumeVSliceCountdown();
 
-
 	public function startSong():Void {}
 
 	public function endSong(?rightGoddamnNow:Bool, ?force:Bool):Void

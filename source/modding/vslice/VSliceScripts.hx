@@ -136,7 +136,7 @@ class VSliceScripts {
 		if (stage == null)
 			return null;
 		stage.host = host;
-		funkin.play.PlayState.instance ??= new funkin.play.PlayState(null, game.PlayState.instance?.curSong ?? Paths.currentSong);
+		funkin.play.PlayState.instance ??= new funkin.play.PlayState(null, game.PlayState.instance?.songFolder ?? Paths.currentSong);
 		funkin.play.PlayState.instance.currentStage = stage;
 		return stage;
 	}

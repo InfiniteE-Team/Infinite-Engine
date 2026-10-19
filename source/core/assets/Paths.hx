@@ -31,14 +31,14 @@ class Paths {
 				case VIDEOS:
 					return Library.findLib("videos/" + fileName + '.mp4');
 				case SONG_AUDIO:
-					var songName = PlayState.instance?.curSong ?? currentSong;
+					var songName = PlayState.instance?.songFolder ?? currentSong;
 					return Library.findLib('songs/$songName/audio/$fileName.ogg') ?? Library.findLib('songs/$songName/$fileName.ogg');
 				case ANIMATED:
 					return getAnimated(fileName);
 				case XML:
 					return Library.findLib(fileName + '.xml');
 				case SONG_SCRIPT:
-					return Library.findLib('songs/${PlayState.instance.curSong}/scripts/$fileName.hx');
+					return Library.findLib('songs/${PlayState.instance.songFolder}/scripts/$fileName.hx');
 				case SHADERS:
 					return Library.findLib('shaders/$fileName.frag');
 				// scripting

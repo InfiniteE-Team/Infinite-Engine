@@ -266,7 +266,7 @@ class ResultScreen extends ScriptState {
 					FlxG.sound.music.volume = v;
 			});
 
-			new FlxTimer().start(1, function(_) {
+			new FlxTimer().start(0.7, function(_) {
 				if (!PlayStateConfig.isStoryMode)
 					MusicBeatState.switchState(() -> new states.menus.FreeplayState());
 				else

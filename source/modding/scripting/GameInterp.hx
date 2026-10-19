@@ -1,6 +1,8 @@
 package modding.scripting;
 
 import hxscript.runtime.Interp;
+import hxscript.syntax.Expr;
+import hxscript.syntax.ExprTools;
 
 @:access(hxscript.runtime.Interp)
 class GameInterp extends Interp {
@@ -73,6 +75,33 @@ class GameInterp extends Interp {
 		}
 
 		return super.resolve(id);
+	}
+
+	override function assign(e1:Expr, e2:Expr):Dynamic {
+		switch (ExprTools.expr(e1)) {
+			case EField(e, f, true):
+				var obj = expr(e);
+				if (obj == null)
+					return null;
+				var v = expr(e2);
+				return set(obj, f, v);
+			default:
+				return super.assign(e1, e2);
+		}
+	}
+
+	// Support null-safe compound assignment: obj?.field += value etc.
+	override function evalAssignOp(op:String, e1:Expr, e2:Expr):Dynamic {
+		switch (ExprTools.expr(e1)) {
+			case EField(e, f, true): // null-safe ?.
+				var obj = expr(e);
+				if (obj == null)
+					return null;
+				var v = combine(op, get(obj, f), expr(e2), e1, e2);
+				return set(obj, f, v);
+			default:
+				return super.evalAssignOp(op, e1, e2);
+		}
 	}
 
 	override function setVar(name:String, value:Dynamic):Dynamic {

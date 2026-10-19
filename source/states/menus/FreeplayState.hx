@@ -14,6 +14,7 @@ import core.assets.FunkinSprite;
 import game.objects.sprites.Icon;
 import flixel.addons.display.FlxBackdrop;
 import states.menus.objects.CardFreeplay;
+import core.json.song.SongData.SongConfig;
 
 class FreeplayState extends MusicBeatState {
 	public static var curSelected:Int = 0;
@@ -135,7 +136,7 @@ class FreeplayState extends MusicBeatState {
 					add(icon);
 				}
 
-				card.createCard(FlxG.width / 2 + (i * 200), FlxG.height / 2 - 100, freeplayData.songData[i].song, i);
+				card.createCard(FlxG.width / 2 + (i * 200), FlxG.height / 2 - 100, SongConfig.getSongName(freeplayData.songData[i].song), i);
 			}
 
 			box = new FlxSprite(700, 0).loadGraphic(Paths.getPath('menus/freeplay/leftBarBFGF', 'image'));

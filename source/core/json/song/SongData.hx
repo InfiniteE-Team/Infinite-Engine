@@ -68,7 +68,7 @@ typedef NoteData = {
 class SongConfig {
 	public var songData:SongData;
 
-	public var songName:String = 'fresh';
+	public var songName:String = 'Fresh';
 	public var bpmSong:Float = 120;
 	public var speed:Float = 1.2;
 	public var needVoices:Bool = true;
@@ -92,9 +92,9 @@ class SongConfig {
 
 	public function new() {}
 
-	public function configSong(curSong:String, diff:String) {
+	public function configSong(songFolder:String, diff:String) {
 		var osuPath:String = null;
-		var baseFile = 'songs/$curSong/charts/$diff';
+		var baseFile = 'songs/$songFolder/charts/$diff';
 		for (lib in ['assets', 'mods']) {
 			var candidate = '$lib/$baseFile.osu';
 			if (sys.FileSystem.exists(candidate)) {
@@ -112,16 +112,16 @@ class SongConfig {
 			var raw:Dynamic = FormatJson.readJson(Paths.getPath(baseFile, 'json'));
 			var meta:Dynamic = null;
 			if (raw == null && modding.vslice.VSlice.isActive()) {
-				raw = modding.vslice.VSliceSongs.chart(curSong);
-				meta = modding.vslice.VSliceSongs.metadata(curSong);
+				raw = modding.vslice.VSliceSongs.chart(songFolder);
+				meta = modding.vslice.VSliceSongs.metadata(songFolder);
 			}
 			if (raw == null)
 				return;
 
-			loadSeparateMeta(raw, curSong);
+			loadSeparateMeta(raw, songFolder);
 
 			if (meta == null)
-				meta = tryLoadVSliceMeta(curSong);
+				meta = tryLoadVSliceMeta(songFolder);
 			var converted = ChartPorter.tryConvert(raw, diff, meta);
 			songData = converted ?? cast raw;
 
@@ -131,9 +131,9 @@ class SongConfig {
 		if (songData == null)
 			return;
 
-		loadSeparateEvents(curSong);
+		loadSeparateEvents(songFolder);
 
-		songName = songData.meta.song ?? 'fresh';
+		songName = songData.meta.song ?? 'Fresh';
 		bpmSong = songData.meta.bpm ?? 120;
 		speed = songData.meta.speed ?? 1.2;
 		needVoices = songData.meta.needVoices ?? true;
@@ -159,8 +159,56 @@ class SongConfig {
 		}
 	}
 
-	private function loadSeparateEvents(curSong:String):Void {
-		var path = core.assets.Library.findLib('songs/$curSong/events.json');
+	public static function getSongName(songFolder:String):String {
+		var songVariations = [
+			songFolder,
+			songFolder.toLowerCase(),
+			songFolder.toUpperCase(),
+			songFolder.substr(0, 1).toUpperCase() + songFolder.substr(1).toLowerCase()
+		];
+
+		var foundMeta:Dynamic = null;
+
+		for (name in songVariations) {
+			for (lib in ['assets', 'mods']) {
+				var candidate = '$lib/songs/$name/charts';
+				if (sys.FileSystem.exists(candidate)) {
+					var files = sys.FileSystem.readDirectory(candidate);
+					for (file in files) {
+						if (StringTools.endsWith(file, '.json')) {
+							var diffName = file.substr(0, file.length - 5);
+							var baseFile = 'songs/$name/charts/$diffName';
+							var raw:Dynamic = FormatJson.readJson(Paths.getPath(baseFile, 'json'));
+							if (raw != null) {
+								foundMeta = raw;
+								break;
+							}
+						}
+					}
+				}
+				if (foundMeta != null)
+					break;
+			}
+			if (foundMeta != null)
+				break;
+		}
+
+		if (foundMeta == null && modding.vslice.VSlice.isActive())
+			foundMeta = modding.vslice.VSliceSongs.chart(songFolder);
+
+		if (foundMeta != null) {
+			if (Reflect.hasField(foundMeta, 'meta') && foundMeta.meta != null) {
+				var meta = foundMeta.meta;
+				if (Reflect.hasField(meta, 'song') && meta.song != null)
+					return meta.song;
+			}
+		}
+
+		return songFolder;
+	}
+
+	private function loadSeparateEvents(songFolder:String):Void {
+		var path = core.assets.Library.findLib('songs/$songFolder/events.json');
 		if (path == null || !sys.FileSystem.exists(path))
 			return;
 
@@ -178,8 +226,8 @@ class SongConfig {
 		Console.log('SongData: events loaded from $path');
 	}
 
-	private function loadSeparateMeta(raw:Dynamic, curSong:String):Void {
-		var path = core.assets.Library.findLib('songs/$curSong/meta.json');
+	private function loadSeparateMeta(raw:Dynamic, songFolder:String):Void {
+		var path = core.assets.Library.findLib('songs/$songFolder/meta.json');
 		if (path == null || !sys.FileSystem.exists(path))
 			return;
 
@@ -193,8 +241,8 @@ class SongConfig {
 		raw.meta = base;
 	}
 
-	private function tryLoadVSliceMeta(curSong:String):Dynamic {
-		var path = core.assets.Library.findLib('songs/$curSong/$curSong-metadata.json');
+	private function tryLoadVSliceMeta(songFolder:String):Dynamic {
+		var path = core.assets.Library.findLib('songs/$songFolder/$songFolder-metadata.json');
 		if (path != null && sys.FileSystem.exists(path)) {
 			var meta:Dynamic = FormatJson.readJson(path);
 			if (meta != null) {

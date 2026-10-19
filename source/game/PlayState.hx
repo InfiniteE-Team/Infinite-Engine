@@ -32,10 +32,21 @@ class PlayState extends MusicBeatState {
 
 	public var subtitleManager:game.objects.Subtitle;
 
-	// Song
-	public var curSong:String = 'default';
-
+	/** SONG INFO!
+	 * 
+	 * There are two variables that contain information about the name of the music
+	 * @param SONG  Here you will find all the information from the JSON.
+	 * @param songFolder  Here you will find the name of the music folder.
+	 * @param curSong  Here is the name of the music within `meta.song`.
+	 */
 	public static var SONG:SongConfig;
+
+	public var songFolder(default, null):String = 'fresh';
+	public var curSong(get, never):String;
+
+	private function get_curSong():String {
+		return SongConfig.getSongName(songFolder);
+	}
 
 	public var curDifficulty:Int = 0;
 
@@ -65,12 +76,14 @@ class PlayState extends MusicBeatState {
 
 	public var startTime:Float = 0;
 
-	public function new(?curSong:String, ?curDifficulty:Int = 0) {
+	public function new(?songFolder:String, ?curDifficulty:Int = 0) {
 		super();
 		gameAudio = new GameAudio();
 		events = new EventManager();
 		playStateConfig = new PlayStateConfig();
-		this.curSong = curSong;
+		if (songFolder != null) {
+			this.songFolder = songFolder;
+		}
 		this.curDifficulty = curDifficulty;
 	}
 
@@ -88,10 +101,10 @@ class PlayState extends MusicBeatState {
 		addCameras();
 
 		SONG = new SongConfig();
-		SONG.configSong(curSong, DiffsUtils.difficulties[curDifficulty]);
+		SONG.configSong(songFolder, DiffsUtils.difficulties[curDifficulty]);
 
 		modding.vslice.VSliceHooks.reset();
-		funkin.play.PlayState.instance = modding.vslice.VSlice.isActive() ? new funkin.play.PlayState(null, curSong) : null;
+		funkin.play.PlayState.instance = modding.vslice.VSlice.isActive() ? new funkin.play.PlayState(null, songFolder) : null;
 
 		#if HSCRIPT_ALLOWED
 		startScript();
@@ -203,7 +216,7 @@ class PlayState extends MusicBeatState {
 	function loadVSliceSong():Void {
 		if (funkin.play.PlayState.instance == null)
 			return;
-		var song = modding.vslice.VSliceScripts.loadSongScript(curSong);
+		var song = modding.vslice.VSliceScripts.loadSongScript(songFolder);
 		if (song == null)
 			return;
 		funkin.play.PlayState.instance.currentSongScript = song;
@@ -372,7 +385,7 @@ class PlayState extends MusicBeatState {
 		flixel.tweens.FlxTween.tween(cameraController.camPoint, {y: cameraController.camPoint.y - 200}, 1, {ease: flixel.tweens.FlxEase.quadOut});
 
 		if (!PlayStateConfig.isStoryMode) {
-			core.config.SaveScore.saveSong(curSong, playStateConfig.score, curDifficulty);
+			core.config.SaveScore.saveSong(songFolder, playStateConfig.score, curDifficulty);
 			new flixel.util.FlxTimer().start(0.9, (_) -> {
 				modding.scripting.types.ScriptClass.switchState('ResultScreen', [playStateConfig]);
 			});
@@ -507,7 +520,7 @@ class PlayState extends MusicBeatState {
 
 	function startScript() {
 		initScript();
-		script.loadFolder('songs/$curSong/scripts');
+		script.loadFolder('songs/$songFolder/scripts');
 		script.loadFolder('scripts/gameplay');
 		script.executeAll();
 	}
@@ -637,7 +650,7 @@ class PlayState extends MusicBeatState {
 		if (FlxG.keys.justPressed.SEVEN && core.ConfigMain.globalData.developerMode) {
 			modding.editors.GameplayEditor.SONG = SONG;
 			// instance is null when the editor opens, so I pass folder and diff here -JloorDev
-			modding.editors.GameplayEditor.folder = curSong;
+			modding.editors.GameplayEditor.folder = songFolder;
 			modding.editors.GameplayEditor.diff = DiffsUtils.difficulties[curDifficulty];
 			MusicBeatState.switchState(() -> new modding.editors.GameplayEditor());
 		}

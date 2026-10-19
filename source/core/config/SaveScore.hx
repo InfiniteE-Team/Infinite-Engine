@@ -25,8 +25,8 @@ class SaveScore {
 			setScore(daWeek, score, diff);
 	}
 
-	public static function formaterSong(curSong:String, diff:Int):String {
-		var nameSong = curSong + '-' + core.rhythm.DiffsUtils.difficulties[diff];
+	public static function formaterSong(songFolder:String, diff:Int):String {
+		var nameSong = songFolder + '-' + core.rhythm.DiffsUtils.difficulties[diff];
 		return nameSong;
 	}
 
