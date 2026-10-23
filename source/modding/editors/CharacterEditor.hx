@@ -482,7 +482,9 @@ class CharacterEditor extends MusicBeatState {
 
 		for (i in 0...layerData.anims.length) {
 			var name = layerData.anims[i].name;
-			var btn = new StatsButton(20, 180 + i * 40, name, null, camHud);
+			var btn = new StatsButton(20, 180 + i * 40, name, null, camHud, null, null, function() {
+				// ghost character function
+			});
 			btn.scrollFactor.set(0, 0);
 			btn.cameras = [camHud];
 			animButtons.push(btn);

@@ -105,12 +105,9 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 			// case 'bf':  hardcoder reference!1
 			default:
 				var charPath:String = 'data/characters/$curCharacter';
-				var isBf:Bool = (curCharacter == 'bf');
-
 				if (!Paths.exists('$charPath.json')) {
 					Console.log('[Character] WARNING: No character data found for "$curCharacter" and it will be replaced to bf.json');
 					charPath = 'data/characters/bf';
-					isBf = true;
 				}
 
 				characterData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath(charPath, JSON));
@@ -119,13 +116,11 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 					Console.log('[Character] WARNING: "$curCharacter" is not a character format the engine reads, using bf', true);
 					charPath = 'data/characters/bf';
 					characterData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath(charPath, JSON));
-					isBf = true;
 				}
 
 				if (characterData == null) {
 					Console.log('[Character] WARNING: Character data was null, creating Dummy character', true);
 					characterData = FormatJson.getCharDataPlaceholder();
-					isBf = true;
 				}
 
 				idleAfterSing = characterData.gameplay.idleAfterSing ?? true;
@@ -136,15 +131,6 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 					x: camOff != null ? (camOff[0] ?? 0) : 0,
 					y: camOff != null ? (camOff[1] ?? 0) : 0
 				};
-				if (isBf && modding.vslice.VSlice.isActive()) {
-					var pos = characterData.gameplay.position;
-					if (pos != null) {
-						pos[0] = (pos[0] ?? 0) + 50;
-						pos[1] = (pos[1] ?? 0) + 100;
-					}
-					cameraOffset.x += 180;
-					cameraOffset.y += 150;
-				}
 
 				var gameplayPos = characterData.gameplay.position;
 				if (gameplayPos != null)

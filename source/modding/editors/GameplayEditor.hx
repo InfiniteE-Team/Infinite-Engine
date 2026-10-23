@@ -1974,7 +1974,7 @@ class GameplayEditor extends MusicBeatState {
 		if (menuBar == null)
 			return;
 
-		var title:String = '$songDir / $chartDiff' + (dirty ? '  *' : '');
+		var title:String = '${SongConfig.getSongName(songDir)} / $chartDiff' + (dirty ? '  *' : '');
 		if (DEBUG_INPUT) {
 			var wp = FlxG.mouse.getWorldPosition(camEditor, mousePoint);
 			var col:Int = Math.floor((wp.x - GRID_X) / GRID_SIZE);

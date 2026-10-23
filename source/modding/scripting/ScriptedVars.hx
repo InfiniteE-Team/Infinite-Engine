@@ -17,6 +17,7 @@ class ScriptedVars {
 		script.expose('iconP2', game.controllerHUD.iconP2);
 		script.expose('skipCountdown', game.countDown.skipCountdown);
 		script.expose('scoreText', game.controllerHUD.scoreText);
+		script.expose('rating', game.controllerHUD.rating);
 
 		script.expose('strumsByChar', game.noteController.strumsByChar);
 	}

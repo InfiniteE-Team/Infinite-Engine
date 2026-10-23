@@ -58,7 +58,7 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 			pauseMenuMusic = _cachedPauseMusic;
 		}
 
-		pauseMenuMusic.volume = 0.7;
+		pauseMenuMusic.volume = 0.5;
 		pauseMenuMusic.play();
 
 		this.camera = FlxG.cameras.list[FlxG.cameras.list.length - 1];

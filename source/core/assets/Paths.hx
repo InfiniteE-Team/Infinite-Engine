@@ -148,17 +148,17 @@ class Paths {
 	}
 
 	public static function cacheAutoAsync(fileName:String, onComplete:Dynamic->Void):Void {
-		if (cache.exists(fileName)) {
-			if (onComplete != null)
-				onComplete(cache.get(fileName));
-			return;
-		}
-
 		var imagePath = getPath(fileName, IMAGE);
 		if (imagePath == null) {
 			Console.log('cacheAutoAsync: Not found $fileName', true);
 			if (onComplete != null)
 				onComplete(null);
+			return;
+		}
+
+		if (cache.exists(imagePath)) {
+			if (onComplete != null)
+				onComplete(cache.get(imagePath));
 			return;
 		}
 
@@ -187,19 +187,16 @@ class Paths {
 				rawData = atlasPath != null ? readText(atlasPath) : null;
 			} catch (e:Dynamic) {}
 
-			// VRAM
 			haxe.MainLoop.runInMainThread(function() {
 				var finalAsset:Dynamic = null;
 
-				if (img != null && !cache.exists(fileName)) {
-					// UPLOAD IN OPENFL
+				if (img != null && !cache.exists(imagePath)) {
 					var bmp = openfl.display.BitmapData.fromImage(img);
-					var graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, fileName);
+					var graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, imagePath);
 					graphic.persist = true;
 
 					@:privateAccess
 					graphic.bitmap.getTexture(FlxG.stage.context3D);
-
 					graphic.bitmap.disposeImage();
 					img.buffer = null;
 					img = null;
@@ -228,16 +225,14 @@ class Paths {
 							fc.parent.persist = true;
 					}
 
-					if (finalAsset != null) {
-						cache.set(fileName, finalAsset);
-					}
+					if (finalAsset != null)
+						cache.set(imagePath, finalAsset);
 				} else if (img != null) {
 					img.buffer = null;
 					img = null;
 				}
-
 				if (onComplete != null) {
-					onComplete(cache.get(fileName) ?? finalAsset);
+					onComplete(cache.get(imagePath) ?? finalAsset);
 				}
 			});
 		});

@@ -24,6 +24,7 @@ class LoadingState extends MusicBeatState {
 
 	// assets Precached
 	var _queue:Array<String> = [];
+	var _audioQueue:Array<String> = [];
 
 	var _bg:FlxSprite;
 	var _bar:FlxBar;
@@ -60,8 +61,9 @@ class LoadingState extends MusicBeatState {
 			return;
 		}
 
-		_total = _queue.length;
+		_total = _queue.length + _audioQueue.length;
 		dispatchQueue();
+		dispatchAudioQueue();
 	}
 
 	function buildUI() {
@@ -130,6 +132,66 @@ class LoadingState extends MusicBeatState {
 		}
 
 		collectNoteSkinAssets(song.noteSkin ?? 'default');
+		collectAudioAssets(song);
+	}
+
+	function collectAudioAssets(song:SongConfig) {
+		Paths.currentSong = songFolder;
+
+		enqueueAudio(Paths.getPath('Inst' + (song.instPrefix ?? ''), SONG_AUDIO));
+
+		// Voces
+		if (song.needVoices) {
+			if (song.vocs == null) {
+				enqueueAudio(Paths.getPath('Voices' + (song.vocPrefix ?? ''), SONG_AUDIO));
+			} else {
+				for (i in 0...song.chars.length) {
+					var stem = i < song.vocs.length ? song.vocs[i] : null;
+					if (stem == null || stem == '')
+						continue;
+					var name = stem;
+					var resolved = Paths.getPath(name, SONG_AUDIO);
+					while (resolved == null && name.lastIndexOf('-') > 0) {
+						name = name.substr(0, name.lastIndexOf('-'));
+						resolved = Paths.getPath(name, SONG_AUDIO);
+					}
+					enqueueAudio(resolved);
+				}
+			}
+		}
+	}
+
+	function enqueueAudio(path:String) {
+		if (path == null)
+			return;
+		var abs = sys.FileSystem.absolutePath(path);
+		if (!_audioQueue.contains(abs) && !core.rhythm.audio.Sound.streamedCache.exists(abs))
+			_audioQueue.push(abs);
+	}
+
+	function dispatchAudioQueue() {
+		for (absPath in _audioQueue) {
+			sys.thread.Thread.create(function() {
+				#if lime_cffi
+				var buffer = lime.media.AudioBuffer.fromFile(absPath);
+				var oflSound = buffer != null ? openfl.media.Sound.fromAudioBuffer(buffer) : null;
+				#else
+				var oflSound = openfl.media.Sound.fromFile(absPath);
+				#end
+
+				haxe.MainLoop.runInMainThread(function() {
+					if (oflSound != null && !core.rhythm.audio.Sound.streamedCache.exists(absPath))
+						core.rhythm.audio.Sound.streamedCache.set(absPath, oflSound);
+
+					_loaded++;
+					updateBar();
+					if (_loaded >= _total && !_done) {
+						_done = true;
+						onAllLoaded();
+					}
+				});
+			});
+		}
 	}
 
 	function collectStageAssets(stageName:String) {

@@ -129,6 +129,8 @@ class PlayState extends MusicBeatState {
 		controllerHUD.cameras = [camHUD];
 		add(controllerHUD);
 
+		chars.rating = controllerHUD.rating;
+
 		subtitleManager = new game.objects.Subtitle();
 		subtitleManager.cameras = [camSubtitles];
 		add(subtitleManager);

@@ -5,6 +5,7 @@ import game.objects.Bar;
 import flixel.text.FlxText;
 import core.assets.FunkinSprite;
 import game.objects.sprites.Icon;
+import game.objects.Rating;
 #if HSCRIPT_ALLOWED
 import modding.scripting.ScriptHandler;
 #end
@@ -23,6 +24,7 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 	public var healthBar:Bar;
 	public var healthBarY:Float = 0;
 	public var scoreText:FlxText;
+	public var rating:Rating;
 
 	var intendedScore:Float = 0;
 
@@ -91,6 +93,10 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 				iconP2 = icon;
 		}
 		_updateIconPositions(0.016);
+
+		rating = new Rating(FlxG.width * 0.55, FlxG.height * 0.5, scriptHUD);
+		add(rating);
+
 		#if HSCRIPT_ALLOWED
 		scriptHUD.call("postCreateHUD", []);
 		#end

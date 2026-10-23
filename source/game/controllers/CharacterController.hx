@@ -18,6 +18,8 @@ class CharacterController extends FunkinObjectRegistry {
 
 	var control:Controls;
 
+	public var rating:game.objects.Rating;
+
 	public static var namesPlayer:Array<String> = ['bf', 'boyfriend', 'player'];
 	public static var namesGf:Array<String> = ['gf', 'girlfriend', 'mid', 'idk'];
 	public static var namesOpponent:Array<String> = ['opponent', 'dad', 'bot', 'cpu'];
@@ -190,6 +192,8 @@ class CharacterController extends FunkinObjectRegistry {
 	public function playMissAnim(dir:Int):Void {
 		for (char in playerChars) {
 			var offset = _noteController?.charStrumOffsets.get(char.id) ?? 0;
+			if (rating != null)
+				rating.onNoteHitMiss();
 			var localDir = dir - offset;
 			if (localDir < 0 || localDir >= 4)
 				continue;
@@ -256,12 +260,15 @@ class CharacterController extends FunkinObjectRegistry {
 				setSing(char, hitNote.direction);
 				char.isMiss = false;
 				modding.vslice.VSliceHooks.dispatch('onNoteHit', modding.vslice.VSliceHooks.noteEvent('NOTE_HIT', hitNote, hitNote.rating));
+				if (rating != null)
+					rating.onNoteHitPlayer();
 				#if HSCRIPT_ALLOWED
 				if (charScript != null)
 					charScript.call("onNoteHitPlayer", [hitNote]);
 				#end
 			} else if (!input.isGhostTapping) {
-				modding.vslice.VSliceHooks.dispatch('onNoteGhostMiss', modding.vslice.VSliceHooks.event('NOTE_GHOST_MISS', {dir: i, hasMissed: true, playAnim: true}));
+				modding.vslice.VSliceHooks.dispatch('onNoteGhostMiss',
+					modding.vslice.VSliceHooks.event('NOTE_GHOST_MISS', {dir: i, hasMissed: true, playAnim: true}));
 				char.playAnim(Character.getCharAnim(i) + 'miss', true);
 				char.isSing = false;
 				char.isMiss = true;
@@ -303,6 +310,8 @@ class CharacterController extends FunkinObjectRegistry {
 			if (note == null || !note.alive || !note.wasMissed || note.wasGoodHit || note.missAnimPlayed || note.strum != strums[i])
 				continue;
 			note.missAnimPlayed = true;
+			if (rating != null)
+				rating.onNoteHitMiss();
 			modding.vslice.VSliceHooks.dispatch('onNoteMiss', modding.vslice.VSliceHooks.noteEvent('NOTE_MISS', note));
 			char.playAnim(Character.getCharAnim(note.direction) + 'miss', true);
 			char.isSing = false;

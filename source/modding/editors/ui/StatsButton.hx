@@ -7,9 +7,11 @@ import flixel.tweens.FlxEase;
 
 class StatsButton extends Button {
 	var dragHandle:FlxSprite;
+	var visibleHandle:FlxSprite;
 	var deleteButton:FlxText;
 	var onDragCallback:(newIndex:Int) -> Void;
 	var onDeleteCallback:Void->Void;
+	var onVisibleCallback:Void->Void;
 
 	public var dragging:Bool = false;
 
@@ -21,7 +23,8 @@ class StatsButton extends Button {
 	var baseY:Float = 0;
 	var dragVisualY:Float = 0;
 
-	override public function new(x:Float, y:Float, text:String, ?onClick:Void->Void, ?cam:game.objects.Camera, ?onDrag:(Int->Void), ?onDelete:Void->Void) {
+	override public function new(x:Float, y:Float, text:String, ?onClick:Void->Void, ?cam:game.objects.Camera, ?onDrag:(Int->Void), ?onDelete:Void->Void,
+			?onVisible:Void->Void) {
 		super(x, y, text, onClick, cam);
 
 		remove(bg, true);
@@ -61,6 +64,18 @@ class StatsButton extends Button {
 			deleteButton.y = (bg.height / 2) - (deleteButton.height / 2);
 			add(deleteButton);
 		}
+
+		if (onVisible != null) {
+			onVisibleCallback = onVisible;
+
+			visibleHandle = new FlxSprite();
+			visibleHandle.loadGraphic(Paths.getPath('menus/editors/ui/show', 'image'));
+			visibleHandle.scale.set(0.6, 0.6);
+			visibleHandle.updateHitbox();
+			visibleHandle.x = bg.width - visibleHandle.width - 6;
+			visibleHandle.y = (bg.height / 2) - (visibleHandle.height / 2);
+			add(visibleHandle);
+		}
 	}
 
 	public function setDragContext(index:Int, total:Int, stepHeight:Float) {
@@ -77,55 +92,61 @@ class StatsButton extends Button {
 		var mx = mouse.x;
 		var my = mouse.y;
 
-		if (onDragCallback == null || dragHandle == null)
-			return;
+		if (onVisibleCallback != null) {
+			var visibleHit = detectHit(mx, my, visibleHandle);
 
-		var deleteHit = mx >= deleteButton.x
-			&& mx <= deleteButton.x + deleteButton.width
-			&& my >= deleteButton.y
-			&& my <= deleteButton.y + deleteButton.height;
+			visibleHandle.alpha = visibleHit ? 0.7 : 1.0;
 
-		deleteButton.color = deleteHit ? 0xFFFFD4D4 : 0xFFFFFFFF;
-
-		if (deleteHit && FlxG.mouse.justPressed)
-			onDeleteCallback();
-
-		var handleHit = mx >= dragHandle.x
-			&& mx <= dragHandle.x + dragHandle.width
-			&& my >= dragHandle.y
-			&& my <= dragHandle.y + dragHandle.height;
-
-		if (handleHit && FlxG.mouse.justPressed) {
-			dragging = true;
-			dragStartY = my;
-			dragVisualY = y;
-			FlxTween.cancelTweensOf(this);
-			FlxTween.tween(this, {y: baseY - 4}, 0.08, {ease: FlxEase.quadOut});
-			alpha = 0.75;
+			if (visibleHit && FlxG.mouse.justPressed)
+				onVisibleCallback();
 		}
 
-		if (dragging) {
-			dragHandle.color = 0xFFFFCC00;
-			this.y = dragVisualY + (my - dragStartY);
+		if (onDragCallback != null) {
+			var deleteHit = detectHit(mx, my, deleteButton);
 
-			if (FlxG.mouse.justReleased) {
-				dragging = false;
-				dragHandle.color = 0xFFFFFFFF;
-				alpha = 1.0;
+			deleteButton.color = deleteHit ? 0xFFFFD4D4 : 0xFFFFFFFF;
 
+			if (deleteHit && FlxG.mouse.justPressed)
+				onDeleteCallback();
+
+			var handleHit = detectHit(mx, my, dragHandle);
+
+			if (handleHit && FlxG.mouse.justPressed) {
+				dragging = true;
+				dragStartY = my;
+				dragVisualY = y;
 				FlxTween.cancelTweensOf(this);
-				FlxTween.tween(this, {y: baseY}, 0.1, {ease: FlxEase.quadOut});
-
-				var delta = my - dragStartY;
-				var steps = Math.round(delta / itemHeight);
-				if (steps != 0) {
-					var newIndex = Std.int(Math.max(0, Math.min(totalItems - 1, myIndex + steps)));
-					if (newIndex != myIndex)
-						onDragCallback(newIndex);
-				}
+				FlxTween.tween(this, {y: baseY - 4}, 0.08, {ease: FlxEase.quadOut});
+				alpha = 0.75;
 			}
-		} else {
-			dragHandle.color = handleHit ? 0xFFFFCC00 : 0xFFFFFFFF;
+
+			if (dragging) {
+				dragHandle.color = 0xFFFFCC00;
+				this.y = dragVisualY + (my - dragStartY);
+
+				if (FlxG.mouse.justReleased) {
+					dragging = false;
+					dragHandle.color = 0xFFFFFFFF;
+					alpha = 1.0;
+
+					FlxTween.cancelTweensOf(this);
+					FlxTween.tween(this, {y: baseY}, 0.1, {ease: FlxEase.quadOut});
+
+					var delta = my - dragStartY;
+					var steps = Math.round(delta / itemHeight);
+					if (steps != 0) {
+						var newIndex = Std.int(Math.max(0, Math.min(totalItems - 1, myIndex + steps)));
+						if (newIndex != myIndex)
+							onDragCallback(newIndex);
+					}
+				}
+			} else {
+				dragHandle.color = handleHit ? 0xFFFFCC00 : 0xFFFFFFFF;
+			}
 		}
+	}
+
+	function detectHit(mx, my, sprite:FlxSprite):Bool {
+		return mx >= sprite.x && mx <= sprite.x + sprite.width && my >= sprite.y && my <= sprite.y + sprite.height;
 	}
 }
