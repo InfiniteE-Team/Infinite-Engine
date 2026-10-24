@@ -1,4 +1,4 @@
-package game.graphics.shaders.hardcode;
+package core.render.shaders.hardcode;
 
 import flixel.addons.display.FlxRuntimeShader;
 import core.json.objects.NoteSkinData;

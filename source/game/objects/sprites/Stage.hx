@@ -191,8 +191,6 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 				layer.alpha = props.alpha;
 	}
 
-
-
 	function createElement(element:StageElement) {
 		var type:String = Std.string(element.type ?? 'sprite');
 		switch (type) {
@@ -257,8 +255,10 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 
 	override public function update(elapsed:Float):Void {
 		super.update(elapsed);
-		if (vsliceScript != null)
+		if (vsliceScript != null) {
 			modding.vslice.VSliceHooks.call(vsliceScript, 'update', elapsed);
+			modding.vslice.VSliceHooks.call(vsliceScript ,'onUpdate', modding.vslice.VSliceHooks.event('UPDATE', {elapsed: elapsed}));
+		}
 		#if HSCRIPT_ALLOWED
 		if (stageScript.hasScripts)
 			stageScript.call('onUpdate', [elapsed]);
@@ -276,12 +276,14 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 		#if HSCRIPT_ALLOWED
 		stageScript.call('onBeatHit', [beat]);
 		#end
+		modding.vslice.VSliceHooks.call(vsliceScript, 'onBeatHit', modding.vslice.VSliceHooks.event('BEAT_HIT', {beat: beat}));
 	}
 
 	public function onStepHit(step:Int):Void {
 		#if HSCRIPT_ALLOWED
 		stageScript.call('onStepHit', [step]);
 		#end
+		modding.vslice.VSliceHooks.call(vsliceScript, 'onStepHit', modding.vslice.VSliceHooks.event('STEP_HIT', {step: step}));
 	}
 
 	override public function destroy() {

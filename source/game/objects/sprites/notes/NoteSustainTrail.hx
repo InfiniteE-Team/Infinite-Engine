@@ -4,7 +4,7 @@ import flixel.FlxSprite;
 import flixel.graphics.tile.FlxDrawTrianglesItem.DrawData;
 import core.assets.FunkinSprite;
 import core.json.extensions.SpriteData.ObjectData;
-import game.graphics.shaders.hardcode.RGBShader;
+import core.render.shaders.hardcode.RGBShader;
 import core.json.objects.NoteSkinData;
 
 /**

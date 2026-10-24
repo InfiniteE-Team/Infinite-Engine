@@ -53,37 +53,47 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 		if (SONG == null)
 			return;
 
-		if (SONG.vocs == null) {
-			vocals = audio('Voices' + SONG?.vocPrefix, onfinish);
-			if (vocals != null) {
-				vocalsGroup.push(vocals);
-				vocalsMap.set('default', vocals);
-				add(vocals);
-			}
-			return;
-		} else {
-			if (SONG.chars != null) {
-				var usedStems:Array<String> = [];
-				for (i in 0...SONG.chars.length) {
-					var charName = SONG.chars[i].id;
-					var stem = i < SONG.vocs.length ? SONG.vocs[i] : null;
-					var file = stem != null && stem != '' ? voiceStem(stem) : null;
-					if (file != null && usedStems.contains(file))
-						file = null;
-					if (file != null)
-						usedStems.push(file);
-					var charVoc = file != null ? audio(file, onfinish) : null;
+		var stems:Array<{id:String, file:String}> = [];
 
-					if (charVoc != null) {
-						vocalsGroup.push(charVoc);
-						vocalsMap.set(charName, charVoc);
-						add(charVoc);
+		if (SONG.vocs != null) {
+			var used:Array<String> = [];
+			for (i in 0...SONG.chars.length) {
+				var file = voiceStem(i < SONG.vocs.length ? SONG.vocs[i] : '');
+				if (file != null && !used.contains(file)) {
+					used.push(file);
+					stems.push({id: SONG.chars[i].id, file: file});
+				}
+			}
+		} else {
+			var used:Array<String> = [];
+			for (char in SONG.chars) {
+				var found = false;
+				for (candidate in [char.name, char.id]) {
+					if (candidate == null || candidate == '')
+						continue;
+					var file = 'Voices-' + candidate;
+					if (Paths.getPath(file, 'songAudio') != null && !used.contains(file)) {
+						used.push(file);
+						stems.push({id: char.id, file: file});
+						found = true;
+						break;
 					}
 				}
-				if (vocalsGroup.length > 0)
-					vocals = vocalsGroup[0];
 			}
+			if (stems.length == 0)
+				stems.push({id: 'default', file: 'Voices' + SONG.vocPrefix});
 		}
+
+		for (s in stems) {
+			var v = audio(s.file, onfinish);
+			if (v == null)
+				continue;
+			vocalsGroup.push(v);
+			vocalsMap.set(s.id, v);
+			add(v);
+		}
+		if (vocalsGroup.length > 0)
+			vocals = vocalsGroup[0];
 	}
 
 	public function playAll():Void {

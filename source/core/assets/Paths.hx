@@ -37,6 +37,10 @@ class Paths {
 					return getAnimated(fileName);
 				case XML:
 					return Library.findLib(fileName + '.xml');
+				case SWF:
+					return Library.findLib(fileName + '.swf');
+				case ASTC:
+					return Library.findLib(fileName + '.astc');
 				case SONG_SCRIPT:
 					return Library.findLib('songs/${PlayState.instance.songFolder}/scripts/$fileName.hx');
 				case SHADERS:

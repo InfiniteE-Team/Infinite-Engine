@@ -56,6 +56,15 @@ class PlayState {
 			currentDifficulty = diffs[diff];
 	}
 
+	public function getBoyfriend():Dynamic
+		return currentStage?.getBoyfriend();
+
+	public function getDad():Dynamic
+		return currentStage?.getDad();
+
+	public function getGirlfriend():Dynamic
+		return currentStage?.getGirlfriend();
+
 	inline function engine():game.PlayState
 		return game.PlayState.instance;
 

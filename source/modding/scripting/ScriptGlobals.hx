@@ -51,7 +51,7 @@ class ScriptGlobals {
 			'modding.scripting.interfaces.ScriptSubstate',
 			'modding.scripting.types.ScriptClass',
 			// Shaders
-			'game.graphics.shaders.CustomShader',
+			'core.render.shaders.CustomShader',
 			// Modchart
 			'game.modchart.ModchartSystem',
 			// Foxlite
@@ -170,7 +170,7 @@ class ScriptGlobals {
 			// modchart
 			"ModchartSystem" => game.modchart.ModchartSystem,
 			// Shaders
-			"CustomShader" => game.graphics.shaders.CustomShader,
+			"CustomShader" => core.render.shaders.CustomShader,
 			// modifiers
 			"DrunkModifier" => DrunkModifier,
 			"TornadoModifier" => TornadoModifier,

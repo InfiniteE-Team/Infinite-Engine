@@ -6,9 +6,12 @@ import haxe.extern.EitherType;
 typedef ObjectData = {
 	var name:String;
 	var ?path:String;
+
 	var ?folder:String;
 	var ?keepHitboxOffset:Bool;
 	var ?position:Array<Float>;
+
+	var ?renderType:core.enums.RenderType;
 
 	var ?scale:Array<Float>;
 	var ?alpha:Float;
@@ -53,6 +56,8 @@ typedef AnimData = {
 	var name:String;
 
 	var ?filePath:EitherType<String, Array<String>>;
+
+	var ?renderType:core.enums.RenderType;
 
 	var ?shaderColor:Array<{r:Array<String>, g:Array<String>, b:Array<String>}>;
 

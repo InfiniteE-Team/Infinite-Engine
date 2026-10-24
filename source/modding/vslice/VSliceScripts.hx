@@ -149,6 +149,7 @@ class VSliceScripts {
 		shim ??= new funkin.play.character.BaseCharacter(host.curCharacter);
 		shim.host = host;
 		shim._data = FormatJson.readJson(Paths.getPath('data/characters/${host.curCharacter}', 'json'));
+		funkin.play.PlayState.instance ??= new funkin.play.PlayState(null, game.PlayState.instance?.songFolder ?? core.assets.Paths.currentSong);
 		return shim;
 	}
 
@@ -159,8 +160,18 @@ class VSliceScripts {
 		// V-Slice's script events are global there; with unknown imports they become plain Dynamic annotations
 		// the classes scripts extend too: hxscript rejects its own bridge subclass where the base type is named -JloorDev
 		var dynamicTypes:Array<String> = [
-			'ScriptEvent', 'FunkinSound', 'Stage', 'Song', 'BaseCharacter', 'SparrowCharacter', 'MultiSparrowCharacter', 'PackerCharacter',
-			'AnimateAtlasCharacter', 'MultiAnimateAtlasCharacter', 'FunkinSprite', 'Bopper'
+			'ScriptEvent',
+			'FunkinSound',
+			'Stage',
+			'Song',
+			'BaseCharacter',
+			'SparrowCharacter',
+			'MultiSparrowCharacter',
+			'PackerCharacter',
+			'AnimateAtlasCharacter',
+			'MultiAnimateAtlasCharacter',
+			'FunkinSprite',
+			'Bopper'
 		];
 		for (i in 0...lines.length) {
 			// the script runs on its own, its package (rewired.stages...) means nothing here -JloorDev
@@ -169,7 +180,9 @@ class VSliceScripts {
 			if (!importLine.match(lines[i]))
 				continue;
 			// openfl's AssetType is an enum abstract hxscript can't import; its values are plain strings -JloorDev
-			if (importLine.matched(1) == 'openfl.utils.AssetType' || !typeKnown(importLine.matched(1))) {
+			if (importLine.matched(1) == 'openfl.utils.AssetType'
+				|| importLine.matched(1) == 'openfl.utils.Assets'
+				|| !typeKnown(importLine.matched(1))) {
 				lines[i] = '// no V-Slice API for this yet: ' + lines[i];
 				dynamicTypes.push(importLine.matched(2) ?? importLine.matched(1).split('.').pop());
 			}
@@ -193,7 +206,7 @@ class VSliceScripts {
 				lines[i] = overrideWord.replace(lines[i], '');
 		}
 
-		src = 'import funkin.Paths; import openfl.utils.Assets; import funkin.Preferences; ' + lines.join('\n');
+		src = 'import funkin.Paths; import funkin.Assets; import funkin.Preferences; ' + lines.join('\n');
 		src = ~/\bnew\s+FlxSprite\s*\(/g.replace(src, 'new funkin.graphics.FunkinSprite(');
 		src = ~/\bnew\s+FlxBackdrop\s*\(/g.replace(src, 'new funkin.compat.LegacyBackdrop(');
 		src = ~/\bAssetType\.([A-Z_]+)/g.replace(src, '"$1"');

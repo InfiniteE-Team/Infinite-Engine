@@ -8,7 +8,7 @@ import core.json.extensions.SpriteData.AnimData;
 import flixel.graphics.frames.FlxFramesCollection;
 import flixel.graphics.frames.FlxTileFrames;
 import flixel.graphics.frames.FlxAtlasFrames;
-import game.graphics.shaders.CustomShader;
+import core.render.shaders.CustomShader;
 
 class FunkinSprite extends animate.FlxAnimate {
 	public var offsets:Map<String, Point> = new Map();
@@ -18,6 +18,9 @@ class FunkinSprite extends animate.FlxAnimate {
 	var _suffixes:Map<String, String> = new Map();
 
 	var _assetLoaded:Bool = false;
+
+	var swfMode:Bool = false;
+	var swfModel:Null<core.render.swf.SWFModel> = null;
 
 	// Tracks the last anim played — DO NOT use anim.name (FlxAnimateController),
 	// that only updates for Adobe Animate atlas sprites, not Sparrow.
@@ -30,6 +33,21 @@ class FunkinSprite extends animate.FlxAnimate {
 			@:privateAccess
 			this._frame = null;
 			this.graphic = null;
+		}
+	}
+
+	override public function update(elapsed:Float) {
+		super.update(elapsed);
+
+		if (swfMode && swfModel != null) {
+			var off = getAnimOffset();
+			var ps = swfModel.pixelSize;
+
+			swfModel.x = (x - (off?.x ?? 0)) * ps;
+			swfModel.y = -(y - (off?.y ?? 0)) * ps;
+			swfModel.scale.x = scale.x;
+			swfModel.scale.y = scale.y;
+			swfModel.visible = visible && alive;
 		}
 	}
 
@@ -91,6 +109,37 @@ class FunkinSprite extends animate.FlxAnimate {
 	var _baseOffset:Point = {x: 0, y: 0};
 
 	public function loadProps(props:ObjectData, path:String):Void {
+		var renderType = props.renderType ?? DEFAULT;
+
+		if (renderType == SWF) {
+			swfMode = true;
+
+			var assetPath = joinPath(props.folder ?? path, props.path);
+			var swfFile = Paths.getPath(assetPath, 'swf');
+
+			if (swfFile != null) {
+				swfModel = new core.render.swf.SWFModel(swfFile, '', core.render.swf.SWFScene.PIXEL_SIZE);
+				if (core.render.swf.SWFScene.instance != null)
+					core.render.swf.SWFScene.instance.add(swfModel);
+
+				if (props.anims != null) {
+					for (anim in props.anims) {
+						if (anim.offsets != null)
+							offsets.set(anim.name, {x: anim.offsets[0], y: anim.offsets[1]});
+					}
+				}
+			} else {
+				Console.log('FunkinSprite SWF: not found "$assetPath.swf"', true);
+				swfMode = false;
+			}
+
+			loadParams(props);
+			if (props.firstAnim != null)
+				playAnim(props.firstAnim, true);
+			_assetLoaded = true;
+			return;
+		}
+
 		if (props.folder != null)
 			path = props.folder;
 		var assetPath = joinPath(path, props.path);
@@ -340,6 +389,14 @@ class FunkinSprite extends animate.FlxAnimate {
 	}
 
 	public function playAnim(name:Null<String>, ?force:Bool = true) {
+		if (swfMode) {
+			if (swfModel == null)
+				return;
+			currentAnim = name;
+			swfModel.playAnim(name);
+			activeOffsets(getAnimOffset());
+			return;
+		}
 		var fullName = name + (_suffixes.get(name) ?? '');
 		if (!existsAnim(fullName)) {
 			Console.log('$name Anim Not Existed!', true);
@@ -372,6 +429,8 @@ class FunkinSprite extends animate.FlxAnimate {
 		offset.set(_baseOffset.x - off.x, _baseOffset.y - off.y);
 
 	override public function draw():Void {
+		if (swfMode)
+			return;
 		if (!_assetLoaded)
 			return;
 		if (isAnimate && (timeline == null || timeline.layers == null || timeline.layers.length == 0))
@@ -382,6 +441,12 @@ class FunkinSprite extends animate.FlxAnimate {
 	public function dance() {}
 
 	override public function destroy() {
+		if (swfModel != null) {
+			core.render.swf.SWFScene.instance?.remove(swfModel);
+			swfModel.destroy();
+			swfModel = null;
+		}
+		swfMode = false;
 		if (anim != null) {
 			anim.pause();
 		}

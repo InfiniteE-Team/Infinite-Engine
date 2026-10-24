@@ -57,17 +57,55 @@ class VSliceNoteStyles {
 		var holdSize = holdPath != null ? pngSize(Library.findLib('images/$holdPath.png')) : null;
 		var holdFrame = holdSize != null ? [Std.int(holdSize[0] / 8), holdSize[1]] : null;
 
+		var strumOffsets:Array<Dynamic> = strum.offsets ?? [0, 0];
+		var strumOff = [num(strumOffsets, 0), num(strumOffsets, 1)];
+
 		var anims:Array<AnimData> = [];
 		for (i in 0...4) {
 			var dir = DIRS[i];
-			anims.push({name: 'note$i-Scroll', filePath: notePath, prefix: prefixOf(note.data, dir), framerate: 24, offsets: [0, 5]});
+			anims.push({
+				name: 'note$i-Scroll',
+				filePath: notePath,
+				prefix: prefixOf(note.data, dir) + "0",
+				framerate: 24,
+				offsets: [0, 5]
+			});
 			if (holdFrame != null) {
-				anims.push({name: 'note$i-Hold', filePath: holdPath, frameScale: holdFrame, indices: [i * 2], framerate: 24, offsets: [0, 0]});
-				anims.push({name: 'note$i-HoldEnd', filePath: holdPath, frameScale: holdFrame, indices: [i * 2 + 1], framerate: 24, offsets: [0, -2]});
+				anims.push({
+					name: 'note$i-Hold',
+					filePath: holdPath,
+					frameScale: holdFrame,
+					indices: [i * 2],
+					framerate: 24,
+					offsets: [0, 0]
+				});
+				anims.push({
+					name: 'note$i-HoldEnd',
+					filePath: holdPath,
+					frameScale: holdFrame,
+					indices: [i * 2 + 1],
+					framerate: 24,
+					offsets: [0, -2]
+				});
 			}
-			anims.push({name: 'static$i', prefix: prefixOf(strum.data, '${dir}Static'), framerate: 24, offsets: [-28, -30]});
-			anims.push({name: 'press$i', prefix: prefixOf(strum.data, '${dir}Press'), framerate: 24, offsets: [0, 0]});
-			anims.push({name: 'confirm$i', prefix: prefixOf(strum.data, '${dir}Confirm'), framerate: 24, offsets: [-28, -30]});
+			anims.push({
+				name: 'static$i',
+				prefix: prefixOf(strum.data, '${dir}Static'),
+				framerate: 24,
+				offsets: [-28 + strumOff[0], -30 + strumOff[1]]
+			});
+			anims.push({
+				name: 'press$i',
+				prefix: prefixOf(strum.data, '${dir}Press'),
+				framerate: 24,
+				offsets: [0 + strumOff[0], 0 + strumOff[1]]
+			});
+			anims.push({
+				name: 'confirm$i',
+				prefix: prefixOf(strum.data, '${dir}Confirm'),
+				framerate: 24,
+				offsets: [-28 + strumOff[0], -30 + strumOff[1]]
+			});
 		}
 
 		return {
@@ -76,7 +114,7 @@ class VSliceNoteStyles {
 				name: 'StrumNotes',
 				path: strumPath,
 				folder: '',
-				position: [15, 20],
+				position: [15 + strumOff[0], 20 + strumOff[1]],
 				scale: [scale, scale],
 				antialiasing: assets.note?.isPixel != true,
 				anims: anims
@@ -90,14 +128,23 @@ class VSliceNoteStyles {
 		var path = stripLibrary(splash.assetPath);
 		var size = frameSize(path, null) ?? [260, 298];
 		var extra:Dynamic = splash.offsets;
-		var off = [-60 - (size[0] - 260) / 2 + num(extra, 0), -60 - (size[1] - 298) / 2 + num(extra, 1)];
+		var off = [
+			-60 - (size[0] - 260) / 2 + num(extra, 0),
+			-60 - (size[1] - 298) / 2 + num(extra, 1)
+		];
 		var anims:Array<AnimData> = [];
 		for (i in 0...4) {
 			var list:Array<Dynamic> = Reflect.field(splash.data, '${DIRS[i]}Splashes') ?? [];
 			for (n in 0...2) {
 				var entry:Dynamic = list.length > 0 ? list[n % list.length] : null;
 				if (entry != null)
-					anims.push({name: 'note$i-Splash$n', prefix: entry.prefix, framerate: entry.framerate ?? 24, looped: false, offsets: off});
+					anims.push({
+						name: 'note$i-Splash$n',
+						prefix: entry.prefix,
+						framerate: entry.framerate ?? 24,
+						looped: false,
+						offsets: off
+					});
 			}
 		}
 		return {
@@ -126,7 +173,11 @@ class VSliceNoteStyles {
 				continue;
 			var path = stripLibrary(d.assetPath ?? cover.assetPath);
 			firstPath ??= path;
-			var stages:Array<Array<Dynamic>> = [['start', 'startHold', false], ['hold', 'loopHold', true], ['end', 'endHold', false]];
+			var stages:Array<Array<Dynamic>> = [
+				['start', 'startHold', false],
+				['hold', 'loopHold', true],
+				['end', 'endHold', false]
+			];
 			for (stage in stages) {
 				var key:String = stage[0];
 				var prefix:String = Reflect.field(d, key)?.prefix;
@@ -134,7 +185,14 @@ class VSliceNoteStyles {
 					continue;
 				var size = frameSize(path, prefix) ?? [161, 125];
 				var off = [85.5 - size[0] / 2 + num(extra, 0), 72.5 - size[1] / 2 + num(extra, 1)];
-				anims.push({name: 'note$i-${stage[1]}', filePath: path, prefix: prefix, framerate: 24, looped: stage[2], offsets: off});
+				anims.push({
+					name: 'note$i-${stage[1]}',
+					filePath: path,
+					prefix: prefix,
+					framerate: 24,
+					looped: stage[2],
+					offsets: off
+				});
 			}
 		}
 		if (firstPath == null)

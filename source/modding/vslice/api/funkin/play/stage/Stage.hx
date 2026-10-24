@@ -15,6 +15,14 @@ class Stage {
 		stageId = id;
 	}
 
+	public var namedProps(get, never):Array<Dynamic>;
+
+	function get_namedProps():Array<Dynamic> {
+		if (host == null)
+			return [];
+		return [for (_ => obj in host.objectMap) obj];
+	}
+
 	public function buildStage():Void {}
 
 	public function add(obj:FlxBasic):FlxBasic {
@@ -65,7 +73,8 @@ class Stage {
 		return c?.vslice != null ? c.vslice : c;
 
 	public function addCharacter(character:Dynamic, charType:String):Void {
-		var c:Character = Std.isOfType(character, funkin.play.character.BaseCharacter) ? cast(character, funkin.play.character.BaseCharacter).host : Std.downcast(character, Character);
+		var c:Character = Std.isOfType(character,
+			funkin.play.character.BaseCharacter) ? cast(character, funkin.play.character.BaseCharacter).host : Std.downcast(character, Character);
 		if (host != null && c != null)
 			host.addExtraCharacter(c);
 	}

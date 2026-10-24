@@ -219,6 +219,7 @@ class FreeplayState extends MusicBeatState {
 			diffTxt.y = 40;
 
 			album = new FunkinSprite(0, 140, true);
+			album.loadGraphic(Paths.getPath('menus/freeplay/albums/placeholder', 'image'));
 			album.antialiasing = SaveData.data.antialiasing;
 			album.scrollFactor.set(0, 0);
 			album.scale.set(1.2, 1.2);
@@ -512,16 +513,16 @@ class FreeplayState extends MusicBeatState {
 		if (album != null) {
 			var albumName = freeplayData.songData[curSelected].album;
 			var albumPath = albumName == null ? null : Paths.getPath(albumName.indexOf('/') >= 0 ? albumName : 'menus/freeplay/albums/' + albumName, 'image');
-			album.visible = albumPath != null;
-			if (albumPath != null) {
-				album.loadGraphic(albumPath);
-				var sx = disk != null ? disk.scale.x : 0.5;
-				var sy = disk != null ? disk.scale.y : 0.5;
-				album.setGraphicSize(Std.int(ALBUM_WINDOW[2] * sx), Std.int(ALBUM_WINDOW[3] * sy));
-				album.updateHitbox();
-				album.x = (disk != null ? disk.x : FlxG.width * 0.96 - 370) + ALBUM_WINDOW[0] * sx;
-				album.y = (disk != null ? disk.y : 90) + ALBUM_WINDOW[1] * sy;
+			if (albumPath == null) {
+				albumPath = Paths.getPath('menus/freeplay/albums/placeholder', 'image');
 			}
+			album.loadGraphic(albumPath);
+			var sx = disk != null ? disk.scale.x : 0.5;
+			var sy = disk != null ? disk.scale.y : 0.5;
+			album.setGraphicSize(Std.int(ALBUM_WINDOW[2] * sx), Std.int(ALBUM_WINDOW[3] * sy));
+			album.updateHitbox();
+			album.x = (disk != null ? disk.x : FlxG.width * 0.96 - 370) + ALBUM_WINDOW[0] * sx;
+			album.y = (disk != null ? disk.y : 90) + ALBUM_WINDOW[1] * sy;
 		}
 
 		if (songs.length > 0) {

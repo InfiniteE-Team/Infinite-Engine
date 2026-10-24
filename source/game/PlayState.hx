@@ -18,7 +18,6 @@ import core.json.song.SongData.SongConfig;
 import game.controllers.events.EventManager;
 import game.objects.Countdown;
 
-// import windowmodcharting.WindowModManager;
 class PlayState extends MusicBeatState {
 	public static var instance:PlayState;
 
@@ -141,9 +140,6 @@ class PlayState extends MusicBeatState {
 		t.reset();
 
 		buildStrumsandNotes();
-		/*
-			windowMod = new WindowModManager();
-			add(windowMod); */
 
 		loadSong();
 
@@ -435,10 +431,6 @@ class PlayState extends MusicBeatState {
 		FlxG.sound.pause();
 		gameAudio.pauseAll();
 		RhythmCore.pause(gameAudio);
-		/*
-			if (windowMod != null)
-				windowMod.pauseWindow(); */
-
 		#if HSCRIPT_ALLOWED
 		script.call('onPause', []);
 		#end
@@ -496,10 +488,7 @@ class PlayState extends MusicBeatState {
 				tween.active = true;
 			}
 		});
-
-		/*
-			if (windowMod != null)
-				windowMod.resumeWindow(); */
+		gameAudio.resumeAll();
 		gameAudio.resyncVocals();
 	}
 
@@ -544,7 +533,7 @@ class PlayState extends MusicBeatState {
 				if (Std.isOfType(c, game.objects.sprites.Character) && cast(c, game.objects.sprites.Character).vslice != null)
 					modding.vslice.VSliceHooks.call(cast(c, game.objects.sprites.Character).vslice, 'resetCharacter', true);
 
-		game.graphics.shaders.CustomShader.clearAll();
+		core.render.shaders.CustomShader.clearAll();
 
 		gameAudio.stopAll();
 
@@ -803,7 +792,7 @@ class PlayState extends MusicBeatState {
 
 		lime.app.Application.current.window.title = modding.mods.ModData.ModConfig.modData?.name ?? "Infinite Engine";
 
-		game.graphics.shaders.CustomShader.clearAll();
+		core.render.shaders.CustomShader.clearAll();
 
 		super.destroy();
 		modding.vslice.VSliceHooks.reset();

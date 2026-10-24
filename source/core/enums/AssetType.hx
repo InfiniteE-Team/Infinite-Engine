@@ -8,6 +8,8 @@ enum abstract AssetType(String) from String to String {
     var SOUND = "sound";
     var MUSIC = "music";
     var VIDEOS = "videos";
+    var ASTC = "astc";
+    var SWF = "swf";
     var SONG_AUDIO = "songAudio";
     var ANIMATED = "animated";
     var XML = "xml";

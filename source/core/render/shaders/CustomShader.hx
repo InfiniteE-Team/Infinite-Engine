@@ -1,4 +1,4 @@
-package game.graphics.shaders;
+package core.render.shaders;
 
 import game.objects.Camera;
 import openfl.filters.ShaderFilter;

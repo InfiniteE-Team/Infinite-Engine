@@ -2,7 +2,7 @@ package game.objects.sprites.notes;
 
 import core.assets.FunkinSprite;
 import core.json.extensions.SpriteData.ObjectData;
-import game.graphics.shaders.hardcode.RGBShader;
+import core.render.shaders.hardcode.RGBShader;
 import core.json.objects.NoteSkinData;
 
 class NoteSustain extends Note {

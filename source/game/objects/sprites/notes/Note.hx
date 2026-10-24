@@ -4,7 +4,7 @@ import core.json.extensions.SpriteData.ObjectData;
 import core.assets.FunkinSprite;
 import core.rhythm.RhythmCore;
 import game.controllers.NoteController;
-import game.graphics.shaders.hardcode.RGBShader;
+import core.render.shaders.hardcode.RGBShader;
 import core.json.objects.NoteSkinData;
 
 class Note extends FunkinSprite {

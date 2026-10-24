@@ -3,7 +3,7 @@ package game.objects.sprites.notes;
 import core.json.objects.NoteSkinData;
 import core.assets.FunkinSprite;
 import core.rhythm.RhythmCore;
-import game.graphics.shaders.hardcode.RGBShader;
+import core.render.shaders.hardcode.RGBShader;
 
 class NoteSplash extends FunkinSprite {
 	public var noteSkinData:NoteSkinData = null;

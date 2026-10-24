@@ -94,7 +94,7 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 		}
 		_updateIconPositions(0.016);
 
-		rating = new Rating(FlxG.width * 0.55, FlxG.height * 0.5, scriptHUD);
+		rating = new Rating(FlxG.width * 0.54, FlxG.height * 0.5, scriptHUD);
 		add(rating);
 
 		#if HSCRIPT_ALLOWED
