@@ -71,7 +71,7 @@ class PlayState extends MusicBeatState {
 	public var paused:Bool = false;
 	public var isRewind:Bool = false;
 
-	public var startCount:Bool = false;
+	public var isInCountdown:Bool = false;
 
 	public var startTime:Float = 0;
 
@@ -319,7 +319,7 @@ class PlayState extends MusicBeatState {
 		#if HSCRIPT_ALLOWED
 		script.call("onCountdown", []);
 		#end
-		startCount = true;
+		isInCountdown = true;
 
 		var crochet:Float = (60 / SONG.bpmSong) * 1000;
 		RhythmCore.songPosition = startTime > 0 ? startTime : -crochet * 4;
@@ -347,7 +347,7 @@ class PlayState extends MusicBeatState {
 	}
 
 	public function initSong() {
-		startCount = false;
+		isInCountdown = false;
 
 		if (startTime > 0) {
 			gameAudio.setTime(startTime);
@@ -654,7 +654,7 @@ class PlayState extends MusicBeatState {
 		if (!paused)
 			modding.vslice.VSliceHooks.dispatch('onUpdate', modding.vslice.VSliceHooks.event('UPDATE', {elapsed: elapsed}));
 
-		if (vsliceCountdownHeld && !paused) {
+		if (vsliceCountdownHeld && !paused && !isInCutscene) {
 			vsliceHeldTime += elapsed;
 			if (modding.vslice.VSliceHooks.failures > vsliceHeldFailures || vsliceHeldTime > 60) {
 				Console.log('[V-Slice] the song script held the countdown and its cutscene did not finish, starting the song', true);
@@ -678,14 +678,14 @@ class PlayState extends MusicBeatState {
 
 		if (!paused && !isInCutscene) {
 			RhythmCore.songPosition += elapsed * 1000;
-			if (!startCount && gameAudio != null && gameAudio.inst != null && gameAudio.inst.playing)
+			if (!isInCountdown && gameAudio != null && gameAudio.inst != null && gameAudio.inst.playing)
 				RhythmCore.songPosition = gameAudio.inst.time;
 		}
 
 		if (gameAudio != null && chars != null && SONG != null)
 			gameAudio.volumeVocs(SONG, chars.isPlayerMissing(), elapsed);
 
-		if (!paused && !isInCutscene) {
+		if (!paused) {
 			if (cameraController != null)
 				cameraController.update(elapsed);
 
@@ -704,7 +704,8 @@ class PlayState extends MusicBeatState {
 				if (!osuMode)
 					chars.isSinging(noteController);
 
-				chars.processInput(noteController, gameAudio, playStateConfig);
+				if (!isInCutscene)
+					chars.processInput(noteController, gameAudio, playStateConfig);
 
 				if (!osuMode && cameraController != null) {
 					if (!cameraController.existsCamEvents) {
@@ -719,7 +720,7 @@ class PlayState extends MusicBeatState {
 		if (Controls.ACCEPT)
 			pauseMenu();
 
-		if (Controls.GAME_DEATH && !startCount)
+		if (Controls.GAME_DEATH && !isInCountdown)
 			isDeath();
 
 		#if HSCRIPT_ALLOWED

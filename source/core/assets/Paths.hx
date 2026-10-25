@@ -135,7 +135,7 @@ class Paths {
 			|| (result = graphic) != null;
 		}
 
-		if (result != null && !(result is FlxAtlasFrames))
+		if (result != null)
 			cache.set(cacheKey, result);
 
 		if ((result is FlxFramesCollection)) {

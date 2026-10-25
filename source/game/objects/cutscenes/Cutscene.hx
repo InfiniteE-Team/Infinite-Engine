@@ -1,11 +1,15 @@
 package game.objects.cutscenes;
 
+import flixel.tweens.FlxTween;
+
 class Cutscene {
 	public var active(default, null):Bool = false;
 
 	#if VIDEO_ALLOWED
 	var video:game.objects.cutscenes.SafeVideoSprite;
 	#end
+
+	var isEnding:Bool = false;
 
 	public var onComplete:Void->Void;
 
@@ -14,6 +18,7 @@ class Cutscene {
 	public function tryPlay(songFolder:String, slot:String, onComplete:Void->Void):Bool {
 		#if VIDEO_ALLOWED
 		this.onComplete = onComplete;
+		isEnding = false;
 		var path = resolve(songFolder, slot);
 		if (path == null)
 			return false;
@@ -55,22 +60,34 @@ class Cutscene {
 
 	public function skip():Void {
 		#if VIDEO_ALLOWED
-		if (video != null && active) {
+		if (video != null && active && !isEnding) {
+			isEnding = true;
 			var cb = onComplete;
-			destroy();
-			PlayState.instance.isInCutscene = false;
-			if (cb != null)
-				cb();
+
+			FlxTween.tween(video, {alpha: 0}, 0.5, {
+				onComplete: function(twn:FlxTween) {
+					destroy();
+					PlayState.instance.isInCutscene = false;
+					if (cb != null)
+						cb();
+				}
+			});
 		}
 		#end
 	}
 
 	public function pause():Void {
-		#if VIDEO_ALLOWED video?.pause(); #end
+		#if VIDEO_ALLOWED
+		if (!isEnding)
+			video?.pause();
+		#end
 	}
 
 	public function resume():Void {
-		#if VIDEO_ALLOWED video?.resume(); #end
+		#if VIDEO_ALLOWED
+		if (!isEnding)
+			video?.resume();
+		#end
 	}
 
 	public function destroy():Void {
@@ -83,6 +100,7 @@ class Cutscene {
 		}
 		#end
 		active = false;
+		isEnding = false;
 	}
 
 	static function resolve(songFolder:String, slot:String):Null<String> {
@@ -98,8 +116,6 @@ class Cutscene {
 			var bare = core.assets.Paths.getPath(songFolder, core.enums.AssetType.VIDEOS);
 			if (bare != null)
 				return bare;
-			else // Compatibility V-Slice Cutscenes
-				return core.assets.Paths.getPath('videos/$songFolder', core.enums.AssetType.VIDEOS);
 		}
 
 		return null;

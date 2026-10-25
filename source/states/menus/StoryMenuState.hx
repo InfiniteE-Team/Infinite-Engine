@@ -107,6 +107,8 @@ class StoryMenuState extends MusicBeatState {
 		add(bottomPanel);
 	}
 
+	var targetScore:Float = 0;
+
 	function buildTopBar() {
 		#if HSCRIPT_ALLOWED
 		if (script.callCancellable("onBuildTopBarCancel", []))
@@ -296,7 +298,7 @@ class StoryMenuState extends MusicBeatState {
 				totalScore += score;
 			}
 		}
-		scoreText.text = 'LEVEL SCORE: $totalScore';
+		targetScore = totalScore;
 
 		descriptionText.text = data.description != null ? data.description : "";
 
@@ -317,10 +319,10 @@ class StoryMenuState extends MusicBeatState {
 			if (bannerPath != null && FileSystem.exists(bannerPath)) {
 				weekBanner.loadGraphic(bannerPath);
 			} else {
-				weekBanner.makeGraphic(400, 100, FlxColor.TRANSPARENT);
+				weekBanner.loadGraphic(Paths.getPath('menus/storymenu/weeks/week1', 'image'));
 			}
 		} else {
-			weekBanner.makeGraphic(400, 100, FlxColor.TRANSPARENT);
+			weekBanner.loadGraphic(Paths.getPath('menus/storymenu/weeks/week1', 'image'));
 		}
 		weekBanner.screenCenter(X);
 		weekBanner.y = FlxG.height / 2 + 150;
@@ -331,7 +333,7 @@ class StoryMenuState extends MusicBeatState {
 			var t = members[i];
 			if (i < songs.length) {
 				t.text = songs[i].song != null ? songs[i].song.toUpperCase() : "???";
-				t.y = FlxG.height * 0.77 + i * 30;
+				t.y = FlxG.height * 0.78 + i * 30;
 				t.visible = true;
 			} else {
 				t.visible = false;
@@ -342,6 +344,16 @@ class StoryMenuState extends MusicBeatState {
 			weekBanner.alpha = 0;
 			FlxTween.tween(weekBanner, {alpha: 1}, 0.2, {ease: FlxEase.cubeOut});
 		}
+	}
+
+	var intendedScore:Float = 0;
+
+	function getScore(score:Float, ?elapsed:Float):String {
+		if (elapsed == null)
+			elapsed = FlxG.elapsed;
+		intendedScore = flixel.math.FlxMath.lerp(intendedScore, score, flixel.math.FlxMath.bound(elapsed * 20, 0, 1));
+		var displayScore:String = InfiniteUtil.formatNumber(Math.round(intendedScore));
+		return displayScore;
 	}
 
 	function refreshDiff() {
@@ -390,7 +402,7 @@ class StoryMenuState extends MusicBeatState {
 					totalScore += score;
 				}
 			}
-			scoreText.text = 'LEVEL SCORE: $totalScore';
+			targetScore = totalScore;
 		}
 	}
 
@@ -403,6 +415,8 @@ class StoryMenuState extends MusicBeatState {
 		if (script.callCancellable("onUpdateCancel", [elapsed]))
 			return;
 		#end
+
+		scoreText.text = 'LEVEL SCORE: ' + getScore(targetScore);
 
 		if (acceptOption)
 			return;
