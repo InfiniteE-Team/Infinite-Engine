@@ -1,9 +1,9 @@
 package game.controllers;
 
 import game.objects.sprites.notes.NoteSkins;
-
 import game.PlayStateConfig;
 // song
+import core.json.song.SongData.NoteData;
 import core.json.song.SongData.SongConfig;
 import core.json.engine.GlobalData.GlobalConfig;
 import core.json.song.RatingData;
@@ -29,6 +29,8 @@ class NoteController {
 	public var popupsData:Dynamic = null;
 
 	var _skinParts:Map<String, Dynamic> = new Map();
+
+	final POOL_LENGTH:Int = 48;
 
 	public function skinPart(skin:String, part:String):Dynamic {
 		var key = '$skin|$part';
@@ -103,6 +105,7 @@ class NoteController {
 		var path = Paths.getPath(folder + entry.path, 'image');
 		return path != null ? {path: path, scale: entry.scale ?? 1.0, pixel: entry.pixel == true} : null;
 	}
+
 	public var noteType:String = 'normal';
 
 	public var blackBacks:FlxTypedGroup<flixel.FlxSprite> = new FlxTypedGroup<flixel.FlxSprite>();
@@ -130,7 +133,12 @@ class NoteController {
 
 	var _charNotesVisible:Map<String, Bool> = new Map();
 
+	var rawNotes:Array<NoteData> = [];
+	var rawNoteIndex:Int = 0;
+	var charMap:Map<String, Dynamic> = new Map();
+
 	public var unspawnNotes:Array<Note> = [];
+
 	public var charStrumOffsets:Map<String, Int> = new Map();
 
 	var daSong:SongConfig = new SongConfig();
@@ -432,143 +440,33 @@ class NoteController {
 			return;
 		}
 
-		_noteSpawnIndex = 0;
-
-		noteTypeManager = new NoteTypeManager();
-		noteTypeManager.initFromNotes(daSong.songData.notes);
-
 		#if HSCRIPT_ALLOWED
 		scriptNC.call("onGenerateNotes", []);
 		#end
 
-		// FAST LOOKUP: Create a map of characters to avoid Lambda.find in the main loop
-		var charMap:Map<String, Dynamic> = new Map();
-		for (c in daSong.chars) {
+		_noteSpawnIndex = 0;
+		rawNoteIndex = 0;
+		unspawnNotes = [];
+
+		noteTypeManager = new NoteTypeManager();
+		noteTypeManager.initFromNotes(daSong.songData.notes);
+
+		charMap = new Map();
+		for (c in daSong.chars)
 			charMap.set(c.id, c);
+
+		rawNotes = daSong.songData.notes.copy();
+		rawNotes.sort((a, b) -> Std.int(a.time - b.time));
+
+		if (songTime > 0) {
+			while (rawNoteIndex < rawNotes.length && rawNotes[rawNoteIndex].time < songTime - 1000)
+				rawNoteIndex++;
 		}
 
-		for (data in daSong.songData.notes) {
-			var charData = charMap.get(data.char);
-			if (charData == null)
-				continue;
-
-			var offset = charStrumOffsets.get(charData.id);
-			if (offset == null)
-				continue;
-
-			var globalLane = offset + data.lane;
-			var strum = strums.members[globalLane];
-			if (strum == null)
-				continue;
-
-			var skinForChar = charSkin(charData.id);
-			var charSkinData:NoteSkinData = skinPart(skinForChar, 'strumnotes');
-			var pool = _notePool.get(skinForChar);
-			var noteTypeSkin = getNoteTypeData(data.type);
-
-			var effectiveSkin:NoteSkinData = (noteTypeSkin?.visual?.noteSkin != null) ? noteTypeSkin.visual.noteSkin : charSkinData;
-			var note:Note;
-			if (pool != null && pool.length > 0) {
-				note = pool.pop();
-				note.revive();
-				note.reinit(data.time, keys, strum.x, 0, effectiveSkin, skinForChar, data.lane);
-			} else {
-				note = new Note(data.time, keys, strum.x, 0, effectiveSkin, skinForChar, data.lane, data.type);
-			}
-
-			note.ID = globalLane;
-			note.direction = globalLane;
-			note.strumTime = data.time;
-			note.mustPress = CharacterController.namesPlayer.contains(charData.role);
-
-			var notesVis = _charNotesVisible.get(charData.id) ?? true;
-			note.visible = notesVis;
-
-			note.strum = strum;
-			note.noteControl = this;
-			note.noteType = data.type ?? 'normal';
-
-			#if HSCRIPT_ALLOWED
-			scriptNC.call("onGenerateNote", [note]);
-			noteTypeManager.onNoteGenerate(note);
-			#end
-
-			if (data.length > 0) {
-				var sustainPool = _sustainPool.get(skinForChar);
-				var totalLength:Float = data.length;
-
-				var sustain:NoteSustain;
-				if (sustainPool != null && sustainPool.length > 0) {
-					sustain = sustainPool.pop();
-					sustain.revive();
-					sustain.reinitSustain(data.time, keys, strum.x, 0, charSkinData, skinForChar, data.lane, totalLength, data.type, false);
-				} else {
-					sustain = new NoteSustain(data.time, keys, strum.x, 0, charSkinData, skinForChar, data.lane, totalLength, data.type, false);
-				}
-
-				sustain.ID = globalLane;
-				sustain.direction = globalLane;
-				sustain.strumTime = data.time;
-				sustain.mustPress = note.mustPress;
-				sustain.noteControl = this;
-				sustain.strum = strum;
-				sustain.noteType = data.type ?? 'normal';
-				if (isDownscroll)
-					sustain.flipY = true;
-				sustain.visible = notesVis;
-
-				sustain.origin.y = 0;
-				// Just for initial scale, we will recalculate on update anyway
-				sustain.scale.y = (totalLength * 0.45 * scrollSpeed) / sustain.frameHeight;
-
-				#if HSCRIPT_ALLOWED
-				scriptNC.call("onGenerateSustain", [sustain]);
-				#end
-
-				unspawnNotes.push(sustain);
-
-				// end sustain
-				var sustainEnd:NoteSustain;
-				if (sustainPool != null && sustainPool.length > 0) {
-					sustainEnd = sustainPool.pop();
-					sustainEnd.revive();
-					sustainEnd.reinitSustain(data.time + data.length, keys, strum.x, 0, charSkinData, skinForChar, data.lane, 0, data.type, true);
-				} else {
-					sustainEnd = new NoteSustain(data.time + data.length, keys, strum.x, 0, charSkinData, skinForChar, data.lane, 0, data.type, true);
-				}
-
-				sustainEnd.ID = globalLane;
-				sustainEnd.direction = globalLane;
-				sustainEnd.strumTime = data.time;
-				sustainEnd.mustPress = note.mustPress;
-				sustainEnd.noteControl = this;
-				sustainEnd.strum = strum;
-				sustainEnd.parentNote = sustain;
-				sustainEnd.noteType = data.type ?? 'normal';
-				if (isDownscroll)
-					sustainEnd.flipY = true;
-				sustainEnd.visible = notesVis;
-				sustainEnd.origin.y = 0;
-
-				#if HSCRIPT_ALLOWED
-				scriptNC.call("onGenerateEndSustain", [sustainEnd]);
-				#end
-
-				unspawnNotes.push(sustainEnd);
-			}
-			unspawnNotes.push(note);
-		}
+		daSong.songData.notes = null;
 
 		#if HSCRIPT_ALLOWED
 		scriptNC.call("postGenerateNotes", []);
-		#end
-
-		#if HSCRIPT_ALLOWED
-		scriptNC.call("onSortNotes", []);
-		#end
-		unspawnNotes.sort(sortNotes);
-		#if HSCRIPT_ALLOWED
-		scriptNC.call("postSortNotes", []);
 		#end
 	}
 
@@ -693,10 +591,132 @@ class NoteController {
 
 	var toDestroySet:Map<Note, Bool> = new Map();
 
+	function buildNoteFromRaw(data:NoteData):Void {
+		var charData = charMap.get(data.char);
+		if (charData == null)
+			return;
+
+		var offset = charStrumOffsets.get(charData.id);
+		if (offset == null)
+			return;
+
+		var globalLane = offset + data.lane;
+		var strum = strums.members[globalLane];
+		if (strum == null)
+			return;
+
+		var skinForChar = charSkin(charData.id);
+		var charSkinData:NoteSkinData = skinPart(skinForChar, 'strumnotes');
+		var pool = _notePool.get(skinForChar);
+		var noteTypeSkin = getNoteTypeData(data.type);
+		var effectiveSkin = (noteTypeSkin?.visual?.noteSkin != null) ? noteTypeSkin.visual.noteSkin : charSkinData;
+
+		var note:Note;
+		if (pool != null && pool.length > 0) {
+			note = pool.pop();
+			note.revive();
+			note.reinit(data.time, keys, strum.x, 0, effectiveSkin, skinForChar, data.lane);
+		} else {
+			note = new Note(data.time, keys, strum.x, 0, effectiveSkin, skinForChar, data.lane, data.type);
+		}
+		note.ID = globalLane;
+		note.direction = globalLane;
+		note.strumTime = data.time;
+		note.mustPress = CharacterController.namesPlayer.contains(charData.role);
+
+		var notesVis = _charNotesVisible.get(charData.id) ?? true;
+		note.visible = notesVis;
+
+		note.strum = strum;
+		note.noteControl = this;
+		note.noteType = data.type ?? 'normal';
+
+		#if HSCRIPT_ALLOWED
+		scriptNC.call("onGenerateNote", [note]);
+		noteTypeManager.onNoteGenerate(note);
+		#end
+
+		if (data.length > 0) {
+			var sustainPool = _sustainPool.get(skinForChar);
+			var totalLength:Float = data.length;
+
+			var sustain:NoteSustain;
+			if (sustainPool != null && sustainPool.length > 0) {
+				sustain = sustainPool.pop();
+				sustain.revive();
+				sustain.reinitSustain(data.time, keys, strum.x, 0, charSkinData, skinForChar, data.lane, totalLength, data.type, false);
+			} else {
+				sustain = new NoteSustain(data.time, keys, strum.x, 0, charSkinData, skinForChar, data.lane, totalLength, data.type, false);
+			}
+
+			sustain.ID = globalLane;
+			sustain.direction = globalLane;
+			sustain.strumTime = data.time;
+			sustain.mustPress = note.mustPress;
+			sustain.noteControl = this;
+			sustain.strum = strum;
+			sustain.noteType = data.type ?? 'normal';
+			if (isDownscroll)
+				sustain.flipY = true;
+			sustain.visible = notesVis;
+
+			sustain.origin.y = 0;
+
+			#if HSCRIPT_ALLOWED
+			scriptNC.call("onGenerateSustain", [sustain]);
+			#end
+
+			unspawnNotes.push(sustain);
+
+			// end sustain
+			var sustainEnd:NoteSustain;
+			if (sustainPool != null && sustainPool.length > 0) {
+				sustainEnd = sustainPool.pop();
+				sustainEnd.revive();
+				sustainEnd.reinitSustain(data.time + data.length, keys, strum.x, 0, charSkinData, skinForChar, data.lane, 0, data.type, true);
+			} else {
+				sustainEnd = new NoteSustain(data.time + data.length, keys, strum.x, 0, charSkinData, skinForChar, data.lane, 0, data.type, true);
+			}
+
+			sustainEnd.ID = globalLane;
+			sustainEnd.direction = globalLane;
+			sustainEnd.strumTime = data.time;
+			sustainEnd.mustPress = note.mustPress;
+			sustainEnd.noteControl = this;
+			sustainEnd.strum = strum;
+			sustainEnd.parentNote = sustain;
+			sustainEnd.noteType = data.type ?? 'normal';
+			if (isDownscroll)
+				sustainEnd.flipY = true;
+			sustainEnd.visible = notesVis;
+			sustainEnd.origin.y = 0;
+
+			#if HSCRIPT_ALLOWED
+			scriptNC.call("onGenerateEndSustain", [sustainEnd]);
+			#end
+
+			unspawnNotes.push(sustainEnd);
+		}
+		unspawnNotes.push(note);
+	}
+
+	static inline var GENERATE_AHEAD_MS:Float = 8000.0;
+
 	public function updateNotes(songTime:Float) {
 		#if HSCRIPT_ALLOWED
 		scriptNC.call("onNoteUpdate", [songTime]);
 		#end
+
+		while (rawNoteIndex < rawNotes.length) {
+			var data = rawNotes[rawNoteIndex];
+			if (data.time - songTime > GENERATE_AHEAD_MS)
+				break;
+
+			buildNoteFromRaw(data);
+			rawNoteIndex++;
+
+			rawNotes[rawNoteIndex - 1] = null;
+		}
 
 		// spawn earlier on slow scroll speeds so notes don't pop in on screen -JloorDev
 		var spawnWindow:Float = Math.max(2000, (flixel.FlxG.height + 200) / (0.45 * Math.max(0.1, Math.min(scrollSpeed, targetScrollSpeed))));
@@ -832,7 +852,14 @@ class NoteController {
 				#end
 
 				var body = sustain.parentNote;
-				if (body == null || !body.alive || toDestroySet.exists(body)) {
+				if (body == null) {
+					toDestroySet.set(sustain, true);
+					continue;
+				}
+				if (!body.alive) {
+					continue;
+				}
+				if (toDestroySet.exists(body)) {
 					toDestroySet.set(sustain, true);
 					continue;
 				}
@@ -933,13 +960,21 @@ class NoteController {
 			note.kill();
 			if (!_sustainPool.exists(note.noteSkin))
 				_sustainPool.set(note.noteSkin, []);
-			_sustainPool.get(note.noteSkin).push(cast note);
+			var pool = _sustainPool.get(note.noteSkin);
+			if (pool.length < POOL_LENGTH)
+				pool.push(cast note);
+			else
+				note.destroy();
 		} else {
 			notes.remove(note, true);
 			note.kill();
 			if (!_notePool.exists(note.noteSkin))
 				_notePool.set(note.noteSkin, []);
-			_notePool.get(note.noteSkin).push(note);
+			var pool = _notePool.get(note.noteSkin);
+			if (pool.length < POOL_LENGTH)
+				pool.push(note);
+			else
+				note.destroy();
 		}
 
 		#if HSCRIPT_ALLOWED
@@ -1007,6 +1042,8 @@ class NoteController {
 	var _charStrumsCache:Map<String, Array<StrumNote>> = new Map();
 
 	public function destroy():Void {
+		rawNotes = null;
+		charMap = null;
 		for (pool in _notePool)
 			for (n in pool)
 				n.destroy();

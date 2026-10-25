@@ -18,6 +18,7 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 	}
 
 	public function loadSong(SONG:SongConfig, needVoices:Bool = true, onfinish:() -> Void):Void {
+		Sound.clearGlobalCache();
 		forEachAlive(function(s:FlxSound) {
 			s.stop();
 			s.destroy();

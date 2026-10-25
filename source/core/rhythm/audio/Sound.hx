@@ -31,22 +31,17 @@ class Sound extends flixel.sound.FlxSound {
 
 		var oflSound = streamedCache.get(absPath);
 		if (oflSound == null) {
-			#if lime_cffi
-			var buffer = lime.media.AudioBuffer.fromFile(absPath);
-			if (buffer == null) {
-				trace('Sound: AudioBuffer null for: $absPath');
-				return;
-			}
-			oflSound = openfl.media.Sound.fromAudioBuffer(buffer);
-			#else
-			oflSound = openfl.media.Sound.fromFile(absPath);
-			#end
-
-			if (oflSound == null) {
-				trace('Sound: fromFile null for: $absPath');
-				return;
-			}
-			streamedCache.set(absPath, oflSound);
+			openfl.media.Sound.loadFromFile(absPath).onComplete(function(sound:openfl.media.Sound) {
+				if (sound != null) {
+					streamedCache.set(absPath, sound);
+					load(sound);
+				} else {
+					trace('Sound: loadFromFile devolvió nulo para: $absPath');
+				}
+			}).onError(function(error) {
+				trace('Sound: Error al cargar el archivo de audio: $error');
+			});
+			return;
 		}
 
 		load(oflSound);

@@ -263,7 +263,6 @@ class FreeplayState extends MusicBeatState {
 		FlxG.camera.setScrollBoundsRect(-totalWidth, 0, totalWidth * 2, totalHeight, true);
 
 		changeSelection(0);
-		changeDifficulty(0);
 		preloadFreeplaySongs();
 	}
 

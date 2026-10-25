@@ -262,6 +262,7 @@ class Paths {
 		cache.clear();
 		pathCache.clear();
 		FunkinSprite.cacheOffsets.clear();
+		FunkinSprite.clearMissingCaches();
 
 		openfl.system.System.gc();
 	}

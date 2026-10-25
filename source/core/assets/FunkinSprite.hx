@@ -26,6 +26,9 @@ class FunkinSprite extends animate.FlxAnimate {
 	// that only updates for Adobe Animate atlas sprites, not Sparrow.
 	public var currentAnim:String = '';
 
+	static var missingAnims:Array<String> = [];
+	static var missingAssets:Array<String> = [];
+
 	public function new(?x:Float = 0, ?y:Float = 0, ?usesLoadProps:Bool = false) {
 		super(x, y);
 		if (usesLoadProps) {
@@ -147,7 +150,10 @@ class FunkinSprite extends animate.FlxAnimate {
 		var loaded = Paths.getPath(assetPath, 'animated');
 
 		if (loaded == null) {
-			Console.log('FunkinSprite could not load asset "$assetPath"');
+			if (!missingAssets.contains(assetPath)) {
+				Console.log('FunkinSprite could not load asset "$assetPath"');
+				missingAssets.push(assetPath);
+			}
 			return;
 		}
 
@@ -399,7 +405,10 @@ class FunkinSprite extends animate.FlxAnimate {
 		}
 		var fullName = name + (_suffixes.get(name) ?? '');
 		if (!existsAnim(fullName)) {
-			Console.log('$name Anim Not Existed!', true);
+			if (!missingAnims.contains(fullName)) {
+				Console.log('$name Anim Not Existed!', true);
+				missingAnims.push(fullName);
+			}
 			return;
 		}
 		currentAnim = fullName;
@@ -464,5 +473,9 @@ class FunkinSprite extends animate.FlxAnimate {
 		offsets = null;
 		_suffixes = null;
 		_registeredAnims = null;
+	}
+
+	public static function clearMissingCaches():Void {
+		missingAnims = [];
 	}
 }

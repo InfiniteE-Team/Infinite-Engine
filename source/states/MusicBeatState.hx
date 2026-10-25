@@ -14,9 +14,7 @@ class MusicBeatState extends State {
 	public static var skipNextTransIn:Bool = false;
 	public static var skipNextTransOut:Bool = false;
 
-	public static var skipNextCacheClear:Bool = false;
-
-	var t:core.rhythm.RhythmTracker;
+	public var rhythmTracker:core.rhythm.RhythmTracker;
 
 	#if HSCRIPT_ALLOWED
 	var script:ScriptHandler;
@@ -32,10 +30,10 @@ class MusicBeatState extends State {
 		#end
 		super.create();
 
-		if (t == null)
-			t = new core.rhythm.RhythmTracker();
+		if (rhythmTracker == null)
+			rhythmTracker = new core.rhythm.RhythmTracker();
 
-		if (core.ConfigMain.globalData.developerMode && infoHelp == null)  {
+		if (core.ConfigMain.globalData.developerMode && infoHelp == null) {
 			infoHelp = new InfoHelpDebug(FlxG.width - 300, 0, 0);
 			add(infoHelp);
 		}
@@ -90,7 +88,7 @@ class MusicBeatState extends State {
 		if (!(Std.isOfType(FlxG.state, game.PlayState)) && FlxG.sound.music != null && FlxG.sound.music.playing)
 			core.rhythm.RhythmCore.songPosition = FlxG.sound.music.time;
 
-		t.check(stepHit, beatHit);
+		rhythmTracker.check(stepHit, beatHit);
 	}
 
 	public static function resetState():Void {
@@ -150,10 +148,7 @@ class MusicBeatState extends State {
 	}
 
 	override function destroy():Void {
-		if (!skipNextCacheClear)
-			core.assets.Paths.clearCache();
-		else
-			skipNextCacheClear = false;
+		core.assets.Paths.clearCache();
 		JsonWatcher.clear();
 		#if HSCRIPT_ALLOWED
 		if (script != null) {
@@ -163,7 +158,7 @@ class MusicBeatState extends State {
 		}
 		#end
 		infoHelp = null;
-		t.reset();
+		rhythmTracker.reset();
 		super.destroy();
 	}
 }

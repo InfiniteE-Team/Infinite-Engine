@@ -20,7 +20,7 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 	public var onNoteHitPlayer:Void->Void;
 	public var onNoteHitMiss:Void->Void;
 
-	var PIXEL_ZOOM:Float = 6;
+	public var PIXEL_ZOOM:Float = 6;
 
 	public var isPixel:Bool = false;
 

@@ -7,13 +7,21 @@ class RhythmTracker {
 	private var lastStep:Int = -1;
 	private var lastBeat:Int = -1;
 
+	private var stepOffset:Int = 0;
+	private var timeAtBpmChange:Float = 0;
+
 	inline function get_step():Int
-		return Std.int(core.rhythm.RhythmCore.songPosition / core.rhythm.RhythmCore.stepInMs);
+		return stepOffset + Std.int((core.rhythm.RhythmCore.songPosition - timeAtBpmChange) / core.rhythm.RhythmCore.stepInMs);
 
 	inline function get_beat():Int
 		return step >> 2;
 
 	public function new() {}
+
+	public function onBpmChange():Void {
+		stepOffset = step;
+		timeAtBpmChange = core.rhythm.RhythmCore.songPosition;
+	}
 
 	public function check(onStep:Int->Void, onBeat:Float->Void):Void {
 		var curStep:Int = step;
@@ -28,6 +36,9 @@ class RhythmTracker {
 		}
 	}
 
-	public function reset():Void
+	public function reset():Void {
 		lastStep = lastBeat = -1;
+		stepOffset = 0;
+		timeAtBpmChange = 0;
+	}
 }

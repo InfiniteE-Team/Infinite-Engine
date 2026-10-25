@@ -233,6 +233,7 @@ class EventManager {
 				var newBPM:Float = event.arguments.bpm;
 				if (!Math.isNaN(newBPM) && newBPM > 0) {
 					core.rhythm.RhythmCore.changeBPM(newBPM);
+					PlayState.instance?.rhythmTracker?.onBpmChange();
 				}
 			case 'Play Special Anim':
 				var charId = event.arguments.char;

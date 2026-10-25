@@ -137,7 +137,7 @@ class PlayState extends MusicBeatState {
 		super.create();
 
 		RhythmCore.reset(SONG.bpmSong);
-		t.reset();
+		rhythmTracker.reset();
 
 		buildStrumsandNotes();
 
@@ -563,7 +563,7 @@ class PlayState extends MusicBeatState {
 		}
 
 		RhythmCore.reset(SONG.bpmSong);
-		t.reset(); // reset steps and beats
+		rhythmTracker.reset(); // reset steps and beats
 
 		if (playStateConfig != null)
 			playStateConfig.reset();

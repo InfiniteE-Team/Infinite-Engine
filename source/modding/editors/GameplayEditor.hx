@@ -399,7 +399,7 @@ class GameplayEditor extends MusicBeatState {
 			startupNotes.push('No audio found for "$songDir" (songs/$songDir/audio/Inst): the timeline runs silently.');
 
 		RhythmCore.reset(SONG.bpmSong);
-		t.reset();
+		rhythmTracker.reset();
 
 		songLength = songLengthMs();
 
@@ -1840,7 +1840,7 @@ class GameplayEditor extends MusicBeatState {
 		}
 
 		if (RhythmCore.songPosition < lastPosition - 1) {
-			t.reset();
+			rhythmTracker.reset();
 			seekNotes();
 		}
 		lastPosition = RhythmCore.songPosition;
@@ -1898,7 +1898,7 @@ class GameplayEditor extends MusicBeatState {
 
 			if (hasAudio)
 				gameAudio.setTime(RhythmCore.songPosition);
-			t.reset();
+			rhythmTracker.reset();
 		}
 
 		if (isPlaying && totalMs > 0 && RhythmCore.songPosition >= totalMs) {
@@ -1952,7 +1952,7 @@ class GameplayEditor extends MusicBeatState {
 		isPlaying = !isPlaying;
 		if (isPlaying) {
 			seekNotes();
-			t.reset();
+			rhythmTracker.reset();
 			if (hasAudio) {
 				gameAudio.setTime(RhythmCore.songPosition);
 				gameAudio.playAll();
@@ -2505,7 +2505,7 @@ class GameplayEditor extends MusicBeatState {
 		SONG.songData.meta.bpm = bpm;
 		SONG.bpmSong = bpm;
 		RhythmCore.changeBPM(bpm);
-		t.reset();
+		rhythmTracker.reset();
 
 		buildGrid(songLength);
 		for (e in noteEntries) {

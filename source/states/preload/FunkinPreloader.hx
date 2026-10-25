@@ -393,7 +393,6 @@ class FunkinPreloader extends MusicBeatState {
 		launched = true;
 		FlxG.removeChild(vfdBitmap);
 		State.skipNextAudioClear = true;
-		MusicBeatState.skipNextCacheClear = true;
 		MusicBeatState.switchState(nextState);
 	}
 
