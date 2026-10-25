@@ -75,6 +75,11 @@ class PlayState extends MusicBeatState {
 
 	public var startTime:Float = 0;
 
+	#if VIDEO_ALLOWED
+	public var cutscene:game.objects.cutscenes.Cutscene;
+	#end
+	public var isInCutscene:Bool = false;
+
 	public function new(?songFolder:String, ?curDifficulty:Int = 0) {
 		super();
 		gameAudio = new GameAudio();
@@ -143,7 +148,9 @@ class PlayState extends MusicBeatState {
 
 		loadSong();
 
-		startCountdown();
+		cutscene = new game.objects.cutscenes.Cutscene();
+		if (!cutscene.tryPlay(songFolder, 'intro', () -> startCountdown()))
+			startCountdown();
 
 		#if HSCRIPT_ALLOWED
 		modding.scripting.ScriptedVars.gameplayVars(script, this);
@@ -252,6 +259,8 @@ class PlayState extends MusicBeatState {
 
 		chars.initControllers(noteController, gameAudio, playStateConfig);
 
+		countDown = new Countdown(0, 0, SONG.countdown);
+
 		modchartSystem = new game.modchart.ModchartSystem(noteController);
 		add(modchartSystem);
 		modchartSystem.cacheStrumBase();
@@ -315,7 +324,6 @@ class PlayState extends MusicBeatState {
 		var crochet:Float = (60 / SONG.bpmSong) * 1000;
 		RhythmCore.songPosition = startTime > 0 ? startTime : -crochet * 4;
 
-		countDown = new Countdown(0, 0, SONG.countdown);
 		countDown.cameras = [camOther];
 		countDown.onComplete = initSong;
 
@@ -357,12 +365,12 @@ class PlayState extends MusicBeatState {
 		#end
 	}
 
-	var _endSongCalled:Bool = false;
+	var endSongCalled:Bool = false;
 
 	public function endSong() {
-		if (_endSongCalled)
+		if (endSongCalled)
 			return;
-		_endSongCalled = true;
+		endSongCalled = true;
 
 		#if HSCRIPT_ALLOWED
 		if (script.callCancellable('onEndSongCancel', []))
@@ -382,28 +390,36 @@ class PlayState extends MusicBeatState {
 
 		flixel.tweens.FlxTween.tween(cameraController.camPoint, {y: cameraController.camPoint.y - 200}, 1, {ease: flixel.tweens.FlxEase.quadOut});
 
-		if (!PlayStateConfig.isStoryMode) {
-			core.config.SaveScore.saveSong(songFolder, playStateConfig.score, curDifficulty);
-			new flixel.util.FlxTimer().start(0.9, (_) -> {
-				modding.scripting.types.ScriptClass.switchState('ResultScreen', [playStateConfig]);
-			});
-		} else {
-			PlayStateConfig.storyScore += playStateConfig.score;
-			if (PlayStateConfig.storyPlaylist.length > 0) {
-				var nextSong = PlayStateConfig.storyPlaylist[0];
-				PlayStateConfig.storyPlaylist.shift();
+		#if VIDEO_ALLOWED
+		var doTransition = () -> {
+		#end
+			if (!PlayStateConfig.isStoryMode) {
+				core.config.SaveScore.saveSong(songFolder, playStateConfig.score, curDifficulty);
 				new flixel.util.FlxTimer().start(0.9, (_) -> {
-					MusicBeatState.switchState(() -> new states.LoadingState(nextSong, curDifficulty));
-				});
-			} else {
-				core.config.SaveScore.saveWeek(PlayStateConfig.storyWeekName, PlayStateConfig.storyScore, curDifficulty);
-				new flixel.util.FlxTimer().start(0.9, (_) -> {
-					PlayStateConfig.isStoryMode = false;
-					PlayStateConfig.storyScore = 0;
 					modding.scripting.types.ScriptClass.switchState('ResultScreen', [playStateConfig]);
 				});
+			} else {
+				PlayStateConfig.storyScore += playStateConfig.score;
+				if (PlayStateConfig.storyPlaylist.length > 0) {
+					var nextSong = PlayStateConfig.storyPlaylist[0];
+					PlayStateConfig.storyPlaylist.shift();
+					new flixel.util.FlxTimer().start(0.9, (_) -> {
+						MusicBeatState.switchState(() -> new states.LoadingState(nextSong, curDifficulty));
+					});
+				} else {
+					core.config.SaveScore.saveWeek(PlayStateConfig.storyWeekName, PlayStateConfig.storyScore, curDifficulty);
+					new flixel.util.FlxTimer().start(0.9, (_) -> {
+						PlayStateConfig.isStoryMode = false;
+						PlayStateConfig.storyScore = 0;
+						modding.scripting.types.ScriptClass.switchState('ResultScreen', [playStateConfig]);
+					});
+				}
 			}
-		}
+		#if VIDEO_ALLOWED
+		};
+		if (cutscene == null || !cutscene.tryPlay(songFolder, 'end', doTransition))
+			doTransition();
+		#end
 
 		#if HSCRIPT_ALLOWED
 		script.call('postEndSong', []);
@@ -420,6 +436,10 @@ class PlayState extends MusicBeatState {
 		#if HSCRIPT_ALLOWED
 		if (script.callCancellable('onPauseCancel', []))
 			return;
+		#end
+
+		#if VIDEO_ALLOWED
+		cutscene?.pause();
 		#end
 
 		persistentUpdate = false;
@@ -474,6 +494,9 @@ class PlayState extends MusicBeatState {
 
 	override public function closeSubState():Void {
 		super.closeSubState();
+		#if VIDEO_ALLOWED
+		cutscene?.resume();
+		#end
 		paused = false;
 		RhythmCore.resume(gameAudio);
 
@@ -525,7 +548,11 @@ class PlayState extends MusicBeatState {
 		}
 		#end
 
+		endSongCalled = false;
 		isRewind = true;
+
+		cutscene?.destroy();
+		cutscene = new game.objects.cutscenes.Cutscene();
 
 		modding.vslice.VSliceHooks.dispatch('onSongRetry', modding.vslice.VSliceHooks.event('SONG_RETRY'));
 		if (chars != null)
@@ -579,6 +606,8 @@ class PlayState extends MusicBeatState {
 			controllerHUD = new HUDController(script);
 			controllerHUD.cameras = [camHUD];
 			add(controllerHUD);
+
+			chars.rating = controllerHUD.rating;
 		}
 
 		if (countDown != null) {
@@ -590,7 +619,8 @@ class PlayState extends MusicBeatState {
 
 		buildStrumsandNotes();
 
-		noteController.generateNotes(0, SONG);
+		if (SONG.songData.notes != null)
+			noteController.generateNotes(0, SONG);
 		startCountdown();
 
 		if (chars != null)
@@ -646,16 +676,16 @@ class PlayState extends MusicBeatState {
 			MusicBeatState.switchState(() -> new modding.editors.GameplayEditor());
 		}
 
-		if (!paused) {
+		if (!paused && !isInCutscene) {
 			RhythmCore.songPosition += elapsed * 1000;
 			if (!startCount && gameAudio != null && gameAudio.inst != null && gameAudio.inst.playing)
 				RhythmCore.songPosition = gameAudio.inst.time;
 		}
 
 		if (gameAudio != null && chars != null && SONG != null)
-			gameAudio.volumenVocs(SONG, chars.isPlayerMissing(), elapsed);
+			gameAudio.volumeVocs(SONG, chars.isPlayerMissing(), elapsed);
 
-		if (!paused) {
+		if (!paused && !isInCutscene) {
 			if (cameraController != null)
 				cameraController.update(elapsed);
 
@@ -793,6 +823,11 @@ class PlayState extends MusicBeatState {
 		lime.app.Application.current.window.title = modding.mods.ModData.ModConfig.modData?.name ?? "Infinite Engine";
 
 		core.render.shaders.CustomShader.clearAll();
+
+		if (cutscene != null) {
+			cutscene.destroy();
+			cutscene = null;
+		}
 
 		super.destroy();
 		modding.vslice.VSliceHooks.reset();

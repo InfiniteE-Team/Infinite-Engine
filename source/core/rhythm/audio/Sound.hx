@@ -34,12 +34,12 @@ class Sound extends flixel.sound.FlxSound {
 			openfl.media.Sound.loadFromFile(absPath).onComplete(function(sound:openfl.media.Sound) {
 				if (sound != null) {
 					streamedCache.set(absPath, sound);
+					var savedCallback = onComplete;
 					load(sound);
-				} else {
-					trace('Sound: loadFromFile devolvió nulo para: $absPath');
+					onComplete = savedCallback;
 				}
 			}).onError(function(error) {
-				trace('Sound: Error al cargar el archivo de audio: $error');
+				trace('Sound: Error when loading the audio file: $error');
 			});
 			return;
 		}

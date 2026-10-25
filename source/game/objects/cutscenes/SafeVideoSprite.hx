@@ -1,4 +1,4 @@
-package states.cutscenes;
+package game.objects.cutscenes;
 
 #if VIDEO_ALLOWED
 // hxvlc's video sprite made safe to stop and destroy at any time; every video sprite in the engine builds on it -JloorDev

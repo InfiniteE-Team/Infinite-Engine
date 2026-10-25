@@ -98,13 +98,13 @@ class VSliceNoteStyles {
 				name: 'press$i',
 				prefix: prefixOf(strum.data, '${dir}Press'),
 				framerate: 24,
-				offsets: [-10 + strumOff[0], -10 + strumOff[1]]
+				offsets: [0 + strumOff[0], 0 + strumOff[1]]
 			});
 			anims.push({
 				name: 'confirm$i',
 				prefix: prefixOf(strum.data, '${dir}Confirm'),
 				framerate: 24,
-				offsets: [-32 + strumOff[0], -34 + strumOff[1]]
+				offsets: [-28 + strumOff[0], -30 + strumOff[1]]
 			});
 		}
 

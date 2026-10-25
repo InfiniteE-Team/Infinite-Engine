@@ -1,4 +1,4 @@
-package states.cutscenes;
+package game.objects.cutscenes;
 
 #if VIDEO_ALLOWED
 import hxvlc.util.Handle;

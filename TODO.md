@@ -61,10 +61,13 @@
     - [ ] Additional Libraries
 
 - [ ] Editors
-    - [ ] ChartingEditor
-    - [ ] CharacterEditor
+    - [x] GameplayEditor
+    - [x] CharacterEditor WIP
     - [ ] StageEditor
     - [ ] Idk Editor
+
+- [ ] Compatibility
+    - [x] V-Slice WIP
 
 - [x] Config
     - [x] Global

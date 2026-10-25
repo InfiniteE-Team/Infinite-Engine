@@ -463,8 +463,6 @@ class NoteController {
 				rawNoteIndex++;
 		}
 
-		daSong.songData.notes = null;
-
 		#if HSCRIPT_ALLOWED
 		scriptNC.call("postGenerateNotes", []);
 		#end

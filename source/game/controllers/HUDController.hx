@@ -215,6 +215,8 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 
 	override function destroy() {
 		super.destroy();
+		rating.destroy();
+		rating = null;
 		scoreText.destroy();
 		scoreText = null;
 		iconP1 = null;

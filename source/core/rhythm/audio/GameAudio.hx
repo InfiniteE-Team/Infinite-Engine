@@ -18,7 +18,6 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 	}
 
 	public function loadSong(SONG:SongConfig, needVoices:Bool = true, onfinish:() -> Void):Void {
-		Sound.clearGlobalCache();
 		forEachAlive(function(s:FlxSound) {
 			s.stop();
 			s.destroy();
@@ -39,7 +38,7 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 			add(inst);
 
 		if (needVoices)
-			vocalsSeparated(SONG, onfinish);
+			vocalsSeparated(SONG, null);
 
 		for (i in 1...3) {
 			var miss = new FlxSound();
@@ -106,7 +105,7 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 			s.play());
 	}
 
-	public function volumenVocs(SONG:SongConfig, isMiss:Bool, elapsed:Float) {
+	public function volumeVocs(SONG:SongConfig, isMiss:Bool, elapsed:Float) {
 		if (vocalsGroup.length == 0)
 			return;
 

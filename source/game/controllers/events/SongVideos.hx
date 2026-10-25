@@ -5,8 +5,8 @@ import core.json.song.SongData.EventsData;
 // videos the chart plays with "Play Video": loaded when the song loads, played on their event, paused with the song -JloorDev
 class SongVideos {
 	#if VIDEO_ALLOWED
-	var ready:Map<String, Array<states.cutscenes.SafeVideoSprite>> = new Map();
-	var playing:Array<states.cutscenes.SafeVideoSprite> = [];
+	var ready:Map<String, Array<game.objects.cutscenes.SafeVideoSprite>> = new Map();
+	var playing:Array<game.objects.cutscenes.SafeVideoSprite> = [];
 	#end
 
 	public function new() {}
@@ -70,13 +70,13 @@ class SongVideos {
 	}
 
 	#if VIDEO_ALLOWED
-	function prepare(name:String, keep:Bool = true):Null<states.cutscenes.SafeVideoSprite> {
+	function prepare(name:String, keep:Bool = true):Null<game.objects.cutscenes.SafeVideoSprite> {
 		var path = Paths.getPath(name, 'videos') ?? Paths.getPath('videos/$name', 'videos');
 		if (path == null) {
 			Console.log('[SongVideos] video "$name" not found in videos/', true);
 			return null;
 		}
-		var video = new states.cutscenes.SafeVideoSprite();
+		var video = new game.objects.cutscenes.SafeVideoSprite();
 		video.scrollFactor.set(0, 0);
 		video.visible = false;
 		video.bitmap.onFormatSetup.add(() -> {
@@ -102,7 +102,7 @@ class SongVideos {
 		return video;
 	}
 
-	function finish(video:states.cutscenes.SafeVideoSprite):Void {
+	function finish(video:game.objects.cutscenes.SafeVideoSprite):Void {
 		playing.remove(video);
 		PlayState.instance?.remove(video, true);
 		video.stop();

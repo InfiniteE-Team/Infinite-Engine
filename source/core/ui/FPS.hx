@@ -1,6 +1,6 @@
 package core.ui;
 
-import openfl.system.System;
+import core.api.Memory;
 import openfl.text.TextFieldAutoSize;
 // filters
 import openfl.filters.GlowFilter;
@@ -28,30 +28,21 @@ class FPS extends openfl.display.FPS {
 	var mods:String = '';
 
 	public function infoFPS() {
-		var currentMem:Float = System.totalMemory;
+		var currentMem:Float = Memory.getProcessMemoryMB();
 		if (currentMem > peakRAM) {
 			peakRAM = currentMem;
 		}
 
-		var mem:String = formatRam(currentMem);
-		var maxMem:String = formatRam(peakRAM);
+		var mem:String = Memory.formatRam(currentMem);
+		var maxMem:String = Memory.formatRam(peakRAM);
 
 		if (!core.ConfigMain.globalData.developerMode) {
-			text = 'FPS: $currentFPS - [MEM: $mem MB / Peak: $maxMem MB]';
+			text = 'FPS: $currentFPS - [MEM: $mem / Peak: $maxMem]';
 		} else {
 			if (modding.mods.ModsRegistry.onMod)
 				mods = ' - ' + modding.mods.ModsRegistry.currentMod;
 
 			text = 'FPS: $currentFPS - [MEM: $mem / $maxMem] - (Developer Mode' + mods + ')';
 		}
-	}
-
-	public function formatRam(r:Float):String {
-		var mb = r / (1024 * 1024);
-		if (mb >= 1024) {
-			var gb = mb / 1024;
-			return (Math.round(gb * 100) / 100) + ' GB';
-		}
-		return (Math.round(mb * 100) / 100) + ' MB';
 	}
 }

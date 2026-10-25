@@ -14,6 +14,7 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 
 	var options:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Options', 'Exit to Menu'];
 	var defaultOptions:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Options', 'Exit to Menu'];
+	var optionsCutscene:Array<String> = ['Resume', 'Skip Cutscene', 'Options', 'Exit to Menu'];
 
 	var tips:Array<String> = [
 		"Stay calm, the rhythm flows better without stress.",
@@ -47,6 +48,9 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 		script.executeAll();
 		script.call("onCreate", []);
 		#end
+
+		if (game.PlayState.instance.isInCutscene)
+			options = optionsCutscene;
 
 		if (_cachedPauseMusic == null) {
 			pauseMenuMusic = new FlxSound();
@@ -152,7 +156,10 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 		if (Controls.BACK) {
 			if (modeDifficultyChanging) {
 				modeDifficultyChanging = false;
-				options = defaultOptions;
+				if (game.PlayState.instance.isInCutscene)
+					options = optionsCutscene;
+				else
+					options = defaultOptions;
 				reloadMenuOptions();
 			} else {
 				resumeFunction();
@@ -172,6 +179,11 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 				switch (options[curSelect]) {
 					case "Resume":
 						resumeFunction();
+						close();
+					case "Skip Cutscene":
+						resumeFunction();
+						if (game.PlayState.instance.isInCutscene)
+							game.PlayState.instance.cutscene.skip();
 						close();
 					case "Restart Song":
 						resumeFunction();
@@ -198,7 +210,10 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 			} else {
 				if (options[curSelect] == 'Exit to Menu' || options[curSelect] == 'Back') {
 					modeDifficultyChanging = false;
-					options = defaultOptions;
+					if (game.PlayState.instance.isInCutscene)
+						options = optionsCutscene;
+					else
+						options = defaultOptions;
 					reloadMenuOptions();
 				} else {
 					var selectedDiffString = options[curSelect].toLowerCase();

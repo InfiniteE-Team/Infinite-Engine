@@ -45,7 +45,7 @@ class ScriptGlobals {
 			'core.rhythm.audio.GameAudio',
 			// Cutscenes
 			'states.cutscenes.VideoState',
-			'states.cutscenes.VideoSprite',
+			'game.objects.cutscenes.VideoSprite',
 			// Scripting
 			'modding.scripting.interfaces.ScriptState',
 			'modding.scripting.interfaces.ScriptSubstate',
@@ -156,7 +156,7 @@ class ScriptGlobals {
 			"GameAudio" => core.rhythm.audio.GameAudio,
 			// Cutscenes
 			"VideoState" => states.cutscenes.VideoState,
-			"VideoSprite" => states.cutscenes.VideoSprite,
+			"VideoSprite" => game.objects.cutscenes.VideoSprite,
 			// Utils
 			"Console" => Console,
 			#if windows

@@ -36,7 +36,7 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 
 	public function onRatingPopUp(ratingName:String, combo:Int) {
 		#if HSCRIPT_ALLOWED
-		if (scripRat.hasScripts && scripRat.callCancellable('onRatingPopUp', [ratingName, combo]))
+		if (scripRat?.hasScripts && scripRat?.callCancellable('onRatingPopUp', [ratingName, combo]))
 			return;
 		#end
 		var pixelPart1 = 'normal/score/';
@@ -54,7 +54,7 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 		ratingSprite.alpha = 1;
 		ratingSprite.visible = true;
 
-		var skinRating = game.PlayState.instance?.noteController?.popupImage('ratings', ratingName);
+		var skinRating = getSkinRating('ratings', ratingName);
 		if (skinRating != null) {
 			if (poolPaths.get(ratingSprite) != skinRating.path) {
 				ratingSprite.loadGraphic(skinRating.path);
@@ -116,7 +116,7 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 			var numScore = getFromPool(numberPool);
 			numScore.alpha = 1;
 			numScore.visible = true;
-			var skinDigit = game.PlayState.instance?.noteController?.popupImage('numbers', Std.string(Std.int(i)));
+			var skinDigit = getSkinRating('numbers', Std.string(Std.int(i)));
 			if (skinDigit != null) {
 				if (poolPaths.get(numScore) != skinDigit.path) {
 					numScore.loadGraphic(skinDigit.path);
@@ -158,6 +158,17 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 			});
 			daLoop++;
 		}
+	}
+
+	public function getSkinRating(type:String, details:String):Dynamic {
+		#if HSCRIPT_ALLOWED
+		if (scripRat.hasScripts) {
+			var result = scripRat.call('onSkinRating', [type, details]);
+			if (result != null && result != false)
+				return result;
+		}
+		#end
+		return game.PlayState.instance?.noteController?.popupImage(type, details);
 	}
 
 	public function onMissPopup() {
