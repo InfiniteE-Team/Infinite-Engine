@@ -92,7 +92,7 @@ class ModsState extends MusicBeatState {
 				graphic = Paths.getPath('menus/mods/fallback-icon', 'image');
 
 			var modMeta = modding.mods.ModData.ModConfig.loadForMod(modName);
-			var description:String = modMeta == null ? '(NO DATA/META.JSON FOUND)' : (modMeta.description ?? '??');
+			var description:String = modMeta == null ? '(NO META.JSON FOUND)' : (modMeta.description ?? '??');
 
 			var itemY:Float = LIST_TOP + (i * ITEM_SPACING);
 

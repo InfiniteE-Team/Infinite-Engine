@@ -26,7 +26,7 @@ class ModConfig {
 	public function new() {}
 
 	public static function init() {
-		var jsonPath = core.assets.Library.findLib('data/meta.json');
+		var jsonPath = core.assets.Library.findLib('meta.json');
 
 		if (jsonPath == null || !FileSystem.exists(jsonPath)) {
 			trace('No meta.json found, using the engine defaults.');
@@ -53,11 +53,11 @@ class ModConfig {
 	}
 
 	public static function loadForMod(modName:String):ModData {
-		var metaPath = '${core.assets.Library.modsFolder}/$modName/data/meta.json';
-		if (!sys.FileSystem.exists(metaPath))
+		var modPath = '${core.assets.Library.modsFolder}/$modName/meta.json';
+		if (!sys.FileSystem.exists(modPath))
 			return null;
 		try {
-			return FormatJson.readJson(metaPath);
+			return FormatJson.readJson(modPath);
 		} catch (e:Dynamic) {
 			Console.log('Error parsing meta for mod $modName: $e');
 			return null;
