@@ -158,13 +158,8 @@ class PlayState extends MusicBeatState {
 		#end
 	}
 
-	function titleGameplay() {
-		var titleName:String = modding.mods.ModData.ModConfig.modData?.name;
-		if (modding.mods.ModData.ModConfig.modData?.name == null)
-			titleName = "Infinite Engine";
-
-		lime.app.Application.current.window.title = titleName + " - Song: " + curSong;
-	}
+	function titleGameplay()
+		lime.app.Application.current.window.title = modding.mods.ModData.ModConfig.title + " - Song: " + curSong;
 
 	public function addCameras() {
 		camGame = new Camera();
@@ -821,7 +816,7 @@ class PlayState extends MusicBeatState {
 
 		cameraController = null;
 
-		lime.app.Application.current.window.title = modding.mods.ModData.ModConfig.modData?.name ?? "Infinite Engine";
+		lime.app.Application.current.window.title = modding.mods.ModData.ModConfig.title;
 
 		core.render.shaders.CustomShader.clearAll();
 

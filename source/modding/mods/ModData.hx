@@ -7,13 +7,16 @@ import states.menus.ModsState;
 
 typedef ModData = {
 	var ?name:String;
-	var ?version:String;
+	var ?title:String;
 	var ?author:String;
 	var ?appIcon:String;
 	var ?description:String;
 	var ?startingMod:Bool;
 
 	// APIs
+	var ?mod_version:String;
+	var ?api_version:String;
+
 	var ?discord:String;
 	var ?webPage:String;
 }
@@ -21,7 +24,8 @@ typedef ModData = {
 class ModConfig {
 	public static var modData:ModData;
 
-	public static var name:String = "Mod Name";
+	public static var title(get, never):String;
+	public static var apiMods(get, never):String;
 
 	public function new() {}
 
@@ -30,9 +34,8 @@ class ModConfig {
 
 		if (jsonPath == null || !FileSystem.exists(jsonPath)) {
 			trace('No meta.json found, using the engine defaults.');
-			name = core.system.EngineData.name;
 			modData = null;
-			lime.app.Application.current.window.title = name;
+			lime.app.Application.current.window.title = title;
 			return;
 		}
 
@@ -44,12 +47,20 @@ class ModConfig {
 			Console.log('Error to parsed the mod: $e');
 		}
 
-		if (modData == null)
-			name = core.system.EngineData.name;
-		else
-			name = modData.name ?? core.system.EngineData.name;
+		lime.app.Application.current.window.title = title;
+	}
 
-		lime.app.Application.current.window.title = name;
+	private static function get_title():String {
+		if (modData == null || modData.title == null) {
+			return core.system.EngineData.title;
+		}
+		return modData.title;
+	}
+
+	private static function get_apiMods():String {
+		if (modData == null)
+			return "";
+		return modData.api_version ?? "0.1.0";
 	}
 
 	public static function loadForMod(modName:String):ModData {
