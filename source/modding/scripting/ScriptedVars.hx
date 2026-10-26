@@ -9,7 +9,7 @@ class ScriptedVars {
 		script.expose('SONG', PlayState.SONG);
 		script.expose('instance', PlayState.instance);
 		script.expose('health', game.playStateConfig.health);
-
+		script.expose('curSong', game.curSong);
 		script.expose('healthBarBG', game.controllerHUD.healthBarBG);
 		script.expose('healthBar', game.controllerHUD.healthBar);
 		script.expose('healthBarY', game.controllerHUD.healthBarY);
