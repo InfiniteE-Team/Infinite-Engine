@@ -142,8 +142,7 @@ class CharacterController extends FunkinObjectRegistry {
 							modding.vslice.VSliceHooks.dispatch('onNoteHit', modding.vslice.VSliceHooks.noteEvent('NOTE_HIT', note, note.rating));
 						}
 					}
-					var globalLane = noteController.charStrumOffsets.get(char.id);
-					var holdingActive = globalLane != null && noteController.activeOpponentHolds.exists(globalLane + i);
+					var holdingActive = noteController.getStrumline(char.id)?.activeOpponentHolds.exists(i);
 					if (holdingActive)
 						strums[i].playAnim('confirm' + i, false);
 					else if (strums[i].confirmHoldTimer < 0)
@@ -172,8 +171,7 @@ class CharacterController extends FunkinObjectRegistry {
 					if (charScript != null)
 						charScript.call("onNoteSustainCPU", []);
 					#end
-					var globalLane = noteController.charStrumOffsets.get(char.id);
-					var holdingActive = globalLane != null && noteController.activeOpponentHolds.exists(globalLane + i);
+					var holdingActive = noteController.getStrumline(char.id)?.activeOpponentHolds.exists(i);
 					if (holdingActive) {
 						strums[i].playAnim('confirm' + i, false);
 						strums[i].confirmHoldTimer = -1;
@@ -220,7 +218,7 @@ class CharacterController extends FunkinObjectRegistry {
 				}
 
 				var globalLane = noteController.charStrumOffsets.get(char.id);
-				var holdingActive = globalLane != null && noteController.activeOpponentHolds.exists(globalLane + i);
+				var holdingActive = noteController.getStrumline(char.id)?.activeOpponentHolds.exists(i);
 				if (holdingActive)
 					setSing(char, globalLane + i);
 				else if (strums[i].confirmHoldTimer < 0)

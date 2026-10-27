@@ -15,6 +15,8 @@ class NoteSplash extends FunkinSprite {
 
 	public var keys:Int = 4;
 
+	public var strumline:Strumline;
+
 	public var noteControl:game.controllers.NoteController;
 
 	var _lastAnimForShader:String = '';
@@ -27,6 +29,17 @@ class NoteSplash extends FunkinSprite {
 		this.noteType = noteType;
 		this.noteSkin = noteSkin;
 		this.noteSkinData = noteSkinData;
+		loadSprite(noteSkinData);
+	}
+
+	public function reinitSplash(x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int, noteType:String = 'normal'):Void {
+		setPosition(x, y);
+		this.direction = direction;
+		this.noteType = noteType;
+		this.noteSkin = noteSkin;
+		this.noteSkinData = noteSkinData;
+		strumline = null;
+		_lastAnimForShader = '';
 		loadSprite(noteSkinData);
 	}
 

@@ -18,6 +18,6 @@ class ScriptedVars {
 		script.expose('scoreText', game.controllerHUD.scoreText);
 		script.expose('rating', game.controllerHUD.rating);
 
-		script.expose('strumsByChar', game.noteController.strumsByChar);
+		script.expose('getStrumline', game.noteController.getStrumline);
 	}
 }

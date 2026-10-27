@@ -12,7 +12,6 @@ class Note extends FunkinSprite {
 	public var direction:Int = 0;
 	public var noteSkin:String = 'default';
 
-	// input good
 	public var strumTime:Float = 0;
 	public var wasGoodHit:Bool = false;
 	public var canBeHit:Bool = false;
@@ -20,12 +19,18 @@ class Note extends FunkinSprite {
 	public var tooLate:Bool = false;
 
 	public var rating:String = 'sick';
-
 	public var keys:Int = 4;
-
 	public var strum:StrumNote;
-
 	public var noteControl:NoteController;
+
+	public var strumline:Strumline;
+
+	public var localLane:Int = 0;
+
+	// Scrollspeed cache
+	public var scrollMult:Float = 0.0;
+
+	public var noteDownscroll:Bool = false;
 
 	private var noteSkinData:NoteSkinData = null;
 
@@ -37,7 +42,6 @@ class Note extends FunkinSprite {
 	public function new(strumTime:Float, keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0,
 			?noteType:String = 'normal') {
 		super(x, y);
-
 		setPosition(x, y);
 		this.keys = keys;
 		this.direction = direction;
@@ -58,7 +62,6 @@ class Note extends FunkinSprite {
 		this.noteSkin = noteSkin;
 		this.noteSkinData = noteSkinData;
 
-		// reset state
 		wasGoodHit = false;
 		canBeHit = false;
 		mustPress = false;
@@ -68,6 +71,10 @@ class Note extends FunkinSprite {
 		rating = 'sick';
 		strum = null;
 		noteControl = null;
+		strumline = null;
+		localLane = 0;
+		scrollMult = 0.0;
+		noteDownscroll = false;
 		alpha = 1;
 		visible = true;
 
@@ -78,7 +85,6 @@ class Note extends FunkinSprite {
 	public function loadSprite(noteSkinData:NoteSkinData) {
 		var basePath = noteType != null
 			&& noteType != 'normal' ? 'game/notetypes/$noteType/strumnotes' : 'game/noteskins/$noteSkin/strumnotes';
-
 		loadProps(noteSkinData.props, basePath);
 		playAnim('note$direction-Scroll', true);
 		RGBShader.applyByAnimation(this, noteSkinData, 'note$direction-Scroll');
@@ -101,10 +107,11 @@ class Note extends FunkinSprite {
 			canBeHit = false;
 			if (strumTime <= RhythmCore.songPosition)
 				wasGoodHit = true;
-		} else if (mustPress && !wasGoodHit && !tooLate && !wasMissed) {
-			canBeHit = (RhythmCore.songPosition >= strumTime - noteControl.worstWindow
-				&& RhythmCore.songPosition <= strumTime + noteControl.worstWindow);
-			if (RhythmCore.songPosition > strumTime + noteControl.worstWindow)
+		} else if (!wasGoodHit && !tooLate && !wasMissed) {
+			var ww = noteControl.worstWindow;
+			var sp = RhythmCore.songPosition;
+			canBeHit = (sp >= strumTime - ww && sp <= strumTime + ww);
+			if (sp > strumTime + ww)
 				tooLate = true;
 		}
 	}

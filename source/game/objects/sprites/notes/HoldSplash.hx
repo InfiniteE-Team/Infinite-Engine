@@ -29,6 +29,17 @@ class HoldSplash extends FunkinSprite {
 		loadSprite(noteSkinData);
 	}
 
+	public function reinitHoldSplash(x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int, noteType:String = 'normal'):Void {
+		setPosition(x, y);
+		this.direction = direction;
+		this.noteType = noteType;
+		this.noteSkin = noteSkin;
+		this.noteSkinData = noteSkinData;
+		isEnding = false;
+		_lastAnimForShader = '';
+		loadSprite(noteSkinData);
+	}
+
 	public function loadSprite(noteSkinData:NoteSkinData) {
 		isEnding = false;
 		loadProps(noteSkinData.props, 'game/noteskins/$noteSkin/holdsplashes');

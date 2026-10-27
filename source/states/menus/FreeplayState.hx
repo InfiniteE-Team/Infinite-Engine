@@ -113,7 +113,7 @@ class FreeplayState extends MusicBeatState {
 		if (freeplayData != null && freeplayData.songData != null) {
 			var charDataCache:Map<String, Dynamic> = new Map();
 			for (i in 0...freeplayData.songData.length) {
-				var card:CardFreeplay = new CardFreeplay(200 - (i * 60), 30 + (i * 200), i);
+				var card:CardFreeplay = new CardFreeplay(220 - (i * 60), 30 + (i * 200), i);
 				songs.push(card);
 				add(card);
 

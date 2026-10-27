@@ -17,9 +17,7 @@ class CardFreeplay extends flixel.group.FlxSpriteGroup {
 	var scrollDirection:Int = 1;
 
 	var windowX:Float = 210;
-	var windowW:Float = 300;
-
-	var _clipRect:openfl.geom.Rectangle = new openfl.geom.Rectangle(0, 0, 300, 80);
+	var windowW:Float = 230;
 
 	public function new(x:Float, y:Float, ID:Int) {
 		super(x, y);
@@ -45,6 +43,7 @@ class CardFreeplay extends flixel.group.FlxSpriteGroup {
 		@:privateAccess songText.textField.filters = [
 			new GlowFilter(flixel.util.FlxColor.fromString('#001b3a'), 1.0, 10, 10, 100, BitmapFilterQuality.MEDIUM)
 		];
+		songText.clipRect = new flixel.math.FlxRect(0, 0, windowW, 80);
 		songText.antialiasing = SaveData.data.antialiasing;
 		songText.ID = ID;
 		add(songText);
@@ -60,42 +59,40 @@ class CardFreeplay extends flixel.group.FlxSpriteGroup {
 		add(card);
 
 		scrollOffset = 0.0;
-        songStartX = windowX;
-        songFullWidth = songText.width;
-        pauseTimer = pauseDuration;
-        scrollDirection = 1;
-        @:privateAccess songText.textField.scrollRect = _clipRect;
+		songStartX = songText.x;
+		songFullWidth = songText.width;
+		pauseTimer = pauseDuration;
+		scrollDirection = 1;
 	}
 
 	var atEnd:Bool = false;
 
 	override public function update(elapsed:Float) {
-        super.update(elapsed);
+		super.update(elapsed);
 
-        if (songText == null || songFullWidth <= windowW)
-            return;
+		if (songText == null || songFullWidth <= windowW)
+			return;
 
-        if (pauseTimer > 0) {
-            pauseTimer -= elapsed;
-            return;
-        }
+		if (pauseTimer > 0) {
+			pauseTimer -= elapsed;
+			return;
+		}
 
-        scrollOffset += scrollSpeed * elapsed * scrollDirection;
+		scrollOffset += scrollSpeed * elapsed * scrollDirection;
 
-        var maxScroll = songFullWidth - windowW + 20;
+		var maxScroll = songFullWidth - windowW;
 
-        if (scrollDirection == 1 && scrollOffset >= maxScroll) {
-            scrollOffset = maxScroll;
-            scrollDirection = -1;
-            pauseTimer = pauseDuration;
-        } 
-        else if (scrollDirection == -1 && scrollOffset <= 0) {
-            scrollOffset = 0;
-            scrollDirection = 1;
-            pauseTimer = pauseDuration;
-        }
+		if (scrollDirection == 1 && scrollOffset >= maxScroll) {
+			scrollOffset = maxScroll;
+			scrollDirection = -1;
+			pauseTimer = pauseDuration;
+		} else if (scrollDirection == -1 && scrollOffset <= 0) {
+			scrollOffset = 0;
+			scrollDirection = 1;
+			pauseTimer = pauseDuration;
+		}
 
-        _clipRect.x = scrollOffset;
-        @:privateAccess songText.textField.scrollRect = _clipRect;
-    }
+		songText.x = songStartX - scrollOffset;
+		songText.clipRect = new flixel.math.FlxRect(scrollOffset, 0, windowW, 80);
+	}
 }
