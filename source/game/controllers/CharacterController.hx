@@ -16,6 +16,46 @@ class CharacterController extends FunkinObjectRegistry {
 
 	public var chars:Character;
 
+	// compatibility vars
+	public var boyfriend(get, set):Character;
+
+	function get_boyfriend():Character
+		return playerChars.length > 0 ? playerChars[0] : null;
+
+	function set_boyfriend(v:Character):Character {
+		if (playerChars.length > 0)
+			playerChars[0] = v;
+		else
+			playerChars.push(v);
+		return v;
+	}
+
+	public var dad(get, set):Character;
+
+	function get_dad():Character
+		return opponentChars.length > 0 ? opponentChars[0] : null;
+
+	function set_dad(v:Character):Character {
+		if (opponentChars.length > 0)
+			opponentChars[0] = v;
+		else
+			opponentChars.push(v);
+		return v;
+	}
+
+	public var gf(get, set):Character;
+
+	function get_gf():Character
+		return gfChars.length > 0 ? gfChars[0] : null;
+
+	function set_gf(v:Character):Character {
+		if (gfChars.length > 0)
+			gfChars[0] = v;
+		else
+			gfChars.push(v);
+		return v;
+	}
+
 	var control:Controls;
 
 	public var rating:game.objects.Rating;

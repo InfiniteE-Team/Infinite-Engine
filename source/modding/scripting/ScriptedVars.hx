@@ -19,5 +19,8 @@ class ScriptedVars {
 		script.expose('rating', game.controllerHUD.rating);
 
 		script.expose('getStrumline', game.noteController.getStrumline);
+		script.expose("boyfriend", game.chars.boyfriend);
+		script.expose("dad", game.chars.dad);
+		script.expose("gf", game.chars.gf);
 	}
 }
