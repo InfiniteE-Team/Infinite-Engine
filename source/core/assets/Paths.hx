@@ -38,9 +38,9 @@ class Paths {
 				case XML:
 					return Library.findLib(fileName + '.xml');
 				case SWF:
-					return Library.findLib(fileName + '.swf');
+					return Library.findLib("images/" + fileName + '.swf');
 				case ASTC:
-					return Library.findLib(fileName + '.astc');
+					return Library.findLib("images/" + fileName + '.astc');
 				case SONG_SCRIPT:
 					return Library.findLib('songs/${PlayState.instance.songFolder}/scripts/$fileName.hx');
 				case SHADERS:
