@@ -38,6 +38,7 @@ class Icon extends modding.scripting.types.sprites.ScriptedSprite {
 			default:
 				if (characterData != null && characterData.icon != null) {
 					var iconData = FormatJson.getIconDataPlaceholder(characterData.icon);
+
 					bumpInBeats = iconData.bumpInBeats;
 					stepTempo = iconData.stepTempo;
 
@@ -46,13 +47,10 @@ class Icon extends modding.scripting.types.sprites.ScriptedSprite {
 						setPosition(iconData.props.position[0], iconData.props.position[1]);
 						loadProps(iconData.props, 'game/icons');
 						if (frameWidth > 0) {
-							if (iconData.size != null) {
-								baseScale = iconData.size / frameWidth;
+							var targetSize:Float = iconData.size ?? iconData.props.scale ?? 0;
+							if (targetSize > 0) {
+								baseScale = targetSize / frameWidth;
 								scale.set(baseScale, baseScale);
-								updateHitbox();
-							} else if (iconData.props.scale != null && iconData.props.scale.length > 0) {
-								baseScale = iconData.props.scale[0] / frameWidth;
-								scale.set(baseScale, iconData.props.scale.length >= 2 ? iconData.props.scale[1] / frameWidth : baseScale);
 								updateHitbox();
 							}
 						}
