@@ -9,63 +9,86 @@ import openfl.display.MovieClip;
 import core.render.swf.utils.*;
 
 class SWFModel extends FoxModel {
-    public var pixelSize:Float = 0.01;
+	public var pixelSize:Float = 0.01;
 
-    var _mc:MovieClip;
-    var _currentFrame:Int = -1;
-    var _frameCache:Map<Int, Array<FoxMesh>> = new Map();
+	var mc:MovieClip;
+	var currentFrame:Int = -1;
+	var frameCache:Map<Int, Array<FoxMesh>> = new Map();
 
-    public function new(swfPath:String, ?symbol:String = "", pixelSize:Float = 0.01) {
-        super();
-        this.pixelSize = pixelSize;
-        _mc = openfl.Assets.getMovieClip('$swfPath:$symbol');
-        if (_mc != null) gotoFrame(1);
-    }
+	public function new(swfPath:String, ?symbol:String = "", pixelSize:Float = 0.01) {
+		super();
+		this.pixelSize = pixelSize;
+		#if sys
+		if (sys.FileSystem.exists(swfPath)) {
+			var ba = openfl.utils.ByteArray.fromBytes(sys.io.File.getBytes(swfPath));
+			var loader = new openfl.display.Loader();
+			FlxG.stage.addChild(loader);
+			loader.loadBytes(ba);
+			var content = loader.content;
+			FlxG.stage.removeChild(loader);
+			if (content != null) {
+				var container:openfl.display.DisplayObjectContainer = cast content;
+				mc = (symbol != null && symbol != "") ? cast container.getChildByName(symbol) : cast content;
+			}
+		}
+		#else
+		mc = openfl.Assets.getMovieClip('$swfPath:$symbol');
+		#end
 
-    public function gotoFrame(frame:Int) {
-        if (frame == _currentFrame) return;
-        _currentFrame = frame;
-        _mc.gotoAndStop(frame);
+		if (mc != null)
+			gotoFrame(1);
+	}
 
-        if (_frameCache.exists(frame)) {
-            meshes = _frameCache.get(frame);
-            return;
-        }
+	public function gotoFrame(frame:Int) {
+		if (mc == null)
+			return;
+		if (frame == currentFrame)
+			return;
+		currentFrame = frame;
+		mc.gotoAndStop(frame);
 
-        var shapes = SWFShapeExtractor.extract(_mc);
-        var newMeshes:Array<FoxMesh> = [];
+		if (frameCache.exists(frame)) {
+			meshes = frameCache.get(frame);
+			return;
+		}
 
-        for (shape in shapes) {
-            var tess = SWFTessellator.tessellate(shape.contour, pixelSize);
-            if (tess == null || tess.indices.length == 0) continue;
+		var shapes = SWFShapeExtractor.extract(mc);
+		var newMeshes:Array<FoxMesh> = [];
 
-            var mat = FoxMaterial.create(FoxShader.fromAsset(FoxShader.BASIC));
-            mat.shadowCulling = FoxTriangleFace.NONE;
-            mat.setColor(shape.color);
+		for (shape in shapes) {
+			var tess = SWFTessellator.tessellate(shape.contour, pixelSize);
+			if (tess == null || tess.indices.length == 0)
+				continue;
 
-            var mesh = new FoxMesh(mat);
-            mesh.setArrays(tess.vertices, null, tess.indices, mat);
-            mesh.calculateBounds(tess.vertices);
-            newMeshes.push(mesh);
-        }
+			var mat = FoxMaterial.create(FoxShader.fromAsset(FoxShader.BASIC));
+			mat.shadowCulling = FoxTriangleFace.NONE;
+			mat.setColor(shape.color);
 
-        _frameCache.set(frame, newMeshes);
-        meshes = newMeshes;
-    }
+			var mesh = new FoxMesh(mat);
+			mesh.setArrays(tess.vertices, null, tess.indices, mat);
+			mesh.calculateBounds(tess.vertices);
+			newMeshes.push(mesh);
+		}
 
-    public function playAnim(label:String) {
-        _mc.gotoAndPlay(label);
-    }
+		frameCache.set(frame, newMeshes);
+		meshes = newMeshes;
+	}
 
-    override public function update(dt:Float) {
-        super.update(dt);
-        if (_mc != null && _mc.currentFrame != _currentFrame)
-            gotoFrame(_mc.currentFrame);
-    }
+	public function playAnim(label:String) {
+		if (mc == null)
+			return;
+		mc.gotoAndPlay(label);
+	}
 
-    override public function destroy() {
-        _frameCache = null;
-        _mc = null;
-        super.destroy();
-    }
+	override public function update(dt:Float) {
+		super.update(dt);
+		if (mc != null && mc.currentFrame != currentFrame)
+			gotoFrame(mc.currentFrame);
+	}
+
+	override public function destroy() {
+		frameCache = null;
+		mc = null;
+		super.destroy();
+	}
 }

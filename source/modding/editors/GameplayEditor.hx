@@ -246,7 +246,12 @@ class GameplayEditor extends MusicBeatState {
 	override public function create() {
 		super.create();
 
-		songDir = folder != null && folder != '' ? folder : (game.PlayState.instance?.songFolder ?? SONG?.songName ?? 'untitled');
+		songDir = folder != null && folder != '' ? folder : (game.PlayState.instance?.songFolder ?? 'untitled');
+		#if sys
+		var resolvedDir = resolveSongDir(songDir);
+		if (resolvedDir != null)
+			songDir = resolvedDir;
+		#end
 		folder = null;
 		chartDiff = pickDiffName();
 		diff = null;
@@ -288,6 +293,28 @@ class GameplayEditor extends MusicBeatState {
 
 		FlxG.mouse.visible = true;
 	}
+
+	#if sys
+	static function resolveSongDir(name:String):String {
+		var basePath = 'assets/songs';
+		if (sys.FileSystem.exists(basePath)) {
+			for (entry in sys.FileSystem.readDirectory(basePath)) {
+				if (entry.toLowerCase() == name.toLowerCase())
+					return entry;
+			}
+		}
+		if (modding.mods.ModsRegistry.onMod && modding.mods.ModsRegistry.currentMod != '') {
+			var modPath = 'mods/${modding.mods.ModsRegistry.currentMod}/songs';
+			if (sys.FileSystem.exists(modPath)) {
+				for (entry in sys.FileSystem.readDirectory(modPath)) {
+					if (entry.toLowerCase() == name.toLowerCase())
+						return entry;
+				}
+			}
+		}
+		return name;
+	}
+	#end
 
 	function restartEditor():Void {
 		resumeActive = true;

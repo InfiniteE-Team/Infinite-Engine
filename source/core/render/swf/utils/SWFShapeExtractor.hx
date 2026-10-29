@@ -13,12 +13,12 @@ class SWFShapeExtractor {
 	static final BEZIER_TOLERANCE:Float = 0.5;
 
 	public static function extract(mc:MovieClip):Array<SWFShape> {
-        var shapes:Array<SWFShape> = [];
-        extractFromGraphics(@:privateAccess mc.__graphics, shapes);
-        return shapes;
-    }
+		var shapes:Array<SWFShape> = [];
+		extractFromDisplayObject(mc, 0, 0, shapes);
+		return shapes;
+	}
 
-	static function extractFromGraphics(g:Graphics, out:Array<SWFShape>):Void {
+	static function extractFromGraphics(g:Graphics, offsetX:Float, offsetY:Float, out:Array<SWFShape>):Void {
 		if (g == null)
 			return;
 		@:privateAccess var cmds = g.__commands;
@@ -56,23 +56,44 @@ class SWFShapeExtractor {
 					curX = d.x;
 					curY = d.y;
 					if (inFill)
-						curContour.push({x: curX, y: curY});
+						curContour.push({x: curX + offsetX, y: curY + offsetY});
 				case LINE_TO:
 					var d = reader.readLineTo();
 					curX = d.x;
 					curY = d.y;
 					if (inFill)
-						curContour.push({x: curX, y: curY});
+						curContour.push({x: curX + offsetX, y: curY + offsetY});
 				case CURVE_TO:
 					var d = reader.readCurveTo();
 					var pts = subdivideQuadratic(curX, curY, d.controlX, d.controlY, d.anchorX, d.anchorY, BEZIER_TOLERANCE);
 					if (inFill)
 						for (p in pts)
-							curContour.push(p);
+							curContour.push({x: p.x + offsetX, y: p.y + offsetY});
 					curX = d.anchorX;
 					curY = d.anchorY;
 				case _:
 					reader.skip(type);
+			}
+		}
+	}
+
+	static function extractFromDisplayObject(obj:openfl.display.DisplayObject, parentX:Float, parentY:Float, out:Array<SWFShape>):Void {
+		var ox = parentX + obj.x;
+		var oy = parentY + obj.y;
+
+		var g:Graphics = null;
+		if ((obj is openfl.display.Shape)) {
+			g = @:privateAccess cast(obj, openfl.display.Shape).__graphics;
+		} else if ((obj is MovieClip)) {
+			g = @:privateAccess cast(obj, MovieClip).__graphics;
+		}
+		if (g != null)
+			extractFromGraphics(g, ox, oy, out);
+
+		if ((obj is openfl.display.DisplayObjectContainer)) {
+			var container:openfl.display.DisplayObjectContainer = cast obj;
+			for (i in 0...container.numChildren) {
+				extractFromDisplayObject(container.getChildAt(i), ox, oy, out);
 			}
 		}
 	}

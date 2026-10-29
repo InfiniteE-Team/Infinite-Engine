@@ -22,9 +22,7 @@ class Icon extends modding.scripting.types.sprites.ScriptedSprite {
 	public function new(isPlayer:Bool, ?characterData:CharacterData, ?sprite:String = 'face') {
 		super();
 		#if HSCRIPT_ALLOWED
-		var iconScriptPath:String = (characterData != null && characterData.icon != null && characterData.icon.props != null) 
-            ? characterData.icon.props.name 
-            : (sprite ?? 'face');
+		var iconScriptPath:String = (characterData != null && characterData.icon != null && characterData.icon.props != null) ? characterData.icon.props.name : (sprite ?? 'face');
 		initScript('characters/icons/$characterData');
 		#end
 		updateIcon(isPlayer, characterData, sprite);
@@ -38,35 +36,40 @@ class Icon extends modding.scripting.types.sprites.ScriptedSprite {
 
 		switch (characterData) {
 			default:
-                if (characterData != null && characterData.icon != null) {
-                    var iconData = FormatJson.getIconDataPlaceholder(characterData.icon);
+				if (characterData != null && characterData.icon != null) {
+					var iconData = FormatJson.getIconDataPlaceholder(characterData.icon);
+					bumpInBeats = iconData.bumpInBeats;
+					stepTempo = iconData.stepTempo;
 
-                    bumpInBeats = iconData.bumpInBeats;
-                    stepTempo = iconData.stepTempo;
+					if (iconData.props != null) {
+						iconData.props.position ??= [0, 0];
+						setPosition(iconData.props.position[0], iconData.props.position[1]);
+						loadProps(iconData.props, 'game/icons');
+						if (frameWidth > 0) {
+							if (iconData.size != null) {
+								baseScale = iconData.size / frameWidth;
+								scale.set(baseScale, baseScale);
+								updateHitbox();
+							} else if (iconData.props.scale != null && iconData.props.scale.length > 0) {
+								baseScale = iconData.props.scale[0] / frameWidth;
+								scale.set(baseScale, iconData.props.scale.length >= 2 ? iconData.props.scale[1] / frameWidth : baseScale);
+								updateHitbox();
+							}
+						}
+					} else {
+						loadProps(defaultProps(sprite), 'game/icons');
+					}
+				} else {
+					var defaultData = FormatJson.getIconDataPlaceholder(null);
 
-                    if (iconData.props != null) {
-                        iconData.props.position ??= [0, 0];
-                        setPosition(iconData.props.position[0], iconData.props.position[1]);
-                        loadProps(iconData.props, 'game/icons');
-                        if (iconData.size != null && frameWidth > 0) {
-                            baseScale = iconData.size / frameWidth;
-                            scale.set(baseScale, baseScale);
-                            updateHitbox();
-                        }
-                    } else {
-                        loadProps(defaultProps(sprite), 'game/icons');
-                    }
-                } else {
-                    var defaultData = FormatJson.getIconDataPlaceholder(null);
+					bumpInBeats = defaultData.bumpInBeats;
+					stepTempo = defaultData.stepTempo;
 
-                    bumpInBeats = defaultData.bumpInBeats;
-                    stepTempo = defaultData.stepTempo;
+					loadProps(defaultProps(sprite), 'game/icons');
+				}
 
-                    loadProps(defaultProps(sprite), 'game/icons');
-                }
-
-                flipX = isPlayer != (characterData?.icon?.props?.flipX == true);
-                antialiasing = SaveData.data.antialiasing;
+				flipX = isPlayer != (characterData?.icon?.props?.flipX == true);
+				antialiasing = SaveData.data.antialiasing;
 		}
 
 		#if HSCRIPT_ALLOWED
@@ -82,8 +85,18 @@ class Icon extends modding.scripting.types.sprites.ScriptedSprite {
 			firstAnim: 'normal',
 			frameScale: [150, 150],
 			anims: [
-				{name: 'normal', indices: [0], looped: false, framerate: 24},
-				{name: 'losing', indices: [1], looped: false, framerate: 24}
+				{
+					name: 'normal',
+					indices: [0],
+					looped: false,
+					framerate: 24
+				},
+				{
+					name: 'losing',
+					indices: [1],
+					looped: false,
+					framerate: 24
+				}
 			]
 		};
 	}
