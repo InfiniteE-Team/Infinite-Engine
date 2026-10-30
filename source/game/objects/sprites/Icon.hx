@@ -47,12 +47,15 @@ class Icon extends modding.scripting.types.sprites.ScriptedSprite {
 						setPosition(iconData.props.position[0], iconData.props.position[1]);
 						loadProps(iconData.props, 'game/icons');
 						if (frameWidth > 0) {
-							var targetSize:Float = iconData.size ?? iconData.props.scale ?? 0;
-							if (targetSize > 0) {
-								baseScale = targetSize / frameWidth;
-								scale.set(baseScale, baseScale);
-								updateHitbox();
+							if (iconData.size != null) {
+								baseScale = iconData.size / frameWidth;
+							} else if (iconData.props.scale != null && iconData.props.scale.length > 0) {
+								baseScale = iconData.props.scale[0];
+							} else {
+								baseScale = 1.0;
 							}
+							scale.set(baseScale, baseScale);
+							updateHitbox();
 						}
 					} else {
 						loadProps(defaultProps(sprite), 'game/icons');
