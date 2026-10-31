@@ -5,6 +5,7 @@ import flixel.util.FlxColor;
 import core.rhythm.RhythmCore;
 import core.rhythm.audio.GameAudio;
 import core.json.song.SongData.SongConfig;
+import core.json.song.SongData.NoteDataUtil;
 import flixel.addons.display.FlxGridOverlay;
 import modding.editors.gameplay.ChartDefaults;
 import modding.editors.gameplay.EditorWidgets;
@@ -1818,7 +1819,13 @@ class GameplayEditor extends MusicBeatState {
 
 			sys.io.File.saveContent(metaPath, haxe.Json.stringify(SONG.songData.meta, null, '\t'));
 			sys.io.File.saveContent(eventsPath, haxe.Json.stringify({events: events}, null, '\t'));
-			sys.io.File.saveContent(path, haxe.Json.stringify(chartCopy, null, '\t'));
+
+			var lbase:Float = SONG.lbase > 0 ? SONG.lbase : 27500.0 / 1001.0;
+			var v2Notes = NoteDataUtil.toV2(SONG.songData.notes, lbase);
+			Reflect.setField(chartCopy, 'notes', v2Notes);
+			Reflect.setField(chartCopy, '_v', 2);
+			Reflect.setField(chartCopy, 'lbase', lbase);
+			sys.io.File.saveContent(path, haxe.Json.stringify(chartCopy));
 
 			dirty = false;
 			leaveArmed = false;

@@ -56,13 +56,61 @@ typedef EventsData = {
 	var name:String;
 }
 
-// note data
 typedef NoteData = {
-	var char:String;
-	var lane:Int;
-	var time:Float;
-	var type:String;
-	var length:Float;
+	var ?char:Null<String>;
+	var ?lane:Null<Int>;
+	var ?time:Null<Float>;
+	var ?type:Null<String>;
+	var ?length:Null<Float>;
+
+	// v2
+	var ?l:Null<Int>;
+	var ?t:Null<Float>;
+	var ?d:Null<Int>;
+	var ?c:Null<String>;
+}
+
+class NoteDataUtil {
+	// to v2
+	public static function normalize(notes:Array<NoteData>, lbase:Float):Void {
+		for (n in notes) {
+			if (n.l == null && n.t == null && n.d == null && n.c == null)
+				continue;
+
+			if (n.lane == null)
+				n.lane = n.l ?? 0;
+			if (n.time == null)
+				n.time = n.t ?? 0.0;
+			if (n.char == null)
+				n.char = n.c ?? '';
+			if (n.type == null)
+				n.type = 'normal';
+			if (n.length == null)
+				n.length = (n.d != null && lbase > 0) ? n.d * lbase : 0.0;
+
+			Reflect.deleteField(n, 'l');
+			Reflect.deleteField(n, 't');
+			Reflect.deleteField(n, 'd');
+			Reflect.deleteField(n, 'c');
+		}
+	}
+
+	public static function toV2(notes:Array<NoteData>, lbase:Float):Array<Dynamic> {
+		var out:Array<Dynamic> = [];
+		for (n in notes) {
+			var d:Dynamic = {
+				l: n.lane,
+				t: n.time,
+				c: n.char
+			};
+			var lenIdx:Int = (lbase > 0) ? Math.round((n.length ?? 0) / lbase) : 0;
+			Reflect.setField(d, 'd', lenIdx);
+			if (n.type != null && n.type != 'normal')
+				Reflect.setField(d, 'type', n.type);
+			out.push(d);
+		}
+		return out;
+	}
 }
 
 class SongConfig {
@@ -89,6 +137,8 @@ class SongConfig {
 	public var vocPrefix:String = '';
 
 	public var vocs:Array<String> = [];
+
+	public var lbase:Float = 0.0;
 
 	public function new() {}
 
@@ -125,6 +175,11 @@ class SongConfig {
 			var converted = ChartPorter.tryConvert(raw, diff, meta);
 			songData = converted ?? cast raw;
 
+			if (raw.lbase != null) {
+				lbase = cast raw.lbase;
+				NoteDataUtil.normalize(songData.notes, lbase);
+			}
+
 			trace('SongData: load Song path: $baseFile');
 		}
 
@@ -141,7 +196,6 @@ class SongConfig {
 		countdown = songData.meta.countdown ?? 'default';
 		instPrefix = songData.meta.instPrefix ?? '';
 		vocPrefix = songData.meta.vocPrefix ?? '';
-
 		vocs = songData.meta.vocs ?? null;
 
 		for (note in songData.notes) {

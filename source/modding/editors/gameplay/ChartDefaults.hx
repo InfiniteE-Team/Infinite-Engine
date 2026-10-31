@@ -1,6 +1,7 @@
 package modding.editors.gameplay;
 
 import core.json.song.SongData;
+import core.json.song.SongData.NoteDataUtil;
 import core.assets.Library;
 import modding.mods.ModsRegistry;
 import sys.FileSystem;
@@ -75,6 +76,9 @@ class ChartDefaults {
 			data.gameplay.events = [];
 		if (data.notes == null)
 			data.notes = [];
+
+		var rawLbase:Float = 0.0;
+		NoteDataUtil.normalize(data.notes, rawLbase);
 
 		var chars:Array<CharDataJson> = [];
 		var seen:Map<String, Bool> = new Map();
