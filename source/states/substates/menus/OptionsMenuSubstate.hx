@@ -44,6 +44,12 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 				description: 'Avoid penalties when pressing keys without notes.',
 				saveField: 'ghosttaping',
 				type: CHECKBOX
+			},
+			{
+				name: 'Camera Movements',
+				description: "Camera shifts slightly based on the character's current pose animation.",
+				saveField: 'cameraMovement',
+				type: CHECKBOX
 			}
 		],
 		'Graphics' => [

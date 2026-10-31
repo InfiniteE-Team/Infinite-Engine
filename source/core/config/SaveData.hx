@@ -41,6 +41,9 @@ class SaveData {
 		if (SaveData.data.botplay == null)
 			SaveData.data.botplay = false;
 
+		if (SaveData.data.cameraMovement == null)
+			SaveData.data.cameraMovement = false;
+
 		if (SaveData.data.noteKeyPresets == null) {
 			var presets:haxe.DynamicAccess<Array<Array<String>>> = {};
 			var keys1:Array<Array<String>> = [["SPACE", "ENTER"]];

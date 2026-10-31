@@ -15,7 +15,6 @@ class InputController {
 
 	public var onNoteHit:game.objects.sprites.notes.Note->Void = function(_) {};
 	public var onNoteMiss:Void->Void = function() {};
-	public var onGhostTap:Int->Void = function(_) {};
 	public var onSustainDrop:Void->Void = function() {};
 
 	public function new() {
@@ -142,18 +141,12 @@ class InputController {
 				onNoteHit(bestNote);
 				noteController.noteTypeManager?.onNoteHit(bestNote);
 			}
-
 			return bestNote;
 		} else if (!hasActiveSustain) {
 			charStrums[i].playAnim('press' + i, true);
-			if (!isGhostTapping) {
+			if (!isGhostTapping)
 				onMiss(playStateConfig, noteController, gameAudio);
-			} else {
-				if (onGhostTap != null)
-					onGhostTap(i);
-			}
 		}
-
 		return null;
 	}
 

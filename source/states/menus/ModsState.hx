@@ -80,53 +80,56 @@ class ModsState extends MusicBeatState {
 	function reloadModMenu() {
 		Library.reloadMods();
 
-		for (i in 0...ModsRegistry.mods.length) {
-			var modName = ModsRegistry.mods[i];
-			var modsFolder = core.assets.Library.modsFolder;
+		if (ModsRegistry.mods.length > 0) {
+			for (i in 0...ModsRegistry.mods.length) {
+				var modName = ModsRegistry.mods[i];
+				var modsFolder = core.assets.Library.modsFolder;
 
-			var graphic:String = '$modsFolder/$modName/images/iconMod.png';
-			if (!sys.FileSystem.exists(graphic)) {
-				graphic = '$modsFolder/$modName/_polymod_icon.png';
+				var graphic:String = '$modsFolder/$modName/images/iconMod.png';
+				if (!sys.FileSystem.exists(graphic)) {
+					graphic = '$modsFolder/$modName/_polymod_icon.png';
+				}
+				if (!sys.FileSystem.exists(graphic))
+					graphic = Paths.getPath('menus/mods/fallback-icon', 'image');
+
+				var modMeta = modding.mods.ModData.ModConfig.loadForMod(modName);
+				var description:String = modMeta == null ? '(NO META.JSON FOUND)' : (modMeta.description ?? '??');
+
+				var itemY:Float = LIST_TOP + (i * ITEM_SPACING);
+
+				var image:FunkinSprite = new FunkinSprite(40, itemY, true);
+				image.loadGraphic(graphic);
+				image.antialiasing = SaveData.data.antialiasing;
+				image.setGraphicSize(95, 95);
+				image.cameras = [camMods];
+				image.updateHitbox();
+				add(image);
+
+				var mod:FlxText = new FlxText(160, itemY + 10, FlxG.width, '');
+				mod.setFormat(Paths.getPath('Funkin.otf', 'font'), 32, 0xFFFFFFFF, "left");
+				fitText(mod, modName.toUpperCase(), TITLE_MAX_WIDTH);
+				mod.antialiasing = SaveData.data.antialiasing;
+				mod.cameras = [camMods];
+				add(mod);
+
+				var modDesc:FlxText = new FlxText(160, itemY + 40, FlxG.width, '');
+				modDesc.setFormat(Paths.getPath('Funkin.otf', 'font'), DESC_SIZE, 0xFFFFFFFF, "left");
+				fitText(modDesc, description, DESC_MAX_WIDTH);
+				modDesc.antialiasing = SaveData.data.antialiasing;
+				modDesc.cameras = [camMods];
+				add(modDesc);
+
+				entries.push({
+					icon: image,
+					title: mod,
+					desc: modDesc,
+					shownTitle: ''
+				});
 			}
-			if (!sys.FileSystem.exists(graphic))
-				graphic = Paths.getPath('menus/mods/fallback-icon', 'image');
 
-			var modMeta = modding.mods.ModData.ModConfig.loadForMod(modName);
-			var description:String = modMeta == null ? '(NO META.JSON FOUND)' : (modMeta.description ?? '??');
-
-			var itemY:Float = LIST_TOP + (i * ITEM_SPACING);
-
-			var image:FunkinSprite = new FunkinSprite(40, itemY, true);
-			image.loadGraphic(graphic);
-			image.antialiasing = SaveData.data.antialiasing;
-			image.setGraphicSize(95, 95);
-			image.cameras = [camMods];
-			image.updateHitbox();
-			add(image);
-
-			var mod:FlxText = new FlxText(160, itemY + 10, FlxG.width, '');
-			mod.setFormat(Paths.getPath('Funkin.otf', 'font'), 32, 0xFFFFFFFF, "left");
-			fitText(mod, modName.toUpperCase(), TITLE_MAX_WIDTH);
-			mod.antialiasing = SaveData.data.antialiasing;
-			mod.cameras = [camMods];
-			add(mod);
-
-			var modDesc:FlxText = new FlxText(160, itemY + 40, FlxG.width, '');
-			modDesc.setFormat(Paths.getPath('Funkin.otf', 'font'), DESC_SIZE, 0xFFFFFFFF, "left");
-			fitText(modDesc, description, DESC_MAX_WIDTH);
-			modDesc.antialiasing = SaveData.data.antialiasing;
-			modDesc.cameras = [camMods];
-			add(modDesc);
-
-			entries.push({
-				icon: image,
-				title: mod,
-				desc: modDesc,
-				shownTitle: ''
-			});
-		}
-
-		changeSelection(0);
+			changeSelection(0);
+		} else
+			showNoModsText();
 	}
 
 	override public function create() {
@@ -188,10 +191,7 @@ class ModsState extends MusicBeatState {
 		scrollbar.scrollFactor.set(0, 0);
 		add(scrollbar);
 
-		if (ModsRegistry.mods.length == 0)
-			showNoModsText();
-		else
-			reloadModMenu();
+		reloadModMenu();
 
 		updateScrollLimits();
 		snapScroll();
@@ -292,9 +292,6 @@ class ModsState extends MusicBeatState {
 		pendingDelete = -1;
 		lastClickIndex = -1;
 		reloadModMenu();
-
-		if (ModsRegistry.mods.length == 0)
-			showNoModsText();
 
 		updateScrollLimits();
 		snapScroll();

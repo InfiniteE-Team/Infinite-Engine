@@ -343,14 +343,13 @@ class PlayState extends MusicBeatState {
 
 	public function initSong() {
 		isInCountdown = false;
+		gameAudio.playAll();
+		RhythmCore.resume(gameAudio);
 
 		if (startTime > 0) {
 			gameAudio.setTime(startTime);
 			RhythmCore.songPosition = startTime;
 		}
-
-		gameAudio.playAll();
-		RhythmCore.resume(gameAudio);
 		if (funkin.play.PlayState.instance != null)
 			funkin.play.PlayState.instance.isInCountdown = false;
 		modding.vslice.VSliceHooks.dispatch('onCountdownEnd', modding.vslice.VSliceHooks.event('COUNTDOWN_END'));
@@ -603,6 +602,10 @@ class PlayState extends MusicBeatState {
 			chars.rating = controllerHUD.rating;
 		}
 
+		#if HSCRIPT_ALLOWED
+		script.call('onRewind', []);
+		#end
+
 		if (countDown != null) {
 			countDown.pause();
 			remove(countDown);
@@ -633,6 +636,8 @@ class PlayState extends MusicBeatState {
 
 		#if HSCRIPT_ALLOWED
 		script.call('postRewind', []);
+		if (stage != null)
+			stage.postRewind();
 		#end
 	}
 

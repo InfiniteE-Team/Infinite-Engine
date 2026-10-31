@@ -238,14 +238,13 @@ class Strumline {
 				continue;
 			holdSplashToStrum.remove(hs);
 			holdsplashes.remove(hs, true);
-			hs.animation.finishCallback = function(name:String) {
-				hs.animation.finishCallback = null;
+			hs.animation.onFinish.addOnce(function(name:String) {
 				hs.kill();
 				if (holdsplashPool.length < POOL_LENGTH)
 					holdsplashPool.push(hs);
 				else
 					hs.destroy();
-			};
+			});
 			hs.endHold();
 			break;
 		}

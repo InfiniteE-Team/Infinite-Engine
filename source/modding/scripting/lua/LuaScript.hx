@@ -78,17 +78,25 @@ class LuaScript {
 	public function registersuperInstance():Void {
 		// superInstance RuleScript but in Lua
 		for (field in Reflect.fields(superInstance)) {
-			var val = Reflect.field(superInstance, field);
-			pushValue(val);
-			Lua.setglobal(L, field);
+			try {
+				var val = Reflect.field(superInstance, field);
+				pushValue(val);
+				Lua.setglobal(L, field);
+			} catch (e:Dynamic) {
+				Console.log('[LuaScript] registersuperInstance: skip field "$field": $e', true);
+			}
 		}
 		var cls = Type.getClass(superInstance);
 		if (cls != null) {
 			for (field in Type.getInstanceFields(cls)) {
-				var val = Reflect.getProperty(superInstance, field);
-				if (val != null) {
-					pushValue(val);
-					Lua.setglobal(L, field);
+				try {
+					var val = Reflect.getProperty(superInstance, field);
+					if (val != null) {
+						pushValue(val);
+						Lua.setglobal(L, field);
+					}
+				} catch (e:Dynamic) {
+					Console.log('[LuaScript] registersuperInstance: skip property "$field": $e', true);
 				}
 			}
 		}

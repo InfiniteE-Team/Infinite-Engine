@@ -84,6 +84,8 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 		FlxTween.tween(ratingSprite.scale, {x: sx, y: sy}, 0.07, {
 			ease: FlxEase.quadOut,
 			onComplete: function(_) {
+				if (ratingSprite == null || !ratingSprite.alive)
+					return;
 				FlxTween.tween(ratingSprite.scale, {x: ratingSprite.scale.x / 1.15, y: ratingSprite.scale.y / 1.15}, 0.10, {ease: FlxEase.quadIn});
 			}
 		});

@@ -72,9 +72,9 @@ class CharacterController extends FunkinObjectRegistry {
 
 	var isGhostTapping:Bool = true;
 
-	var _noteController:NoteController;
-	var _gameAudio:GameAudio;
-	var _playStateConfig:PlayStateConfig;
+	var noteController:NoteController;
+	var gameAudio:GameAudio;
+	var playStateConfig:PlayStateConfig;
 
 	#if HSCRIPT_ALLOWED
 	var scriptMap:Map<String, ScriptHandler> = [];
@@ -87,27 +87,21 @@ class CharacterController extends FunkinObjectRegistry {
 	}
 
 	public function initControllers(nc:NoteController, audio:GameAudio, cfg:PlayStateConfig):Void {
-		_noteController = nc;
-		_gameAudio = audio;
-		_playStateConfig = cfg;
+		noteController = nc;
+		gameAudio = audio;
+		playStateConfig = cfg;
 		isGhostTapping = core.config.SaveData.data.ghosttaping;
 		#if HSCRIPT_ALLOWED
-		_noteController.input.onNoteHit = function(note) {
+		noteController.input.onNoteHit = function(note) {
 			@:privateAccess {
 				if (PlayState.instance?.script != null)
 					PlayState.instance.script.call('onNoteHit', [note]);
 			}
 		};
-		_noteController.input.onNoteMiss = function() {
+		noteController.input.onNoteMiss = function() {
 			@:privateAccess {
 				if (PlayState.instance?.script != null)
 					PlayState.instance.script.call('onNoteMiss', []);
-			}
-		};
-		_noteController.input.onGhostTap = function(dir) {
-			@:privateAccess {
-				if (PlayState.instance?.script != null)
-					PlayState.instance.script.call('onGhostTap', [dir]);
 			}
 		};
 		#end
@@ -115,8 +109,8 @@ class CharacterController extends FunkinObjectRegistry {
 
 	public function syncGhostTapping():Void {
 		isGhostTapping = core.config.SaveData.data.ghosttaping;
-		if (_noteController != null)
-			_noteController.input.isGhostTapping = isGhostTapping;
+		if (noteController != null)
+			noteController.input.isGhostTapping = isGhostTapping;
 	}
 
 	public function loadCharacter(id:String, name:String, role:String, targetGroup:FlxTypedGroup<flixel.FlxBasic>, script:ScriptHandler):Character {
@@ -229,7 +223,7 @@ class CharacterController extends FunkinObjectRegistry {
 
 	public function playMissAnim(dir:Int):Void {
 		for (char in playerChars) {
-			var offset = _noteController?.charStrumOffsets.get(char.id) ?? 0;
+			var offset = noteController?.charStrumOffsets.get(char.id) ?? 0;
 			if (rating != null)
 				rating.onNoteHitMiss();
 			var localDir = dir - offset;
@@ -270,7 +264,7 @@ class CharacterController extends FunkinObjectRegistry {
 	function onStageKeyDown(e:openfl.events.KeyboardEvent):Void {
 		if (PlayState.instance == null || PlayState.instance.paused)
 			return;
-		if (_noteController == null)
+		if (noteController == null)
 			return;
 		if (!control.justPressedKeyCode(e.keyCode))
 			return;
@@ -284,11 +278,11 @@ class CharacterController extends FunkinObjectRegistry {
 			return;
 
 		for (char in playerChars) {
-			var strums = _noteController.getCharStrums(char.id);
+			var strums = noteController.getCharStrums(char.id);
 			if (i >= strums.length)
 				continue;
 
-			var hitNote = input.attemptHit(strums, char.id, _noteController, _gameAudio, _playStateConfig, i);
+			var hitNote = input.attemptHit(strums, char.id, noteController, gameAudio, playStateConfig, i);
 
 			#if HSCRIPT_ALLOWED
 			var charScript = scriptMap.get(char.id);
@@ -449,9 +443,9 @@ class CharacterController extends FunkinObjectRegistry {
 		FlxG.stage.removeEventListener(openfl.events.KeyboardEvent.KEY_DOWN, onStageKeyDown);
 		playerChars = null;
 		opponentChars = null;
-		_noteController = null;
-		_gameAudio = null;
-		_playStateConfig = null;
+		noteController = null;
+		gameAudio = null;
+		playStateConfig = null;
 		gfChars = null;
 		#if HSCRIPT_ALLOWED
 		scriptMap = null;

@@ -14,7 +14,7 @@ class FPS extends openfl.display.FPS {
 	public function new(x:Float, y:Float, color:Int) {
 		super(x, y, color);
 		autoSize = TextFieldAutoSize.LEFT;
-		defaultTextFormat = new openfl.text.TextFormat(Paths.getPath("5by7_b.ttf", "font"), 14, color);
+		defaultTextFormat = new openfl.text.TextFormat(Paths.getPath("5by7_b.ttf", "font"), 13, color);
 		var glow = new openfl.filters.GlowFilter(glowColor, 1.0, 6, 6, 100, BitmapFilterQuality.MEDIUM);
 		filters = [glow];
 	}
@@ -37,12 +37,12 @@ class FPS extends openfl.display.FPS {
 		var maxMem:String = Memory.formatRam(peakRAM);
 
 		if (!core.ConfigMain.globalData.developerMode) {
-			text = 'FPS: $currentFPS - [MEM: $mem / Peak: $maxMem]';
+			text = 'FPS: $currentFPS\nTask MEM: $mem / $maxMem';
 		} else {
 			if (modding.mods.ModsRegistry.onMod)
 				mods = ' - ' + modding.mods.ModsRegistry.currentMod;
 
-			text = 'FPS: $currentFPS - [MEM: $mem / $maxMem] - (Developer Mode' + mods + ')';
+			text = 'FPS: $currentFPS\n\nTask MEM: $mem / $maxMem\n\nDeveloper Mode' + mods;
 		}
 	}
 }

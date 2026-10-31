@@ -259,6 +259,14 @@ class GameplayEditor extends MusicBeatState {
 
 		game.PlayState.instance = null;
 
+		#if DISCORD_ALLOWED
+		core.api.DiscordAPI.instance.setPresence({
+			details: "Editing " + SongConfig.getSongName(songDir),
+			state: 'Difficulty: ' + core.rhythm.DiffsUtils.difficulties[states.menus.FreeplayState.curDiff].toUpperCase(),
+			largeImageKey: "ge"
+		});
+		#end
+
 		previousLogInScreen = SaveData.data.logInScreen;
 		SaveData.data.logInScreen = false;
 		Console.updateVisibility();

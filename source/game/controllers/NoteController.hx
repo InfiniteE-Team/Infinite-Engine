@@ -39,11 +39,11 @@ class NoteController {
 	public var ratingData:RatingData;
 	public var worstWindow:Float = 166.0;
 
-	var _skinParts:Map<String, Dynamic> = new Map();
+	var skinParts:Map<String, Dynamic> = new Map();
 	var cachedRatings:Array<Dynamic> = [];
 	var cachedMissHealth:Float = -0.04;
 	var cachedMissScore:Int = -10;
-	var _noteTypeCache:Map<String, core.json.objects.NoteTypeData> = new Map();
+	var noteTypeCache:Map<String, core.json.objects.NoteTypeData> = new Map();
 
 	var daSong:SongConfig = new SongConfig();
 	var globalData:GlobalConfig;
@@ -54,7 +54,7 @@ class NoteController {
 
 	public var unspawnNotes:Array<Note> = [];
 
-	var _noteSpawnIndex:Int = 0;
+	var noteSpawnIndex:Int = 0;
 	var toDestroySet:Map<Note, Bool> = new Map();
 
 	static inline var GENERATE_AHEAD_MS:Float = 8000.0;
@@ -201,12 +201,12 @@ class NoteController {
 
 	public function skinPart(skin:String, part:String):Dynamic {
 		var key = '$skin|$part';
-		if (!_skinParts.exists(key)) {
+		if (!skinParts.exists(key)) {
 			var data = NoteSkins.read(skin, part);
 			data ??= skin != noteSkin ? skinPart(noteSkin, part) : (skin != NoteSkins.DEFAULT ? NoteSkins.read(NoteSkins.DEFAULT, part) : null);
-			_skinParts.set(key, data);
+			skinParts.set(key, data);
 		}
-		return _skinParts.get(key);
+		return skinParts.get(key);
 	}
 
 	public function charSkin(charId:String):String {
@@ -388,7 +388,7 @@ class NoteController {
 		scriptNC.call("onGenerateNotes", []);
 		#end
 
-		_noteSpawnIndex = 0;
+		noteSpawnIndex = 0;
 		rawNoteIndex = 0;
 		unspawnNotes = [];
 		noteTypeManager = new NoteTypeManager();
@@ -540,8 +540,8 @@ class NoteController {
 		}
 
 		var spawnWindow:Float = Math.max(2000, (FlxG.height + 200) / (0.45 * Math.max(0.1, Math.min(scrollSpeed, targetScrollSpeed))));
-		while (_noteSpawnIndex < unspawnNotes.length) {
-			var note = unspawnNotes[_noteSpawnIndex];
+		while (noteSpawnIndex < unspawnNotes.length) {
+			var note = unspawnNotes[noteSpawnIndex];
 			var sustain = Std.downcast(note, NoteSustain);
 			var spawnTime = note.strumTime;
 			if (sustain != null && sustain.isSustainEnd && sustain.parentNote != null)
@@ -557,7 +557,7 @@ class NoteController {
 					notes.add(note);
 					strums?.notes.add(note);
 				}
-				_noteSpawnIndex++;
+				noteSpawnIndex++;
 			} else
 				break;
 		}
@@ -893,11 +893,11 @@ class NoteController {
 	function getNoteTypeData(noteType:String):Null<core.json.objects.NoteTypeData> {
 		if (noteType == null || noteType == 'normal' || noteType == '')
 			return null;
-		if (_noteTypeCache.exists(noteType))
-			return _noteTypeCache.get(noteType);
+		if (noteTypeCache.exists(noteType))
+			return noteTypeCache.get(noteType);
 		var path = Paths.getPath('data/notetypes/$noteType', 'json');
 		var data:core.json.objects.NoteTypeData = path != null ? FormatJson.readJson(path) : null;
-		_noteTypeCache.set(noteType, data);
+		noteTypeCache.set(noteType, data);
 		return data;
 	}
 
@@ -905,7 +905,7 @@ class NoteController {
 		rawNotes = null;
 		charMap = null;
 		cachedRatings = null;
-		_noteTypeCache = null;
+		noteTypeCache = null;
 		for (strums in strumlines)
 			strums.destroy();
 		strumlines = null;

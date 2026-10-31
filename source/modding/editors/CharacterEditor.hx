@@ -89,6 +89,9 @@ class CharacterEditor extends MusicBeatState {
 
 		createCameras();
 
+		if (core.ui.FPSCounter.instance != null)
+			core.ui.FPSCounter.instance.visible = false;
+
 		final tile = FlxGridOverlay.createGrid(32, 32, FlxG.width * 5, FlxG.height * 5, true, 0xFF2C2C2C, 0xFF1F1F1F);
 		final grid = new flixel.FlxSprite(-(FlxG.width * 5) * 0.32, -(FlxG.height * 5) * 0.3);
 		grid.loadGraphic(tile);
@@ -121,6 +124,10 @@ class CharacterEditor extends MusicBeatState {
 		if (char == null)
 			return null;
 		char.editorMode = true;
+
+		for (layer in char.layers)
+			layer.setPosition(layer.x + char.x, layer.y + char.y);
+
 		for (layer in char.layers)
 			add(layer);
 		add(char);
@@ -805,6 +812,8 @@ class CharacterEditor extends MusicBeatState {
 		if (char == null)
 			return;
 
+		char.characterData.gameplay.position = [char.x, char.y];
+
 		for (i in 0...char.layers.length) {
 			if (i >= char.characterData.render.layers.length)
 				break;
@@ -1012,5 +1021,60 @@ class CharacterEditor extends MusicBeatState {
 			keysLocked = true;
 			MusicBeatState.switchState(() -> new DebugMenu());
 		}
+	}
+
+	override public function destroy():Void {
+		if (importErrorTimer != null) {
+			importErrorTimer.cancel();
+			importErrorTimer.destroy();
+			importErrorTimer = null;
+		}
+
+		flixel.tweens.FlxTween.cancelTweensOf(this);
+
+		if (char != null) {
+			for (layer in char.layers) {
+				flixel.tweens.FlxTween.cancelTweensOf(layer);
+				remove(layer, true);
+				layer.destroy();
+			}
+			remove(char, true);
+			char.destroy();
+			char = null;
+		}
+
+		for (imported in importedLayers) {
+			if (imported.sprite != null) {
+				flixel.tweens.FlxTween.cancelTweensOf(imported.sprite);
+				remove(imported.sprite, true);
+				imported.sprite.destroy();
+			}
+		}
+		importedLayers = null;
+
+		for (btn in animButtons) {
+			flixel.tweens.FlxTween.cancelTweensOf(btn);
+			btn.destroy();
+		}
+		animButtons = null;
+
+		for (btn in layerButtons) {
+			flixel.tweens.FlxTween.cancelTweensOf(btn);
+			btn.destroy();
+		}
+		layerButtons = null;
+
+		clearHistory();
+
+		selectedLayer = null;
+		selectionObj = null;
+
+		if (camHud != null) {
+			FlxG.cameras.remove(camHud, false);
+			camHud = null;
+		}
+		if (core.ui.FPSCounter.instance != null)
+			core.ui.FPSCounter.instance.updateVisibility();
+		super.destroy();
 	}
 }

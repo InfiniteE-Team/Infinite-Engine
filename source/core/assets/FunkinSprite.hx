@@ -13,14 +13,16 @@ import core.render.shaders.CustomShader;
 class FunkinSprite extends animate.FlxAnimate {
 	public var offsets:Map<String, Point> = new Map();
 
+	public var animFlips:Map<String, {x:Bool, y:Bool}> = new Map();
+
+	var baseFlipX:Bool = false;
+	var baseFlipY:Bool = false;
+
 	public static var cacheOffsets = new Map<String, Map<String, Int>>();
 
-	var _suffixes:Map<String, String> = new Map();
+	var suffixes:Map<String, String> = new Map();
 
-	var _assetLoaded:Bool = false;
-
-	var swfMode:Bool = false;
-	var swfModel:Null<core.render.swf.SWFModel> = null;
+	var assetLoaded:Bool = false;
 
 	// Tracks the last anim played — DO NOT use anim.name (FlxAnimateController),
 	// that only updates for Adobe Animate atlas sprites, not Sparrow.
@@ -32,25 +34,10 @@ class FunkinSprite extends animate.FlxAnimate {
 	public function new(?x:Float = 0, ?y:Float = 0, ?usesLoadProps:Bool = false) {
 		super(x, y);
 		if (usesLoadProps) {
-			_assetLoaded = true;
+			assetLoaded = true;
 			@:privateAccess
 			this._frame = null;
 			this.graphic = null;
-		}
-	}
-
-	override public function update(elapsed:Float) {
-		super.update(elapsed);
-
-		if (swfMode && swfModel != null) {
-			var off = getAnimOffset();
-			var ps = swfModel.pixelSize;
-
-			swfModel.x = (x - (off?.x ?? 0)) * ps;
-			swfModel.y = -(y - (off?.y ?? 0)) * ps;
-			swfModel.scale.x = scale.x;
-			swfModel.scale.y = scale.y;
-			swfModel.visible = visible && alive;
 		}
 	}
 
@@ -66,7 +53,7 @@ class FunkinSprite extends animate.FlxAnimate {
 			if (path != null && sys.FileSystem.exists(path)) {
 				if (sys.FileSystem.exists('$path/Animation.json')) {
 					frames = cast FlxAnimateFrames.fromAnimate(path);
-					_assetLoaded = true;
+					assetLoaded = true;
 					return this;
 				}
 
@@ -82,21 +69,21 @@ class FunkinSprite extends animate.FlxAnimate {
 				var xmlPath = path.substr(0, path.lastIndexOf('.')) + '.xml';
 				if (sys.FileSystem.exists(xmlPath)) {
 					frames = FlxAtlasFrames.fromSparrow(flxGraphic, Paths.readText(xmlPath));
-					_assetLoaded = true;
+					assetLoaded = true;
 					return this;
 				}
 
 				var jsonPath = path.substr(0, path.lastIndexOf('.')) + '.json';
 				if (sys.FileSystem.exists(jsonPath)) {
 					frames = FlxAtlasFrames.fromTexturePackerJson(flxGraphic, Paths.readText(jsonPath));
-					_assetLoaded = true;
+					assetLoaded = true;
 					return this;
 				}
 
 				var txtPath = path.substr(0, path.lastIndexOf('.')) + '.txt';
 				if (sys.FileSystem.exists(txtPath)) {
 					frames = FlxAtlasFrames.fromLibGdx(flxGraphic, Paths.readText(txtPath));
-					_assetLoaded = true;
+					assetLoaded = true;
 					return this;
 				}
 
@@ -112,37 +99,6 @@ class FunkinSprite extends animate.FlxAnimate {
 	var _baseOffset:Point = {x: 0, y: 0};
 
 	public function loadProps(props:ObjectData, path:String):Void {
-		var renderType = props.renderType ?? DEFAULT;
-
-		if (renderType == SWF) {
-			swfMode = true;
-
-			var assetPath = joinPath(props.folder ?? path, props.path);
-			var swfFile = Paths.getPath(assetPath, 'swf');
-
-			if (swfFile != null) {
-				swfModel = new core.render.swf.SWFModel(swfFile, '', core.render.swf.SWFScene.PIXEL_SIZE);
-				if (core.render.swf.SWFScene.instance != null)
-					core.render.swf.SWFScene.instance.add(swfModel);
-
-				if (props.anims != null) {
-					for (anim in props.anims) {
-						if (anim.offsets != null)
-							offsets.set(anim.name, {x: anim.offsets[0], y: anim.offsets[1]});
-					}
-				}
-			} else {
-				Console.log('FunkinSprite SWF: not found "$assetPath.swf"', true);
-				swfMode = false;
-			}
-
-			loadParams(props);
-			if (props.firstAnim != null)
-				playAnim(props.firstAnim, true);
-			_assetLoaded = true;
-			return;
-		}
-
 		if (props.folder != null)
 			path = props.folder;
 		var assetPath = joinPath(path, props.path);
@@ -182,11 +138,14 @@ class FunkinSprite extends animate.FlxAnimate {
 		for (anim in props.anims ?? []) {
 			var suffix = anim.suffix ?? '';
 			var fullAnimName = anim.name + suffix;
-			_suffixes.set(anim.name, suffix);
+			suffixes.set(anim.name, suffix);
 			_registerAnim(fullAnimName);
 
 			if (anim.offsets != null)
 				offsets.set(fullAnimName, {x: anim.offsets[0], y: anim.offsets[1]});
+
+			if (anim.flipX != null || anim.flipY != null)
+				animFlips.set(fullAnimName, {x: anim.flipX ?? false, y: anim.flipY ?? false});
 
 			if (isSimpleImage) {
 				animation.add(fullAnimName, anim.indices, anim.framerate, anim.looped);
@@ -227,7 +186,7 @@ class FunkinSprite extends animate.FlxAnimate {
 			graphic.bitmap.disposeImage(); // clears RAM to use only the memory in VRAM
 		}
 
-		_assetLoaded = true;
+		assetLoaded = true;
 	}
 
 	public function addAnim(name:String, prefix:String, fps:Float = 24, looped:Bool = true, ?indices:Array<Int>):Void {
@@ -361,7 +320,7 @@ class FunkinSprite extends animate.FlxAnimate {
 		makeGraphic(Std.int(props.scale[0]), Std.int(props.scale[1]), color ?? flixel.util.FlxColor.WHITE);
 		loadParams(props);
 		updateHitbox();
-		_assetLoaded = true;
+		assetLoaded = true;
 	}
 
 	public function loadParams(props:ObjectData):Void {
@@ -378,10 +337,14 @@ class FunkinSprite extends animate.FlxAnimate {
 			alpha = props.alpha;
 		if (props.visible != null)
 			visible = props.visible;
-		if (props.flipX != null)
+		if (props.flipX != null) {
 			flipX = props.flipX;
-		if (props.flipY != null)
+			baseFlipX = props.flipX;
+		}
+		if (props.flipY != null) {
 			flipY = props.flipY;
+			baseFlipY = props.flipY;
+		}
 
 		if (props.antialiasing != null) {
 			if (props.antialiasing)
@@ -395,15 +358,7 @@ class FunkinSprite extends animate.FlxAnimate {
 	}
 
 	public function playAnim(name:Null<String>, ?force:Bool = true) {
-		if (swfMode) {
-			if (swfModel == null)
-				return;
-			currentAnim = name;
-			swfModel.playAnim(name);
-			activeOffsets(getAnimOffset());
-			return;
-		}
-		var fullName = name + (_suffixes.get(name) ?? '');
+		var fullName = name + (suffixes.get(name) ?? '');
 		if (!existsAnim(fullName)) {
 			if (!missingAnims.contains(fullName)) {
 				Console.log('$name Anim Not Existed!', true);
@@ -414,23 +369,32 @@ class FunkinSprite extends animate.FlxAnimate {
 		currentAnim = fullName;
 		animation.play(fullName, force);
 		activeOffsets(getAnimOffset());
+
+		var flip = animFlips.get(fullName);
+		if (flip != null) {
+			flipX = flip.x;
+			flipY = flip.y;
+		} else {
+			flipX = baseFlipX;
+			flipY = baseFlipY;
+		}
 	}
 
 	public function getAnimOffset():Null<Point>
 		return offsets.get(currentAnim) ?? {x: 0, y: 0};
 
-	var _registeredAnims:Array<String> = [];
+	var registeredAnims:Array<String> = [];
 
 	function _registerAnim(name:String) {
-		if (!_registeredAnims.contains(name))
-			_registeredAnims.push(name);
+		if (!registeredAnims.contains(name))
+			registeredAnims.push(name);
 	}
 
 	public function existsAnim(name:String):Bool
-		return animation.exists(name) || _registeredAnims.contains(name);
+		return animation.exists(name) || registeredAnims.contains(name);
 
 	public function isFinished(anim:String):Bool {
-		var fullName = anim + (_suffixes.get(anim) ?? '');
+		var fullName = anim + (suffixes.get(anim) ?? '');
 		return animation.curAnim != null && animation.curAnim.name == fullName && animation.curAnim.finished;
 	}
 
@@ -438,9 +402,7 @@ class FunkinSprite extends animate.FlxAnimate {
 		offset.set(_baseOffset.x - off.x, _baseOffset.y - off.y);
 
 	override public function draw():Void {
-		if (swfMode)
-			return;
-		if (!_assetLoaded)
+		if (!assetLoaded)
 			return;
 		if (isAnimate && (timeline == null || timeline.layers == null || timeline.layers.length == 0))
 			return;
@@ -450,29 +412,17 @@ class FunkinSprite extends animate.FlxAnimate {
 	public function dance() {}
 
 	override public function destroy() {
-		if (swfModel != null) {
-			core.render.swf.SWFScene.instance?.remove(swfModel);
-			swfModel.destroy();
-			swfModel = null;
-		}
-		swfMode = false;
-		if (anim != null) {
+		if (anim != null)
 			anim.pause();
-		}
 
-		if (isAnimate && (timeline == null || anim == null)) {
+		if (isAnimate && (timeline == null || anim == null))
 			frames = null;
-		}
 
-		try {
-			super.destroy();
-		} catch (e:Dynamic) {
-			Console.log('Warning: Destroy FunkinSprite: $e');
-		}
+		super.destroy();
 
 		offsets = null;
-		_suffixes = null;
-		_registeredAnims = null;
+		suffixes = null;
+		registeredAnims = null;
 	}
 
 	public static function clearMissingCaches():Void {

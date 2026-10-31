@@ -253,6 +253,13 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 		return objectMap.get(name);
 	}
 
+	public function postRewind():Void {
+		#if HSCRIPT_ALLOWED
+		if (stageScript.hasScripts)
+			stageScript.call('postRewind', []);
+		#end
+	}
+
 	override public function update(elapsed:Float):Void {
 		super.update(elapsed);
 		if (vsliceScript != null) {

@@ -54,16 +54,24 @@ class CameraController {
 			var tx = fixedX, ty = fixedY;
 			if (char != null) {
 				var pos = char.getCamPosition();
-				tx = pos.x + focusX;
-				ty = pos.y + focusY;
+				var poseOff = getCamOffsetPose(char);
+				tx = pos.x + focusX + poseOff.x;
+				ty = pos.y + focusY + poseOff.y;
 			}
 			moveCameraTo(FlxMath.lerp(focusStartX, tx, focusProgress), FlxMath.lerp(focusStartY, ty, focusProgress));
 		} else if (!isLock && char != null) {
 			var pos = char.getCamPosition();
-			moveCameraTo(pos.x + focusX, pos.y + focusY);
+			var poseOff = getCamOffsetPose(char);
+			moveCameraTo(pos.x + focusX + poseOff.x, pos.y + focusY + poseOff.y);
 		}
 
 		lerpZoom(elapsed);
+	}
+
+	inline function getCamOffsetPose(c:Character):{x:Float, y:Float} {
+		if (!SaveData.data.cameraMovement)
+			return {x: 0, y: 0};
+		return c.getCameraMovementPose();
 	}
 
 	public function followChar(char:Character) {

@@ -15,47 +15,46 @@ class Paths {
 
 	public static function getPath(fileName:String, ?type:core.enums.AssetType = DEFAULT):Dynamic {
 		try {
-			switch (type) {
+			return switch (type) {
 				case DATA:
-					return Library.findLib("data/" + fileName);
+					Library.findLib("data/" + fileName);
 				case JSON:
-					return Library.findLib(fileName + '.json');
+					Library.findLib(fileName + '.json');
 				case FONT:
-					return Library.findLib("fonts/" + fileName);
+					Library.findLib("fonts/" + fileName);
 				case IMAGE:
-					return Library.findLib("images/" + fileName + '.png');
+					Library.findLib("images/" + fileName + '.png');
 				case SOUND:
-					return Library.findLib("sounds/" + fileName + '.ogg');
+					Library.findLib("sounds/" + fileName + '.ogg');
 				case MUSIC:
-					return Library.findLib("music/" + fileName + '.ogg');
+					Library.findLib("music/" + fileName + '.ogg');
 				case VIDEOS:
-					return Library.findLib("videos/" + fileName + '.mp4');
+					Library.findLib("videos/" + fileName + '.mp4');
 				case SONG_AUDIO:
 					var songName = PlayState.instance?.songFolder ?? currentSong;
-					return Library.findLib('songs/$songName/audio/$fileName.ogg') ?? Library.findLib('songs/$songName/$fileName.ogg');
+					Library.findLib('songs/$songName/audio/$fileName.ogg') ?? Library.findLib('songs/$songName/$fileName.ogg');
 				case ANIMATED:
-					return getAnimated(fileName);
+					getAnimated(fileName);
 				case XML:
-					return Library.findLib(fileName + '.xml');
-				case SWF:
-					return Library.findLib("images/" + fileName + '.swf');
+					Library.findLib(fileName + '.xml');
 				case ASTC:
-					return Library.findLib("images/" + fileName + '.astc');
+					Library.findLib("images/" + fileName + '.astc');
 				case SONG_SCRIPT:
-					return Library.findLib('songs/${PlayState.instance.songFolder}/scripts/$fileName.hx');
+					var songName = PlayState.instance?.songFolder ?? currentSong;
+					Library.findLib('songs/$songName/scripts/$fileName.hx');
 				case SHADERS:
-					return Library.findLib('shaders/$fileName.frag');
+					Library.findLib('shaders/$fileName.frag');
 				// scripting
 				case STATES:
-					return Library.findLib(resolveScript('source/states/$fileName'));
+					Library.findLib(resolveScript('source/states/$fileName'));
 				case SUBSTATES:
-					return Library.findLib(resolveScript('source/substates/$fileName'));
+					Library.findLib(resolveScript('source/substates/$fileName'));
 				case TYPEDEFS:
-					return Library.findLib(resolveScript('source/typedefs/$fileName'));
+					Library.findLib(resolveScript('source/typedefs/$fileName'));
 				case SCRIPT:
-					return Library.findLib(resolveScript('scripts/$fileName'));
+					Library.findLib(resolveScript('scripts/$fileName'));
 				default:
-					return Library.findLib(fileName);
+					Library.findLib(fileName);
 			}
 		} catch (e:Dynamic) {
 			Console.log('Paths: "$fileName" not found: $e', true);
@@ -65,6 +64,8 @@ class Paths {
 
 	// fix BOM, invisible caracter - JloorDev
 	public static function readText(path:String):String {
+		if (!FileSystem.exists(path))
+			return "";
 		var text = File.getContent(path);
 		if (text.length > 0 && text.charCodeAt(0) == 0xFEFF)
 			text = text.substr(1);

@@ -22,6 +22,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 	public var isMiss:Bool = false;
 
 	public var idleAfterSing:Bool = true;
+
 	var isFlipXAnim:Bool = false;
 
 	public var singCountTime:Float = 0;
@@ -345,6 +346,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		return layers[0].isFinished(anim);
 	}
 
+	// camera
 	public function getCamPosition():Point {
 		var off = cameraOffset;
 		var mid = (layers != null && layers.length > 0) ? layers[0].getMidpoint() : getMidpoint();
@@ -352,6 +354,21 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 			x: mid.x + (off != null ? off.x : 0.0),
 			y: mid.y + (off != null ? off.y : 0.0)
 		};
+	}
+
+	final intensityCam:Float = 30;
+
+	public function getCameraMovementPose():Point {
+		var curAnim = layers[0].currentAnim;
+		if (curAnim.indexOf('LEFT') != -1)
+			return {x: -intensityCam, y: 0};
+		if (curAnim.indexOf('RIGHT') != -1)
+			return {x: intensityCam, y: 0};
+		if (curAnim.indexOf('UP') != -1)
+			return {x: 0, y: -intensityCam};
+		if (curAnim.indexOf('DOWN') != -1)
+			return {x: 0, y: intensityCam};
+		return {x: 0, y: 0};
 	}
 
 	var isDancing:Bool = false;

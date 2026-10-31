@@ -17,7 +17,7 @@ class FPSCounter extends Sprite {
 		this.x = x;
 		this.y = y;
 
-		fps = new core.ui.FPS(5, 5, color);
+		fps = new core.ui.FPS(6, 6, color);
 
 		addChild(bg);
 		addChild(fps);
@@ -39,8 +39,8 @@ class FPSCounter extends Sprite {
 
 	public function drawBackground() {
 		// bg black
-		var w = fps.textWidth + 8 * 2;
-		var h = fps.textHeight + 8 * 2;
+		var w = fps.textWidth + 12 * 2;
+		var h = fps.textHeight + 12 * 2;
 
 		if (w != lastW || h != lastH) {
 			bg.graphics.clear();

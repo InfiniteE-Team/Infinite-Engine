@@ -13,6 +13,7 @@ typedef SaveDataFields = {
     var ?ghosttaping:Bool;
     var ?laneBackdrop:Float;
 	var ?botplay:Bool;
+	var ?cameraMovement:Bool;
 	
 	// controls
 	var ?noteKeyPresets:haxe.DynamicAccess<Array<Array<String>>>;
