@@ -375,11 +375,9 @@ class PlayState extends MusicBeatState {
 		modding.vslice.VSliceHooks.dispatch('onSongEnd', modding.vslice.VSliceHooks.event('SONG_END'));
 
 		cameraController.char = null;
-		var opp = cast(chars.get(Lambda.find(SONG.chars, c -> CharacterController.namesOpponent.contains(c.role))?.id), game.objects.sprites.Character);
-		var ply = cast(chars.get(Lambda.find(SONG.chars, c -> !CharacterController.namesOpponent.contains(c.role))?.id), game.objects.sprites.Character);
 
-		if (opp != null && ply != null)
-			cameraController.centerCamera(opp, ply, true);
+		if (chars.dad != null && chars.boyfriend != null)
+			cameraController.centerCamera(chars.dad, chars.boyfriend, true);
 		else
 			cameraController.isLock = true;
 
@@ -634,7 +632,7 @@ class PlayState extends MusicBeatState {
 		flixel.tweens.FlxTween.cancelTweensOf(cameraController);
 
 		#if HSCRIPT_ALLOWED
-		script.call('onRewindPost', []);
+		script.call('postRewind', []);
 		#end
 	}
 

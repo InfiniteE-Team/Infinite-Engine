@@ -154,7 +154,6 @@ class Paths {
 	public static function cacheAutoAsync(fileName:String, onComplete:Dynamic->Void):Void {
 		var imagePath = getPath(fileName, IMAGE);
 		if (imagePath == null) {
-			Console.log('cacheAutoAsync: Not found $fileName', true);
 			if (onComplete != null)
 				onComplete(null);
 			return;

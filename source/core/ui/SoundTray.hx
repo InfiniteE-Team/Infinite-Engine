@@ -69,6 +69,8 @@ class SoundTray extends FlxSoundTray {
 
 		trayHeight = height;
 		y = -trayHeight - 10;
+
+		getVolumePreferences();
 	}
 
 	private static inline function smoothLerp(from:Float, to:Float, elapsed:Float, halfLife:Float):Float {
@@ -140,6 +142,18 @@ class SoundTray extends FlxSoundTray {
 
 		for (i in 0..._bars.length)
 			_bars[i].visible = i < globalVolume;
+	}
+
+	function getVolumePreferences():Void {
+		// Fix for retrieving the saved volume setting when starting the game
+		#if FLX_SAVE
+		if (FlxG.save.isBound) {
+			if (FlxG.save.data.volume != null)
+				FlxG.sound.volume = FlxG.save.data.volume;
+			if (FlxG.save.data.mute != null)
+				FlxG.sound.muted = FlxG.save.data.mute;
+		}
+		#end
 	}
 
 	function saveVolumePreferences():Void {

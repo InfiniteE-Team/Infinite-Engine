@@ -5,41 +5,6 @@ class MasterAudio {
 
 	// Class for the Audio General Manager
 	public static function playMenu(path:String, volume:Float = 1, ?bpm:Float = 102):Void {
-		var absPath = sys.FileSystem.absolutePath(path);
-
-		if (currentTrackPath == path && FlxG.sound.music != null && FlxG.sound.music.playing)
-			return;
-
-		var oflSound = Sound.streamedCache.get(absPath);
-		if (oflSound == null && sys.FileSystem.exists(path)) {
-			oflSound = openfl.media.Sound.fromFile(path);
-			Sound.streamedCache.set(absPath, oflSound);
-		}
-
-		if (oflSound == null)
-			return;
-
-		currentTrackPath = path;
-		RhythmCore.changeBPM(bpm);
-
-		if (FlxG.sound.music != null) {
-			FlxG.sound.music.stop();
-			FlxG.sound.music.destroy();
-			FlxG.sound.music = null;
-		}
-
-		var sound = new flixel.sound.FlxSound();
-		sound.load(oflSound, true);
-		sound.volume = volume;
-		sound.looped = true;
-		sound.persist = true;
-
-		FlxG.sound.music = sound;
-		FlxG.sound.music.play(true);
-	}
-
-	// Load Stream for better ram use
-	public static function playSong(path:String, volume:Float = 1, ?bpm:Float = 102):Void {
 		if (FlxG.sound.music != null && FlxG.sound.music.playing && currentTrackPath == path)
 			return;
 
@@ -56,7 +21,7 @@ class MasterAudio {
 		var cached = Sound.streamedCache.get(absPath);
 
 		if (cached != null) {
-			_launchMusic(cached, volume);
+			launchMusic(cached, volume);
 		} else {
 			sys.thread.Thread.create(function():Void {
 				var oflSound:openfl.media.Sound = null;
@@ -74,39 +39,13 @@ class MasterAudio {
 					if (oflSound != null && !Sound.streamedCache.exists(absPath))
 						Sound.streamedCache.set(absPath, oflSound);
 					if (currentTrackPath == path)
-						_launchMusic(Sound.streamedCache.get(absPath), volume);
+						launchMusic(Sound.streamedCache.get(absPath), volume);
 				});
 			});
 		}
 	}
 
-	public static function playSongStream(path:String, volume:Float = 1, ?bpm:Float = 102):Void {
-		if (currentTrackPath == path && FlxG.sound.music != null && FlxG.sound.music.playing)
-			return;
-
-		if (!sys.FileSystem.exists(path))
-			return;
-
-		currentTrackPath = path;
-		RhythmCore.changeBPM(bpm);
-
-		if (FlxG.sound.music != null) {
-			FlxG.sound.music.stop();
-			FlxG.sound.music.destroy();
-			FlxG.sound.music = null;
-		}
-
-		var sound = new flixel.sound.FlxSound();
-		sound.loadFromURL(path);
-		sound.volume = volume;
-		sound.looped = true;
-		sound.persist = true;
-
-		FlxG.sound.music = sound;
-		FlxG.sound.music.play();
-	}
-
-	static function _launchMusic(oflSound:openfl.media.Sound, volume:Float):Void {
+	static function launchMusic(oflSound:openfl.media.Sound, volume:Float):Void {
 		if (oflSound == null)
 			return;
 		if (FlxG.sound.music != null) {

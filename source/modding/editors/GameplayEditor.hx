@@ -1638,6 +1638,9 @@ class GameplayEditor extends MusicBeatState {
 		if (chars != null)
 			chars.danceAll();
 
+		if (stage != null)
+			stage.onBeatHit(beat);
+
 		if (metronome)
 			FlxG.sound.play(Paths.getPath('editors/ge/metronome' + FlxG.random.int(1, 2), 'sound'), 0.5);
 	}
@@ -1823,7 +1826,6 @@ class GameplayEditor extends MusicBeatState {
 			var lbase:Float = SONG.lbase > 0 ? SONG.lbase : 27500.0 / 1001.0;
 			var v2Notes = NoteDataUtil.toV2(SONG.songData.notes, lbase);
 			Reflect.setField(chartCopy, 'notes', v2Notes);
-			Reflect.setField(chartCopy, '_v', 2);
 			Reflect.setField(chartCopy, 'lbase', lbase);
 			sys.io.File.saveContent(path, haxe.Json.stringify(chartCopy));
 

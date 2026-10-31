@@ -455,7 +455,7 @@ class FreeplayState extends MusicBeatState {
 
 			var instPath = (diffName != '' && sys.FileSystem.exists(diffInstPath)) ? diffInstPath : genericInstPath;
 
-			core.rhythm.audio.MasterAudio.playSong(instPath, 0.6, bpm);
+			core.rhythm.audio.MasterAudio.playMenu(instPath, 0.6, bpm);
 		}
 
 		#if HSCRIPT_ALLOWED
