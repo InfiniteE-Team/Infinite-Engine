@@ -11,6 +11,8 @@ class Sound extends flixel.sound.FlxSound {
 	public var soundType:SoundType;
 	public var soundPath:String;
 
+	public var onLoaded:() -> Void;
+
 	public function new(type:SoundType, path:String) {
 		super();
 		this.soundType = type;
@@ -37,6 +39,8 @@ class Sound extends flixel.sound.FlxSound {
 					var savedCallback = onComplete;
 					load(sound);
 					onComplete = savedCallback;
+					if (onLoaded != null)
+						onLoaded();
 				}
 			}).onError(function(error) {
 				trace('Sound: Error when loading the audio file: $error');

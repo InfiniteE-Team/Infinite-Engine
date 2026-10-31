@@ -421,9 +421,14 @@ class GameplayEditor extends MusicBeatState {
 			gameAudio.pauseAll();
 		});
 
-		hasAudio = gameAudio.inst != null && gameAudio.inst.length > 0;
-		if (!hasAudio)
-			startupNotes.push('No audio found for "$songDir" (songs/$songDir/audio/Inst): the timeline runs silently.');
+		hasAudio = gameAudio.inst != null && gameAudio.inst.soundPath != null;
+
+		if (hasAudio) {
+			gameAudio.inst.onLoaded = () -> {
+				songLength = gameAudio.inst.length;
+				buildGrid(songLength);
+			};
+		}
 
 		RhythmCore.reset(SONG.bpmSong);
 		rhythmTracker.reset();
@@ -607,7 +612,7 @@ class GameplayEditor extends MusicBeatState {
 	}
 
 	function songLengthMs():Float {
-		if (hasAudio)
+		if (hasAudio && gameAudio.inst != null && gameAudio.inst.length > 0)
 			return gameAudio.inst.length;
 
 		var last:Float = 0;
@@ -2534,6 +2539,7 @@ class GameplayEditor extends MusicBeatState {
 		RhythmCore.changeBPM(bpm);
 		rhythmTracker.reset();
 
+		songLength = songLengthMs();
 		buildGrid(songLength);
 		for (e in noteEntries) {
 			placeEntry(e);

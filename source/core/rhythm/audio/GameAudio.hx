@@ -10,6 +10,7 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 	public var vocals:Sound;
 	public var vocalsGroup:Array<Sound> = [];
 	public var vocalsMap:Map<String, Sound> = new Map();
+	public var onInstReady:() -> Void;
 
 	public var soundMisses:Array<FlxSound> = [];
 
@@ -160,11 +161,12 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 
 	public function audio(path:String, onfinish:() -> Void):Sound {
 		var sound = new Sound(MUSIC, Paths.getPath(path, 'songAudio'));
-		if (onfinish != null) {
-			sound.onComplete = onfinish;
-		}
-
 		sound.volume = 1.0;
+		if (onfinish != null) {
+			sound.onLoaded = () -> {
+				sound.onComplete = onfinish;
+			};
+		}
 		return sound;
 	}
 

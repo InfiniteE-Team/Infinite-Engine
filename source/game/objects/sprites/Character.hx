@@ -21,7 +21,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 	public var isSing:Bool = false;
 	public var isMiss:Bool = false;
 
-	var idleAfterSing:Bool = true;
+	public var idleAfterSing:Bool = true;
 	var isFlipXAnim:Bool = false;
 
 	public var singCountTime:Float = 0;
