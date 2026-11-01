@@ -17,6 +17,7 @@ class FunkinSprite extends animate.FlxAnimate {
 
 	var baseFlipX:Bool = false;
 	var baseFlipY:Bool = false;
+	private var applyingAnimFlip:Bool = false;
 
 	public static var cacheOffsets = new Map<String, Map<String, Int>>();
 
@@ -339,11 +340,11 @@ class FunkinSprite extends animate.FlxAnimate {
 			visible = props.visible;
 		if (props.flipX != null) {
 			flipX = props.flipX;
-			baseFlipX = props.flipX;
+			baseFlipX = flipX;
 		}
 		if (props.flipY != null) {
 			flipY = props.flipY;
-			baseFlipY = props.flipY;
+			baseFlipY = flipY;
 		}
 
 		if (props.antialiasing != null) {
@@ -370,6 +371,7 @@ class FunkinSprite extends animate.FlxAnimate {
 		animation.play(fullName, force);
 		activeOffsets(getAnimOffset());
 
+		applyingAnimFlip = true;
 		var flip = animFlips.get(fullName);
 		if (flip != null) {
 			flipX = flip.x;
@@ -378,6 +380,19 @@ class FunkinSprite extends animate.FlxAnimate {
 			flipX = baseFlipX;
 			flipY = baseFlipY;
 		}
+		applyingAnimFlip = false;
+	}
+
+	override function set_flipX(value:Bool):Bool {
+		if (!applyingAnimFlip)
+			baseFlipX = value;
+		return super.set_flipX(value);
+	}
+
+	override function set_flipY(value:Bool):Bool {
+		if (!applyingAnimFlip)
+			baseFlipY = value;
+		return super.set_flipY(value);
 	}
 
 	public function getAnimOffset():Null<Point>

@@ -23,8 +23,6 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 
 	public var idleAfterSing:Bool = true;
 
-	var isFlipXAnim:Bool = false;
-
 	public var singCountTime:Float = 0;
 
 	// is special animation yep
@@ -132,6 +130,15 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 					x: camOff != null ? (camOff[0] ?? 0) : 0,
 					y: camOff != null ? (camOff[1] ?? 0) : 0
 				};
+				if (curCharacter == 'bf' && modding.mods.ModData.ModConfig.apiMods != '0.8.4' && modding.vslice.VSlice.isActive()) {
+					var pos = characterData.gameplay.position;
+					if (pos != null) {
+						pos[0] = (pos[0] ?? 0) + 50;
+						pos[1] = (pos[1] ?? 0) + 100;
+					}
+					cameraOffset.x += 180;
+					cameraOffset.y += 150;
+				}
 
 				var gameplayPos = characterData.gameplay.position;
 				if (gameplayPos != null)
@@ -326,17 +333,6 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		if (characterData.render.layers != null) {
 			for (layer in layers)
 				layer.playAnim(name, force);
-
-			for (layer in characterData.render.layers) {
-				for (anim in layer.anims) {
-					if (anim.name == name) {
-						isFlipXAnim = anim.flipX;
-						if (flipX != isFlipXAnim)
-							flipX = isFlipXAnim;
-						break;
-					}
-				}
-			}
 		}
 	}
 

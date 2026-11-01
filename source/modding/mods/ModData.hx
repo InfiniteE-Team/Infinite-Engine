@@ -30,7 +30,7 @@ class ModConfig {
 	public function new() {}
 
 	public static function init() {
-		var jsonPath = core.assets.Library.findLib('meta.json');
+		var jsonPath = core.assets.Library.findLib('meta.json') ?? core.assets.Library.findLib('_polymod_meta.json');
 
 		if (jsonPath == null || !FileSystem.exists(jsonPath)) {
 			trace('No meta.json found, using the engine defaults.');

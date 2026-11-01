@@ -72,10 +72,6 @@ jobs:
           haxelib --global git hmm https://github.com/ALE-Psych-Crew/hmm
           haxelib --global run hmm setup
           haxelib --global run hmm install
-
-      - name: Pre-generate hxcpp PCH
-        if: matrix.platform == 'Linux'
-        run: haxelib run hxcpp Build.xml -Dlinux -DHXCPP_M64
         
       - name: Build for ${{ matrix.platform }}
         run: ${{ matrix.build_cmd }}
