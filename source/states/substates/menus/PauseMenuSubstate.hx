@@ -201,11 +201,11 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 					case "Options":
 						openSubState(new states.substates.menus.OptionsMenuSubstate());
 					case "Exit to Menu":
-						resumeFunction();
 						game.PlayStateConfig.blueBalled = 0;
 						#if HSCRIPT_ALLOWED
-						script.call("ExitMenu", []);
+						script.call("onExitMenu", []);
 						#end
+						exitMenu();
 				}
 			} else {
 				if (options[curSelect] == 'Exit to Menu' || options[curSelect] == 'Back') {
@@ -241,6 +241,17 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 		if (script.hasScripts)
 			script.call("postUpdate", [elapsed]);
 		#end
+	}
+
+	public function exitMenu() {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onExitMenuCancel", []))
+			return;
+		#end
+		if (!game.PlayStateConfig.isStoryMode)
+			MusicBeatState.switchState(() -> new states.menus.FreeplayState(), 'default');
+		else
+			MusicBeatState.switchState(() -> new states.menus.StoryMenuState(), 'default');
 	}
 
 	function resumeFunction() {
