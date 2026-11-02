@@ -1,48 +1,52 @@
-package states;
+package states.menus;
 
-import game.PlayState;
+import flixel.tweens.FlxTween;
+import core.assets.FunkinSprite;
 import core.json.song.SongData.SongConfig;
 import core.json.objects.CharacterData;
 import core.json.objects.StageData;
 import core.json.objects.NoteSkinData;
-import flixel.ui.FlxBar;
-import flixel.text.FlxText;
-import flixel.FlxSprite;
-import flixel.util.FlxColor;
-import flixel.tweens.FlxTween;
-import flixel.tweens.FlxEase;
+import states.menus.objects.FunkinLoadingCharacter;
+import core.json.menus.loading.LoadingCharacterData;
 
 class LoadingState extends MusicBeatState {
 	// config
 	var songFolder:String;
-	var _curDifficulty:Int;
+	var curDifficulty:Int;
 
-	var _total:Int = 0;
-	var _loaded:Int = 0;
-	var _done:Bool = false;
-	var _readyToGo:Bool = false;
+	var total:Int = 0;
+	var loaded:Int = 0;
+	var done:Bool = false;
 
 	// assets Precached
-	var _queue:Array<String> = [];
-	var _audioQueue:Array<String> = [];
+	var queue:Array<String> = [];
+	var audioQueue:Array<String> = [];
 
-	var _bg:FlxSprite;
-	var _bar:FlxBar;
-	var _barBg:FlxSprite;
-	var _label:FlxText;
-	var _songLabel:FlxText;
+	public static final BAR_PAD:Int = 16;
 
-	static inline var BAR_W:Int = 640;
-	static inline var BAR_H:Int = 10;
+	public var barTargetX:Float = 0;
+
+	var bar:Null<FunkinSprite> = null;
+	var micStand:Null<FunkinSprite> = null;
+	var character:Null<FunkinLoadingCharacter> = null;
+
+	var dataList:Array<LoadingCharacterData> = [];
 
 	public function new(songFolder:String, curDifficulty:Int = 0) {
 		super();
 		this.songFolder = songFolder;
-		_curDifficulty = curDifficulty;
+		this.curDifficulty = curDifficulty;
+
+		bar = new FunkinSprite(0, 0, true);
+		micStand = new FunkinSprite(0, 0, true);
+		character = new FunkinLoadingCharacter();
 	}
 
 	override public function create() {
 		super.create();
+
+		if (FlxG.mouse != null)
+			FlxG.mouse.visible = false;
 
 		#if HSCRIPT_ALLOWED
 		initScript();
@@ -53,60 +57,97 @@ class LoadingState extends MusicBeatState {
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
-		buildUI();
+		buildLoadingUI();
 		collectQueue();
 
-		if (_queue.length == 0) {
+		if (queue.length == 0) {
 			launchPlayState();
 			return;
 		}
 
-		_total = _queue.length + _audioQueue.length;
+		total = queue.length + audioQueue.length;
 		dispatchQueue();
 		dispatchAudioQueue();
 	}
 
-	function buildUI() {
+	function buildLoadingUI() {
 		#if HSCRIPT_ALLOWED
 		if (script.callCancellable("onCreateCancel", []))
 			return;
 		#end
 
-		_bg = new FlxSprite().loadGraphic(Paths.getPath('menus/menuBG2', 'image'));
-		_bg.screenCenter();
-		_bg.antialiasing = SaveData.data.antialiasing;
-		_bg.scrollFactor.set(0, 0);
-		add(_bg);
+		loadCharacterData();
 
-		#if HSCRIPT_ALLOWED
-		script.call("postBGCreate", []);
-		#end
+		getCharacter();
 
-		_songLabel = new FlxText(0, FlxG.height * 0.85, FlxG.width, SongConfig.getSongName(songFolder.toUpperCase()));
-		_songLabel.setFormat(Paths.getPath('Funkin.otf', 'font'), 28, FlxColor.WHITE, CENTER);
-		_songLabel.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
-		_songLabel.alpha = 0.9;
-		add(_songLabel);
+		micStand.loadGraphic(Paths.getPath('menus/loading/mic-stand', 'image'));
+		micStand.scale.set(0.24, 0.24);
+		micStand.updateHitbox();
+		micStand.x = FlxG.width - (micStand.width + 45);
+		micStand.y = FlxG.height - (micStand.height + 30);
+		add(micStand);
 
-		_barBg = new FlxSprite((FlxG.width - BAR_W) / 2, FlxG.height * 0.9).makeGraphic(BAR_W, BAR_H, 0xFF333333);
-		add(_barBg);
+		barTargetX = micStand.x;
 
-		_bar = new FlxBar(_barBg.x, _barBg.y, LEFT_TO_RIGHT, BAR_W, BAR_H, this, '_loaded', 0, 1);
-		_bar.createFilledBar(FlxColor.TRANSPARENT, FlxColor.WHITE);
-		add(_bar);
-
-		_label = new FlxText(0, _barBg.y + BAR_H + 14, FlxG.width, "Loading...");
-		_label.setFormat(null, 14, 0xFF888888, CENTER);
-		add(_label);
+		bar.alpha = 0.9;
+		bar.makeSolidColor(Std.int(micStand.width) + BAR_PAD, Std.int(micStand.height) + BAR_PAD, flixel.util.FlxColor.BLACK);
+		bar.setPosition(barTargetX, micStand.y);
+		add(bar);
 
 		#if HSCRIPT_ALLOWED
 		script.call("postCreate", []);
 		#end
 	}
 
+	function loadCharacterData():Void {
+		var folder = core.assets.Library.findLib('images/menus/loading/characters');
+		if (!sys.FileSystem.exists(folder) || !sys.FileSystem.isDirectory(folder))
+			return;
+
+		for (file in sys.FileSystem.readDirectory(folder)) {
+			if (!sys.FileSystem.isDirectory('$folder/$file'))
+				continue;
+			var data:LoadingCharacterData = FormatJson.readJson('$folder/$file/$file.json');
+			if (data != null)
+				dataList.push(data);
+		}
+	}
+
+	public function getCharacter():Void {
+		#if HSCRIPT_ALLOWED
+		if (script.callCancellable("onGetCharacterCancel", []))
+			return;
+		#end
+		final folder = core.assets.Library.findLib('images/menus/loading/characters');
+		var charNames:Array<String> = [];
+
+		if (sys.FileSystem.exists(folder) && sys.FileSystem.isDirectory(folder)) {
+			for (file in sys.FileSystem.readDirectory(folder)) {
+				charNames.push(file);
+			}
+		}
+
+		if (charNames.length == 0)
+			return;
+		var weights:Array<Float> = [];
+
+		for (data in dataList) {
+			weights.push(data.weight);
+		}
+		var characterData:LoadingCharacterData = FlxG.random.getObject(dataList, weights);
+		var idx:Int = dataList.indexOf(characterData);
+		var characterId:String = charNames[idx];
+		character.loadCharacter(characterData, Paths.getPath('menus/loading/characters/$characterId/$characterId', 'animated'));
+		add(character);
+
+		#if HSCRIPT_ALLOWED
+		script.call("postGetCharacter", []);
+		#end
+	}
+
 	function collectQueue() {
-		var song:SongConfig = new SongConfig();
-		song.configSong(songFolder, core.rhythm.DiffsUtils.difficulties[_curDifficulty]);
+		var song:Null<SongConfig> = new SongConfig();
+		song.configSong(songFolder, core.rhythm.DiffsUtils.difficulties[curDifficulty]);
 
 		if (song.songData == null) {
 			launchPlayState();
@@ -124,7 +165,7 @@ class LoadingState extends MusicBeatState {
 		if (song.songData.gameplay?.events != null) {
 			for (event in song.songData.gameplay.events) {
 				if (event.name == 'Change Character') {
-					var newChar:String = event.arguments != null ? Reflect.field(event.arguments, 'newCharacter') : null;
+					var newChar:Null<String> = event.arguments != null ? Reflect.field(event.arguments, 'newCharacter') : null;
 					if (newChar != null)
 						collectCharAssets(newChar);
 				}
@@ -165,12 +206,12 @@ class LoadingState extends MusicBeatState {
 		if (path == null)
 			return;
 		var abs = sys.FileSystem.absolutePath(path);
-		if (!_audioQueue.contains(abs) && !core.rhythm.audio.Sound.streamedCache.exists(abs))
-			_audioQueue.push(abs);
+		if (!audioQueue.contains(abs) && !core.rhythm.audio.Sound.streamedCache.exists(abs))
+			audioQueue.push(abs);
 	}
 
 	function dispatchAudioQueue() {
-		for (absPath in _audioQueue) {
+		for (absPath in audioQueue) {
 			sys.thread.Thread.create(function() {
 				#if lime_cffi
 				var buffer = lime.media.AudioBuffer.fromFile(absPath);
@@ -183,10 +224,10 @@ class LoadingState extends MusicBeatState {
 					if (oflSound != null && !core.rhythm.audio.Sound.streamedCache.exists(absPath))
 						core.rhythm.audio.Sound.streamedCache.set(absPath, oflSound);
 
-					_loaded++;
+					loaded++;
 					updateBar();
-					if (_loaded >= _total && !_done) {
-						_done = true;
+					if (loaded >= total && !done) {
+						done = true;
 						onAllLoaded();
 					}
 				});
@@ -195,7 +236,7 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function collectStageAssets(stageName:String) {
-		var stageData:StageData = modding.vslice.VSliceStages.readStage(Paths.getPath('data/stages/$stageName', 'json'));
+		var stageData:Null<StageData> = modding.vslice.VSliceStages.readStage(Paths.getPath('data/stages/$stageName', 'json'));
 		if (stageData == null || stageData.elements == null)
 			return;
 
@@ -208,7 +249,7 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function collectCharAssets(charName:String) {
-		var charData:CharacterData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('data/characters/$charName', 'json'));
+		var charData:Null<CharacterData> = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('data/characters/$charName', 'json'));
 		if (charData == null || charData.render == null || charData.render.layers == null)
 			return;
 
@@ -231,14 +272,14 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function collectNoteSkinAssets(skinName:String) {
-		var noteSkinData:NoteSkinData = game.objects.sprites.notes.NoteSkins.read(skinName, 'strumnotes');
+		var noteSkinData:Null<NoteSkinData> = game.objects.sprites.notes.NoteSkins.read(skinName, 'strumnotes');
 		if (noteSkinData != null && noteSkinData.props != null && noteSkinData.props.path != null)
 			enqueue(noteSkinData.props.folder != null ? noteSkinData.props.path : 'game/noteskins/$skinName/strumnotes/${noteSkinData.props.path}');
 	}
 
 	inline function enqueue(path:String) {
-		if (!_queue.contains(path))
-			_queue.push(path);
+		if (!queue.contains(path))
+			queue.push(path);
 	}
 
 	static function getAnimFilePath(anim:core.json.extensions.SpriteData.AnimData):Null<String> {
@@ -248,46 +289,35 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function dispatchQueue() {
-		for (path in _queue) {
+		for (path in queue) {
 			Paths.cacheAutoAsync(path, function(_) {
-				_loaded++;
+				loaded++;
 				updateBar();
 
-				if (_loaded >= _total && !_done) {
-					_done = true;
+				if (loaded >= total && !done) {
+					done = true;
 					onAllLoaded();
 				}
 			});
 		}
 	}
 
-	var _barValue(get, never):Float;
-
-	inline function get__barValue():Float
-		return _total > 0 ? (_loaded / _total) : 0.0;
-
 	function updateBar() {
-		_bar.setRange(0, _total);
-		_bar.setParent(this, '_loaded', false, 0, _total);
-
-		var pct = Std.int((_loaded / _total) * 100);
-		_label.text = '$pct%   (${_loaded} / ${_total})';
+		var currentProgress:Float = flixel.math.FlxMath.bound(loaded / total, 0, 1);
+		barTargetX += (bar.width * currentProgress - BAR_PAD - BAR_PAD) + BAR_PAD;
 	}
 
 	// end
 	function onAllLoaded() {
-		_label.text = "¡Done!";
-
-		FlxTween.tween(_bg, {alpha: 0}, 1, {
-			ease: FlxEase.quadIn,
-			onComplete: function(_) {
-				launchPlayState();
-			}
+		new flixel.util.FlxTimer().start(1, (_) -> {
+			launchPlayState();
 		});
-		FlxTween.tween(_songLabel, {alpha: 0}, 0.25);
-		FlxTween.tween(_bar, {alpha: 0}, 0.25);
-		FlxTween.tween(_barBg, {alpha: 0}, 0.25);
-		FlxTween.tween(_label, {alpha: 0}, 0.2);
+		#if HSCRIPT_ALLOWED
+		script.call("onAllLoaded", []);
+		#end
+		FlxTween.tween(micStand, {alpha: 0}, 0.25);
+		if (character != null)
+			FlxTween.tween(character, {alpha: 0}, 0.25);
 	}
 
 	function launchPlayState() {
@@ -296,11 +326,7 @@ class LoadingState extends MusicBeatState {
 			return;
 		#end
 
-		if (_readyToGo)
-			return;
-		_readyToGo = true;
-
-		MusicBeatState.switchState(() -> new PlayState(songFolder, _curDifficulty));
+		MusicBeatState.switchState(() -> new game.PlayState(songFolder, curDifficulty));
 	}
 
 	override public function update(elapsed:Float) {
@@ -319,15 +345,14 @@ class LoadingState extends MusicBeatState {
 		if (script.hasScripts)
 			script.call("postUpdate", [elapsed]);
 		#end
+
+		bar.x = InfiniteUtil.smoothLerpPrecision(bar.x, barTargetX, elapsed, 0.2);
 	}
 
 	override public function destroy() {
 		super.destroy();
 
-		_bg = null;
-		_bar = null;
-		_barBg = null;
-		_label = null;
-		_songLabel = null;
+		character = null;
+		micStand = null;
 	}
 }

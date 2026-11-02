@@ -90,7 +90,7 @@ class CharacterController extends FunkinObjectRegistry {
 		noteController = nc;
 		gameAudio = audio;
 		playStateConfig = cfg;
-		isGhostTapping = core.config.SaveData.data.ghosttaping;
+		isGhostTapping = SaveData.data.ghosttaping;
 		#if HSCRIPT_ALLOWED
 		noteController.input.onNoteHit = function(note) {
 			@:privateAccess {
@@ -108,7 +108,7 @@ class CharacterController extends FunkinObjectRegistry {
 	}
 
 	public function syncGhostTapping():Void {
-		isGhostTapping = core.config.SaveData.data.ghosttaping;
+		isGhostTapping = SaveData.data.ghosttaping;
 		if (noteController != null)
 			noteController.input.isGhostTapping = isGhostTapping;
 	}

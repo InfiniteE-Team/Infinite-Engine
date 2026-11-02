@@ -13,6 +13,9 @@ class VideoCutscene extends game.objects.cutscenes.Cutscene {
 	public function playVideo(path:String):Void {
 		#if VIDEO_ALLOWED
 		isEnding = false;
+		blackBg = new flixel.FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
+		blackBg.scrollFactor.set(0, 0);
+
 		video = new game.objects.cutscenes.SafeVideoSprite();
 		video.scrollFactor.set(0, 0);
 
@@ -33,15 +36,21 @@ class VideoCutscene extends game.objects.cutscenes.Cutscene {
 		if (!video.load(sys.FileSystem.fullPath(path))) {
 			video.destroy();
 			video = null;
+			blackBg.destroy();
+			blackBg = null;
 			return;
 		}
 
 		active = true;
 		var ps = game.PlayState.instance;
 		ps.isInCutscene = true;
+
 		if (ps.cutscene != null && ps.cutscene.active)
 			ps.cutscene.destroy();
 		ps.cutscene = this;
+
+		blackBg.cameras = [ps.camOther];
+		ps.add(blackBg);
 
 		var fnkPs = funkin.play.PlayState.instance;
 		if (fnkPs != null) {

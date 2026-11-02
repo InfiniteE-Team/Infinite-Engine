@@ -1,4 +1,4 @@
-package core.json.engine;
+package core.json.menus;
 
 typedef FreeplayData = {
     var songData:Array<SongData>;

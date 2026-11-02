@@ -3,7 +3,7 @@ package states.substates.menus;
 import flixel.FlxSprite;
 import game.objects.Camera;
 import flixel.text.FlxText;
-import core.json.engine.OptionData;
+import core.json.menus.OptionData;
 import flixel.graphics.frames.FlxAtlasFrames;
 import states.substates.menus.options.Keybind;
 
@@ -407,10 +407,8 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 					newValue = max;
 				Reflect.setField(SaveData.data, opt.saveField, Math.round(newValue));
 
-				if (opt.saveField == 'framerate') {
-					FlxG.drawFramerate = Math.round(newValue);
-					FlxG.updateFramerate = Math.round(newValue);
-				}
+				if (opt.saveField == 'framerate')
+					core.api.AppUtil.updateFramerate(Math.round(newValue));
 
 				var displayFormat = opt.displayFormat;
 				if (displayFormat == null)

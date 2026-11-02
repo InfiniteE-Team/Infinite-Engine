@@ -194,7 +194,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 	function createElement(element:StageElement) {
 		var type:String = Std.string(element.type ?? 'sprite');
 		switch (type) {
-			case 'animated' | 'sprite' | 'group':
+			case 'animated' | 'sprite':
 				var sprite:FunkinSprite;
 				if (element.zIndex != null) {
 					var prop = new funkin.play.stage.StageProp(0, 0);
@@ -203,7 +203,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 					prop.bopAnims = element.props?.bopAnims;
 					sprite = prop;
 				} else
-					sprite = new FunkinSprite(0, 0);
+					sprite = new FunkinSprite();
 				sprite.loadProps(element.props, 'game/stages/$stage');
 				elements.push(sprite);
 				add(sprite);
@@ -227,14 +227,14 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 
 				if (element.props?.name != null)
 					objectMap.set(element.props.name, sprite);
-			case 'graphic':
-				var sprite:FunkinSprite = new FunkinSprite(0, 0);
+			case 'graphic' | 'solid':
+				var sprite:FunkinSprite = new FunkinSprite();
 				if (element.zIndex != null) {
 					var prop = new funkin.play.stage.StageProp(0, 0);
 					prop.zIndex = element.zIndex;
 					sprite = prop;
 				}
-				sprite.loadMakeGraphic(element.props);
+				sprite.loadSolidGraphic(element.props);
 				elements.push(sprite);
 				add(sprite);
 
@@ -264,7 +264,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 		super.update(elapsed);
 		if (vsliceScript != null) {
 			modding.vslice.VSliceHooks.call(vsliceScript, 'update', elapsed);
-			modding.vslice.VSliceHooks.call(vsliceScript ,'onUpdate', modding.vslice.VSliceHooks.event('UPDATE', {elapsed: elapsed}));
+			modding.vslice.VSliceHooks.call(vsliceScript, 'onUpdate', modding.vslice.VSliceHooks.event('UPDATE', {elapsed: elapsed}));
 		}
 		#if HSCRIPT_ALLOWED
 		if (stageScript.hasScripts)
@@ -299,17 +299,21 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 		if (vsliceScript != null && funkin.play.PlayState.instance?.currentStage == vsliceScript)
 			funkin.play.PlayState.instance.currentStage = null;
 		vsliceScript = null;
+		brokenHooks = null;
 		extraChars = null;
 		#if HSCRIPT_ALLOWED
 		stageScript.call('onDestroy', []);
 		stageScript.destroy();
 		stageScript = null;
 		#end
+		if (objectMap != null) {
+			objectMap.clear();
+			objectMap = null;
+		}
 		for (element in elements)
 			element.destroy();
 		elements = null;
 		charProps = null;
-		objectMap = null;
 		charLayer.destroy();
 		charLayer = null;
 		super.destroy();

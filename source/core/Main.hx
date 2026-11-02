@@ -26,14 +26,23 @@ class Main extends Sprite {
 	function mainGame() {
 		addChild(new core.Game(core.ConfigMain));
 		addChild(fps);
+
+		#if !mobile
+		// Force-kill the game to prevent background processing.
+		openfl.Lib.application.onExit.add((_) -> {
+			// Dispose of cached audio and textures.
+			core.assets.Paths.clearCache();
+			core.rhythm.audio.Sound.clearGlobalCache();
+			trace('Exiting game, cleaning up memory...');
+			Sys.exit(0);
+		}, 99);
+		#end
 	}
 
 	private function onKeyDown(e:openfl.events.KeyboardEvent):Void {
-		if (e.keyCode == flash.ui.Keyboard.F11) {
-			openfl.Lib.application.window.fullscreen = !openfl.Lib.application.window.fullscreen;
-			core.api.WindowAPI.resizeGame();
-		}
-
+		if (e.keyCode == flash.ui.Keyboard.F11)
+			core.api.AppUtil.setFullscreen(!openfl.Lib.application.window.fullscreen);
+		
 		#if DEBUG_CONSOLE
 		if (e.keyCode == flash.ui.Keyboard.F2) {
 			core.system.WinConsole.toggle();

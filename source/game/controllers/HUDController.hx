@@ -40,7 +40,7 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 		#if HSCRIPT_ALLOWED
 		scriptHUD.call("onCreateHUD", []);
 		#end
-		healthBarY = FlxG.height * (core.config.SaveData.data.downscroll ? barYDOWNSCROLL : barYNORMAL);
+		healthBarY = FlxG.height * (SaveData.data.downscroll ? barYDOWNSCROLL : barYNORMAL);
 
 		healthBarBG = new FunkinSprite(0, healthBarY + 5, true);
 		healthBarBG.loadGraphic(Paths.getPath('game/hud/healthBar', 'image'));

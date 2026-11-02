@@ -1,6 +1,5 @@
 package states;
 
-import states.LoadingState;
 import core.json.JsonWatcher;
 import states.menus.FreeplayState;
 import utils.InfoHelpDebug;
@@ -148,7 +147,6 @@ class MusicBeatState extends State {
 	}
 
 	override function destroy():Void {
-		core.assets.Paths.clearCache();
 		JsonWatcher.clear();
 		#if HSCRIPT_ALLOWED
 		if (script != null) {

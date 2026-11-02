@@ -1,8 +1,8 @@
 package modding.vslice;
 
 import sys.FileSystem;
-import core.json.engine.FreeplayData;
-import core.json.engine.storymenu.WeekData;
+import core.json.menus.FreeplayData;
+import core.json.menus.storymenu.WeekData;
 import modding.vslice.VSlice.*;
 
 // V-Slice songs as the menus want them: freeplay list, story weeks, charts, difficulties and albums -JloorDev

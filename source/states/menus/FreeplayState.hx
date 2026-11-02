@@ -24,7 +24,7 @@ class FreeplayState extends MusicBeatState {
 
 	var songs:Array<CardFreeplay> = [];
 	var icons:Array<Icon> = [];
-	var freeplayData:core.json.engine.FreeplayData;
+	var freeplayData:core.json.menus.FreeplayData;
 
 	var album:FunkinSprite;
 
@@ -372,7 +372,7 @@ class FreeplayState extends MusicBeatState {
 			#end
 
 			new FlxTimer().start(1, function(tmr:FlxTimer) {
-				MusicBeatState.switchState(() -> new states.LoadingState(songSelected, curDiff), freeplayData.songData[curSelected].stickerPack ?? 'default');
+				MusicBeatState.switchState(() -> new states.menus.LoadingState(songSelected, curDiff), freeplayData.songData[curSelected].stickerPack ?? 'default');
 			});
 		}
 

@@ -46,14 +46,15 @@ class Camera extends flixel.FlxCamera {
 		"saturation" => 11,
 		"color" => 12,
 		"luminosity" => 13,
-		"invert" => 14
+		"invert" => 14,
+		"softlight" => 15
 	];
 
 	var blendShader:CustomBlendShader;
 	var backgroundFrame:FlxFrame;
-	var blendRenderTexture:RenderTexture;
-	var backgroundRenderTexture:RenderTexture;
-	var cameraTexture:FixedBitmapData;
+	var blendRenderTexture:Null<RenderTexture>;
+	var backgroundRenderTexture:Null<RenderTexture>;
+	var cameraTexture:Null<FixedBitmapData>;
 	var cameraMatrix:FlxMatrix;
 
 	@:nullSafety(Off)
@@ -87,11 +88,18 @@ class Camera extends flixel.FlxCamera {
 			?shader:FlxShader):Void {
 		var blendStr = blend != null ? @:privateAccess blend.toString().toLowerCase() : null;
 		if (blendStr != null && SHADER_BLEND_MODES.contains(blendStr)) {
+			if (cameraTexture == null)
+				cameraTexture = FixedBitmapData.create(this.width, this.height);
 			core.render.BitmapDataUtil.drawCameraScreen(cameraTexture, this);
 
 			backgroundFrame.frame.set(0, 0, this.width, this.height);
 			this.clearDrawStack();
 			this.canvas.graphics.clear();
+
+			if (blendRenderTexture == null)
+				blendRenderTexture = new RenderTexture(this.width, this.height);
+			if (backgroundRenderTexture == null)
+				backgroundRenderTexture = new RenderTexture(this.width, this.height);
 
 			blendRenderTexture.init(this.width, this.height);
 			blendRenderTexture.drawToCamera((cam, frameMatrix) -> {
@@ -138,8 +146,17 @@ class Camera extends flixel.FlxCamera {
 
 	override function destroy():Void {
 		super.destroy();
-		blendRenderTexture.destroy();
-		backgroundRenderTexture.destroy();
-		cameraTexture.dispose();
+		if (blendRenderTexture != null) {
+			blendRenderTexture.destroy();
+			blendRenderTexture = null;
+		}
+		if (backgroundRenderTexture != null) {
+			backgroundRenderTexture.destroy();
+			backgroundRenderTexture = null;
+		}
+		if (cameraTexture != null) {
+			cameraTexture.dispose();
+			cameraTexture = null;
+		}
 	}
 }

@@ -246,24 +246,31 @@ class Paths {
 		for (_ => asset in cache) {
 			if (asset is FlxFramesCollection) {
 				var frames = cast(asset, FlxFramesCollection);
-				if (frames.parent != null) {
-					frames.parent.bitmap.dispose();
-					FlxG.bitmap.remove(frames.parent);
+				if (frames != null && frames.parent != null) {
+					if (FlxG.bitmap.checkCache(frames.parent.key)) {
+						frames.parent.persist = false;
+						frames.parent.destroyOnNoUse = true;
+						FlxG.bitmap.remove(frames.parent);
+						frames.destroy();
+					}
 				}
-				frames.destroy();
 			} else if (asset is flixel.graphics.FlxGraphic) {
-				var asset = cast(asset, flixel.graphics.FlxGraphic);
-				if (asset.bitmap != null)
-					asset.bitmap.dispose();
-				FlxG.bitmap.remove(asset);
-				asset.destroy();
+				var graphic = cast(asset, flixel.graphics.FlxGraphic);
+				if (graphic != null && FlxG.bitmap.checkCache(graphic.key)) {
+					graphic.persist = false;
+					graphic.destroyOnNoUse = true;
+					FlxG.bitmap.remove(graphic);
+				}
 			}
 		}
 		cache.clear();
 		pathCache.clear();
-		FunkinSprite.cacheOffsets.clear();
+		if (FunkinSprite.cacheOffsets != null)
+			FunkinSprite.cacheOffsets.clear();
 		FunkinSprite.clearMissingCaches();
-
+		try {
+			openfl.utils.Assets.cache.clear();
+		} catch (e:Dynamic) {}
 		openfl.system.System.gc();
 	}
 }

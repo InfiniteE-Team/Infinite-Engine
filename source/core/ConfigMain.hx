@@ -40,7 +40,7 @@ class ConfigMain extends flixel.FlxState {
 		if (globalData.startState != null)
 			mainState = globalData.startState;
 
-		InfiniteUtil.updateFramerate();
+		core.api.AppUtil.updateFramerate(SaveData.data.framerate);
 
 		core.config.SaveScore.load();
 
@@ -55,7 +55,7 @@ class ConfigMain extends flixel.FlxState {
 			details: "Infinite Engine",
 			largeImageKey: "icon"
 		});
-		lime.app.Application.current.onExit.add(function(exitCode:Int) {
+		lime.app.Application.current.onExit.add(function(exitCode) {
 			core.api.DiscordAPI.instance.shutdown();
 		});
 		#end

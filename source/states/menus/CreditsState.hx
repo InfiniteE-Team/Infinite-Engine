@@ -6,7 +6,7 @@ import modding.scripting.types.ScriptClass;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
-import core.json.engine.CreditsData.CreditEntry;
+import core.json.menus.CreditsData.CreditEntry;
 
 class CreditsState extends MusicBeatState {
 	#if windows

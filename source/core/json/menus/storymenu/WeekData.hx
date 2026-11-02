@@ -1,4 +1,4 @@
-package core.json.engine.storymenu;
+package core.json.menus.storymenu;
 
 typedef WeekData = {
 	var week:String;

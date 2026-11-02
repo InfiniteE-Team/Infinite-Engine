@@ -6,6 +6,7 @@ class Cutscene {
 	public var active(default, null):Bool = false;
 
 	#if VIDEO_ALLOWED
+	var blackBg:flixel.FlxSprite;
 	var video:game.objects.cutscenes.SafeVideoSprite;
 	#end
 
@@ -22,6 +23,9 @@ class Cutscene {
 		var path = resolve(songFolder, slot);
 		if (path == null)
 			return false;
+
+		blackBg = new flixel.FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
+		blackBg.scrollFactor.set(0, 0);
 
 		video = new game.objects.cutscenes.SafeVideoSprite();
 		video.scrollFactor.set(0, 0);
@@ -43,14 +47,20 @@ class Cutscene {
 		if (!video.load(sys.FileSystem.fullPath(path))) {
 			video.destroy();
 			video = null;
+			blackBg.destroy();
+			blackBg = null;
 			return false;
 		}
 
 		active = true;
 		var ps = PlayState.instance;
+		blackBg.cameras = [ps.camOther];
+		ps.add(blackBg);
+
 		ps.isInCutscene = true;
 		video.cameras = [ps.camOther];
 		ps.add(video);
+
 		video.play();
 		return true;
 		#else
@@ -64,6 +74,8 @@ class Cutscene {
 			isEnding = true;
 			var cb = onComplete;
 
+			if (blackBg != null)
+				FlxTween.tween(blackBg, {alpha: 0}, 0.5);
 			FlxTween.tween(video, {alpha: 0}, 0.5, {
 				onComplete: function(twn:FlxTween) {
 					destroy();
@@ -97,6 +109,11 @@ class Cutscene {
 			video.stop();
 			video.destroy();
 			video = null;
+		}
+		if (blackBg != null) {
+			PlayState.instance?.remove(blackBg, true);
+			blackBg.destroy();
+			blackBg = null;
 		}
 		#end
 		active = false;

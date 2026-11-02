@@ -625,7 +625,7 @@ class NoteController {
 			var lk = sustain.localLane;
 
 			// CPU hold splashes
-			if (!isMiddlescroll && !sustain.mustPress) {
+			if (!isMiddlescroll && !sustain.mustPress && !sustain.isSustainEnd) {
 				var inHold = songTime >= sustain.strumTime && songTime <= (sustain.strumTime + sustain.length);
 				if (inHold) {
 					if (!sustain.isHeld) {
@@ -635,7 +635,7 @@ class NoteController {
 					}
 					sustain.strum.playAnim('confirm$lk', false);
 					if (strums != null) {
-						strums.activeOpponentHolds.set(lane, true);
+						strums.activeOpponentHolds.set(lk, true);
 						activeOpponentHolds.set(lane, true);
 					}
 				} else if (sustain.isHeld) {
@@ -643,12 +643,12 @@ class NoteController {
 					strums?.stopHoldSplash(sustain.strum);
 					sustain.strum.playAnim('static$lk', true);
 					if (strums != null) {
-						strums.activeOpponentHolds.remove(lane);
+						strums.activeOpponentHolds.remove(lk);
 						activeOpponentHolds.remove(lane);
 					}
 				}
 			}
-			if (sustain.mustPress && SaveData.data.botplay) {
+			if (sustain.mustPress && SaveData.data.botplay && !sustain.isSustainEnd) {
 				var inHold = songTime >= sustain.strumTime && songTime <= (sustain.strumTime + sustain.length);
 				if (inHold) {
 					sustain.wasNoteHit = true;
@@ -658,7 +658,7 @@ class NoteController {
 						_syncHoldSplashToGlobal(strums);
 					}
 					if (strums != null) {
-						strums.activeOpponentHolds.set(lane, true);
+						strums.activeOpponentHolds.set(lk, true);
 						activeOpponentHolds.set(lane, true);
 					}
 					sustain.strum.playAnim(confirmAnims[lk], false);
@@ -667,7 +667,7 @@ class NoteController {
 					strums?.stopHoldSplash(sustain.strum);
 					sustain.strum.playAnim(staticAnims[lk], true);
 					if (strums != null) {
-						strums.activeOpponentHolds.remove(lane);
+						strums.activeOpponentHolds.remove(lk);
 						activeOpponentHolds.remove(lane);
 					}
 				}

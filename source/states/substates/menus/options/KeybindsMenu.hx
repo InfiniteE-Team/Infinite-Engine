@@ -59,7 +59,6 @@ class KeybindsMenu extends flixel.group.FlxGroup {
 		build();
 	}
 
-	// var resetBtn:FunkinSprite;
 	var setLabels:Array<FlxText> = [];
 
 	public function build() {
@@ -84,18 +83,6 @@ class KeybindsMenu extends flixel.group.FlxGroup {
 		buildUiKeys(uiStartY);
 
 		refreshVisuals();
-		/*
-			resetBtn = new FunkinSprite(BASE_X + 200, BASE_Y - 54, false);
-			resetBtn.makeGraphic(200, 40, 0xFFFF5555);
-			resetBtn.cameras = [contentCam];
-			resetBtn.scrollFactor.set(0, 0);
-			add(resetBtn);
-
-			var resetLabel = makeText(BASE_X + 220, BASE_Y - 46, 'Reset to Default', 18);
-			resetLabel.color = 0xFF000000;
-			resetLabel.cameras = [contentCam];
-			resetLabel.scrollFactor.set(0, 0);
-			add(resetLabel); */
 	}
 
 	var laneStrums:Array<StrumNote> = [];

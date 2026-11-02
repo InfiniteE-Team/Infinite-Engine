@@ -1,4 +1,4 @@
-package core.json.engine;
+package core.json.menus;
 
 typedef CreditEntry = {
     var entries:Array<CreditHeader>;

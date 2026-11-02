@@ -7,7 +7,7 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import game.PlayStateConfig;
-import states.LoadingState;
+import states.menus.LoadingState;
 import core.config.SaveScore;
 import core.rhythm.DiffsUtils;
 import core.assets.FunkinSprite;
@@ -16,7 +16,7 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 
 @:keep
 class StoryMenuState extends MusicBeatState {
-	var weeks:Array<core.json.engine.storymenu.WeekData> = [];
+	var weeks:Array<core.json.menus.storymenu.WeekData> = [];
 	var curWeek:Int = 0;
 
 	var acceptOption:Bool = false;
@@ -264,7 +264,7 @@ class StoryMenuState extends MusicBeatState {
 			for (file in FileSystem.readDirectory(resolved)) {
 				if (!file.endsWith('.json'))
 					continue;
-				var data:core.json.engine.storymenu.WeekData = FormatJson.readJson(Paths.getPath('data/storymenu/weeks/$file'));
+				var data:core.json.menus.storymenu.WeekData = FormatJson.readJson(Paths.getPath('data/storymenu/weeks/$file'));
 				if (data != null)
 					weeks.push(data);
 			}

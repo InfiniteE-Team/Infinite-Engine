@@ -1,13 +1,10 @@
 package states;
 
 import cpp.vm.Gc;
-import core.rhythm.audio.Sound;
 
 class State extends flixel.FlxState {
 	private var tweenManager:flixel.tweens.FlxTween.FlxTweenManager;
 	private var timerManager:flixel.util.FlxTimer.FlxTimerManager;
-
-	public static var skipNextAudioClear:Bool = false;
 
 	public function new() {
 		super();
@@ -75,6 +72,8 @@ class State extends flixel.FlxState {
 			volumeTween = null;
 		}
 
+		core.assets.Paths.clearCache();
+
 		super.destroy();
 		#if cpp
 		Gc.run(true);
@@ -92,10 +91,6 @@ class State extends flixel.FlxState {
 			timerManager = null;
 		}
 
-		if (skipNextAudioClear) {
-			skipNextAudioClear = false;
-		} else {
-			Sound.clearGlobalCache();
-		}
+		core.rhythm.audio.Sound.clearGlobalCache();
 	}
 }

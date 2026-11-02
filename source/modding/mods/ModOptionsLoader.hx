@@ -1,6 +1,6 @@
 package modding.mods;
 
-import core.json.engine.OptionData;
+import core.json.menus.OptionData;
 import core.enums.OptionType;
 import flixel.input.keyboard.FlxKey;
 

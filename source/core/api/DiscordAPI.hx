@@ -122,13 +122,3 @@ typedef DiscordAPIPresenceParams = {
 	var ?largeImageKey:String;
 	var ?smallImageKey:String;
 }
-
-class DiscordAPISandboxed {
-	public static function setPresence(params:DiscordAPIPresenceParams):Void {
-		DiscordAPI.instance.setPresence(params);
-	}
-
-	public static function shutdown():Void {
-		DiscordAPI.instance.shutdown();
-	}
-}

@@ -396,7 +396,7 @@ class PlayState extends MusicBeatState {
 					var nextSong = PlayStateConfig.storyPlaylist[0];
 					PlayStateConfig.storyPlaylist.shift();
 					new flixel.util.FlxTimer().start(0.9, (_) -> {
-						MusicBeatState.switchState(() -> new states.LoadingState(nextSong, curDifficulty));
+						MusicBeatState.switchState(() -> new states.menus.LoadingState(nextSong, curDifficulty));
 					});
 				} else {
 					core.config.SaveScore.saveWeek(PlayStateConfig.storyWeekName, PlayStateConfig.storyScore, curDifficulty);

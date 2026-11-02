@@ -1,5 +1,6 @@
 package core.assets;
 
+import flixel.util.FlxColor;
 import flixel.math.FlxPoint;
 import animate.FlxAnimateFrames;
 import openfl.display.BlendMode;
@@ -316,12 +317,19 @@ class FunkinSprite extends animate.FlxAnimate {
 		return null;
 	}
 
-	public function loadMakeGraphic(props:ObjectData):Void {
-		var color:Null<flixel.util.FlxColor> = props.color != null ? flixel.util.FlxColor.fromString(props.color) : null;
-		makeGraphic(Std.int(props.scale[0]), Std.int(props.scale[1]), color ?? flixel.util.FlxColor.WHITE);
+	public function makeSolidColor(width:Int, height:Int, color:FlxColor = FlxColor.WHITE):FunkinSprite {
+		makeGraphic(1, 1, color);
+		scale.set(width, height);
+		updateHitbox();
+		return this;
+	}
+
+	public function loadSolidGraphic(props:ObjectData):FunkinSprite {
+		var color:Null<FlxColor> = props.color != null ? FlxColor.fromString(props.color) : null;
+		makeSolidColor(Std.int(props.scale[0]), Std.int(props.scale[1]), props.color != null ? FlxColor.fromString(props.color) : FlxColor.WHITE);
 		loadParams(props);
 		updateHitbox();
-		assetLoaded = true;
+		return this;
 	}
 
 	public function loadParams(props:ObjectData):Void {

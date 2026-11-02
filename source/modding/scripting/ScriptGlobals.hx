@@ -29,7 +29,6 @@ class ScriptGlobals {
 			'core.json.engine.GlobalData.GlobalConfig',
 			'game.objects.Bar',
 			'game.PlayState',
-			'states.MenuState',
 			'utils.Alphabet',
 			'game.objects.sprites.Character',
 			'game.objects.sprites.Stage',
@@ -70,7 +69,7 @@ class ScriptGlobals {
 		Config.globalVariables.set('Json', haxe.Json);
 		Config.globalVariables.set('FormatJson', FormatJson);
 		Config.globalVariables.set('SaveScore', core.config.SaveScore);
-		Config.globalVariables.set('SaveData', core.config.SaveData);
+		Config.globalVariables.set('SaveData', SaveData);
 		Config.globalVariables.set('OptionType', core.enums.OptionType);
 		Config.globalVariables.set('Console', Console);
 
@@ -136,7 +135,6 @@ class ScriptGlobals {
 			// Engine
 			"Bar" => game.objects.Bar,
 			"PlayState" => game.PlayState,
-			"MenuState" => states.MenuState,
 			"Alphabet" => utils.Alphabet,
 			"Character" => game.objects.sprites.Character,
 			"Stage" => game.objects.sprites.Stage,
@@ -149,7 +147,7 @@ class ScriptGlobals {
 			"FormatJson" => FormatJson,
 			// Save Config Game
 			"SaveScore" => core.config.SaveScore,
-			"SaveData" => core.config.SaveData,
+			"SaveData" => SaveData,
 			// Sound
 			"Sound" => core.rhythm.audio.Sound,
 			"MasterAudio" => core.rhythm.audio.MasterAudio,

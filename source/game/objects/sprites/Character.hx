@@ -130,11 +130,13 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 					x: camOff != null ? (camOff[0] ?? 0) : 0,
 					y: camOff != null ? (camOff[1] ?? 0) : 0
 				};
-				if (curCharacter == 'bf' && modding.mods.ModData.ModConfig.apiMods != '0.8.4' && modding.vslice.VSlice.isActive()) {
-					var pos = characterData.gameplay.position;
-					if (pos != null) {
-						pos[0] = (pos[0] ?? 0) + 50;
-						pos[1] = (pos[1] ?? 0) + 100;
+				if (curCharacter == 'bf' && modding.vslice.VSlice.isActive()) {
+					if (modding.mods.ModData.ModConfig.apiMods != '0.8.4') {
+						var pos = characterData.gameplay.position;
+						if (pos != null) {
+							pos[0] = (pos[0] ?? 0) + 50;
+							pos[1] = (pos[1] ?? 0) + 100;
+						}
 					}
 					cameraOffset.x += 180;
 					cameraOffset.y += 150;
