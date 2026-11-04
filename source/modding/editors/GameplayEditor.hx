@@ -2217,7 +2217,7 @@ class GameplayEditor extends MusicBeatState {
 			var index = core.rhythm.DiffsUtils.getDiffIndex(chartDiff);
 			if (index < 0)
 				index = states.menus.FreeplayState.curDiff;
-			MusicBeatState.switchState(() -> new game.PlayState(songDir, index));
+			MusicBeatState.switchState(() -> new states.menus.LoadingState(songDir, index));
 		} else
 			MusicBeatState.switchState(() -> new states.menus.FreeplayState());
 	}

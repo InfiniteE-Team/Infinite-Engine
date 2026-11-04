@@ -153,7 +153,7 @@ class Paths {
 	}
 
 	public static function cacheAutoAsync(fileName:String, onComplete:Dynamic->Void):Void {
-		var imagePath = getPath(fileName, IMAGE);
+		var imagePath = getPath(fileName, 'image');
 		if (imagePath == null) {
 			if (onComplete != null)
 				onComplete(null);

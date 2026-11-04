@@ -72,6 +72,8 @@ class NoteController {
 	public var charController:CharacterController = null;
 	public var playStateConfig:PlayStateConfig;
 	public var gameAudio:core.rhythm.audio.GameAudio;
+	public var isGhostTapping:Bool = false;
+
 	public var isMiss:Bool = false;
 
 	final POOL_LENGTH:Int = 48;
@@ -98,18 +100,17 @@ class NoteController {
 		this.daSong = daSong;
 		this.isDownscroll = isDownscroll;
 		this.playStateConfig = playStateConfig;
+		this.isGhostTapping = isGhostTapping;
 		this.gameAudio = gameAudio;
 		#if HSCRIPT_ALLOWED
 		scriptNC = script;
 		#end
 
 		loadJson();
-
 		#if HSCRIPT_ALLOWED
 		scriptNC.loadFolder('scripts/noteskins/$noteSkin');
 		scriptNC.executeAll();
 		#end
-
 		var globalOffset = 0;
 		for (i in 0...daSong.chars.length) {
 			var charData = daSong.chars[i];
@@ -118,7 +119,7 @@ class NoteController {
 			var strumsVis = charData?.strums?.visible ?? true;
 			var notesVis = charData?.strums?.notesVisible ?? strumsVis;
 
-			var strums = buildStrumline(charData.id, isPlayer, isGhostTapping);
+			var strums = buildStrumline(charData.id, isPlayer);
 			strums.strumsVisible = strumsVis;
 			strums.notesVisible = notesVis;
 
@@ -144,7 +145,7 @@ class NoteController {
 		Console.log("Created Strums");
 	}
 
-	function buildStrumline(charId:String, isPlayer:Bool, isGhostTapping:Bool):Strumline {
+	function buildStrumline(charId:String, isPlayer:Bool):Strumline {
 		var skin = charSkin(charId);
 		var strums = new Strumline(charId, isPlayer, keys, skin, skinPart(skin, 'strumnotes'), skinPart(skin, 'splashes'), skinPart(skin, 'holdsplashes'),
 			noteSkinData.spacing ?? 0, #if HSCRIPT_ALLOWED scriptNC #end
@@ -163,9 +164,9 @@ class NoteController {
 		return strumsByChar.get(charId);
 	}
 
-	public function addStrumline(charId:String, isPlayer:Bool, x:Float, y:Float, ?isGhostTapping:Bool = false):Strumline {
+	public function addStrumline(charId:String, isPlayer:Bool, x:Float, y:Float):Strumline {
 		var globalOffset = strums.length;
-		var strums = buildStrumline(charId, isPlayer, isGhostTapping);
+		var strums = buildStrumline(charId, isPlayer);
 		charStrumOffsets.set(charId, globalOffset);
 		strumsGlobalOffset.set(strums, globalOffset);
 		strums.generateStrums(x, y, daSong, isDownscroll, isMiddlescroll);
@@ -363,16 +364,16 @@ class NoteController {
 		scrollTween?.cancel();
 		if (duration <= 0 || ease == null) {
 			scrollSpeed = targetScrollSpeed = target;
-			_syncScrollToAll(target);
+			syncScrollToAll(target);
 			return;
 		}
 		scrollTween = flixel.tweens.FlxTween.num(scrollSpeed, target, duration, {ease: ease}, v -> {
 			scrollSpeed = targetScrollSpeed = v;
-			_syncScrollToAll(v);
+			syncScrollToAll(v);
 		});
 	}
 
-	inline function _syncScrollToAll(v:Float):Void {
+	inline function syncScrollToAll(v:Float):Void {
 		for (strums in strumlines) {
 			strums.scrollSpeed = v;
 			strums.targetScrollSpeed = v;
@@ -631,7 +632,7 @@ class NoteController {
 					if (!sustain.isHeld) {
 						sustain.isHeld = true;
 						strums?.spawnHoldSplash(sustain.strum, lk, sustain.noteType);
-						_syncHoldSplashToGlobal(strums);
+						syncHoldSplashToGlobal(strums);
 					}
 					sustain.strum.playAnim('confirm$lk', false);
 					if (strums != null) {
@@ -655,7 +656,7 @@ class NoteController {
 					if (!sustain.isHeld) {
 						sustain.isHeld = true;
 						strums?.spawnHoldSplash(sustain.strum, lk, sustain.noteType);
-						_syncHoldSplashToGlobal(strums);
+						syncHoldSplashToGlobal(strums);
 					}
 					if (strums != null) {
 						strums.activeOpponentHolds.set(lk, true);
@@ -763,7 +764,7 @@ class NoteController {
 		#end
 	}
 
-	inline function _syncHoldSplashToGlobal(strums:Strumline):Void {
+	inline function syncHoldSplashToGlobal(strums:Strumline):Void {
 		if (strums == null)
 			return;
 		for (h in strums.holdsplashes.members)
@@ -794,7 +795,7 @@ class NoteController {
 		for (strums in strumlines) {
 			if (strums.strums.members.indexOf(strum) >= 0) {
 				strums.spawnHoldSplash(strum, direction, noteType);
-				_syncHoldSplashToGlobal(strums);
+				syncHoldSplashToGlobal(strums);
 				return;
 			}
 		}

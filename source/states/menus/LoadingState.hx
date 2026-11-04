@@ -32,6 +32,13 @@ class LoadingState extends MusicBeatState {
 
 	var dataList:Array<LoadingCharacterData> = [];
 
+	var prebuiltState:game.PlayState = null;
+	var isLoadingFinished:Bool = false;
+
+	function startLoadingSong() {
+		prebuiltState = new game.PlayState(songFolder, curDifficulty);
+	}
+
 	public function new(songFolder:String, curDifficulty:Int = 0) {
 		super();
 		this.songFolder = songFolder;
@@ -58,16 +65,17 @@ class LoadingState extends MusicBeatState {
 			FlxG.sound.music.stop();
 
 		buildLoadingUI();
+
+		startLoadingSong();
+
 		collectQueue();
 
-		if (queue.length == 0) {
-			launchPlayState();
-			return;
-		}
-
 		total = queue.length + audioQueue.length;
-		dispatchQueue();
-		dispatchAudioQueue();
+
+		if (total > 0) {
+			dispatchQueue();
+			dispatchAudioQueue();
+		}
 	}
 
 	function buildLoadingUI() {
@@ -77,7 +85,6 @@ class LoadingState extends MusicBeatState {
 		#end
 
 		loadCharacterData();
-
 		getCharacter();
 
 		micStand.loadGraphic(Paths.getPath('menus/loading/mic-stand', 'image'));
@@ -149,10 +156,8 @@ class LoadingState extends MusicBeatState {
 		var song:Null<SongConfig> = new SongConfig();
 		song.configSong(songFolder, core.rhythm.DiffsUtils.difficulties[curDifficulty]);
 
-		if (song.songData == null) {
-			launchPlayState();
+		if (song.songData == null)
 			return;
-		}
 
 		var stageId = song.stage ?? 'stage';
 		collectStageAssets(stageId);
@@ -180,8 +185,6 @@ class LoadingState extends MusicBeatState {
 		Paths.currentSong = songFolder;
 
 		enqueueAudio(Paths.getPath('Inst' + (song.instPrefix ?? ''), SONG_AUDIO));
-
-		// Voces
 		if (song.needVoices) {
 			if (song.vocs == null) {
 				enqueueAudio(Paths.getPath('Voices' + (song.vocPrefix ?? ''), SONG_AUDIO));
@@ -226,10 +229,6 @@ class LoadingState extends MusicBeatState {
 
 					loaded++;
 					updateBar();
-					if (loaded >= total && !done) {
-						done = true;
-						onAllLoaded();
-					}
 				});
 			});
 		}
@@ -293,31 +292,33 @@ class LoadingState extends MusicBeatState {
 			Paths.cacheAutoAsync(path, function(_) {
 				loaded++;
 				updateBar();
-
-				if (loaded >= total && !done) {
-					done = true;
-					onAllLoaded();
-				}
 			});
 		}
 	}
 
 	function updateBar() {
-		var currentProgress:Float = flixel.math.FlxMath.bound(loaded / total, 0, 1);
+		var currentProgress:Float = flixel.math.FlxMath.bound(loaded / Math.max(1, total), 0, 1);
 		barTargetX += (bar.width * currentProgress - BAR_PAD - BAR_PAD) + BAR_PAD;
 	}
 
-	// end
 	function onAllLoaded() {
-		new flixel.util.FlxTimer().start(1, (_) -> {
-			launchPlayState();
-		});
+		if (done)
+			return;
+		done = true;
+
 		#if HSCRIPT_ALLOWED
 		script.call("onAllLoaded", []);
 		#end
-		FlxTween.tween(micStand, {alpha: 0}, 0.25);
-		if (character != null)
-			FlxTween.tween(character, {alpha: 0}, 0.25);
+
+		new flixel.util.FlxTimer().start(0.1, (_) -> {
+			FlxTween.tween(micStand, {alpha: 0}, 0.4);
+			if (character != null)
+				FlxTween.tween(character, {alpha: 0}, 0.4, {
+					onComplete: _ -> {
+						launchPlayState();
+					}
+				});
+		});
 	}
 
 	function launchPlayState() {
@@ -326,7 +327,7 @@ class LoadingState extends MusicBeatState {
 			return;
 		#end
 
-		MusicBeatState.switchState(() -> new game.PlayState(songFolder, curDifficulty));
+		MusicBeatState.switchState(() -> prebuiltState);
 	}
 
 	override public function update(elapsed:Float) {
@@ -339,19 +340,27 @@ class LoadingState extends MusicBeatState {
 			return;
 		#end
 
-		var t = haxe.Timer.stamp();
+		if (prebuiltState != null && !prebuiltState.prebuilt) {
+			prebuiltState.prebuildStep();
+		}
+
+		var assetsReady:Bool = (loaded >= total);
+		var playStateReady:Bool = (prebuiltState != null && prebuiltState.prebuilt);
+
+		if (assetsReady && playStateReady && !done) {
+			onAllLoaded();
+		}
+
+		bar.x = InfiniteUtil.smoothLerpPrecision(bar.x, barTargetX, elapsed, 0.2);
 
 		#if HSCRIPT_ALLOWED
 		if (script.hasScripts)
 			script.call("postUpdate", [elapsed]);
 		#end
-
-		bar.x = InfiniteUtil.smoothLerpPrecision(bar.x, barTargetX, elapsed, 0.2);
 	}
 
 	override public function destroy() {
 		super.destroy();
-
 		character = null;
 		micStand = null;
 	}

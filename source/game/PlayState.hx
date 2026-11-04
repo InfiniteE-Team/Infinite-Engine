@@ -80,6 +80,49 @@ class PlayState extends MusicBeatState {
 	#end
 	public var isInCutscene:Bool = false;
 
+	// loading state
+	public var prebuilt:Bool = false;
+
+	var prePhase:Int = 0;
+
+	public function prebuildStep():Bool {
+		switch (prePhase++) {
+			case 0:
+				instance = this;
+				if (playStateConfig != null)
+					playStateConfig.reset();
+
+				SONG = new SongConfig();
+				SONG.configSong(songFolder, DiffsUtils.difficulties[curDifficulty]);
+
+				modding.vslice.VSliceHooks.reset();
+				funkin.play.PlayState.instance = modding.vslice.VSlice.isActive() ? new funkin.play.PlayState(null, songFolder) : null;
+
+				#if HSCRIPT_ALLOWED
+				startScript();
+				script.call("onCreate", []);
+				#end
+			case 1:
+				camGame = new Camera();
+				camHUD = new Camera();
+				camHUD.bgColor.alpha = 0;
+				camOther = new Camera();
+				camOther.bgColor.alpha = 0;
+				camSubtitles = new Camera();
+				camSubtitles.bgColor.alpha = 0;
+				cameraController = new CameraController(camGame, camHUD);
+				titleGameplay();
+				setDiscordPresence();
+			case 2:
+				subtitleManager = new game.objects.Subtitle();
+			case 3:
+				cutscene = new game.objects.cutscenes.Cutscene();
+				prebuilt = true;
+				return true;
+		}
+		return false;
+	}
+
 	public function new(?songFolder:String, ?curDifficulty:Int = 0) {
 		super();
 		gameAudio = new GameAudio();
@@ -99,35 +142,17 @@ class PlayState extends MusicBeatState {
 
 		PlayStateConfig.isPlaying = true;
 
-		if (playStateConfig != null)
-			playStateConfig.reset();
-
 		addCameras();
 
-		SONG = new SongConfig();
-		SONG.configSong(songFolder, DiffsUtils.difficulties[curDifficulty]);
+		if (prebuilt)
+			finishPrebuilt();
+	}
 
-		modding.vslice.VSliceHooks.reset();
-		funkin.play.PlayState.instance = modding.vslice.VSlice.isActive() ? new funkin.play.PlayState(null, songFolder) : null;
-
-		#if HSCRIPT_ALLOWED
-		startScript();
-		script.call("onCreate", []);
-		#end
-
-		#if DISCORD_ALLOWED
-		core.api.DiscordAPI.instance.setPresence({
-			details: 'Playing: ${curSong}',
-			state: 'Difficulty: ' + DiffsUtils.difficulties[curDifficulty].toUpperCase(),
-			largeImageKey: "album-volume1"
-		});
-		#end
-
-		titleGameplay();
-
-		buildStageandChars();
-
+	function finishPrebuilt() {
 		add(gameAudio);
+
+		loadSong();
+		buildStageAndChars();
 
 		controllerHUD = new HUDController(script);
 		controllerHUD.cameras = [camHUD];
@@ -135,7 +160,6 @@ class PlayState extends MusicBeatState {
 
 		chars.rating = controllerHUD.rating;
 
-		subtitleManager = new game.objects.Subtitle();
 		subtitleManager.cameras = [camSubtitles];
 		add(subtitleManager);
 
@@ -144,11 +168,8 @@ class PlayState extends MusicBeatState {
 		RhythmCore.reset(SONG.bpmSong);
 		rhythmTracker.reset();
 
-		buildStrumsandNotes();
+		buildStrumsAndNotes();
 
-		loadSong();
-
-		cutscene = new game.objects.cutscenes.Cutscene();
 		if (!cutscene.tryPlay(songFolder, 'intro', () -> startCountdown()))
 			startCountdown();
 
@@ -158,29 +179,27 @@ class PlayState extends MusicBeatState {
 		#end
 	}
 
-	function titleGameplay()
+	inline function setDiscordPresence() {
+		#if DISCORD_ALLOWED
+		core.api.DiscordAPI.instance.setPresence({
+			details: 'Playing: ${curSong}',
+			state: 'Difficulty: ' + DiffsUtils.difficulties[curDifficulty].toUpperCase(),
+			largeImageKey: "album-volume1"
+		});
+		#end
+	}
+
+	inline function titleGameplay()
 		lime.app.Application.current.window.title = modding.mods.ModData.ModConfig.title + " - Song: " + curSong;
 
 	public function addCameras() {
-		camGame = new Camera();
-		camHUD = new Camera();
-		camHUD.bgColor.alpha = 0;
-
-		camOther = new Camera();
-		camOther.bgColor.alpha = 0;
-
-		camSubtitles = new Camera();
-		camSubtitles.bgColor.alpha = 0;
-
 		FlxG.cameras.reset(camGame);
 		FlxG.cameras.add(camHUD, false);
 		FlxG.cameras.add(camOther, false);
 		FlxG.cameras.add(camSubtitles, false);
-
-		cameraController = new CameraController(camGame, camHUD);
 	}
 
-	public function buildStageandChars() {
+	function buildStageAndChars():Void {
 		#if HSCRIPT_ALLOWED
 		script.call("buildStage", []);
 		#end
@@ -236,10 +255,22 @@ class PlayState extends MusicBeatState {
 		}
 	}
 
-	function buildStrumsandNotes() {
+	function buildStrumsAndNotes():Void {
 		noteController = new NoteController(SONG, SaveData.data.downscroll, SaveData.data.ghosttaping, script, playStateConfig, gameAudio);
 		noteController.charController = chars;
 		core.ConfigMain.controls.loadPreset(noteController.keys);
+
+		countDown = new Countdown(0, 0, SONG.countdown);
+
+		modchartSystem = new game.modchart.ModchartSystem(noteController);
+		modchartSystem.cacheStrumBase();
+
+		addStrumAndNotes();
+
+		chars.initControllers(noteController, gameAudio, playStateConfig);
+	}
+
+	function addStrumAndNotes():Void {
 		for (noteControl in [
 			noteController.blackBacks,
 			noteController.strums,
@@ -252,13 +283,15 @@ class PlayState extends MusicBeatState {
 			add(noteControl);
 		}
 
-		chars.initControllers(noteController, gameAudio, playStateConfig);
-
-		countDown = new Countdown(0, 0, SONG.countdown);
-
-		modchartSystem = new game.modchart.ModchartSystem(noteController);
 		add(modchartSystem);
-		modchartSystem.cacheStrumBase();
+
+		if (SONG.songData.notes != null)
+			noteController.generateNotes(startTime, SONG);
+
+		if (SONG.songData.gameplay.events != null) {
+			events.loadEvents(SONG.songData.gameplay.events);
+			events.updateEvents(0);
+		}
 	}
 
 	// Code Song
@@ -273,12 +306,6 @@ class PlayState extends MusicBeatState {
 		if (startTime > 0)
 			gameAudio.setTime(startTime);
 
-		noteController.generateNotes(startTime, SONG);
-
-		if (SONG.songData.gameplay.events != null) {
-			events.loadEvents(SONG.songData.gameplay.events);
-			events.updateEvents(0);
-		}
 		modding.vslice.VSliceHooks.dispatch('onSongLoaded', modding.vslice.VSliceHooks.event('SONG_LOADED'));
 	}
 
@@ -613,19 +640,12 @@ class PlayState extends MusicBeatState {
 			countDown = null;
 		}
 
-		buildStrumsandNotes();
+		buildStrumsAndNotes();
 
-		if (SONG.songData.notes != null)
-			noteController.generateNotes(0, SONG);
 		startCountdown();
 
 		if (chars != null)
 			chars.resetAll();
-
-		if (SONG.songData.gameplay.events != null) {
-			events.loadEvents(SONG.songData.gameplay.events);
-			events.updateEvents(0);
-		}
 
 		#if HSCRIPT_ALLOWED
 		modding.scripting.ScriptedVars.gameplayVars(script, this);
