@@ -13,6 +13,9 @@ class GameOverSubstate extends MusicBeatSubstate {
 	var music:String = 'default/gameOver';
 	var endSound:String = 'default/gameOverEnd';
 
+	var songFolder:String;
+	var curDifficulty:Int;
+
 	var confirm:Bool = false;
 
 	public function new() {
@@ -21,6 +24,10 @@ class GameOverSubstate extends MusicBeatSubstate {
 
 	override public function create() {
 		super.create();
+
+		songFolder = PlayState.instance.songFolder;
+		curDifficulty = PlayState.instance.curDifficulty;
+
 		funkin.play.GameOverSubState.instance = new funkin.play.GameOverSubState(this);
 
 		#if HSCRIPT_ALLOWED
@@ -56,7 +63,11 @@ class GameOverSubstate extends MusicBeatSubstate {
 			char.applyPlayerFlip();
 
 			var alivePos = charYep.characterData?.gameplay?.position;
-			char.setPosition(charYep.x - (alivePos != null ? alivePos[0] ?? 0 : 0) + char.x, charYep.y - (alivePos != null ? alivePos[1] ?? 0 : 0) + char.y);
+			char.setPosition(charYep.x
+				- (alivePos != null ? alivePos[0] ?? 0 : 0)
+				+ char.x, charYep.y
+				- (alivePos != null ? alivePos[1] ?? 0 : 0)
+				+ char.y);
 
 			if (PlayState.instance.cameraController != null)
 				PlayState.instance.cameraController.followChar(char);
@@ -118,7 +129,7 @@ class GameOverSubstate extends MusicBeatSubstate {
 			new flixel.util.FlxTimer().start(0.7, function(_) {
 				FlxG.camera.fade(flixel.util.FlxColor.BLACK, 2, false, function() {
 					close();
-					MusicBeatState.resetState();
+					MusicBeatState.switchState(() -> new states.menus.LoadingState(songFolder, curDifficulty));
 				});
 			});
 		}

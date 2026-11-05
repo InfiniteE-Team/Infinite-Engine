@@ -142,13 +142,18 @@ class PlayState extends MusicBeatState {
 
 		PlayStateConfig.isPlaying = true;
 
-		addCameras();
-
 		if (prebuilt)
 			finishPrebuilt();
+		else {
+			while (!prebuilt)
+				prebuildStep();
+			finishPrebuilt();
+		}
 	}
 
 	function finishPrebuilt() {
+		addCameras();
+
 		add(gameAudio);
 
 		loadSong();
@@ -193,10 +198,14 @@ class PlayState extends MusicBeatState {
 		lime.app.Application.current.window.title = modding.mods.ModData.ModConfig.title + " - Song: " + curSong;
 
 	public function addCameras() {
-		FlxG.cameras.reset(camGame);
-		FlxG.cameras.add(camHUD, false);
-		FlxG.cameras.add(camOther, false);
-		FlxG.cameras.add(camSubtitles, false);
+		if (camGame != null)
+			FlxG.cameras.reset(camGame);
+		if (camHUD != null)
+			FlxG.cameras.add(camHUD, false);
+		if (camOther != null)
+			FlxG.cameras.add(camOther, false);
+		if (camSubtitles != null)
+			FlxG.cameras.add(camSubtitles, false);
 	}
 
 	function buildStageAndChars():Void {
