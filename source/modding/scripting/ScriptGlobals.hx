@@ -8,6 +8,57 @@ import modding.editors.DebugMenu;
 class ScriptGlobals {
 	static var initialized:Bool = false;
 
+	static var hxClassPaths:Array<String> = [
+		// Flixel
+		'flixel.FlxG',
+		'flixel.FlxSprite',
+		'flixel.text.FlxText',
+		'flixel.sound.FlxSound',
+		'flixel.tweens.FlxTween',
+		'flixel.util.FlxTimer',
+		'flixel.tweens.FlxEase',
+		'flixel.math.FlxMath',
+		// Engine
+		'core.json.engine.GlobalData.GlobalConfig',
+		'game.objects.Bar',
+		'game.PlayState',
+		'utils.Alphabet',
+		'game.objects.sprites.Character',
+		'game.objects.sprites.Stage',
+		'core.assets.Paths',
+		'core.assets.FunkinSprite',
+		'core.rhythm.RhythmCore',
+		'modding.scripting.ScriptHandler',
+		'core.config.Controls',
+		'states.MusicBeatState',
+		// Audio
+		'core.rhythm.audio.Sound',
+		'core.rhythm.audio.MasterAudio',
+		'core.rhythm.audio.GameAudio',
+		// Cutscenes
+		'states.cutscenes.VideoState',
+		'game.objects.cutscenes.VideoSprite',
+		// Scripting
+		'modding.scripting.interfaces.ScriptState',
+		'modding.scripting.interfaces.ScriptSubstate',
+		'modding.scripting.types.ScriptClass',
+		// Shaders
+		'core.render.shaders.CustomShader',
+		// Modchart
+		'game.modchart.ModchartSystem',
+		// Foxlite
+		'foxlite.FoxBasic',
+		'foxlite.FoxCache',
+		'foxlite.FoxCamera',
+		'foxlite.FoxInstancedModel',
+		'foxlite.FoxLayer',
+		'foxlite.FoxModel',
+		'foxlite.FoxObject',
+		'foxlite.FoxOfflineScene',
+		'foxlite.FoxScene',
+		'foxlite.FoxShader',
+	];
+
 	public static function init():Void {
 		if (initialized)
 			return;
@@ -15,100 +66,9 @@ class ScriptGlobals {
 
 		hxscript.Config.interpClass = modding.scripting.GameInterp;
 
-		Boot.importGlobals([
-			// Flixel
-			'flixel.FlxG',
-			'flixel.FlxSprite',
-			'flixel.text.FlxText',
-			'flixel.sound.FlxSound',
-			'flixel.tweens.FlxTween',
-			'flixel.util.FlxTimer',
-			'flixel.tweens.FlxEase',
-			'flixel.math.FlxMath',
-			// Engine
-			'core.json.engine.GlobalData.GlobalConfig',
-			'game.objects.Bar',
-			'game.PlayState',
-			'utils.Alphabet',
-			'game.objects.sprites.Character',
-			'game.objects.sprites.Stage',
-			'core.assets.Paths',
-			'core.assets.FunkinSprite',
-			'core.rhythm.RhythmCore',
-			'modding.scripting.ScriptHandler',
-			'core.config.Controls',
-			'states.MusicBeatState',
-			// Audio
-			'core.rhythm.audio.Sound',
-			'core.rhythm.audio.MasterAudio',
-			'core.rhythm.audio.GameAudio',
-			// Cutscenes
-			'states.cutscenes.VideoState',
-			'game.objects.cutscenes.VideoSprite',
-			// Scripting
-			'modding.scripting.interfaces.ScriptState',
-			'modding.scripting.interfaces.ScriptSubstate',
-			'modding.scripting.types.ScriptClass',
-			// Shaders
-			'core.render.shaders.CustomShader',
-			// Modchart
-			'game.modchart.ModchartSystem',
-			// Foxlite
-			'foxlite.FoxBasic',
-			'foxlite.FoxCache',
-			'foxlite.FoxCamera',
-			'foxlite.FoxInstancedModel',
-			'foxlite.FoxLayer',
-			'foxlite.FoxModel',
-			'foxlite.FoxObject',
-			'foxlite.FoxOfflineScene',
-			'foxlite.FoxScene',
-			'foxlite.FoxShader',
-		]);
+		Boot.importGlobals(hxClassPaths);
 
-		Config.globalVariables.set('Json', haxe.Json);
-		Config.globalVariables.set('FormatJson', FormatJson);
-		Config.globalVariables.set('SaveScore', core.config.SaveScore);
-		Config.globalVariables.set('SaveData', SaveData);
-		Config.globalVariables.set('OptionType', core.enums.OptionType);
-		Config.globalVariables.set('Console', Console);
-
-		Config.globalVariables.set('FPSCounter', core.ui.FPSCounter);
-
-		Config.globalVariables.set('File', sys.io.File);
-		Config.globalVariables.set('FileSystem', sys.FileSystem);
-		Config.globalVariables.set('Camera', game.objects.Camera);
-
-		Config.globalVariables.set('globalConfig', core.ConfigMain.globalData);
-		Config.globalVariables.set('modData', modding.mods.ModData.ModConfig.modData);
-
-		Config.globalVariables.set('AudioAnalyzer', core.rhythm.audio.AudioAnalyzer);
-
-		Config.globalVariables.set('StoryMenuState', states.menus.StoryMenuState);
-
-		// OpenFL
-		Config.globalVariables.set('Capabilities', openfl.system.Capabilities);
-
-		// Modifiers
-		Config.globalVariables.set('DrunkModifier', DrunkModifier);
-		Config.globalVariables.set('TornadoModifier', TornadoModifier);
-		Config.globalVariables.set('TipsyModifier', TipsyModifier);
-		Config.globalVariables.set('TipsyZModifier', TipsyZModifier);
-		Config.globalVariables.set('ReverseModifier', ReverseModifier);
-		Config.globalVariables.set('FlipModifier', FlipModifier);
-		Config.globalVariables.set('ConfusionModifier', ConfusionModifier);
-		Config.globalVariables.set('MiniModifier', MiniModifier);
-		Config.globalVariables.set('StealthModifier', StealthModifier);
-		Config.globalVariables.set('ZModifier', ZModifier);
-		Config.globalVariables.set('SpeedModifier', SpeedModifier);
-		Config.globalVariables.set('ConfusionOffsetModifier', ConfusionOffsetModifier);
-		Config.globalVariables.set('TwirlModifier', TwirlModifier);
-		Config.globalVariables.set('ShakyModifier', ShakyModifier);
-		Config.globalVariables.set('PulseModifier', PulseModifier);
-		Config.globalVariables.set('BlinkModifier', BlinkModifier);
-		Config.globalVariables.set('TanDrunkModifier', TanDrunkModifier);
-		Config.globalVariables.set('BeatXModifier', BeatXModifier);
-		Config.globalVariables.set('ShrinkXModifier', ShrinkXModifier);
+		registerValues((k, v) -> Config.globalVariables.set(k, v));
 
 		#if windows
 		Config.globalVariables.set('WindowsAPI', winapi.WindowsAPI);
@@ -121,75 +81,104 @@ class ScriptGlobals {
 	public static function initLua():Void {
 		if (modding.scripting.lua.LuaScript.globalClasses != null)
 			return;
-		modding.scripting.lua.LuaScript.globalClasses = [
-			// Flixel
-			"FlxG" => flixel.FlxG,
-			"FlxSprite" => flixel.FlxSprite,
-			"FlxText" => flixel.text.FlxText,
-			"FlxSound" => flixel.sound.FlxSound,
-			"Camera" => game.objects.Camera,
-			"FlxTween" => flixel.tweens.FlxTween,
-			"FlxTimer" => flixel.util.FlxTimer,
-			"FlxEase" => flixel.tweens.FlxEase,
-			"FlxMath" => flixel.math.FlxMath,
-			// Engine
-			"Bar" => game.objects.Bar,
-			"PlayState" => game.PlayState,
-			"Alphabet" => utils.Alphabet,
-			"Character" => game.objects.sprites.Character,
-			"Stage" => game.objects.sprites.Stage,
-			"Paths" => core.assets.Paths,
-			"FunkinSprite" => core.assets.FunkinSprite,
-			"RhythmCore" => core.rhythm.RhythmCore,
-			"FPSCounter" => core.ui.FPSCounter,
-			// Json
-			"Json" => haxe.Json,
-			"FormatJson" => FormatJson,
-			// Save Config Game
-			"SaveScore" => core.config.SaveScore,
-			"SaveData" => SaveData,
-			// Sound
-			"Sound" => core.rhythm.audio.Sound,
-			"MasterAudio" => core.rhythm.audio.MasterAudio,
-			"GameAudio" => core.rhythm.audio.GameAudio,
-			// Cutscenes
-			"VideoState" => states.cutscenes.VideoState,
-			"VideoSprite" => game.objects.cutscenes.VideoSprite,
-			// Utils
-			"Console" => Console,
-			#if windows
-			"WindowsAPI" => winapi.WindowsAPI, "WindowsGDI" => winapi.gdi.WindowsGDI, "WindowsGDIThread" => winapi.gdi.WindowsGDIThread,
-			#end
-			// Std
-			"FileSystem" => sys.FileSystem,
-			"File" => sys.io.File,
-			// OpenFL
-			"Capabilities" => openfl.system.Capabilities,
-			// modchart
-			"ModchartSystem" => game.modchart.ModchartSystem,
-			// Shaders
-			"CustomShader" => core.render.shaders.CustomShader,
-			// modifiers
-			"DrunkModifier" => DrunkModifier,
-			"TornadoModifier" => TornadoModifier,
-			"TipsyModifier" => TipsyModifier,
-			"TipsyZModifier" => TipsyZModifier,
-			"ReverseModifier" => ReverseModifier,
-			"FlipModifier" => FlipModifier,
-			"ConfusionModifier" => ConfusionModifier,
-			"MiniModifier" => MiniModifier,
-			"StealthModifier" => StealthModifier,
-			"ZModifier" => ZModifier,
-			"SpeedModifier" => SpeedModifier,
-			"ConfusionOffsetModifier" => ConfusionOffsetModifier,
-			"TwirlModifier" => TwirlModifier,
-			"ShakyModifier" => ShakyModifier,
-			"PulseModifier" => PulseModifier,
-			"BlinkModifier" => BlinkModifier,
-			"ShrinkXModifier" => ShrinkXModifier,
-			"BeatXModifier" => BeatXModifier,
-			"TanDrunkModifier" => TanDrunkModifier,
-			// "WindowModManager" => windowmodcharting.WindowModManager
-		];
+
+		var map:Map<String, Dynamic> = new Map<String, Dynamic>();
+		registerValues((k, v) -> map.set(k, v));
+
+		#if windows
+		map.set('WindowsAPI', winapi.WindowsAPI);
+		map.set('WindowsGDI', winapi.gdi.WindowsGDI);
+		map.set('WindowsGDIThread', winapi.gdi.WindowsGDIThread);
+		#end
+
+		modding.scripting.lua.LuaScript.globalClasses = map;
+	}
+
+	static function registerValues(set:String->Dynamic->Void):Void {
+		// Flixel
+		set("FlxG", flixel.FlxG);
+		set("FlxSprite", flixel.FlxSprite);
+		set("FlxText", flixel.text.FlxText);
+		set("FlxSound", flixel.sound.FlxSound);
+		set("FlxTween", flixel.tweens.FlxTween);
+		set("FlxTimer", flixel.util.FlxTimer);
+		set("FlxEase", flixel.tweens.FlxEase);
+		set("FlxMath", flixel.math.FlxMath);
+		// Engine
+		set("Camera", game.objects.Camera);
+		set("Bar", game.objects.Bar);
+		set("PlayState", game.PlayState);
+		set("Alphabet", utils.Alphabet);
+		set("Character", game.objects.sprites.Character);
+		set("Stage", game.objects.sprites.Stage);
+		set("Paths", core.assets.Paths);
+		set("FunkinSprite", core.assets.FunkinSprite);
+		set("RhythmCore", core.rhythm.RhythmCore);
+		set("FPSCounter", core.ui.FPSCounter);
+		set("ScriptHandler", modding.scripting.ScriptHandler);
+		set("Controls", core.config.Controls);
+		set("MusicBeatState", states.MusicBeatState);
+		set("StoryMenuState", states.menus.StoryMenuState);
+		set("AudioAnalyzer", core.rhythm.audio.AudioAnalyzer);
+		// Json
+		set("Json", haxe.Json);
+		set("FormatJson", FormatJson);
+		set("SaveScore", core.config.SaveScore);
+		set("SaveData", SaveData);
+		set("OptionType", core.enums.OptionType);
+		// Audio
+		set("Sound", core.rhythm.audio.Sound);
+		set("MasterAudio", core.rhythm.audio.MasterAudio);
+		set("GameAudio", core.rhythm.audio.GameAudio);
+		// Cutscenes
+		set("VideoState", states.cutscenes.VideoState);
+		set("VideoSprite", game.objects.cutscenes.VideoSprite);
+		// Scripting
+		set("ScriptState", modding.scripting.interfaces.ScriptState);
+		set("ScriptSubstate", modding.scripting.interfaces.ScriptSubstate);
+		set("ScriptClass", modding.scripting.types.ScriptClass);
+		// Debug / System
+		set("Console", Console);
+		set("FileSystem", sys.FileSystem);
+		set("File", sys.io.File);
+		// OpenFL
+		set("Capabilities", openfl.system.Capabilities);
+		// Render
+		set("CustomShader", core.render.shaders.CustomShader);
+		// Modchart
+		set("ModchartSystem", game.modchart.ModchartSystem);
+		// Config global
+		set("globalConfig", core.ConfigMain.globalData);
+		set("modData", modding.mods.ModData.ModConfig.modData);
+		// Foxlite
+		set("FoxBasic", foxlite.FoxBasic);
+		set("FoxCache", foxlite.FoxCache);
+		set("FoxCamera", foxlite.FoxCamera);
+		set("FoxInstancedModel", foxlite.FoxInstancedModel);
+		set("FoxModel", foxlite.FoxModel);
+		set("FoxObject", foxlite.FoxObject);
+		set("FoxOfflineScene", foxlite.FoxOfflineScene);
+		set("FoxScene", foxlite.FoxScene);
+		set("FoxShader", foxlite.FoxShader);
+		// Modifiers
+		set("DrunkModifier", DrunkModifier);
+		set("TornadoModifier", TornadoModifier);
+		set("TipsyModifier", TipsyModifier);
+		set("TipsyZModifier", TipsyZModifier);
+		set("ReverseModifier", ReverseModifier);
+		set("FlipModifier", FlipModifier);
+		set("ConfusionModifier", ConfusionModifier);
+		set("MiniModifier", MiniModifier);
+		set("StealthModifier", StealthModifier);
+		set("ZModifier", ZModifier);
+		set("SpeedModifier", SpeedModifier);
+		set("ConfusionOffsetModifier", ConfusionOffsetModifier);
+		set("TwirlModifier", TwirlModifier);
+		set("ShakyModifier", ShakyModifier);
+		set("PulseModifier", PulseModifier);
+		set("BlinkModifier", BlinkModifier);
+		set("TanDrunkModifier", TanDrunkModifier);
+		set("BeatXModifier", BeatXModifier);
+		set("ShrinkXModifier", ShrinkXModifier);
 	}
 }

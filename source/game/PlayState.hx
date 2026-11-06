@@ -97,11 +97,6 @@ class PlayState extends MusicBeatState {
 
 				modding.vslice.VSliceHooks.reset();
 				funkin.play.PlayState.instance = modding.vslice.VSlice.isActive() ? new funkin.play.PlayState(null, songFolder) : null;
-
-				#if HSCRIPT_ALLOWED
-				startScript();
-				script.call("onCreate", []);
-				#end
 			case 1:
 				camGame = new Camera();
 				camHUD = new Camera();
@@ -141,6 +136,11 @@ class PlayState extends MusicBeatState {
 			FlxG.mouse.visible = false;
 
 		PlayStateConfig.isPlaying = true;
+
+		#if HSCRIPT_ALLOWED
+		startScript();
+		script.call("onCreate", []);
+		#end
 
 		if (prebuilt)
 			finishPrebuilt();

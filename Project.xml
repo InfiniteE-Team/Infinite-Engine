@@ -58,7 +58,7 @@
 
 	<haxelib name="hxvlc" if="desktop"/>
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
-	<haxelib name="linc_luajit" if="LUA_ALLOWED"/>
+	<haxelib name="hxluajit" if="LUA_ALLOWED"/>
 	<haxelib name="sl-windows-api" if="windows"/>
 
 	<haxelib name="funkin.vis" />
@@ -97,9 +97,6 @@
 	<haxeflag name="--macro" value="include('foxlite')" />
 	<haxeflag name="--macro" value="include('modding.scripting.interfaces')" />
 	<haxeflag name="--macro" value="include('funkin', true, ['funkin.vis'])" />
-
-	<haxedef name="HXCPP_CLANG_PCH" value="0" if="linux" />
-	<haxedef name="HXCPP_M64" if="cpp" />
 
 	<!-- Place custom nodes like icons here -->
 	<icon path="assets/icon.png" />

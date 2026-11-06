@@ -142,7 +142,7 @@ class InputController {
 				noteController.noteTypeManager?.onNoteHit(bestNote);
 			}
 			return bestNote;
-		} else if (!hasActiveSustain) {
+		} else {
 			charStrums[i].playAnim('press' + i, true);
 			if (!isGhostTapping)
 				onMiss(playStateConfig, noteController, gameAudio);
