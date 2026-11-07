@@ -406,7 +406,7 @@ class LuaScript {
 		}
 		var key:String = Lua.tostring(L, 2);
 		Lua.getfield(L, 1, "__hx_id");
-		var oid = Lua.tointeger(L, -1);
+		var oid:Int = (Lua.tointeger(L, -1) : Int);
 		Lua.pop(L, 1);
 		var o = getObject(oid);
 		if (o == null) {
@@ -476,7 +476,7 @@ class LuaScript {
 		else if (Std.isOfType(v, Bool))
 			Lua.pushboolean(L, v ? 1 : 0);
 		else if (Std.isOfType(v, Int))
-			Lua.pushinteger(L, v);
+			Lua.pushinteger(L, (v : Int));
 		else if (Std.isOfType(v, Float))
 			Lua.pushnumber(L, v);
 		else if (Std.isOfType(v, String))
@@ -587,7 +587,8 @@ class LuaScript {
 		if (Lua.istable(L, -1) != 0) {
 			Lua.getfield(L, -1, "traceback");
 			if (Lua.isfunction(L, -1) != 0) {
-				Lua.pushstring(L, msg);
+				var msgForLua:cpp.ConstCharStar = (msg : cpp.ConstCharStar);
+				Lua.pushstring(L, msgForLua);
 				Lua.pushinteger(L, 2);
 				if (Lua.pcall(L, 2, 1, 0) == 0) {
 					var tb:cpp.ConstCharStar = Lua.tostring(L, -1);
