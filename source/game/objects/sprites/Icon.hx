@@ -35,6 +35,7 @@ class Icon extends modding.scripting.types.sprites.ScriptedSprite {
 		#end
 
 		switch (characterData) {
+			// hardcode reference lel
 			default:
 				if (characterData != null && characterData.icon != null) {
 					var iconData = FormatJson.getIconDataPlaceholder(characterData.icon);

@@ -52,11 +52,11 @@
 	<haxelib name="flixel-animate"/>
 	<haxelib name="openfl"/>
 
-	<haxelib name="hxscript" />
+	<haxelib name="hxscript" if="HSCRIPT_ALLOWED"/>
 
 	<haxelib name="ale-json"/>
 
-	<haxelib name="hxvlc" if="desktop"/>
+	<haxelib name="hxvlc" if="VIDEO_ALLOWED"/>
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
 	<haxelib name="hxluajit" if="LUA_ALLOWED"/>
 	<haxelib name="sl-windows-api" if="windows"/>
