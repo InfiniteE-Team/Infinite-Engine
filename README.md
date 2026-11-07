@@ -14,6 +14,14 @@ The infinite engine is an FNF engine written from scratch in HaxeFlixel.
 <img width="480" height="280" alt="image" src="https://github.com/user-attachments/assets/2a8835ec-ddf4-49ed-abfe-94427bc5ebaa" />
 <img width="481" height="280" alt="image" src="https://github.com/user-attachments/assets/273392c3-9915-4564-a194-590d1661454f" />
 
+**WorkFlows:**
+- [Windows](https://nightly.link/InfiniteE-Team/Infinite-Engine/workflows/init.yml/dev/Windows%20Build.zip)
+- [MacOS](https://nightly.link/InfiniteE-Team/Infinite-Engine/workflows/init.yml/dev/MacOS%20Build.zip)
+- [MacOSx64](
+https://nightly.link/InfiniteE-Team/Infinite-Engine/workflows/init.yml/dev/MacOS%20x64%20Build.zip)
+- [Linux](
+https://nightly.link/InfiniteE-Team/Infinite-Engine/workflows/init.yml/dev/Linux%20Build.zip)
+
 **Infinite Team:**
 -----------------------
 - Manux (Main Coder, and Concepts)
