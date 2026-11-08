@@ -49,7 +49,7 @@ class FPS extends openfl.display.FPS {
 		var maxMem:String = Memory.formatRam(peakRAM);
 
 		if (!core.ConfigMain.globalData.developerMode) {
-			text = 'FPS: $currentFPS\nTask MEM: $mem / $maxMem';
+			text = 'FPS: $currentFPS\n\nTask MEM: $mem / $maxMem';
 		} else {
 			if (modding.mods.ModsRegistry.onMod)
 				mods = ' - ' + modding.mods.ModsRegistry.currentMod;

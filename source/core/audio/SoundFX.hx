@@ -9,7 +9,7 @@ class SoundFX extends FlxSound {
 		super();
 	}
 
-	public static function randomPitch(soundPath:String, ?minPitch:Float = 0.8, ?maxPitch:Float = 1.2, ?volume:Float = 1.0, ?varyVolume:Bool = false):FlxSound {
+	public static function randomPitch(soundPath:String, ?minPitch:Float = 0.8, ?maxPitch:Float = 1, ?volume:Float = 1.0, ?varyVolume:Bool = false):FlxSound {
 		var sound = FlxG.sound.play(soundPath, volume);
 		if (sound != null) {
 			sound.pitch = FlxG.random.float(minPitch, maxPitch);

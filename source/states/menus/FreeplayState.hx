@@ -425,7 +425,7 @@ class FreeplayState extends MusicBeatState {
 
 		curSelected += change;
 
-		core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.9, 1.1);
+		core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.9, 1);
 
 		if (curSelected < 0)
 			curSelected = freeplayData.songData.length - 1;

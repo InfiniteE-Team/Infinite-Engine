@@ -430,7 +430,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		if (currentList == null || currentList.length == 0)
 			return;
 
-		core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.9, 1.1);
+		core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.9, 1);
 
 		var opt = currentList[curSelectedOption];
 		var currentValue:Dynamic = Reflect.field(SaveData.data, opt.saveField);
