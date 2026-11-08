@@ -31,7 +31,7 @@ class Sound extends flixel.sound.FlxSound {
 			return;
 		}
 
-		var oflSound = streamedCache.get(absPath);
+		var oflSound = isStreamable(absPath) ? openStream(absPath) : streamedCache.get(absPath);
 		if (oflSound == null) {
 			openfl.media.Sound.loadFromFile(absPath).onComplete(function(sound:openfl.media.Sound) {
 				if (sound != null) {
@@ -49,6 +49,19 @@ class Sound extends flixel.sound.FlxSound {
 		}
 
 		load(oflSound);
+	}
+
+	public static function isStreamable(absPath:String):Bool
+		return #if lime_vorbis absPath.toLowerCase().endsWith('.ogg') #else false #end;
+
+	// ogg plays as a stream instead of decoding it all to RAM, a stream can't be shared so it isn't cached -JloorDev
+	public static function openStream(absPath:String):Null<openfl.media.Sound> {
+		#if lime_vorbis
+		var vorbis = lime.media.vorbis.VorbisFile.fromFile(absPath);
+		if (vorbis != null)
+			return openfl.media.Sound.fromAudioBuffer(lime.media.AudioBuffer.fromVorbisFile(vorbis));
+		#end
+		return null;
 	}
 
 	public var playbackRate(default, set):Float = 1.0;

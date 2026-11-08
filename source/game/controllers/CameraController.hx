@@ -39,6 +39,9 @@ class CameraController {
 	var fixedX:Float = 0;
 	var fixedY:Float = 0;
 
+	var poseX:Float = 0;
+	var poseY:Float = 0;
+
 	public function new(camGame:Camera, camHUD:Camera) {
 		this.camGame = camGame;
 		this.camHUD = camHUD;
@@ -50,19 +53,28 @@ class CameraController {
 	}
 
 	public function update(elapsed:Float):Void {
+		var poseOff = char != null ? getCamOffsetPose(char) : {x: 0.0, y: 0.0};
+		if (focusTween != null) {
+			// followLerp is 1 during the tween, without this the camera jumps on every note -JloorDev
+			var k = FlxMath.bound(elapsed * 60 * lerp, 0, 1);
+			poseX = FlxMath.lerp(poseX, poseOff.x, k);
+			poseY = FlxMath.lerp(poseY, poseOff.y, k);
+		} else {
+			poseX = poseOff.x;
+			poseY = poseOff.y;
+		}
+
 		if (focusTween != null) {
 			var tx = fixedX, ty = fixedY;
 			if (char != null) {
 				var pos = char.getCamPosition();
-				var poseOff = getCamOffsetPose(char);
-				tx = pos.x + focusX + poseOff.x;
-				ty = pos.y + focusY + poseOff.y;
+				tx = pos.x + focusX + poseX;
+				ty = pos.y + focusY + poseY;
 			}
 			moveCameraTo(FlxMath.lerp(focusStartX, tx, focusProgress), FlxMath.lerp(focusStartY, ty, focusProgress));
 		} else if (!isLock && char != null) {
 			var pos = char.getCamPosition();
-			var poseOff = getCamOffsetPose(char);
-			moveCameraTo(pos.x + focusX + poseOff.x, pos.y + focusY + poseOff.y);
+			moveCameraTo(pos.x + focusX + poseX, pos.y + focusY + poseY);
 		}
 
 		lerpZoom(elapsed);

@@ -27,6 +27,10 @@ class StrumNote extends FunkinSprite {
 	public function loadSprite(x:Float, y:Float, noteSkinData:ObjectData) {
 		setPosition(x, y);
 		loadProps(noteSkinData, 'game/noteskins/$noteSkin/strumnotes');
+		// skins don't set looped and anims loop by default -JloorDev
+		for (name in animation.getNameList())
+			if (name.startsWith('press') || name.startsWith('confirm'))
+				animation.getByName(name).looped = false;
 	}
 
 	public function applyShader(noteSkinData:NoteSkinData) {

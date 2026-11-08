@@ -20,8 +20,20 @@ class FPS extends openfl.display.FPS {
 	}
 
 	@:noCompletion
+	var sinceRefresh:Float = 0;
+
+	// the glow filter redraws on every text change, so it only refreshes twice a second -JloorDev
 	override private function __enterFrame(e:Float):Void {
-		super.__enterFrame(e);
+		currentTime += e;
+		times.push(currentTime);
+		while (times[0] < currentTime - 1000)
+			times.shift();
+		currentFPS = times.length;
+
+		sinceRefresh += e;
+		if (sinceRefresh < 500)
+			return;
+		sinceRefresh = 0;
 		infoFPS();
 	}
 

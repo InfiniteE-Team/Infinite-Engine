@@ -60,7 +60,7 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 			var used:Array<String> = [];
 			for (i in 0...SONG.chars.length) {
 				var file = voiceStem(i < SONG.vocs.length ? SONG.vocs[i] : '');
-				if (file != null && !used.contains(file)) {
+				if (file != null && file != '' && !used.contains(file)) {
 					used.push(file);
 					stems.push({id: SONG.chars[i].id, file: file});
 				}
@@ -163,6 +163,8 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 		var sound = new Sound(MUSIC, Paths.getPath(path, 'songAudio'));
 		sound.volume = 1.0;
 		if (onfinish != null) {
+			// streams load in the constructor, before onLoaded is set -JloorDev
+			sound.onComplete = onfinish;
 			sound.onLoaded = () -> {
 				sound.onComplete = onfinish;
 			};

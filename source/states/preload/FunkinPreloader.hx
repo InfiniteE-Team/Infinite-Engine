@@ -251,6 +251,8 @@ class FunkinPreloader extends MusicBeatState {
 				scanForAudio(fullPath, rootDir);
 			} else if (item.endsWith('.ogg')) {
 				var absPath = FileSystem.absolutePath(fullPath);
+				if (Sound.isStreamable(absPath))
+					continue;
 
 				if (!Sound.streamedCache.exists(absPath) && !audioQueue.contains(absPath))
 					audioQueue.push(absPath);

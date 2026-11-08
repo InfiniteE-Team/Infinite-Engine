@@ -18,7 +18,7 @@ class MasterAudio {
 		}
 
 		var absPath = sys.FileSystem.absolutePath(path);
-		var cached = Sound.streamedCache.get(absPath);
+		var cached = Sound.isStreamable(absPath) ? Sound.openStream(absPath) : Sound.streamedCache.get(absPath);
 
 		if (cached != null) {
 			launchMusic(cached, volume);

@@ -68,7 +68,11 @@ class CharacterController extends FunkinObjectRegistry {
 	var opponentChars:Array<Character> = [];
 	var gfChars:Array<Character> = [];
 
-	var input:InputController = new InputController();
+	// the strumline's input is the one that gets the ghost tapping option -JloorDev
+	var input(get, never):InputController;
+
+	function get_input():InputController
+		return noteController.input;
 
 	var isGhostTapping:Bool = true;
 
@@ -109,8 +113,11 @@ class CharacterController extends FunkinObjectRegistry {
 
 	public function syncGhostTapping():Void {
 		isGhostTapping = SaveData.data.ghosttaping;
-		if (noteController != null)
-			noteController.input.isGhostTapping = isGhostTapping;
+		if (noteController != null) {
+			noteController.isGhostTapping = isGhostTapping;
+			for (sl in noteController.strumlines)
+				sl.input.isGhostTapping = isGhostTapping;
+		}
 	}
 
 	public function loadCharacter(id:String, name:String, role:String, targetGroup:FlxTypedGroup<flixel.FlxBasic>, script:ScriptHandler):Character {
@@ -254,7 +261,7 @@ class CharacterController extends FunkinObjectRegistry {
 				var globalLane = noteController.charStrumOffsets.get(char.id);
 				var holdingActive = noteController.getStrumline(char.id)?.activeOpponentHolds.exists(i);
 				if (holdingActive)
-					setSing(char, globalLane + i);
+					holdSing(char, globalLane + i);
 				else if (strums[i].confirmHoldTimer < 0)
 					strums[i].playAnim('static' + i, true);
 			}
@@ -326,7 +333,7 @@ class CharacterController extends FunkinObjectRegistry {
 			if (songPos < sustain.strumTime || songPos > sustain.strumTime + sustain.length)
 				continue;
 			if (input.control.getGroupInput("noteKeys")[i])
-				setSing(char, sustain.direction);
+				holdSing(char, sustain.direction);
 			else
 				getCharMiss(char, nc, strums, i);
 		}
@@ -406,6 +413,15 @@ class CharacterController extends FunkinObjectRegistry {
 	}
 
 	// utils
+
+	function holdSing(char:Character, dir:Int) {
+		var cur = char.layers.length > 0 ? char.layers[0].currentAnim : null;
+		if (char.isSing && cur != null && cur.startsWith(Character.getCharAnim(dir))) {
+			char.singCountTime = 0;
+			return;
+		}
+		setSing(char, dir);
+	}
 
 	inline function setSing(char:Character, dir:Int) {
 		#if HSCRIPT_ALLOWED

@@ -207,8 +207,13 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 	public function beatHit(beat:Float) {
 		if (iconP1 == null && iconP2 == null)
 			return;
+		var gf = PlayState.instance?.chars?.gf;
 		for (icon in [iconP1, iconP2]) {
-			if (icon.bumpInBeats && Math.floor(beat % icon.stepTempo) == 0)
+			if (icon == null || !icon.bumpInBeats)
+				continue;
+			// with a gf the icons bop with her dance -JloorDev
+			var every = gf != null ? Math.max(1, gf.danceEvery) : icon.stepTempo;
+			if (Math.floor(beat % every) == 0)
 				icon.scale.set(1.2 * icon.baseScale, 1.2 * icon.baseScale);
 		}
 	}

@@ -185,7 +185,12 @@ class Paths {
 
 		// CPU / RAM
 		sys.thread.Thread.create(function() {
-			var img = lime.graphics.Image.fromFile(imagePath);
+			var img:lime.graphics.Image = null;
+			try {
+				img = lime.graphics.Image.fromFile(imagePath);
+			} catch (e:Dynamic) {
+				Console.log('cacheAutoAsync: could not decode "$imagePath": $e', true);
+			}
 			var rawData:String = null;
 			try {
 				rawData = atlasPath != null ? readText(atlasPath) : null;
@@ -195,42 +200,46 @@ class Paths {
 				var finalAsset:Dynamic = null;
 
 				if (img != null && !cache.exists(imagePath)) {
-					var bmp = openfl.display.BitmapData.fromImage(img);
-					var graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, imagePath);
-					graphic.persist = true;
-
-					@:privateAccess
-					graphic.bitmap.getTexture(FlxG.stage.context3D);
-					graphic.bitmap.disposeImage();
-					img.buffer = null;
-					img = null;
-
 					try {
-						switch (formatDetected) {
-							case "animate":
-								finalAsset = FlxAnimateFrames.fromAnimate(folderPath);
-							case "sparrow":
-								finalAsset = FlxAtlasFrames.fromSparrow(graphic, rawData);
-							case "json":
-								finalAsset = FlxAtlasFrames.fromTexturePackerJson(graphic, rawData);
-							case "pack":
-								finalAsset = FlxAtlasFrames.fromLibGdx(graphic, rawData);
-							default:
-								finalAsset = graphic;
+						var bmp = openfl.display.BitmapData.fromImage(img);
+						var graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, imagePath);
+						graphic.persist = true;
+
+						@:privateAccess
+						graphic.bitmap.getTexture(FlxG.stage.context3D);
+						graphic.bitmap.disposeImage();
+						img.buffer = null;
+						img = null;
+
+						try {
+							switch (formatDetected) {
+								case "animate":
+									finalAsset = FlxAnimateFrames.fromAnimate(folderPath);
+								case "sparrow":
+									finalAsset = FlxAtlasFrames.fromSparrow(graphic, rawData);
+								case "json":
+									finalAsset = FlxAtlasFrames.fromTexturePackerJson(graphic, rawData);
+								case "pack":
+									finalAsset = FlxAtlasFrames.fromLibGdx(graphic, rawData);
+								default:
+									finalAsset = graphic;
+							}
+						} catch (e:Dynamic) {
+							Console.log('cacheAutoAsync: Failed to parse atlas for "$fileName" ($formatDetected): $e', true);
+							finalAsset = graphic;
 						}
+
+						if ((finalAsset is FlxFramesCollection)) {
+							var fc:FlxFramesCollection = cast finalAsset;
+							if (fc.parent != null)
+								fc.parent.persist = true;
+						}
+
+						if (finalAsset != null)
+							cache.set(imagePath, finalAsset);
 					} catch (e:Dynamic) {
-						Console.log('cacheAutoAsync: Failed to parse atlas for "$fileName" ($formatDetected): $e', true);
-						finalAsset = graphic;
+						Console.log('cacheAutoAsync: could not upload "$imagePath": $e', true);
 					}
-
-					if ((finalAsset is FlxFramesCollection)) {
-						var fc:FlxFramesCollection = cast finalAsset;
-						if (fc.parent != null)
-							fc.parent.persist = true;
-					}
-
-					if (finalAsset != null)
-						cache.set(imagePath, finalAsset);
 				} else if (img != null) {
 					img.buffer = null;
 					img = null;

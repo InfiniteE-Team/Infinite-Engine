@@ -26,6 +26,16 @@ class LoadingState extends MusicBeatState {
 
 	public var barTargetX:Float = 0;
 
+	var barStartX:Float = 0;
+
+	// loading more at once spikes the RAM -JloorDev
+	static inline final MAX_LOADING:Int = 2;
+
+	var loading:Int = 0;
+	var nextImage:Int = 0;
+	var nextAudio:Int = 0;
+	var destroyed:Bool = false;
+
 	var bar:Null<FunkinSprite> = null;
 	var micStand:Null<FunkinSprite> = null;
 	var character:Null<FunkinLoadingCharacter> = null;
@@ -71,11 +81,6 @@ class LoadingState extends MusicBeatState {
 		collectQueue();
 
 		total = queue.length + audioQueue.length;
-
-		if (total > 0) {
-			dispatchQueue();
-			dispatchAudioQueue();
-		}
 	}
 
 	function buildLoadingUI() {
@@ -94,7 +99,7 @@ class LoadingState extends MusicBeatState {
 		micStand.y = FlxG.height - (micStand.height + 30);
 		add(micStand);
 
-		barTargetX = micStand.x;
+		barTargetX = barStartX = micStand.x;
 
 		bar.alpha = 0.9;
 		bar.makeSolidColor(Std.int(micStand.width) + BAR_PAD, Std.int(micStand.height) + BAR_PAD, flixel.util.FlxColor.BLACK);
@@ -209,29 +214,10 @@ class LoadingState extends MusicBeatState {
 		if (path == null)
 			return;
 		var abs = sys.FileSystem.absolutePath(path);
+		if (core.rhythm.audio.Sound.isStreamable(abs))
+			return;
 		if (!audioQueue.contains(abs) && !core.rhythm.audio.Sound.streamedCache.exists(abs))
 			audioQueue.push(abs);
-	}
-
-	function dispatchAudioQueue() {
-		for (absPath in audioQueue) {
-			sys.thread.Thread.create(function() {
-				#if lime_cffi
-				var buffer = lime.media.AudioBuffer.fromFile(absPath);
-				var oflSound = buffer != null ? openfl.media.Sound.fromAudioBuffer(buffer) : null;
-				#else
-				var oflSound = openfl.media.Sound.fromFile(absPath);
-				#end
-
-				haxe.MainLoop.runInMainThread(function() {
-					if (oflSound != null && !core.rhythm.audio.Sound.streamedCache.exists(absPath))
-						core.rhythm.audio.Sound.streamedCache.set(absPath, oflSound);
-
-					loaded++;
-					updateBar();
-				});
-			});
-		}
 	}
 
 	function collectStageAssets(stageName:String) {
@@ -287,18 +273,43 @@ class LoadingState extends MusicBeatState {
 		return (anim.filePath is String) ? cast anim.filePath : (cast anim.filePath : Array<Dynamic>)[0];
 	}
 
-	function dispatchQueue() {
-		for (path in queue) {
-			Paths.cacheAutoAsync(path, function(_) {
-				loaded++;
-				updateBar();
-			});
+	function loadNext() {
+		while (loading < MAX_LOADING && (nextImage < queue.length || nextAudio < audioQueue.length)) {
+			loading++;
+			if (nextImage < queue.length)
+				Paths.cacheAutoAsync(queue[nextImage++], _ -> onAssetLoaded());
+			else
+				loadAudio(audioQueue[nextAudio++]);
 		}
 	}
 
+	function loadAudio(absPath:String) {
+		sys.thread.Thread.create(function() {
+			var oflSound:openfl.media.Sound = null;
+			try {
+				var buffer = lime.media.AudioBuffer.fromFile(absPath);
+				oflSound = buffer != null ? openfl.media.Sound.fromAudioBuffer(buffer) : null;
+			} catch (e:Dynamic) {
+				Console.log('[LoadingState] could not load "$absPath": $e', true);
+			}
+			haxe.MainLoop.runInMainThread(function() {
+				if (oflSound != null && !core.rhythm.audio.Sound.streamedCache.exists(absPath))
+					core.rhythm.audio.Sound.streamedCache.set(absPath, oflSound);
+				onAssetLoaded();
+			});
+		});
+	}
+
+	function onAssetLoaded() {
+		loading--;
+		loaded++;
+		if (!destroyed)
+			updateBar();
+	}
+
 	function updateBar() {
-		var currentProgress:Float = flixel.math.FlxMath.bound(loaded / Math.max(1, total), 0, 1);
-		barTargetX += (bar.width * currentProgress - BAR_PAD - BAR_PAD) + BAR_PAD;
+		var progress:Float = flixel.math.FlxMath.bound(loaded / Math.max(1, total), 0, 1);
+		barTargetX = barStartX + bar.width * progress;
 	}
 
 	function onAllLoaded() {
@@ -332,6 +343,7 @@ class LoadingState extends MusicBeatState {
 
 	override public function update(elapsed:Float) {
 		super.update(elapsed);
+		loadNext();
 
 		#if HSCRIPT_ALLOWED
 		if (script.hasScripts)
@@ -360,6 +372,7 @@ class LoadingState extends MusicBeatState {
 	}
 
 	override public function destroy() {
+		destroyed = true;
 		super.destroy();
 		character = null;
 		micStand = null;
