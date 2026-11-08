@@ -391,7 +391,7 @@ class PlayState extends MusicBeatState {
 		modding.vslice.VSliceHooks.dispatch('onCountdownEnd', modding.vslice.VSliceHooks.event('COUNTDOWN_END'));
 		modding.vslice.VSliceHooks.dispatch('onSongStart', modding.vslice.VSliceHooks.event('SONG_STARTED'));
 		#if HSCRIPT_ALLOWED
-		script.call("postInitSong", []);
+		script.call("postSongStart", []);
 		#end
 	}
 
