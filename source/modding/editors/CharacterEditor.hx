@@ -172,7 +172,7 @@ class CharacterEditor extends MusicBeatState {
 
 		tabRight();
 
-		var path = Paths.getPath('data/characters');
+		var path = Paths.getPath('data/game/characters');
 		var chars:Array<String> = [];
 		if (sys.FileSystem.exists(path) && sys.FileSystem.isDirectory(path)) {
 			chars = sys.FileSystem.readDirectory(path).map(function(file) {
