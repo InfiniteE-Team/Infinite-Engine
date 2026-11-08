@@ -79,10 +79,10 @@ class ResultScreen extends ScriptState {
 		results.updateHitbox();
 		add(results);
 
-		rating = new FlxSprite(-400, 100);
+		rating = new FlxSprite(-450, 100);
 		rating.loadGraphic(Paths.getPath('menus/resultScreen/ratings/' + ratingPath, 'image'));
 		rating.antialiasing = SaveData.data.antialiasing;
-		rating.scale.set(1.3, 1.3);
+		rating.scale.set(0.27, 0.27);
 		rating.updateHitbox();
 		rating.scrollFactor.set();
 		add(rating);
@@ -278,11 +278,10 @@ class ResultScreen extends ScriptState {
 	function onScoreFinished() {
 		animateScore(playStateConfig.score);
 
-		var totalDelay = (10 - 1) * 0.08 + (41 / 24) + (23 / 24) + 0.3;
-		new FlxTimer().start(totalDelay, function(_) {
+		new FlxTimer().start(3.687, function(_) {
 			MasterAudio.playMenu(Paths.getPath('menus/resultScreen/$ratingPath/results', 'music'), 0.6, 126);
 			new FlxTimer().start(0.3, function(_) {
-				FlxTween.tween(rating, {x: FlxG.width * 0.65}, 0.6, {ease: FlxEase.elasticInOut});
+				FlxTween.tween(rating, {x: FlxG.width * 0.6}, 0.6, {ease: FlxEase.elasticInOut});
 				new FlxTimer().start(0.4, function(_) {
 					FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
 					FlxG.camera.flash(0xFFFFFFFF, 0.4);

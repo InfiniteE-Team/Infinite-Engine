@@ -27,6 +27,7 @@ https://nightly.link/InfiniteE-Team/Infinite-Engine/workflows/init.yml/dev/Linux
 - Manux (Main Coder, and Concepts)
 - Jloor (Assistant Coder and Gameplay Editor Creator)
 - Nelson (Main Artist)
+- SoyJulian34 (Ratings in Results Screen)
 - Yuning (UI Artist)
 - Seevent (Musician)
 
