@@ -324,7 +324,8 @@ class FreeplayState extends MusicBeatState {
 			#end
 
 			new FlxTimer().start(1, function(tmr:FlxTimer) {
-				MusicBeatState.switchState(() -> new states.menus.LoadingState(songSelected, curDiff), freeplayData.songData[curSelected].stickerPack ?? 'default');
+				MusicBeatState.switchState(() -> new states.menus.LoadingState(songSelected, curDiff),
+					freeplayData.songData[curSelected].stickerPack ?? 'default');
 			});
 		}
 
@@ -425,7 +426,7 @@ class FreeplayState extends MusicBeatState {
 
 		curSelected += change;
 
-		core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.9, 1);
+		FlxG.sound.play(Paths.getPath('menus/scrollMenu', 'sound'));
 
 		if (curSelected < 0)
 			curSelected = freeplayData.songData.length - 1;

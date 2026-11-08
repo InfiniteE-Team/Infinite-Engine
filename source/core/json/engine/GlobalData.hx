@@ -13,7 +13,7 @@ class GlobalConfig {
 	public var developerMode:Bool = true;
 	public var noteSkin:String = 'default';
 	public var hud:String = 'default';
-	public var startState:Class<MusicBeatState> = game.PlayState;
+	public var startState:String = 'TitleState';
 	public var startStateScript:String = null;
 	public var skipTrans:Bool = false;
 
@@ -29,13 +29,8 @@ class GlobalConfig {
 		developerMode = globalData.developerMode ?? true;
 		skipTrans = globalData.skipTrans ?? false;
 
-		var stateStr = globalData.startState;
-		if (stateStr != null) {
-			var cls:Class<MusicBeatState> = cast(Type.resolveClass(stateStr) ?? Type.resolveClass('states.$stateStr'));
-			if (cls != null)
-				startState = cls;
-			else
-				startStateScript = stateStr;
+		if (globalData.startState != null && globalData.startState != "") {
+			startState = globalData.startState;
 		}
 	}
 

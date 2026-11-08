@@ -5,7 +5,7 @@ import core.json.engine.GlobalData.GlobalConfig;
 import modding.scripting.ScriptGlobals;
 
 class ConfigMain extends flixel.FlxState {
-	public var mainState:Class<MusicBeatState> = game.PlayState;
+	var mainState:String = null;
 
 	public static var globalData:GlobalConfig = new GlobalConfig();
 
@@ -78,9 +78,15 @@ class ConfigMain extends flixel.FlxState {
 
 		FlxG.autoPause = false;
 
-		var innerState:() -> MusicBeatState = if (globalData.startStateScript != null) () ->
-			modding.scripting.types.ScriptClass.load(globalData.startStateScript); else() -> Type.createInstance(mainState, []);
-						
-		MusicBeatState.switchState(() -> new states.preload.FunkinPreloader(innerState));
+		if (mainState != null) {
+			var innerState:() -> MusicBeatState = () -> {
+				var cls = Type.resolveClass(mainState);
+				if (cls != null)
+					return Type.createInstance(cls, []);
+				else
+					return modding.scripting.types.ScriptClass.load(mainState);
+			};
+			MusicBeatState.switchState(() -> new states.preload.FunkinPreloader(innerState));
+		}
 	}
 }

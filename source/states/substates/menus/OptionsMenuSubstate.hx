@@ -239,6 +239,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		valueTexts = [];
 
 		if (categories[curCategory] == 'Keybinds') {
+			core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.9, 1.1);
 			keybindsMenu = new states.substates.menus.options.KeybindsMenu(contentCam);
 			add(keybindsMenu);
 			return;
