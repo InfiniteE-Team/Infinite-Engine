@@ -8,7 +8,7 @@ import flixel.ui.FlxBar;
 import flixel.FlxSprite;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
-import core.rhythm.audio.Sound;
+import core.audio.Sound;
 
 /**
  * Runs immediately after ConfigMain, before the mod's initial state.
@@ -163,8 +163,12 @@ class FunkinPreloader extends MusicBeatState {
 		progressLines.dirty = true;
 		add(progressLines);
 
-		vfdBitmap = new flash.display.Bitmap(new flash.display.BitmapData(FlxG.width >> 1, FlxG.height >> 1, true, 0xFFFFFFFF));
-		vfdBitmap.scaleX = vfdBitmap.scaleY = 2.0;
+		var bmpData = new flash.display.BitmapData(Std.int(FlxG.width / 2), Std.int(FlxG.height / 2), true, 0xFFFFFFFF);
+		vfdBitmap = new flash.display.Bitmap(bmpData);
+
+		vfdBitmap.width = FlxG.width;
+		vfdBitmap.height = FlxG.height;
+
 		FlxG.addChildBelowMouse(vfdBitmap);
 
 		vfdShader = new VFDOverlay();

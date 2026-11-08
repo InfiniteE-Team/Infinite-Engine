@@ -12,7 +12,7 @@ class DebugMenu extends MusicBeatState {
 	override public function create() {
 		super.create();
 
-		core.rhythm.audio.MasterAudio.playMenu(Paths.getPath('menus/artistic-expression/artistic-expression', 'music'), 0.6, 137);
+		core.audio.MasterAudio.playMenu(Paths.getPath('menus/artistic-expression/artistic-expression', 'music'), 0.6, 137);
 
 		final bg:flixel.FlxSprite = new flixel.FlxSprite().loadGraphic(Paths.getPath('menus/menuBG2', 'image'));
 		bg.antialiasing = SaveData.data.antialiasing;

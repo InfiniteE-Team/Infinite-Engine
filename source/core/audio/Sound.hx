@@ -1,4 +1,4 @@
-package core.rhythm.audio;
+package core.audio;
 
 enum abstract SoundType(String) from String to String {
 	var SOUND = "SOUND";

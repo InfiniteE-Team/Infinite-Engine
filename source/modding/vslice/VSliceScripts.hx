@@ -148,7 +148,7 @@ class VSliceScripts {
 		var shim:funkin.play.character.BaseCharacter = load('character', host.curCharacter, funkin.play.character.MultiAnimateAtlasCharacter);
 		shim ??= new funkin.play.character.BaseCharacter(host.curCharacter);
 		shim.host = host;
-		shim._data = FormatJson.readJson(Paths.getPath('data/characters/${host.curCharacter}', 'json'));
+		shim._data = FormatJson.readJson(Paths.getPath('data/game/characters/${host.curCharacter}', 'json'));
 		funkin.play.PlayState.instance ??= new funkin.play.PlayState(null, game.PlayState.instance?.songFolder ?? core.assets.Paths.currentSong);
 		return shim;
 	}

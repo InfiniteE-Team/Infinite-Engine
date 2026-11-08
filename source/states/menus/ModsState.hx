@@ -138,7 +138,7 @@ class ModsState extends MusicBeatState {
 		mouseWasVisible = FlxG.mouse.visible;
 		FlxG.mouse.visible = true;
 
-		core.rhythm.audio.MasterAudio.playMenu(Paths.getPath('menus/mod-menu-ambience/mod-menu-ambience', 'music'), 0.8, 67);
+		core.audio.MasterAudio.playMenu(Paths.getPath('menus/mod-menu-ambience/mod-menu-ambience', 'music'), 0.8, 67);
 
 		camMods = new Camera(BOX_X, BOX_Y, BOX_W, BOX_H);
 		camMods.bgColor = 0x00000000;

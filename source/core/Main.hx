@@ -34,7 +34,7 @@ class Main extends Sprite {
 		openfl.Lib.application.onExit.add((_) -> {
 			// Dispose of cached audio and textures.
 			core.assets.Paths.clearCache();
-			core.rhythm.audio.Sound.clearGlobalCache();
+			core.audio.Sound.clearGlobalCache();
 			trace('Exiting game, cleaning up memory...');
 			Sys.exit(0);
 		}, 99);

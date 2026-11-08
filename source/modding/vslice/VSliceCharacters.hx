@@ -15,11 +15,11 @@ class VSliceCharacters {
 		var main = stripLibrary(raw.assetPath);
 		if (Library.findLib('images/$main.png') == null && Library.findLib('images/$main/Animation.json') == null) {
 			Console.log('[V-Slice] ${haxe.io.Path.withoutDirectory(path)} needs "$main" from the base game, using the engine bf', true);
-			return FormatJson.readJson('${Library.baseFolder}/data/characters/bf.json');
+			return FormatJson.readJson('${Library.baseFolder}/data/game/characters/bf.json');
 		}
 		var id = haxe.io.Path.withoutExtension(path);
-		var dataDir = id.indexOf('data/characters/');
-		id = dataDir >= 0 ? id.substr(dataDir + 'data/characters/'.length) : haxe.io.Path.withoutDirectory(id);
+		var dataDir = ~/data\/(game\/)?characters\//;
+		id = dataDir.match(id) ? dataDir.matchedRight() : haxe.io.Path.withoutDirectory(id);
 		return convertCharacter(raw, id);
 	}
 

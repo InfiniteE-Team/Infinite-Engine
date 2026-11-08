@@ -1,7 +1,7 @@
 package states.menus;
 
 import flixel.util.FlxColor;
-import core.rhythm.audio.MasterAudio;
+import core.audio.MasterAudio;
 import modding.scripting.types.ScriptClass;
 import flixel.text.FlxText;
 import flixel.tweens.FlxTween;
@@ -56,7 +56,7 @@ class CreditsState extends MusicBeatState {
 	}
 
 	function buildCredits() {
-		var creditsData:CreditEntry = FormatJson.readJson(Paths.getPath('data/credits', 'json'));
+		var creditsData:CreditEntry = FormatJson.readJson(Paths.getPath('data/menus/credits', 'json'));
 		
 		var curY:Float = FlxG.height * 0.35 + GAP_AFTER_SECTION * 2;
 

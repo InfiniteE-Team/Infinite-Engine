@@ -214,14 +214,14 @@ class LoadingState extends MusicBeatState {
 		if (path == null)
 			return;
 		var abs = sys.FileSystem.absolutePath(path);
-		if (core.rhythm.audio.Sound.isStreamable(abs))
+		if (core.audio.Sound.isStreamable(abs))
 			return;
-		if (!audioQueue.contains(abs) && !core.rhythm.audio.Sound.streamedCache.exists(abs))
+		if (!audioQueue.contains(abs) && !core.audio.Sound.streamedCache.exists(abs))
 			audioQueue.push(abs);
 	}
 
 	function collectStageAssets(stageName:String) {
-		var stageData:Null<StageData> = modding.vslice.VSliceStages.readStage(Paths.getPath('data/stages/$stageName', 'json'));
+		var stageData:Null<StageData> = modding.vslice.VSliceStages.readStage(Paths.getPath('data/game/stages/$stageName', 'json'));
 		if (stageData == null || stageData.elements == null)
 			return;
 
@@ -234,7 +234,7 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function collectCharAssets(charName:String) {
-		var charData:Null<CharacterData> = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('data/characters/$charName', 'json'));
+		var charData:Null<CharacterData> = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('data/game/characters/$charName', 'json'));
 		if (charData == null || charData.render == null || charData.render.layers == null)
 			return;
 
@@ -293,8 +293,8 @@ class LoadingState extends MusicBeatState {
 				Console.log('[LoadingState] could not load "$absPath": $e', true);
 			}
 			haxe.MainLoop.runInMainThread(function() {
-				if (oflSound != null && !core.rhythm.audio.Sound.streamedCache.exists(absPath))
-					core.rhythm.audio.Sound.streamedCache.set(absPath, oflSound);
+				if (oflSound != null && !core.audio.Sound.streamedCache.exists(absPath))
+					core.audio.Sound.streamedCache.set(absPath, oflSound);
 				onAssetLoaded();
 			});
 		});

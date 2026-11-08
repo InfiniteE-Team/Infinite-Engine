@@ -85,7 +85,7 @@ class CharacterEditor extends MusicBeatState {
 	override public function create() {
 		super.create();
 
-		core.rhythm.audio.MasterAudio.playMenu(Paths.getPath('menus/artistic-expression/artistic-expression', 'music'), 0.6, 137);
+		core.audio.MasterAudio.playMenu(Paths.getPath('menus/artistic-expression/artistic-expression', 'music'), 0.6, 137);
 
 		createCameras();
 
@@ -833,7 +833,7 @@ class CharacterEditor extends MusicBeatState {
 			}
 		}
 
-		var path = Paths.getPath('data/characters/$curCharacter', 'json');
+		var path = Paths.getPath('data/game/characters/$curCharacter', 'json');
 		var json = haxe.Json.stringify(char.characterData, null, '\t');
 		sys.io.File.saveContent(path, json);
 

@@ -108,7 +108,7 @@ class KeybindsMenu extends flixel.group.FlxGroup {
 		laneStrums = [];
 		keySprites = [];
 
-		var noteSkinData:NoteSkinData = FormatJson.readJson(Paths.getPath('data/noteskins/default/strumnotes', 'json'));
+		var noteSkinData:NoteSkinData = FormatJson.readJson(Paths.getPath('data/game/noteskins/default/strumnotes', 'json'));
 		if (noteSkinData == null)
 			return;
 

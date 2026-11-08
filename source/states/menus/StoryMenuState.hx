@@ -61,7 +61,7 @@ class StoryMenuState extends MusicBeatState {
 			largeImageKey: "icon"
 		});
 
-		core.rhythm.audio.MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102);
+		core.audio.MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102);
 
 		loadAllWeeks();
 
@@ -241,7 +241,7 @@ class StoryMenuState extends MusicBeatState {
 	}
 
 	function buildNoWeeksWarning() {
-		noWeeksText = new FlxText(0, FlxG.height / 2 - 35, FlxG.width, "¡Not exists weeks! — Create your data in 'data/storymenu/weeks/'");
+		noWeeksText = new FlxText(0, FlxG.height / 2 - 35, FlxG.width, "¡Not exists weeks! — Create your data in 'data/menus/storymenu/weeks/'");
 		noWeeksText.setFormat(Paths.getPath('5by7_b.ttf', 'font'), 24, 0xFFFFB2B2, "center");
 		noWeeksText.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 2, 1);
 		noWeeksText.antialiasing = SaveData.data.antialiasing;
@@ -264,7 +264,7 @@ class StoryMenuState extends MusicBeatState {
 			for (file in FileSystem.readDirectory(resolved)) {
 				if (!file.endsWith('.json'))
 					continue;
-				var data:core.json.menus.storymenu.WeekData = FormatJson.readJson(Paths.getPath('data/storymenu/weeks/$file'));
+				var data:core.json.menus.storymenu.WeekData = FormatJson.readJson(Paths.getPath('data/menus/storymenu/weeks/$file'));
 				if (data != null)
 					weeks.push(data);
 			}

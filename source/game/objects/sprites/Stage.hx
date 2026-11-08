@@ -51,7 +51,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 		// hardcoder reference!1
 		switch (stage) {
 			default:
-				var stageDataPath = Paths.getPath('data/stages/' + stage, "json");
+				var stageDataPath = Paths.getPath('data/game/stages/' + stage, "json");
 				stageData = modding.vslice.VSliceStages.readStage(stageDataPath);
 
 				if (stageData == null)
@@ -60,7 +60,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 				if (stageData.elements == null) {
 					Console.log('[Stage] WARNING: "$stage" is not a stage format the engine reads, using stage', true);
 					stage = 'stage';
-					stageData = FormatJson.readJson('${core.assets.Library.baseFolder}/data/stages/stage.json');
+					stageData = FormatJson.readJson('${core.assets.Library.baseFolder}/data/game/stages/stage.json');
 					if (stageData == null || stageData.elements == null) {
 						stageData = null;
 						return;
@@ -243,7 +243,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 
 			case 'sound':
 				if (element.audio?.path != null)
-					core.json.extensions.AudioData.AudioConfig.playElementAudio(element.audio, 'gameplay/stages/');
+					core.json.extensions.AudioData.AudioConfig.playElementAudio(element.audio, 'game/stages/');
 			default:
 				Console.log('Element Type Unknown $type', true);
 		}

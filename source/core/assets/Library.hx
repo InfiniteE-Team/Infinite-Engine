@@ -71,6 +71,15 @@ class Library {
 					Paths.pathCache.set(file, sharedPath);
 					return sharedPath;
 				}
+				// V-Slice mods keep data/characters, data/stages... without the game folder -JloorDev
+				if (modding.vslice.VSlice.isActive() && file.startsWith('data/game/')) {
+					var vslicePath = '$modsFolder/${ModsRegistry.currentMod}/data/${file.substr('data/game/'.length)}';
+					if (FileSystem.exists(vslicePath)) {
+						@:privateAccess
+						Paths.pathCache.set(file, vslicePath);
+						return vslicePath;
+					}
+				}
 			}
 		}
 
@@ -114,6 +123,6 @@ class Library {
 			}
 		}
 
-		core.rhythm.audio.Sound.clearGlobalCache();
+		core.audio.Sound.clearGlobalCache();
 	}
 }

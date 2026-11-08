@@ -343,7 +343,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 	function updateSelection(change:Int = 0) {
 		var currentList = categoryOptions.get(categories[curCategory]);
 
-		FlxG.sound.play(Paths.getPath('menus/scrollMenu', 'sound'));
+		core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.9, 1.1);
 		if (currentList == null || currentList.length == 0) {
 			descText.text = "Press ENTER to configure controls.";
 			return;
@@ -430,7 +430,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		if (currentList == null || currentList.length == 0)
 			return;
 
-		FlxG.sound.play(Paths.getPath('menus/scrollMenu', 'sound'));
+		core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.9, 1.1);
 
 		var opt = currentList[curSelectedOption];
 		var currentValue:Dynamic = Reflect.field(SaveData.data, opt.saveField);

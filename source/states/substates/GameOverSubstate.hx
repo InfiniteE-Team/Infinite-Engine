@@ -54,7 +54,7 @@ class GameOverSubstate extends MusicBeatSubstate {
 				continue;
 			}
 
-			gameOverData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('data/characters/' + data.name, 'json'));
+			gameOverData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('data/game/characters/' + data.name, 'json'));
 
 			var deathCharName:String = (gameOverData != null && gameOverData.gameplay != null && gameOverData.gameplay.death != null) ? gameOverData.gameplay.death.character : data.name;
 
@@ -92,7 +92,7 @@ class GameOverSubstate extends MusicBeatSubstate {
 		PlayState.instance.cameraController.isLock = false;
 		PlayState.instance.cameraController.followChar(char);
 
-		FlxG.sound.play(Paths.getPath('gameplay/death/' + sound, 'sound'));
+		FlxG.sound.play(Paths.getPath('game/death/' + sound, 'sound'));
 
 		char.playAnim('firstDeath');
 
@@ -117,14 +117,14 @@ class GameOverSubstate extends MusicBeatSubstate {
 
 		if (char.isFinished('firstDeath')) {
 			char.playAnim('deathLoop', true);
-			FlxG.sound.playMusic(Paths.getPath('gameplay/death/' + music, 'music'));
+			FlxG.sound.playMusic(Paths.getPath('game/death/' + music, 'music'));
 		}
 
 		if (Controls.ACCEPT) {
 			confirm = true;
 			char.playAnim('deathConfirm', true);
 			FlxG.sound.music?.stop();
-			FlxG.sound.play(Paths.getPath('gameplay/death/' + endSound, 'music'));
+			FlxG.sound.play(Paths.getPath('game/death/' + endSound, 'music'));
 
 			new flixel.util.FlxTimer().start(0.7, function(_) {
 				FlxG.camera.fade(flixel.util.FlxColor.BLACK, 2, false, function() {

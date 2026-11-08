@@ -32,9 +32,10 @@ class ScriptGlobals {
 		'core.config.Controls',
 		'states.MusicBeatState',
 		// Audio
-		'core.rhythm.audio.Sound',
-		'core.rhythm.audio.MasterAudio',
-		'core.rhythm.audio.GameAudio',
+		'core.audio.Sound',
+		'core.audio.SoundFX',
+		'core.audio.MasterAudio',
+		'core.audio.GameAudio',
 		// Cutscenes
 		'states.cutscenes.VideoState',
 		'game.objects.cutscenes.VideoSprite',
@@ -119,7 +120,7 @@ class ScriptGlobals {
 		set("Controls", core.config.Controls);
 		set("MusicBeatState", states.MusicBeatState);
 		set("StoryMenuState", states.menus.StoryMenuState);
-		set("AudioAnalyzer", core.rhythm.audio.AudioAnalyzer);
+		set("AudioAnalyzer", core.audio.AudioAnalyzer);
 		// Json
 		set("Json", haxe.Json);
 		set("FormatJson", FormatJson);
@@ -127,9 +128,10 @@ class ScriptGlobals {
 		set("SaveData", SaveData);
 		set("OptionType", core.enums.OptionType);
 		// Audio
-		set("Sound", core.rhythm.audio.Sound);
-		set("MasterAudio", core.rhythm.audio.MasterAudio);
-		set("GameAudio", core.rhythm.audio.GameAudio);
+		set("Sound", core.audio.Sound);
+		set("SoundFX", core.audio.SoundFX);
+		set("MasterAudio", core.audio.MasterAudio);
+		set("GameAudio", core.audio.GameAudio);
 		// Cutscenes
 		set("VideoState", states.cutscenes.VideoState);
 		set("VideoSprite", game.objects.cutscenes.VideoSprite);
