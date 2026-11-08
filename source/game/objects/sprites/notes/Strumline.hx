@@ -61,6 +61,35 @@ class Strumline {
 	var script:ScriptHandler;
 	#end
 
+	var _alpha:Float = 1.0;
+
+	public var alpha(get, set):Float;
+
+	function get_alpha():Float
+		return _alpha;
+
+	function set_alpha(v:Float):Float {
+		_alpha = v;
+		for (s in strums.members)
+			if (s != null)
+				s.alpha = v;
+		for (n in notes.members)
+			if (n != null)
+				n.alpha = v;
+		for (s in sustains.members)
+			if (s != null)
+				s.alpha = v;
+		for (s in splashes.members)
+			if (s != null)
+				s.alpha = v;
+		for (h in holdsplashes.members)
+			if (h != null)
+				h.alpha = v;
+		if (blackBack != null)
+			blackBack.alpha = v;
+		return v;
+	}
+
 	public function new(charId:String, isPlayer:Bool, keys:Int, noteSkin:String, noteSkinData:NoteSkinData, splashesSkinData:NoteSkinData,
 			holdSkinData:NoteSkinData, spacing:Float, #if HSCRIPT_ALLOWED script:ScriptHandler #end) {
 		this.charId = charId;

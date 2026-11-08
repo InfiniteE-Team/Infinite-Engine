@@ -89,6 +89,9 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 				if (Lambda.exists(stageData.elements, e -> e.zIndex != null))
 					runVSliceScript();
 		}
+		#if HSCRIPT_ALLOWED
+		stageScript.call('postCreate', []);
+		#end
 	}
 
 	var vsliceScript:funkin.play.stage.Stage = null;
