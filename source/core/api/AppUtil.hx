@@ -11,9 +11,4 @@ class AppUtil {
 	public static function resizeGame() {
 		FlxG.scaleMode = new flixel.system.scaleModes.RatioScaleMode();
 	}
-
-	public static function setFullscreen(value:Bool) {
-		openfl.Lib.application.window.fullscreen = value;
-		core.api.AppUtil.resizeGame();
-	}
 }

@@ -17,7 +17,9 @@ class Main extends Sprite {
 		super();
 		mainGame();
 
+		#if desktop
 		stage.addEventListener(openfl.events.KeyboardEvent.KEY_DOWN, onKeyDown);
+		#end
 		#if CRASH_HANDLER
 		openfl.Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrashHandler);
 		#end
@@ -39,16 +41,15 @@ class Main extends Sprite {
 		#end
 	}
 
+	#if desktop
 	private function onKeyDown(e:openfl.events.KeyboardEvent):Void {
-		if (e.keyCode == flash.ui.Keyboard.F11)
-			core.api.AppUtil.setFullscreen(!openfl.Lib.application.window.fullscreen);
-		
 		#if DEBUG_CONSOLE
 		if (e.keyCode == flash.ui.Keyboard.F2) {
 			core.system.WinConsole.toggle();
 		}
 		#end
 	}
+	#end
 
 	#if CRASH_HANDLER
 	private function onCrashHandler(event:UncaughtErrorEvent):Void {

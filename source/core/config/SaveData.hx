@@ -17,6 +17,15 @@ class SaveData {
 		if (SaveData.data.framerate == null)
 			SaveData.data.framerate = 60;
 
+		if (SaveData.data.windowmode == null)
+			SaveData.data.windowmode = 'Windowed';
+
+		if (SaveData.data.comboPosX == null)
+			SaveData.data.comboPosX = FlxG.width * 0.54;
+
+		if (SaveData.data.comboPosY == null)
+			SaveData.data.comboPosY = FlxG.height * 0.5;
+
 		if (SaveData.data.fpsVisible == null)
 			SaveData.data.fpsVisible = true;
 

@@ -1,8 +1,9 @@
 package core.json.engine;
 
 typedef SaveDataFields = {
-	// graphics
-    var ?framerate:Int;
+	// visual
+	var ?framerate:Int;
+	var ?windowmode:String;
 	var ?fpsVisible:Bool;
 	var ?antialiasing:Bool;
 	var ?shaders:Bool;
@@ -10,11 +11,14 @@ typedef SaveDataFields = {
 	// gameplay
 	var ?downscroll:Bool;
 	var ?middlescroll:Bool;
-    var ?ghosttaping:Bool;
-    var ?laneBackdrop:Float;
+	var ?ghosttaping:Bool;
+	var ?laneBackdrop:Float;
 	var ?botplay:Bool;
 	var ?cameraMovement:Bool;
-	
+
+	var ?comboPosX:Float;
+	var ?comboPosY:Float;
+
 	// controls
 	var ?noteKeyPresets:haxe.DynamicAccess<Array<Array<String>>>;
 	var ?uiKeys:Array<Array<String>>;

@@ -21,6 +21,10 @@ class ConfigMain extends flixel.FlxState {
 	override public function create() {
 		SaveData.initSave();
 
+		#if desktop
+		core.api.DesktopAPI.configWindow();
+		#end
+
 		controls = new Controls();
 
 		Controls.init();

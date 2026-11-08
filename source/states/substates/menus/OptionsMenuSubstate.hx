@@ -10,7 +10,7 @@ import states.substates.menus.options.Keybind;
 class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 	var categoryTexts:Array<FlxText> = [];
 	var categoryGraphics:Array<FlxSprite> = [];
-	var categories:Array<String> = ['Gameplay', 'Keybinds', 'Graphics', 'Debug'];
+	var categories:Array<String> = ['Visual', 'Gameplay', 'Keybinds', 'Debug'];
 	var curCategory:Int = 0;
 
 	var contentCam:Camera;
@@ -19,14 +19,35 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 	static final CONTENT_H:Int = 412;
 
 	var categoryOptions:Map<String, Array<OptionData>> = [
-		'Gameplay' => [
+		'Visual' => [
+			#if desktop
 			{
-				name: 'Lane Backdrop',
-				description: 'Increase or decrease the opacity of the lane background in your notes.',
-				saveField: 'laneBackdrop',
-				type: NUMBER(0, 100, 5),
-				displayFormat: '%'
+				name: 'Screen Mode',
+				description: 'Toggle between full screen, borderless and windowed mode.',
+				saveField: 'windowmode',
+				type: STRING(['Fullscreen', 'Borderless', 'Windowed'])
 			},
+			#end
+			{
+				name: 'Framerate',
+				description: 'Adjust the frames per second limit.',
+				saveField: 'framerate',
+				type: NUMBER(30, 240, 5)
+			},
+			{
+				name: 'Antialiasing',
+				description: 'Softens the edges of the images.',
+				saveField: 'antialiasing',
+				type: CHECKBOX
+			},
+			{
+				name: 'Shaders',
+				description: 'Enables advanced visual effects.',
+				saveField: 'shaders',
+				type: CHECKBOX
+			}
+		],
+		'Gameplay' => [
 			{
 				name: 'Downscroll',
 				description: 'Reverse the direction of the notes downwards.',
@@ -46,29 +67,22 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 				type: CHECKBOX
 			},
 			{
+				name: 'Lane Backdrop',
+				description: 'Increase or decrease the opacity of the lane background in your notes.',
+				saveField: 'laneBackdrop',
+				type: NUMBER(0, 100, 5),
+				displayFormat: '%'
+			},
+			{
+				name: 'Combo Position',
+				description: 'Move the rating position wherever you like.',
+				saveField: null,
+				type: null
+			},
+			{
 				name: 'Camera Movements',
 				description: "Camera shifts slightly based on the character's current pose animation.",
 				saveField: 'cameraMovement',
-				type: CHECKBOX
-			}
-		],
-		'Graphics' => [
-			{
-				name: 'Framerate',
-				description: 'Adjust the frames per second limit.',
-				saveField: 'framerate',
-				type: NUMBER(30, 240, 5)
-			},
-			{
-				name: 'Antialiasing',
-				description: 'It softens the edges of the images.',
-				saveField: 'antialiasing',
-				type: CHECKBOX
-			},
-			{
-				name: 'Shaders',
-				description: 'Enables advanced visual effects.',
-				saveField: 'shaders',
 				type: CHECKBOX
 			}
 		],
@@ -168,6 +182,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 			if (character.layers != null) {
 				for (layer in character.layers) {
 					if (layer != null) {
+						layer.scale.set(0.7, 0.7);
 						layer.visible = false;
 						add(layer);
 					}
@@ -176,7 +191,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 			add(character);
 		}
 
-		if (character != null && (character.existsAnim('idle') || character.existsAnim('danceLeft'))) {
+		if (character != null) {
 			character.dance();
 		}
 
@@ -243,12 +258,22 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 			itemTexts.push(optText);
 			add(optText);
 
-			var rawValue = Reflect.field(SaveData.data, opt.saveField);
 			var valSprite:FlxSprite;
+
+			if (opt.type == null) {
+				var placeholder = createText('');
+				placeholder.y += (i * 50);
+				valSprite = placeholder;
+				valueTexts.push(valSprite);
+				add(valSprite);
+				continue;
+			}
+
+			var rawValue = Reflect.field(SaveData.data, opt.saveField);
 
 			switch (opt.type) {
 				case CHECKBOX:
-					valSprite = new FlxSprite(900 - 200, 20 + (i * 50));
+					valSprite = new FlxSprite(900 - 200, 15 + (i * 50));
 					valSprite.frames = Paths.getPath('menus/options/check_box', 'animated');
 					valSprite.animation.addByPrefix('uncheck', 'UnCheck0000', 24, false);
 					valSprite.animation.addByPrefix('check', 'Check0000', 24, false);
@@ -263,20 +288,41 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 					} else {
 						valSprite.animation.play('uncheck', true);
 					}
-					valSprite.scale.set(0.6, 0.6);
+					valSprite.scale.set(0.5, 0.5);
 					valSprite.updateHitbox();
 
-				default:
+				case NUMBER(min, max, step):
 					var displayFormat = opt.displayFormat;
 					if (displayFormat == null)
 						displayFormat = '';
 
-					var valText = new FlxText(330 + 375, 20 + (i * 50), 0, Std.string(rawValue) + displayFormat);
-					valText.setFormat(Paths.getPath('Funkin.otf', 'font'), 26, 0xFFFFFFFF, "right");
-					valText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+					var valText = createText(Std.string(rawValue) + displayFormat);
+					valText.y += (i * 50);
 					valSprite = valText;
-					valText.cameras = [contentCam];
-					valText.text = Std.string(Reflect.field(SaveData.data, opt.saveField)) + displayFormat;
+					valText.text = '< ' + Std.string(Reflect.field(SaveData.data, opt.saveField)) + displayFormat + ' >';
+				case STRING(options):
+					var rawVal:Dynamic = rawValue;
+					var index:Int = 0;
+
+					if (Std.isOfType(rawVal, Int))
+						index = cast(rawVal, Int);
+					else if (Std.isOfType(rawVal, Float))
+						index = Std.int(cast(rawVal, Float));
+					else if (Std.isOfType(rawVal, Bool))
+						index = (rawVal : Bool) ? 0 : 1;
+					else if (Std.isOfType(rawVal, String)) {
+						index = options.indexOf(cast(rawVal, String));
+						if (index < 0)
+							index = 0;
+					}
+
+					if (index < 0 || index >= options.length)
+						index = 0;
+
+					var valText = createText(options[index]);
+					valText.y += (i * 50);
+					valSprite = valText;
+					valText.text = '< ' + Std.string(Reflect.field(SaveData.data, opt.saveField)) + ' >';
 			}
 
 			valueTexts.push(valSprite);
@@ -284,6 +330,14 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		}
 
 		updateSelection(0);
+	}
+
+	function createText(text:String):FlxText {
+		var valText = new FlxText(330 + 355, 20, 0, text);
+		valText.setFormat(Paths.getPath('Funkin.otf', 'font'), 26, 0xFFFFFFFF, "right");
+		valText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+		valText.cameras = [contentCam];
+		return valText;
 	}
 
 	function updateSelection(change:Int = 0) {
@@ -415,10 +469,52 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 					displayFormat = '';
 
 				if (Std.isOfType(valueTexts[curSelectedOption], FlxText)) {
-					cast(valueTexts[curSelectedOption], FlxText).text = Std.string(newValue) + displayFormat;
+					cast(valueTexts[curSelectedOption], FlxText).text = '< ' + Std.string(newValue) + displayFormat + ' >';
+				}
+			case STRING(options):
+				var rawVal:Dynamic = Reflect.field(SaveData.data, opt.saveField);
+				var currentIndex:Int = 0;
+
+				if (Std.isOfType(rawVal, Int))
+					currentIndex = cast(rawVal, Int);
+				else if (Std.isOfType(rawVal, Float))
+					currentIndex = Std.int(cast(rawVal, Float));
+				else if (Std.isOfType(rawVal, Bool))
+					currentIndex = (rawVal : Bool) ? 0 : 1;
+				else if (Std.isOfType(rawVal, String)) {
+					currentIndex = options.indexOf(cast(rawVal, String));
+					if (currentIndex < 0)
+						currentIndex = 0;
+				}
+
+				currentIndex += direction;
+				if (currentIndex < 0)
+					currentIndex = options.length - 1;
+				if (currentIndex >= options.length)
+					currentIndex = 0;
+
+				Reflect.setField(SaveData.data, opt.saveField, options[currentIndex]);
+
+				var selectedString:String = options[currentIndex];
+
+				if (opt.saveField == 'windowmode') {
+					switch (selectedString) {
+						case 'Fullscreen':
+							core.api.DesktopAPI.setFullscreen(true);
+							core.api.DesktopAPI.setBorderless(false);
+						case 'Windowed':
+							core.api.DesktopAPI.setFullscreen(false);
+							core.api.DesktopAPI.setBorderless(false);
+						case 'Borderless':
+							core.api.DesktopAPI.setFullscreen(false);
+							core.api.DesktopAPI.setBorderless(true);
+					}
+				}
+
+				if (Std.isOfType(valueTexts[curSelectedOption], FlxText)) {
+					cast(valueTexts[curSelectedOption], FlxText).text = '< ' + selectedString + ' >';
 				}
 		}
-
 		SaveData.flush();
 	}
 
@@ -493,14 +589,20 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		}
 
 		if (Controls.UI_LEFT) {
-			if (!isCategory && hasOptions && currentList[curSelectedOption].type != CHECKBOX) {
+			if (!isCategory
+				&& hasOptions
+				&& currentList[curSelectedOption].type != CHECKBOX
+				&& currentList[curSelectedOption].type != null) {
 				updateVisualFocus();
 				changeOptionValue(-1);
 			}
 		}
 
 		if (Controls.UI_RIGHT) {
-			if (!isCategory && hasOptions && currentList[curSelectedOption].type != CHECKBOX) {
+			if (!isCategory
+				&& hasOptions
+				&& currentList[curSelectedOption].type != CHECKBOX
+				&& currentList[curSelectedOption].type != null) {
 				updateVisualFocus();
 				changeOptionValue(1);
 			}
@@ -531,9 +633,14 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 				updateVisualFocus();
 				if (categories[curCategory] == 'Keybinds')
 					reloadOptions();
-			} else if (!isCategory && hasOptions && currentList[curSelectedOption].type == CHECKBOX) {
-				updateVisualFocus();
-				changeOptionValue(1);
+			} else if (!isCategory && hasOptions) {
+				var opt = currentList[curSelectedOption];
+				if (opt.type == CHECKBOX) {
+					updateVisualFocus();
+					changeOptionValue(1);
+				} else if (opt.name == 'Combo Position') {
+					openSubState(new states.substates.menus.options.ComboPositionSubstate());
+				}
 			}
 		}
 

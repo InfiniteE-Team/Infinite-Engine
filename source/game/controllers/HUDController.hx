@@ -92,9 +92,9 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 			else
 				iconP2 = icon;
 		}
-		_updateIconPositions(0.016);
+		updateIconPositions(0.016);
 
-		rating = new Rating(FlxG.width * 0.54, FlxG.height * 0.5, scriptHUD);
+		rating = new Rating(SaveData.data.comboPosX, SaveData.data.comboPosY, scriptHUD);
 		add(rating);
 
 		#if HSCRIPT_ALLOWED
@@ -124,7 +124,7 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 		}
 
 		_updateLosingAnim();
-		_updateIconPositions(elapsed);
+		updateIconPositions(elapsed);
 	}
 
 	function updateScore(elapsed:Float) {
@@ -180,7 +180,7 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 		return null;
 	}
 
-	function _updateIconPositions(elapsed:Float = 0.016) {
+	function updateIconPositions(elapsed:Float = 0.016) {
 		if (healthBarBG == null)
 			return;
 
