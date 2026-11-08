@@ -13,7 +13,7 @@ import game.objects.sprites.Stage;
 // songs
 import core.rhythm.DiffsUtils;
 import core.rhythm.RhythmCore;
-import core.rhythm.audio.GameAudio;
+import core.audio.GameAudio;
 import core.json.song.SongData.SongConfig;
 import game.controllers.events.EventManager;
 import game.objects.Countdown;
@@ -94,9 +94,6 @@ class PlayState extends MusicBeatState {
 
 				SONG = new SongConfig();
 				SONG.configSong(songFolder, DiffsUtils.difficulties[curDifficulty]);
-
-				modding.vslice.VSliceHooks.reset();
-				funkin.play.PlayState.instance = modding.vslice.VSlice.isActive() ? new funkin.play.PlayState(null, songFolder) : null;
 			case 1:
 				camGame = new Camera();
 				camHUD = new Camera();
@@ -136,6 +133,9 @@ class PlayState extends MusicBeatState {
 			FlxG.mouse.visible = false;
 
 		PlayStateConfig.isPlaying = true;
+
+		modding.vslice.VSliceHooks.reset();
+		funkin.play.PlayState.instance = modding.vslice.VSlice.isActive() ? new funkin.play.PlayState(null, songFolder) : null;
 
 		#if HSCRIPT_ALLOWED
 		startScript();

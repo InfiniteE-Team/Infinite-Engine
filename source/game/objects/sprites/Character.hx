@@ -103,17 +103,17 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		switch (curCharacter) {
 			// case 'bf':  hardcoder reference!1
 			default:
-				var charPath:String = 'data/characters/$curCharacter';
+				var charPath:String = 'data/game/characters/$curCharacter';
 				if (!Paths.exists('$charPath.json')) {
 					Console.log('[Character] WARNING: No character data found for "$curCharacter" and it will be replaced to bf.json');
-					charPath = 'data/characters/bf';
+					charPath = 'data/game/characters/bf';
 				}
 
 				characterData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath(charPath, JSON));
 
 				if (characterData != null && (characterData.render == null || characterData.gameplay == null)) {
 					Console.log('[Character] WARNING: "$curCharacter" is not a character format the engine reads, using bf', true);
-					charPath = 'data/characters/bf';
+					charPath = 'data/game/characters/bf';
 					characterData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath(charPath, JSON));
 				}
 

@@ -27,7 +27,7 @@ class RhythmCore {
 		return step * RhythmCore.stepInMs;
 	}
 
-	public static function pause(gameAudio:core.rhythm.audio.GameAudio):Void {
+	public static function pause(gameAudio:core.audio.GameAudio):Void {
 		FlxG.sound.pause();
 		if (gameAudio.inst != null)
 			gameAudio.inst.pause();
@@ -35,7 +35,7 @@ class RhythmCore {
 			gameAudio.vocals.pause();
 	}
 
-	public static function resume(gameAudio:core.rhythm.audio.GameAudio):Void {
+	public static function resume(gameAudio:core.audio.GameAudio):Void {
 		FlxG.sound.resume();
 		if (gameAudio.inst != null)
 			gameAudio.inst.resume();

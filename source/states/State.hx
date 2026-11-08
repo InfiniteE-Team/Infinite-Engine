@@ -91,6 +91,6 @@ class State extends flixel.FlxState {
 			timerManager = null;
 		}
 
-		core.rhythm.audio.Sound.clearGlobalCache();
+		core.audio.Sound.clearGlobalCache();
 	}
 }

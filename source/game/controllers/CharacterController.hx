@@ -6,7 +6,7 @@ import game.objects.sprites.Character;
 import core.assets.FunkinObjectRegistry;
 import game.controllers.NoteController;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import core.rhythm.audio.GameAudio;
+import core.audio.GameAudio;
 #if HSCRIPT_ALLOWED
 import modding.scripting.ScriptHandler;
 #end

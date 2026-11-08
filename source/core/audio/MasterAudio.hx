@@ -1,4 +1,4 @@
-package core.rhythm.audio;
+package core.audio;
 
 class MasterAudio {
 	public static var currentTrackPath:String = "";
@@ -9,7 +9,7 @@ class MasterAudio {
 			return;
 
 		currentTrackPath = path;
-		RhythmCore.changeBPM(bpm);
+		core.rhythm.RhythmCore.changeBPM(bpm);
 
 		if (FlxG.sound.music != null) {
 			FlxG.sound.music.stop();

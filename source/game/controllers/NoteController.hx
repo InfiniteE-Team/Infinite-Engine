@@ -71,7 +71,7 @@ class NoteController {
 	public var noteTypeManager:NoteTypeManager;
 	public var charController:CharacterController = null;
 	public var playStateConfig:PlayStateConfig;
-	public var gameAudio:core.rhythm.audio.GameAudio;
+	public var gameAudio:core.audio.GameAudio;
 	public var isGhostTapping:Bool = false;
 
 	public var isMiss:Bool = false;
@@ -96,7 +96,7 @@ class NoteController {
 	}
 
 	public function new(daSong:SongConfig, isDownscroll:Bool, isGhostTapping:Bool, script:ScriptHandler, playStateConfig:PlayStateConfig,
-			gameAudio:core.rhythm.audio.GameAudio) {
+			gameAudio:core.audio.GameAudio) {
 		this.daSong = daSong;
 		this.isDownscroll = isDownscroll;
 		this.playStateConfig = playStateConfig;
@@ -277,7 +277,7 @@ class NoteController {
 		holdSkinData = skinPart(noteSkin, 'holdsplashes');
 		popupsData = NoteSkins.read(noteSkin, 'popups');
 
-		var ratingPath = Paths.getPath('data/ratings', 'json');
+		var ratingPath = Paths.getPath('data/game/ratings', 'json');
 		ratingData = FormatJson.readJson(ratingPath);
 		if (ratingData == null || ratingData.ratings == null) {
 			trace("WARNING: ratings.json not found or invalid");
@@ -896,7 +896,7 @@ class NoteController {
 			return null;
 		if (noteTypeCache.exists(noteType))
 			return noteTypeCache.get(noteType);
-		var path = Paths.getPath('data/notetypes/$noteType', 'json');
+		var path = Paths.getPath('data/game/notetypes/$noteType', 'json');
 		var data:core.json.objects.NoteTypeData = path != null ? FormatJson.readJson(path) : null;
 		noteTypeCache.set(noteType, data);
 		return data;

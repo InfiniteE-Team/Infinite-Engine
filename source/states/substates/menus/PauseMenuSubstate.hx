@@ -271,7 +271,7 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 		curSelect += change;
 
 		if (change != 0)
-			FlxG.sound.play(Paths.getPath('menus/scrollMenu', 'sound'), 0.7);
+			core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.9, 1.1, 0.7);
 
 		if (curSelect >= options.length)
 			curSelect = 0;

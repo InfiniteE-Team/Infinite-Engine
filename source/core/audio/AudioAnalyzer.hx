@@ -1,4 +1,4 @@
-package core.rhythm.audio;
+package core.audio;
 
 import flixel.sound.FlxSound;
 import funkin.vis.dsp.SpectralAnalyzer;

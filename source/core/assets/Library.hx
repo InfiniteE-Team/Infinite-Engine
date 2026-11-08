@@ -114,6 +114,6 @@ class Library {
 			}
 		}
 
-		core.rhythm.audio.Sound.clearGlobalCache();
+		core.audio.Sound.clearGlobalCache();
 	}
 }

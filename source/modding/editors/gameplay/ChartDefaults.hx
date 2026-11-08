@@ -145,11 +145,11 @@ class ChartDefaults {
 			fixes.push('$orphans notes belong to a character that is not in the chart. They are hidden in the editor but kept.');
 
 		var stage:String = data.meta.stage ?? FALLBACK_STAGE;
-		if (!Paths.exists('data/stages/$stage.json'))
+		if (!Paths.exists('data/game/stages/$stage.json'))
 			fixes.push('Stage "$stage" not found: the preview uses "$FALLBACK_STAGE". Press Tab to pick another one.');
 
 		for (c in chars) {
-			if (!Paths.exists('data/characters/${c.name}.json'))
+			if (!Paths.exists('data/game/characters/${c.name}.json'))
 				fixes.push('Character "${c.name}" not found: the preview shows "$FALLBACK_CHAR" instead. Press Tab to pick another one.');
 		}
 

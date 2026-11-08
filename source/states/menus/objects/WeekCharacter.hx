@@ -22,7 +22,7 @@ class WeekCharacter extends core.assets.FunkinSprite {
     }
 
     public function loadJson() {
-        wCharacterData = FormatJson.readJson(Paths.getPath('data/storymenu/chars/$character', 'json'));
+        wCharacterData = FormatJson.readJson(Paths.getPath('data/menus/storymenu/chars/$character', 'json'));
     }
 
 	public function acceptWeek() {

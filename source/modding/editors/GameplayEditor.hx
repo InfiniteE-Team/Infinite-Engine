@@ -3,7 +3,7 @@ package modding.editors;
 import game.objects.Camera;
 import flixel.util.FlxColor;
 import core.rhythm.RhythmCore;
-import core.rhythm.audio.GameAudio;
+import core.audio.GameAudio;
 import core.json.song.SongData.SongConfig;
 import core.json.song.SongData.NoteDataUtil;
 import flixel.addons.display.FlxGridOverlay;
@@ -1479,7 +1479,7 @@ class GameplayEditor extends MusicBeatState {
 
 		try {
 			var stageName:String = SONG.stage;
-			if (stageName == null || !Paths.exists('data/stages/$stageName.json'))
+			if (stageName == null || !Paths.exists('data/game/stages/$stageName.json'))
 				stageName = ChartDefaults.FALLBACK_STAGE;
 
 			stage = new game.objects.sprites.Stage(stageName);
@@ -1623,7 +1623,7 @@ class GameplayEditor extends MusicBeatState {
 		}
 
 		if (hit && hitsounds)
-			FlxG.sound.play(Paths.getPath('gameplay/hitsounds/hit-1', 'sound'), 0.6);
+			FlxG.sound.play(Paths.getPath('game/hitsounds/hit-1', 'sound'), 0.6);
 
 		for (n in sustainNotes) {
 			if (pos < n.time || pos > n.time + n.length)
@@ -1650,7 +1650,7 @@ class GameplayEditor extends MusicBeatState {
 			stage.onBeatHit(beat);
 
 		if (metronome)
-			FlxG.sound.play(Paths.getPath('editors/ge/metronome' + FlxG.random.int(1, 2), 'sound'), 0.5);
+			FlxG.sound.play(Paths.getPath('menus/editors/ge/metronome' + FlxG.random.int(1, 2), 'sound'), 0.5);
 	}
 
 	function assignCamera(obj:flixel.FlxBasic, cam:flixel.FlxCamera):Void {

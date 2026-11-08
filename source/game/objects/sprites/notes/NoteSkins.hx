@@ -5,7 +5,7 @@ import core.assets.Library;
 import modding.mods.ModsRegistry;
 import modding.vslice.VSliceNoteStyles;
 
-// Note skins as one package per name: data/noteskins/<skin>/ holds strumnotes, splashes, holdsplashes and, optional,
+// Note skins as one package per name: data/game/noteskins/<skin>/ holds strumnotes, splashes, holdsplashes and, optional,
 // popups (rating and combo images) and countdown. A "vslice-<id>" skin is a V-Slice notestyle converted on read -JloorDev
 class NoteSkins {
 	public static inline final DEFAULT:String = 'default';
@@ -21,7 +21,7 @@ class NoteSkins {
 				converted.set(key, VSliceNoteStyles.convert(skin.substr(VSliceNoteStyles.PREFIX.length), part));
 			return converted.get(key);
 		}
-		return FormatJson.readJson(Paths.getPath('data/noteskins/$skin/$part', 'json'));
+		return FormatJson.readJson(Paths.getPath('data/game/noteskins/$skin/$part', 'json'));
 	}
 
 	public static function exists(skin:String):Bool

@@ -78,7 +78,7 @@ class FreeplayState extends MusicBeatState {
 			largeImageKey: "icon"
 		});
 
-		core.rhythm.audio.MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102);
+		core.audio.MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102);
 
 		freeplayData = modding.vslice.VSlice.isActive() ? modding.vslice.VSliceSongs.freeplay() : FormatJson.readJson(Paths.getPath('songs/listSong', 'json'));
 
@@ -120,7 +120,7 @@ class FreeplayState extends MusicBeatState {
 				var iconName:String = freeplayData.songData[i].icon;
 				var charData = charDataCache.get(iconName);
 				if (charData == null) {
-					charData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('data/characters/' + iconName, 'json'));
+					charData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('data/game/characters/' + iconName, 'json'));
 					charDataCache.set(iconName, charData);
 				}
 
@@ -276,7 +276,7 @@ class FreeplayState extends MusicBeatState {
 			if (instPath == null)
 				continue;
 			var absPath = sys.FileSystem.absolutePath(instPath);
-			if (!core.rhythm.audio.Sound.streamedCache.exists(absPath))
+			if (!core.audio.Sound.streamedCache.exists(absPath))
 				queue.push(absPath);
 		}
 
@@ -299,8 +299,8 @@ class FreeplayState extends MusicBeatState {
 					var snd = openfl.media.Sound.fromFile(absPath);
 					#end
 					haxe.MainLoop.runInMainThread(function():Void {
-						if (snd != null && !core.rhythm.audio.Sound.streamedCache.exists(absPath))
-							core.rhythm.audio.Sound.streamedCache.set(absPath, snd);
+						if (snd != null && !core.audio.Sound.streamedCache.exists(absPath))
+							core.audio.Sound.streamedCache.set(absPath, snd);
 						next();
 					});
 				} catch (_:Dynamic) {
@@ -455,7 +455,7 @@ class FreeplayState extends MusicBeatState {
 
 			var instPath = (diffName != '' && sys.FileSystem.exists(diffInstPath)) ? diffInstPath : genericInstPath;
 
-			core.rhythm.audio.MasterAudio.playMenu(instPath, 0.6, bpm);
+			core.audio.MasterAudio.playMenu(instPath, 0.6, bpm);
 		}
 
 		#if HSCRIPT_ALLOWED
@@ -473,7 +473,7 @@ class FreeplayState extends MusicBeatState {
 
 		curSelected += change;
 
-		FlxG.sound.play(Paths.getPath('menus/scrollMenu', 'sound'));
+		core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.9, 1.1);
 
 		if (curSelected < 0)
 			curSelected = freeplayData.songData.length - 1;

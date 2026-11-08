@@ -254,7 +254,7 @@ class VSliceNoteStyles {
 			}
 			steps.push(step);
 		}
-		return {countdown: steps, soundFolder: modSounds ? '' : 'gameplay/countdown/default/'};
+		return {countdown: steps, soundFolder: modSounds ? '' : 'game/countdown/default/'};
 	}
 
 	static function frameSize(path:String, prefix:Null<String>):Null<Array<Float>> {
