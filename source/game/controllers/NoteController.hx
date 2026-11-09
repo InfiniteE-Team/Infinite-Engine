@@ -652,7 +652,7 @@ class NoteController {
 					}
 				}
 			}
-			if (sustain.mustPress && SaveData.data.botplay && !sustain.isSustainEnd) {
+			if (sustain.mustPress && playStateConfig.botplayOn && !sustain.isSustainEnd) {
 				var inHold = songTime >= sustain.strumTime && songTime <= (sustain.strumTime + sustain.length);
 				if (inHold) {
 					sustain.wasNoteHit = true;

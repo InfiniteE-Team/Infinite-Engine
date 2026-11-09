@@ -27,6 +27,15 @@ class PlayStateConfig {
 
 	public var isBotplay:Bool = false;
 
+	// set by scripts for a moment (a minigame), never saved -JloorDev
+	public var autoPlay:Bool = false;
+	public var inputLocked:Bool = false;
+
+	public var botplayOn(get, never):Bool;
+
+	function get_botplayOn():Bool
+		return SaveData.data.botplay || autoPlay;
+
 	public static var blueBalled:Int = 0;
 
 	// storymode

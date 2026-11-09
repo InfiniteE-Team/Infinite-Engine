@@ -7,13 +7,28 @@ import game.objects.sprites.notes.StrumNote;
 
 @:keep
 class Strumline {
-	public var isPlayer(default, null):Bool;
+	// which side's arrows this is, isPlayer can change but the side doesn't -JloorDev
+	final playerSide:Bool;
+
+	public var isPlayer(get, set):Bool;
 
 	public var notes(default, null):StrumlineNotes;
 
 	public function new(isPlayer:Bool) {
-		this.isPlayer = isPlayer;
+		playerSide = isPlayer;
 		notes = new StrumlineNotes(isPlayer);
+	}
+
+	// stays true while auto playing, or scripts (Thinkpad) would try to hit the notes themselves -JloorDev
+	function get_isPlayer():Bool
+		return playerSide;
+
+	// turning the player's line off makes it hit its notes on its own, like a CPU line -JloorDev
+	function set_isPlayer(v:Bool):Bool {
+		var cfg = game.PlayState.instance?.playStateConfig;
+		if (playerSide && cfg != null)
+			cfg.autoPlay = !v;
+		return v;
 	}
 
 	public var alpha(get, set):Float;
@@ -24,7 +39,7 @@ class Strumline {
 		if (ps?.chars == null || ps.noteController == null)
 			return [];
 		var result:Array<StrumNote> = [];
-		var side:Array<game.objects.sprites.Character> = isPlayer ? @:privateAccess ps.chars.playerChars : @:privateAccess ps.chars.opponentChars;
+		var side:Array<game.objects.sprites.Character> = playerSide ? @:privateAccess ps.chars.playerChars : @:privateAccess ps.chars.opponentChars;
 		for (c in side)
 			result = result.concat(ps.noteController.getCharStrums(c.id));
 		return result;
@@ -67,7 +82,7 @@ class Strumline {
 		var ps = game.PlayState.instance;
 		var side:Array<game.objects.sprites.Character> = [];
 		if (ps?.chars != null)
-			side = isPlayer ? @:privateAccess ps.chars.playerChars : @:privateAccess ps.chars.opponentChars;
+			side = playerSide ? @:privateAccess ps.chars.playerChars : @:privateAccess ps.chars.opponentChars;
 		var line = side.length > 0 ? ps.noteController?.getStrumline(side[0].id) : null;
 		return line?.scrollSpeed ?? ps?.noteController?.scrollSpeed ?? 1.0;
 	}

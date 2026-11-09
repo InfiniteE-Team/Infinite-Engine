@@ -90,6 +90,11 @@ class VSliceScripts {
 					env.variables.set(missing.matched(1), null);
 				rest = missing.matchedRight();
 			}
+			// a parent script class can declare it, skip those -JloorDev
+			if (!classes.exists(entry.base))
+				for (name in undeclared(main.src, base))
+					if (!env.variables.exists(name))
+						env.variables.set(name, null);
 			env.addModule(main.module);
 			for (dep in dependencies(main.src, entry.className))
 				env.addModule(dep);
@@ -104,6 +109,51 @@ class VSliceScripts {
 			Console.log('[V-Slice] could not build ${entry.path}: $e', true);
 			return null;
 		}
+	}
+
+	// Polymod makes a variable out of an assignment to a name nobody declared (addedObjects in NoFullscreenMobile), hxscript throws -JloorDev
+	static function undeclared(src:String, base:Class<Dynamic>):Array<String> {
+		var fields = base != null ? Type.getInstanceFields(base) : [];
+		var assign = ~/(?:^|[;{}])\s*([a-z_]\w*)\s*=(?![=>])/m;
+		var found:Array<String> = [];
+		var rest = src;
+		while (assign.match(rest)) {
+			var name = assign.matched(1);
+			rest = assign.matchedRight();
+			if (found.contains(name) || fields.contains(name) || fields.contains('set_$name'))
+				continue;
+			var declared = new EReg('\\b(?:var|final|function)\\s+$name\\b|[(,]\\s*\\??$name\\s*[:,)=]|\\bfor\\s*\\(\\s*$name\\b|\\b$name\\s*->', '');
+			if (!declared.match(src))
+				found.push(name);
+		}
+		return found;
+	}
+
+	// hxscript hands back a reference instead of the value for a parent property used bare, so `scrollFactor.set()` inside
+	// a class extending FlxSprite throws; `this.scrollFactor` reads it right -JloorDev
+	static function qualifyParentFields(src:String, base:Null<Class<Dynamic>>):String {
+		// with more classes in the file we can't tell whose fields these are -JloorDev
+		var decls = ~/\bclass\s+\w+\s+extends\s+(\w+)/;
+		if (!decls.match(src) || decls.matchedRight().indexOf('class ') != -1)
+			return src;
+		if (base == null) {
+			var parent = decls.matched(1);
+			var imported = new EReg('import\\s+([\\w.]*\\b$parent)\\s*;', '');
+			base = imported.match(src) ? Type.resolveClass(imported.matched(1)) : null;
+		}
+		if (base == null)
+			return src;
+		for (name in Type.getInstanceFields(base)) {
+			if (StringTools.startsWith(name, 'get_') || StringTools.startsWith(name, 'set_'))
+				continue;
+			var bare = new EReg('(?<![\\w."])$name(\\s*\\.\\s*\\w)', 'g');
+			if (!bare.match(src))
+				continue;
+			var declared = new EReg('\\b(?:var|final|function)\\s+$name\\b|[(,]\\s*\\??$name\\s*[:,)=]|\\bfor\\s*\\(\\s*$name\\b|\\b$name\\s*->', '');
+			if (!declared.match(src))
+				src = bare.replace(src, 'this.$name$1');
+		}
+		return src;
 	}
 
 	static function moduleOf(entry:ScriptEntry, base:Null<Class<Dynamic>>):{module:hxscript.Module, typeName:String, src:String} {
@@ -287,6 +337,8 @@ class VSliceScripts {
 			'Stage',
 			'Song',
 			'BaseCharacter',
+			// without an import hxscript reads it as the engine's Character -JloorDev
+			'Character',
 			'SparrowCharacter',
 			'MultiSparrowCharacter',
 			'PackerCharacter',
@@ -327,7 +379,16 @@ class VSliceScripts {
 		var funcDecl = ~/^(\s*)((?:public|private|static|inline)\s+)*function\s+(\w+)/;
 		var baseFields = base != null ? Type.getInstanceFields(base) : [];
 		var overrideWord = ~/\boverride\s+/;
+		var classLine = ~/\bclass\s+\w+\s+extends\s+(\w+)/;
 		for (i in 0...(base != null ? lines.length : 0)) {
+			// a file can hold more classes (ChangCharacterEvent has a SongEvent and a Module), each with its own base -JloorDev
+			if (classLine.match(lines[i])) {
+				var other = baseClassOf(classLine.matched(1));
+				baseFields = other != null ? Type.getInstanceFields(other) : null;
+				continue;
+			}
+			if (baseFields == null)
+				continue;
 			if (!funcDecl.match(lines[i]) && !(overrideWord.match(lines[i]) && ~/\bfunction\s+\w+/.match(lines[i])))
 				continue;
 			var nameMatch = ~/\bfunction\s+(\w+)/;
@@ -349,9 +410,12 @@ class VSliceScripts {
 		src = ~/\bnew\s+FlxBackdrop\s*\(/g.replace(src, 'new funkin.compat.LegacyBackdrop(');
 		src = ~/\bAssetType\.([A-Z_]+)/g.replace(src, '"$1"');
 		src = ~/\bFlxKey\.fromString\s*\(/g.replace(src, 'funkin.compat.FlxCompat.fromString(');
+		src = ~/\bFlxG\.switchState\s*\(/g.replace(src, 'funkin.compat.FlxCompat.switchState(');
+		src = ~/\bFlxG\.sound\.music\b(?!\s*=[^=])/g.replace(src, 'funkin.compat.FlxCompat.music');
 		src = ~/\bFlxG\.keys\.(anyJustPressed|anyPressed|anyJustReleased)\s*\(/g.replace(src, 'funkin.compat.FlxCompat.$1(');
 		src = ~/(?<![\w.?])((?!this\b)\w+(?:\.\w+)*)\??\.zIndex\s*=(?!=)\s*([^;]+);/g.replace(src, 'funkin.compat.FlxCompat.setZIndex($1, $2);');
 		src = ~/\bthis\.superClass\b/g.replace(src, 'this');
+		src = qualifyParentFields(src, base);
 		// once a field holds a function hxscript won't let it be reassigned, so the `x = null` cleanup of a callback field
 		// (obliterated's focus callbacks) is dropped; the callback was already unregistered and the rest of the cleanup runs -JloorDev
 		var funcVar = ~/\bvar\s+(\w+)\s*:\s*\(?[\w<>?, ]*\)?\s*->[^;=]*;/;

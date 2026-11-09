@@ -219,7 +219,7 @@ class Strumline {
 	}
 
 	public function spawnSplash(strum:StrumNote, direction:Int, noteType:String = 'normal'):Void {
-		if (splashesSkinData == null)
+		if (splashesSkinData == null || Reflect.field(splashesSkinData, 'enabled') == false)
 			return;
 		var splash:NoteSplash;
 		if (splashPool.length > 0) {
@@ -243,7 +243,7 @@ class Strumline {
 	}
 
 	public function spawnHoldSplash(strum:StrumNote, direction:Int, noteType:String = 'normal'):Void {
-		if (holdSkinData == null)
+		if (holdSkinData == null || Reflect.field(holdSkinData, 'enabled') == false)
 			return;
 		if (Lambda.exists(holdSplashToStrum, v -> v == strum))
 			return;

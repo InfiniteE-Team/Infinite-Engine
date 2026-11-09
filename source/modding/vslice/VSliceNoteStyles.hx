@@ -57,8 +57,6 @@ class VSliceNoteStyles {
 		var holdSize = holdPath != null ? pngSize(Library.findLib('images/$holdPath.png')) : null;
 		var holdFrame = holdSize != null ? [Std.int(holdSize[0] / 8), holdSize[1]] : null;
 
-		var strumOffsets:Array<Dynamic> = strum.offsets ?? [0, 0];
-		var strumOff = [num(strumOffsets, 0), num(strumOffsets, 1)];
 
 		var anims:Array<AnimData> = [];
 		for (i in 0...4) {
@@ -92,19 +90,19 @@ class VSliceNoteStyles {
 				name: 'static$i',
 				prefix: prefixOf(strum.data, '${dir}Static'),
 				framerate: 24,
-				offsets: [-28 + strumOff[0], -30 + strumOff[1]]
+				offsets: [-28, -30]
 			});
 			anims.push({
 				name: 'press$i',
 				prefix: prefixOf(strum.data, '${dir}Press'),
 				framerate: 24,
-				offsets: [0 + strumOff[0], 0 + strumOff[1]]
+				offsets: [0, 0]
 			});
 			anims.push({
 				name: 'confirm$i',
 				prefix: prefixOf(strum.data, '${dir}Confirm'),
 				framerate: 24,
-				offsets: [-28 + strumOff[0], -30 + strumOff[1]]
+				offsets: [-28, -30]
 			});
 		}
 
@@ -114,7 +112,6 @@ class VSliceNoteStyles {
 				name: 'StrumNotes',
 				path: strumPath,
 				folder: '',
-				position: [15 + strumOff[0], 20 + strumOff[1]],
 				scale: [scale, scale],
 				antialiasing: assets.note?.isPixel != true,
 				anims: anims
@@ -123,7 +120,10 @@ class VSliceNoteStyles {
 	}
 
 	static function splashes(splash:Dynamic):Dynamic {
-		if (splash?.assetPath == null || splash.data?.enabled == false)
+		// V-Slice draws none when a style turns them off; null would fall back to the default skin -JloorDev
+		if (splash?.data?.enabled == false)
+			return {enabled: false};
+		if (splash?.assetPath == null)
 			return game.objects.sprites.notes.NoteSkins.read('default', 'splashes');
 		var path = stripLibrary(splash.assetPath);
 		var size = frameSize(path, null) ?? [260, 298];
@@ -162,7 +162,9 @@ class VSliceNoteStyles {
 
 	static function holdsplashes(cover:Dynamic):Dynamic {
 		var data:Dynamic = cover?.data;
-		if (data == null || data.enabled == false)
+		if (data?.enabled == false)
+			return {enabled: false};
+		if (data == null)
 			return game.objects.sprites.notes.NoteSkins.read('default', 'holdsplashes');
 		var extra:Dynamic = cover.offsets;
 		var anims:Array<AnimData> = [];
@@ -255,6 +257,23 @@ class VSliceNoteStyles {
 			steps.push(step);
 		}
 		return {countdown: steps, soundFolder: modSounds ? '' : 'game/countdown/default/'};
+	}
+
+	// where the engine has to put a side's first arrow so it lands where V-Slice draws it. V-Slice: the strumline starts at
+	// x 48 (the player's at half the screen + 48) and y 24, arrows go 0.275 of an arrow in, plus the style's offset, and
+	// the static frame is scaled from its center. The engine draws static anims at (-28, -30) from the strum's x/y -JloorDev
+	public static function strumPosition(styleId:String, isPlayer:Bool):Null<Array<Float>> {
+		var strum:Dynamic = readMod('data/notestyles/$styleId.json')?.assets?.noteStrumline;
+		if (strum?.assetPath == null)
+			return null;
+		var scale:Float = strum.scale ?? 0.7;
+		var size = frameSize(stripLibrary(strum.assetPath), prefixOf(strum.data, 'leftStatic')) ?? [154.0, 154.0];
+		var shrink = (1 - scale) / 2;
+		var lineX = 48 + (isPlayer ? flixel.FlxG.width / 2 : 0);
+		return [
+			lineX + 0.275 * 104 + 28 + num(strum.offsets, 0) - size[0] * shrink,
+			24 + 30 + num(strum.offsets, 1) - size[1] * shrink - game.PlayStateConfig.strumLineY
+		];
 	}
 
 	static function frameSize(path:String, prefix:Null<String>):Null<Array<Float>> {

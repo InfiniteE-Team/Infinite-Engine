@@ -18,6 +18,8 @@ class VSlicePorter implements FormatChartConverter {
 		var opponent:String = raw._opponent ?? 'dad';
 		var girlfriend:String = raw._girlfriend ?? 'gf';
 		var noteSkin:Null<String> = modding.vslice.VSliceNoteStyles.skinFor(raw._noteStyle);
+		var playerStrums = noteSkin != null ? modding.vslice.VSliceNoteStyles.strumPosition(raw._noteStyle, true) : null;
+		var opponentStrums = noteSkin != null ? modding.vslice.VSliceNoteStyles.strumPosition(raw._noteStyle, false) : null;
 
 		var diff:Null<String> = raw._diff;
 		var notesObj:Dynamic = raw.notes;
@@ -118,7 +120,7 @@ class VSlicePorter implements FormatChartConverter {
 						name: player,
 						role: 'player',
 						strums: {
-							position: [720, 0],
+							position: playerStrums ?? [720, 0],
 							noteSkin: noteSkin
 						}
 					},
@@ -127,7 +129,7 @@ class VSlicePorter implements FormatChartConverter {
 						name: opponent,
 						role: 'opponent',
 						strums: {
-							position: [50, 0],
+							position: opponentStrums ?? [50, 0],
 							noteSkin: noteSkin
 						}
 					}

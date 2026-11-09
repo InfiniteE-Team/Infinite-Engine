@@ -1,6 +1,7 @@
 package funkin.play;
 
 import flixel.FlxBasic;
+import flixel.FlxG;
 import flixel.FlxCamera;
 import flixel.FlxObject;
 
@@ -32,6 +33,7 @@ class PlayState {
 	public var defaultHUDCameraZoom:Float = 1.0;
 	public var songScore(get, set):Int;
 	public var songEvents(get, never):Array<Dynamic>;
+	public var currentChart(get, never):Dynamic;
 	public var startingSong(get, never):Bool;
 	public var conductorInUse(get, never):funkin.Conductor;
 	public var playerVocalsVolume(never, set):Float;
@@ -42,6 +44,7 @@ class PlayState {
 	public var isInCountdown:Bool = false;
 	public var mayPauseGame:Bool = true;
 	public var isPracticeMode:Bool = false;
+	public var disableKeys(get, set):Bool;
 	public var isChartingMode:Bool = false;
 	public var isMinimalMode:Bool = false;
 	public var justUnpaused:Bool = false;
@@ -98,6 +101,29 @@ class PlayState {
 
 	function get_isBotPlayMode():Bool
 		return SaveData.data.botplay == true;
+
+	var savedVolumeKeys:Array<Array<flixel.input.keyboard.FlxKey>> = null;
+
+	function get_disableKeys():Bool
+		return engine()?.playStateConfig?.inputLocked == true;
+
+	// V-Slice also drops the volume keys here, so typing 0 doesn't mute the game -JloorDev
+	function set_disableKeys(v:Bool):Bool {
+		if (engine()?.playStateConfig != null)
+			engine().playStateConfig.inputLocked = v;
+		// the keys are off while a minigame takes over, the mouse is how it gets played -JloorDev
+		FlxG.mouse.visible = v;
+		if (v && savedVolumeKeys == null) {
+			savedVolumeKeys = [FlxG.sound.muteKeys, FlxG.sound.volumeUpKeys, FlxG.sound.volumeDownKeys];
+			FlxG.sound.muteKeys = FlxG.sound.volumeUpKeys = FlxG.sound.volumeDownKeys = null;
+		} else if (!v && savedVolumeKeys != null) {
+			FlxG.sound.muteKeys = savedVolumeKeys[0];
+			FlxG.sound.volumeUpKeys = savedVolumeKeys[1];
+			FlxG.sound.volumeDownKeys = savedVolumeKeys[2];
+			savedVolumeKeys = null;
+		}
+		return v;
+	}
 
 	function get_stageZoom():Float
 		return engine()?.cameraController?.stageZoom ?? 1.0;
@@ -192,12 +218,32 @@ class PlayState {
 	public function endSong(?rightGoddamnNow:Bool, ?force:Bool):Void
 		engine()?.endSong();
 
-	public function add(obj:FlxBasic):FlxBasic {
+	// scripts also add the characters CharacterDataParser gives them -JloorDev
+	static function basicOf(obj:Dynamic):FlxBasic
+		return Std.isOfType(obj, funkin.play.character.BaseCharacter) ? cast(obj, funkin.play.character.BaseCharacter).asGroup() : obj;
+
+	public function add(o:Dynamic):Dynamic {
+		var obj = basicOf(o);
 		if (engine() != null)
 			engine().add(obj);
 		else if (currentStage != null)
 			currentStage.add(obj);
-		return obj;
+		return o;
+	}
+
+	// what scripts read of the chart: its stage and characters -JloorDev
+	function get_currentChart():Dynamic {
+		var song = game.PlayState.SONG;
+		if (song == null)
+			return null;
+		var byRole = (roles:Array<String>) -> Lambda.find(song.chars, c -> roles.contains(c.role))?.name;
+		var C = game.controllers.CharacterController;
+		return {
+			songName: currentSong?.id,
+			stage: song.stage,
+			characters: {player: byRole(C.namesPlayer), girlfriend: byRole(C.namesGf), opponent: byRole(C.namesOpponent)},
+			scrollSpeed: engine()?.noteController?.scrollSpeed ?? 1.0
+		};
 	}
 
 	function get_songEvents():Array<Dynamic> {
@@ -263,9 +309,9 @@ class PlayState {
 			cfg.combo++;
 	}
 
-	public function remove(obj:FlxBasic):FlxBasic {
+	public function remove(o:Dynamic):Dynamic {
 		if (engine() != null)
-			engine().remove(obj, true);
-		return obj;
+			engine().remove(basicOf(o), true);
+		return o;
 	}
 }

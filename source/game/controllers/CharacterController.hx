@@ -152,7 +152,7 @@ class CharacterController extends FunkinObjectRegistry {
 			var charScript = scriptMap.get(char.id);
 			#end
 			for (i in 0...strums.length) {
-				if (SaveData.data.botplay) {
+				if (playStateConfig.botplayOn) {
 					var note = noteController.getHittableNote(char.id, i, true);
 					if (note != null) {
 						var diff = note.strumTime - core.rhythm.RhythmCore.songPosition;
@@ -281,7 +281,7 @@ class CharacterController extends FunkinObjectRegistry {
 	}
 
 	function onLaneKeyDown(i:Int):Void {
-		if (SaveData.data.botplay)
+		if (playStateConfig.botplayOn || playStateConfig.inputLocked)
 			return;
 
 		for (char in playerChars) {

@@ -64,6 +64,8 @@ class BaseCharacter {
 	public var library(get, never):Dynamic;
 	public var cameraFocusPoint(get, never):FlxPoint;
 	public var width(get, never):Float;
+	public var cameras(get, set):Array<flixel.FlxCamera>;
+	public var scrollFactor(get, never):FlxPoint;
 	public var height(get, never):Float;
 
 	function body()
@@ -164,6 +166,51 @@ class BaseCharacter {
 
 	function get_cameraFocusPoint():FlxPoint
 		return host?.cameraFocusPoint;
+
+	function get_cameras():Array<flixel.FlxCamera>
+		return host?.cameras;
+
+	function set_cameras(v:Array<flixel.FlxCamera>):Array<flixel.FlxCamera> {
+		if (host != null) {
+			host.cameras = v;
+			for (l in host.layers)
+				l.cameras = v;
+		}
+		return v;
+	}
+
+	function get_scrollFactor():FlxPoint
+		return host?.scrollFactor;
+
+	public function kill():Void {
+		if (host != null)
+			for (o in drawables())
+				o.kill();
+	}
+
+	public function revive():Void {
+		if (host != null)
+			for (o in drawables())
+				o.revive();
+	}
+
+	function drawables():Array<flixel.FlxBasic> {
+		var list:Array<flixel.FlxBasic> = [for (l in host.layers) l];
+		list.push(host);
+		return list;
+	}
+
+	var _group:flixel.group.FlxGroup = null;
+
+	// what a script adds to a state: the layers draw, the character only places them -JloorDev
+	public function asGroup():flixel.group.FlxGroup {
+		if (_group == null && host != null) {
+			_group = new flixel.group.FlxGroup();
+			for (o in drawables())
+				_group.add(o);
+		}
+		return _group;
+	}
 
 	function get_width():Float
 		return body()?.width ?? 0;

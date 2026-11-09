@@ -176,7 +176,7 @@ class PlayState extends MusicBeatState {
 		buildStrumsAndNotes();
 
 		// V-Slice modules set themselves up here, once the strumlines exist -JloorDev
-		modding.vslice.VSliceHooks.dispatch('onSongLoaded', modding.vslice.VSliceHooks.event('SONG_LOADED'));
+		modding.vslice.VSliceHooks.dispatch('onSongLoaded', modding.vslice.VSliceHooks.event('SONG_LOADED', {id: songFolder, events: funkin.play.PlayState.instance?.songEvents ?? []}));
 		modding.vslice.VSliceHooks.dispatch('onStateChangeEnd', modding.vslice.VSliceHooks.event('STATE_CHANGE_END', {targetState: funkin.play.PlayState.instance}));
 
 		if (!cutscene.tryPlay(songFolder, 'intro', () -> startCountdown()))
