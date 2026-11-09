@@ -15,6 +15,19 @@ class FunkinSprite extends FlxAnimate {
 
 	public function new(x:Float = 0, y:Float = 0, ?graphic:Dynamic) {
 		super(x, y, graphic);
+		addFrameLabelAnims();
+	}
+
+	// V-Slice plays frame labels by name, flixel-animate needs them registered -JloorDev
+	function addFrameLabelAnims():Void {
+		var timeline = isAnimate ? library?.timeline : null;
+		if (timeline == null)
+			return;
+		for (i in 0...timeline.frameCount) {
+			var label = timeline.getFrameLabelAtIndex(i);
+			if (label != '' && !anim.exists(label))
+				anim.addByFrameLabel(label, label, null, false);
+		}
 	}
 
 	public static function create(x:Float = 0, y:Float = 0, key:String):FunkinSprite
@@ -49,6 +62,7 @@ class FunkinSprite extends FlxAnimate {
 			return this;
 		}
 		frames = FlxAnimateFrames.fromAnimate(dir);
+		addFrameLabelAnims();
 		return this;
 	}
 

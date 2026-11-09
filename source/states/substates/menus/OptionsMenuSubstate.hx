@@ -672,6 +672,15 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 
 		ps.playStateConfig.isBotplay = SaveData.data.botplay;
 
+		// V-Slice scripts lay out their own HUD (space notes...) once, from where the arrows are; reload so they redo it -JloorDev
+		var layoutChanged = ps.noteController.isDownscroll != SaveData.data.downscroll || ps.noteController.isMiddlescroll != SaveData.data.middlescroll;
+		if (layoutChanged && modding.vslice.VSlice.isActive() && modding.vslice.VSliceHooks.active) {
+			var song = ps.songFolder;
+			var diff = ps.curDifficulty;
+			MusicBeatState.switchState(() -> new states.menus.LoadingState(song, diff));
+			return;
+		}
+
 		ps.noteController.applyScrollDirection(SaveData.data.downscroll);
 		ps.noteController.applyMiddlescroll(SaveData.data.middlescroll);
 

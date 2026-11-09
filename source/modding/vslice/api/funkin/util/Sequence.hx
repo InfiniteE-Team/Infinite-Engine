@@ -30,9 +30,16 @@ class Sequence {
 		}
 		for (e in events) {
 			var callback:Void->Void = e.callback;
-			timers.push(new FlxTimer().start(Math.max(0, (e.time ?? 0) * mult), _ -> {
+			// with `?? 0` haxe typed it Int and 0.24 secs fired at once -JloorDev
+			var time:Float = e.time ?? 0.0;
+			timers.push(new FlxTimer().start(Math.max(0, time * mult), _ -> {
+				// runs from a timer, a script error here would crash the game -JloorDev
 				if (callback != null)
-					callback();
+					try {
+						callback();
+					} catch (err:Dynamic) {
+						Console.log('[V-Slice] a Sequence callback failed: $err', true);
+					}
 				if (--left <= 0)
 					finished = true;
 			}));

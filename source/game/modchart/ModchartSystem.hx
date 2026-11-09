@@ -38,6 +38,8 @@ class ModchartSystem extends FlxBasic {
 
 	var _baseX:Array<Float> = [];
 	var _baseY:Array<Float> = [];
+	var _lastX:Array<Null<Float>> = [];
+	var _lastY:Array<Null<Float>> = [];
 	var _baseScaleX:Array<Float> = [];
 	var _baseScaleY:Array<Float> = [];
 	var _baseAngle:Array<Float> = [];
@@ -54,6 +56,8 @@ class ModchartSystem extends FlxBasic {
 	public function cacheStrumBase():Void {
 		_baseX = [];
 		_baseY = [];
+		_lastX = [];
+		_lastY = [];
 		_baseScaleX = [];
 		_baseScaleY = [];
 		_baseAngle = [];
@@ -66,6 +70,8 @@ class ModchartSystem extends FlxBasic {
 				continue;
 			_baseX[i] = s.x;
 			_baseY[i] = s.y;
+			_lastX[i] = s.x;
+			_lastY[i] = s.y;
 			_baseScaleX[i] = s.scale.x;
 			_baseScaleY[i] = s.scale.y;
 			_baseAngle[i] = s.angle;
@@ -80,6 +86,8 @@ class ModchartSystem extends FlxBasic {
 			if (s != null){
 				_baseX[i] = s.x;
 				_baseY[i] = s.y;
+				_lastX[i] = s.x;
+				_lastY[i] = s.y;
 			}
 		}
 	}
@@ -294,6 +302,12 @@ class ModchartSystem extends FlxBasic {
 			if (strum == null)
 				continue;
 
+			// a script moved the strum since last frame, keep that move -JloorDev
+			if (i < _baseX.length && _lastX[i] != null && strum.x != _lastX[i])
+				_baseX[i] += strum.x - _lastX[i];
+			if (i < _baseY.length && _lastY[i] != null && strum.y != _lastY[i])
+				_baseY[i] += strum.y - _lastY[i];
+
 			final bx = _baseX[i] ?? strum.x;
 			final by = _baseY[i] ?? strum.y;
 			final bsx = _baseScaleX[i] ?? strum.scale.x;
@@ -345,6 +359,8 @@ class ModchartSystem extends FlxBasic {
 
 			strum.x = finalX;
 			strum.y = finalY;
+			_lastX[i] = finalX;
+			_lastY[i] = finalY;
 			strum.angle = ba + rangle;
 			strum.alpha = bal * ralpha;
 			strum.scale.set(finalSX, finalSY);

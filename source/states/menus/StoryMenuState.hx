@@ -25,6 +25,7 @@ class StoryMenuState extends MusicBeatState {
 	var descriptionText:FlxText;
 
 	var charGroup:FlxTypedGroup<states.menus.objects.WeekCharacter>;
+	var bg:flixel.FlxSprite;
 
 	var weekBanner:FunkinSprite;
 
@@ -96,7 +97,8 @@ class StoryMenuState extends MusicBeatState {
 		if (script.callCancellable("onBuildBackgroundCancel", []))
 			return;
 		#end
-		var bg = new flixel.FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFFDCC202);
+		bg = new flixel.FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.WHITE);
+		bg.color = 0xFFDCC202;
 		add(bg);
 
 		var topBar = new flixel.FlxSprite().makeGraphic(FlxG.width, 70, FlxColor.BLACK);
@@ -257,7 +259,7 @@ class StoryMenuState extends MusicBeatState {
 			for (week in modding.vslice.VSliceSongs.weeks())
 				weeks.push(week);
 		} else {
-			var resolved = Paths.getPath('data/storymenu/weeks');
+			var resolved = Paths.getPath('data/menus/storymenu/weeks');
 			if (resolved == null || !FileSystem.exists(resolved))
 				return;
 
@@ -302,8 +304,16 @@ class StoryMenuState extends MusicBeatState {
 
 		descriptionText.text = data.description != null ? data.description : "";
 
+		bg.color = data.color != null ? FlxColor.fromString(data.color) : 0xFFDCC202;
+
 		charGroup.clear();
-		if (data.chars != null) {
+		if (data.charProps != null) {
+			for (i in 0...data.charProps.length) {
+				var ch = new states.menus.objects.WeekCharacter(0, 0, null, data.charProps[i]);
+				ch.ID = i;
+				charGroup.add(ch);
+			}
+		} else if (data.chars != null) {
 			var totalChars = data.chars.length;
 			var spacing = 350;
 			var startX = (FlxG.width / 2) - ((totalChars - 1) * spacing / 2) - 150;
@@ -315,7 +325,7 @@ class StoryMenuState extends MusicBeatState {
 		}
 
 		if (data.weekGraphic != null && data.weekGraphic != "") {
-			var bannerPath = Paths.getPath('menus/storymenu/weeks/' + data.weekGraphic, 'image');
+			var bannerPath = Paths.getPath('menus/storymenu/weeks/' + data.weekGraphic, 'image') ?? Paths.getPath(data.weekGraphic, 'image');
 			if (bannerPath != null && FileSystem.exists(bannerPath)) {
 				weekBanner.loadGraphic(bannerPath);
 			} else {
@@ -533,7 +543,7 @@ class StoryMenuState extends MusicBeatState {
 		for (item in charGroup.members) {
 			if (item != null && item.alive) {
 				if (!acceptOption || item.ID != 1) {
-					item.playAnim('idle');
+					item.dance();
 				}
 			}
 		}

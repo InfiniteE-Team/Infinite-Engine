@@ -65,6 +65,9 @@ class ModConfig {
 
 	public static function loadForMod(modName:String):ModData {
 		var modPath = '${core.assets.Library.modsFolder}/$modName/meta.json';
+		// V-Slice mods ship Polymod's meta instead -JloorDev
+		if (!sys.FileSystem.exists(modPath))
+			modPath = '${core.assets.Library.modsFolder}/$modName/_polymod_meta.json';
 		if (!sys.FileSystem.exists(modPath))
 			return null;
 		try {

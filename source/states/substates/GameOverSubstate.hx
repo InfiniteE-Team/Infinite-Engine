@@ -92,9 +92,10 @@ class GameOverSubstate extends MusicBeatSubstate {
 		PlayState.instance.cameraController.isLock = false;
 		PlayState.instance.cameraController.followChar(char);
 
-		FlxG.sound.play(Paths.getPath('game/death/' + sound, 'sound'));
+		var lossSound = suffixed('gameplay/gameover/fnf_loss_sfx', funkin.play.GameOverSubState.blueBallSuffix, 'sound');
+		FlxG.sound.play(lossSound ?? Paths.getPath('game/death/' + sound, 'sound'));
 
-		char.playAnim('firstDeath');
+		char.playAnim(deathAnim('firstDeath'));
 
 		#if HSCRIPT_ALLOWED
 		script.call("postCreate", []);
@@ -115,14 +116,17 @@ class GameOverSubstate extends MusicBeatSubstate {
 		if (char != null)
 			PlayState.instance?.cameraController?.followChar(char);
 
-		if (char.isFinished('firstDeath')) {
-			char.playAnim('deathLoop', true);
-			FlxG.sound.playMusic(Paths.getPath('game/death/' + music, 'music'));
+		if (char.isFinished(deathAnim('firstDeath'))) {
+			char.playAnim(deathAnim('deathLoop'), true);
+			var modMusic = suffixed('gameplay/gameover/gameOver', funkin.play.GameOverSubState.musicSuffix, 'music');
+			FlxG.sound.playMusic(modMusic ?? Paths.getPath('game/death/' + music, 'music'));
+			if (funkin.play.GameOverSubState.instance != null)
+				funkin.play.GameOverSubState.instance.gameOverMusic = FlxG.sound.music;
 		}
 
-		if (Controls.ACCEPT) {
+		if (Controls.ACCEPT && funkin.play.GameOverSubState.instance?.mustNotExit != true) {
 			confirm = true;
-			char.playAnim('deathConfirm', true);
+			char.playAnim(deathAnim('deathConfirm'), true);
 			FlxG.sound.music?.stop();
 			FlxG.sound.play(Paths.getPath('game/death/' + endSound, 'music'));
 
@@ -147,6 +151,19 @@ class GameOverSubstate extends MusicBeatSubstate {
 		if (script.hasScripts)
 			script.call("postUpdate", []);
 		#end
+	}
+
+	// V-Slice scripts pick a death variant through these suffixes -JloorDev
+	function deathAnim(name:String):String {
+		var suffix = funkin.play.GameOverSubState.animationSuffix;
+		return suffix != null && suffix != '' && char.existsAnim(name + suffix) ? name + suffix : name;
+	}
+
+	// mod sounds aren't bundled assets, funkin.Paths loads them from disk -JloorDev
+	static function suffixed(path:String, suffix:String, type:String):Dynamic {
+		if (suffix == null || suffix == '')
+			return null;
+		return type == 'music' ? funkin.Paths.music(path + suffix) : funkin.Paths.sound(path + suffix);
 	}
 
 	override public function destroy() {

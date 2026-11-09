@@ -72,6 +72,13 @@ class Camera extends flixel.FlxCamera {
 		pruneEmptyFilters();
 	}
 
+	// openfl crashes cloning a null filter -JloorDev
+	override function render():Void {
+		if (filters != null && Lambda.exists(filters, f -> f == null))
+			pruneEmptyFilters();
+		super.render();
+	}
+
 	public function pruneEmptyFilters():Void {
 		if (filters == null)
 			return;

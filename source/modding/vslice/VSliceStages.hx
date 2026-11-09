@@ -103,6 +103,7 @@ class VSliceStages {
 				scrollFactor: p.scroll != null ? pair(p.scroll, 1) : null,
 				scale: scale,
 				alpha: p.alpha,
+				angle: p.angle,
 				flipX: p.flipX,
 				flipY: p.flipY,
 				blend: p.blend,

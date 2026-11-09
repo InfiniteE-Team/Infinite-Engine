@@ -175,6 +175,10 @@ class PlayState extends MusicBeatState {
 
 		buildStrumsAndNotes();
 
+		// V-Slice modules set themselves up here, once the strumlines exist -JloorDev
+		modding.vslice.VSliceHooks.dispatch('onSongLoaded', modding.vslice.VSliceHooks.event('SONG_LOADED'));
+		modding.vslice.VSliceHooks.dispatch('onStateChangeEnd', modding.vslice.VSliceHooks.event('STATE_CHANGE_END', {targetState: funkin.play.PlayState.instance}));
+
 		if (!cutscene.tryPlay(songFolder, 'intro', () -> startCountdown()))
 			startCountdown();
 
@@ -225,10 +229,20 @@ class PlayState extends MusicBeatState {
 
 		for (data in SONG.chars) {
 			chars.loadCharacter(data.id, data.name, data.role, stage.charLayer, script);
-			applyStageProps(cast(chars.get(data.id), game.objects.sprites.Character), data.id);
+			var char = cast(chars.get(data.id), game.objects.sprites.Character);
+			applyStageProps(char, data.id);
+			stage.addVSliceCharacter(char, vsliceCharType(data.role));
 		}
 
 		var opponentData = Lambda.find(SONG.chars, c -> CharacterController.namesOpponent.contains(c.role)) ?? (SONG.chars.length > 0 ? SONG.chars[0] : null);
+		// V-Slice starts the camera on the opponent -JloorDev
+		if (modding.vslice.VSlice.isActive() && opponentData != null) {
+			var opponent = cast(chars.get(opponentData.id), game.objects.sprites.Character);
+			// its layers only get placed on update -JloorDev
+			opponent.update(0);
+			var start = opponent.getCamPosition();
+			cameraController.snapCameraTo(start.x, start.y);
+		}
 		if (!cameraController.existsCamEvents) {
 			if (opponentData != null)
 				cameraController.char = cast(chars.get(opponentData.id), game.objects.sprites.Character);
@@ -241,9 +255,29 @@ class PlayState extends MusicBeatState {
 		#end
 	}
 
+	static function vsliceCharType(role:String):String {
+		if (CharacterController.namesPlayer.contains(role))
+			return 'bf';
+		if (CharacterController.namesOpponent.contains(role))
+			return 'dad';
+		return CharacterController.namesGf.contains(role) ? 'gf' : 'other';
+	}
+
 	function loadVSliceSong():Void {
 		if (funkin.play.PlayState.instance == null)
 			return;
+		// in V-Slice a stage without a script is still currentStage, scripts reach props and characters through it -JloorDev
+		if (funkin.play.PlayState.instance.currentStage == null) {
+			var plain = new funkin.play.stage.Stage(SONG.stage);
+			plain.host = stage;
+			funkin.play.PlayState.instance.currentStage = plain;
+		}
+		modding.vslice.VSliceHooks.modEvents = modding.vslice.VSliceScripts.loadEvents();
+		funkin.modding.module.ModuleHandler.modules = modding.vslice.VSliceScripts.loadModules();
+		for (module in funkin.modding.module.ModuleHandler.modules) {
+			modding.vslice.VSliceHooks.register(module);
+			modding.vslice.VSliceHooks.call(module, 'onCreate', modding.vslice.VSliceHooks.event('CREATE'));
+		}
 		var song = modding.vslice.VSliceScripts.loadSongScript(songFolder);
 		if (song == null)
 			return;
@@ -299,7 +333,9 @@ class PlayState extends MusicBeatState {
 
 		if (SONG.songData.gameplay.events != null) {
 			events.loadEvents(SONG.songData.gameplay.events);
-			events.updateEvents(0);
+			// V-Slice fires them when the song reaches 0 -JloorDev
+			if (!modding.vslice.VSlice.isActive())
+				events.updateEvents(0);
 		}
 	}
 
@@ -314,8 +350,6 @@ class PlayState extends MusicBeatState {
 
 		if (startTime > 0)
 			gameAudio.setTime(startTime);
-
-		modding.vslice.VSliceHooks.dispatch('onSongLoaded', modding.vslice.VSliceHooks.event('SONG_LOADED'));
 	}
 
 	var vsliceCountdownHeld:Bool = false;
@@ -323,11 +357,15 @@ class PlayState extends MusicBeatState {
 	var vsliceHeldTime:Float = 0;
 	var vsliceHeldFailures:Int = 0;
 
+	var resumingAfterIntro:Bool = false;
+
 	public function resumeVSliceCountdown(force:Bool = false):Void {
 		if (!vsliceCountdownHeld)
 			return;
 		vsliceCountdownHeld = false;
+		resumingAfterIntro = true;
 		startCountdown(force);
+		resumingAfterIntro = false;
 	}
 
 	public function startCountdown(skipVSlice:Bool = false) {
@@ -340,6 +378,8 @@ class PlayState extends MusicBeatState {
 			skipVSliceCountdown = true;
 		}
 		if (countdownEvent.eventCanceled == true) {
+			// hold the song before the countdown while the intro plays -JloorDev
+			RhythmCore.songPosition = -(60 / SONG.bpmSong) * 1000 * 5;
 			vsliceCountdownHeld = true;
 			vsliceHeldTime = 0;
 			vsliceHeldFailures = modding.vslice.VSliceHooks.failures;
@@ -354,6 +394,14 @@ class PlayState extends MusicBeatState {
 
 		var crochet:Float = (60 / SONG.bpmSong) * 1000;
 		RhythmCore.songPosition = startTime > 0 ? startTime : -crochet * 4;
+		rhythmTracker.syncTo();
+		if (modding.vslice.VSlice.isActive()) {
+			// same as above, the camera events need the characters in place -JloorDev
+			for (data in SONG.chars)
+				cast(chars.get(data.id), game.objects.sprites.Character)?.update(0);
+			// after an intro, ease into the start camera over the countdown -JloorDev
+			events.applyStartCameraEvents(resumingAfterIntro ? 16 : null);
+		}
 
 		countDown.cameras = [camOther];
 		countDown.onComplete = initSong;
@@ -703,7 +751,7 @@ class PlayState extends MusicBeatState {
 			MusicBeatState.switchState(() -> new modding.editors.GameplayEditor());
 		}
 
-		if (!paused && !isInCutscene) {
+		if (!paused && !isInCutscene && !vsliceCountdownHeld) {
 			RhythmCore.songPosition += elapsed * 1000;
 			if (!isInCountdown && gameAudio != null && gameAudio.inst != null && gameAudio.inst.playing)
 				RhythmCore.songPosition = gameAudio.inst.time;

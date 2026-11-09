@@ -9,7 +9,11 @@ import game.objects.sprites.Character;
 @:keep
 class Stage {
 	public var stageId:String;
+	public var id(get, never):String;
 	public var host:game.objects.sprites.Stage;
+
+	function get_id():String
+		return stageId;
 
 	public function new(id:String) {
 		stageId = id;
@@ -70,12 +74,12 @@ class Stage {
 	}
 
 	static function vsliceOf(c:Character):Dynamic
-		return c?.vslice != null ? c.vslice : c;
+		return funkin.play.character.BaseCharacter.wrap(c);
 
 	public function addCharacter(character:Dynamic, charType:String):Void {
 		var c:Character = Std.isOfType(character,
 			funkin.play.character.BaseCharacter) ? cast(character, funkin.play.character.BaseCharacter).host : Std.downcast(character, Character);
-		if (host != null && c != null)
+		if (host != null && c != null && !host.charLayer.members.contains(c))
 			host.addExtraCharacter(c);
 	}
 

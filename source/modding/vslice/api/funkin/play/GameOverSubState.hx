@@ -7,8 +7,11 @@ class GameOverSubState {
 	public static var blueballed:Bool = false;
 	public static var blueBallSuffix:String = '';
 	public static var musicSuffix:String = '';
+	public static var animationSuffix:String = '';
 
 	public var engine:Dynamic;
+	public var mustNotExit:Bool = false;
+	public var gameOverMusic:flixel.sound.FlxSound = null;
 
 	public function new(engine:Dynamic) {
 		this.engine = engine;
@@ -19,6 +22,7 @@ class GameOverSubState {
 	public static function reset():Void {
 		blueBallSuffix = '';
 		musicSuffix = '';
+		animationSuffix = '';
 	}
 
 	public function startDeathMusic(?startingVolume:Float, ?force:Bool):Void {}

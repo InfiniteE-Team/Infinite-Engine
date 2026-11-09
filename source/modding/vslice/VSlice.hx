@@ -27,6 +27,43 @@ class VSlice {
 		return FileSystem.exists(path) ? FormatJson.readJson(path) : null;
 	}
 
+	// Polymod's _merge: JSON Patch ops a mod applies to a base game file -JloorDev
+	public static function applyMerge(rel:String, data:Dynamic):Dynamic {
+		var ops:Array<Dynamic> = isActive() ? readMod('_merge/$rel') : null;
+		if (ops == null || data == null)
+			return data;
+		for (op in ops) {
+			var parts = Std.string(op.path).split('/').slice(1);
+			if (parts.length == 0)
+				continue;
+			var parent:Dynamic = data;
+			for (i in 0...parts.length - 1)
+				parent = Std.isOfType(parent, Array) ? parent[Std.parseInt(parts[i])] : Reflect.field(parent, parts[i]);
+			if (parent == null)
+				continue;
+			var key = parts[parts.length - 1];
+			if (Std.isOfType(parent, Array)) {
+				var list:Array<Dynamic> = parent;
+				var at = key == '-' ? list.length : Std.parseInt(key);
+				switch (op.op) {
+					case 'add':
+						list.insert(at, op.value);
+					case 'replace':
+						list[at] = op.value;
+					case 'remove':
+						list.splice(at, 1);
+				}
+			} else
+				switch (op.op) {
+					case 'add' | 'replace':
+						Reflect.setField(parent, key, op.value);
+					case 'remove':
+						Reflect.deleteField(parent, key);
+				}
+		}
+		return data;
+	}
+
 	public static function sortedJson(rel:String):Array<String> {
 		var dir = '${modRoot()}/$rel';
 		if (!FileSystem.exists(dir) || !FileSystem.isDirectory(dir))

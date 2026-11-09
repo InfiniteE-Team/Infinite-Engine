@@ -84,15 +84,46 @@ class EventManager {
 	}
 
 	public static function schemaNames():Array<String> {
-		return [for (t in schemas) t.name];
+		return [for (t in allSchemas()) t.name];
 	}
 
 	public static function findSchema(name:String):EventSchema {
-		for (t in schemas) {
+		for (t in allSchemas()) {
 			if (t.name == name)
 				return t;
 		}
 		return null;
+	}
+
+	static var extraCache:{mod:String, list:Array<EventSchema>} = null;
+
+	// built-in events plus the ones the current mod brings -JloorDev
+	public static function allSchemas():Array<EventSchema> {
+		var mod = modding.mods.ModsRegistry.onMod ? modding.mods.ModsRegistry.currentMod : '';
+		if (extraCache == null || extraCache.mod != mod) {
+			var extra:Array<EventSchema> = [];
+			var taken = [for (t in schemas) t.name];
+			for (t in modding.vslice.VSliceScripts.eventSchemas())
+				if (!taken.contains(t.name)) {
+					taken.push(t.name);
+					extra.push(t);
+				}
+			var dirs = ['${core.assets.Library.baseFolder}/scripts/events'];
+			if (mod != '')
+				dirs.push('${core.assets.Library.modsFolder}/$mod/scripts/events');
+			for (dir in dirs)
+				if (sys.FileSystem.exists(dir) && sys.FileSystem.isDirectory(dir))
+					for (file in sys.FileSystem.readDirectory(dir)) {
+						var name = haxe.io.Path.withoutExtension(file);
+						var ext = haxe.io.Path.extension(file);
+						if ((ext == 'hx' || ext == 'lua') && !taken.contains(name)) {
+							taken.push(name);
+							extra.push({name: name, fields: []});
+						}
+					}
+			extraCache = {mod: mod, list: extra};
+		}
+		return schemas.concat(extraCache.list);
 	}
 
 	public static function defaultArgs(schema:EventSchema, chars:Array<String>, bpm:Float):Dynamic {
@@ -272,6 +303,26 @@ class EventManager {
 		if (handler != null)
 			handler.call('onEvent', [event.arguments, event.time]);
 		#end
+	}
+
+	// time-0 camera events land before the countdown, otherwise the camera swings as the song starts -JloorDev
+	public function applyStartCameraEvents(?overSteps:Float):Void {
+		for (event in pendingEvents.copy()) {
+			if (event.time > 0)
+				break;
+			if (event.name != 'Camera Follow' && event.name != 'Zoom Camera')
+				continue;
+			var args:Dynamic = Reflect.copy(event.arguments);
+			if (overSteps != null) {
+				args.ease = 'sineInOut';
+				args.duration = overSteps;
+			} else if (event.name == 'Camera Follow')
+				args.ease = 'INSTANT';
+			else
+				args.duration = 0;
+			pendingEvents.remove(event);
+			handleEvent({name: event.name, arguments: args, time: event.time});
+		}
 	}
 
 	public function updateEvents(songTime:Float) {

@@ -31,6 +31,25 @@ class BaseCharacter {
 		characterId = id;
 	}
 
+	static var wrappers:haxe.ds.ObjectMap<Character, BaseCharacter> = new haxe.ds.ObjectMap();
+
+	public static function wrap(c:Character):Null<BaseCharacter> {
+		if (c == null)
+			return null;
+		if (c.vslice != null)
+			return c.vslice;
+		var w = wrappers.get(c);
+		if (w == null) {
+			w = new BaseCharacter(c.curCharacter);
+			w.host = c;
+			wrappers.set(c, w);
+		}
+		return w;
+	}
+
+	public static function clearWrappers():Void
+		wrappers = new haxe.ds.ObjectMap();
+
 	public var x(get, set):Float;
 	public var y(get, set):Float;
 	public var alpha(get, set):Float;
@@ -98,8 +117,12 @@ class BaseCharacter {
 		return v;
 	}
 
-	function get_zIndex():Int
-		return host?.zIndex ?? 0;
+	// characters are drawn in the stage's character layer -JloorDev
+	function get_zIndex():Int {
+		if (host == null)
+			return 0;
+		return host.zIndex != 0 ? host.zIndex : game.PlayState.instance?.stage?.charLayerZ ?? 0;
+	}
 
 	function set_zIndex(v:Int):Int {
 		if (host != null)

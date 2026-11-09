@@ -11,7 +11,7 @@ class RhythmTracker {
 	private var timeAtBpmChange:Float = 0;
 
 	inline function get_step():Int
-		return stepOffset + Std.int((core.rhythm.RhythmCore.songPosition - timeAtBpmChange) / core.rhythm.RhythmCore.stepInMs);
+		return stepOffset + Math.floor((core.rhythm.RhythmCore.songPosition - timeAtBpmChange) / core.rhythm.RhythmCore.stepInMs);
 
 	inline function get_beat():Int
 		return step >> 2;
@@ -34,6 +34,12 @@ class RhythmTracker {
 				onBeat(lastBeat = Std.int(curBeat));
 			}
 		}
+	}
+
+	// call after moving songPosition back, so the countdown's negative beats still fire -JloorDev
+	public function syncTo():Void {
+		lastStep = step - 1;
+		lastBeat = lastStep >> 2;
 	}
 
 	public function reset():Void {

@@ -30,6 +30,69 @@ class Strumline {
 		return result;
 	}
 
+	public static var INITIAL_OFFSET:Float = 0;
+	public static var STRUMLINE_SIZE:Float = 104;
+
+	public var strumlineNotes(get, never):{members:Array<StrumNote>};
+
+	function get_strumlineNotes() {
+		groupX();
+		return {members: arrows()};
+	}
+
+	// V-Slice's x is the group's, it stays put when single arrows move -JloorDev
+	var _groupX:Null<Float> = null;
+
+	function groupX():Float {
+		if (_groupX == null) {
+			var a = arrows();
+			if (a.length == 0)
+				return 0;
+			// arrows sit 0.275 of an arrow inside the group; +4 matched V-Slice on screen -JloorDev
+			_groupX = a[0].x - 0.275 * STRUMLINE_SIZE + 4;
+		}
+		return _groupX;
+	}
+
+	public var width(get, never):Float;
+
+	function get_width():Float {
+		var a = arrows();
+		return a.length > 0 ? a[a.length - 1].x + a[a.length - 1].width - a[0].x : 0;
+	}
+
+	public var scrollSpeed(get, never):Float;
+
+	function get_scrollSpeed():Float {
+		var ps = game.PlayState.instance;
+		var side:Array<game.objects.sprites.Character> = [];
+		if (ps?.chars != null)
+			side = isPlayer ? @:privateAccess ps.chars.playerChars : @:privateAccess ps.chars.opponentChars;
+		var line = side.length > 0 ? ps.noteController?.getStrumline(side[0].id) : null;
+		return line?.scrollSpeed ?? ps?.noteController?.scrollSpeed ?? 1.0;
+	}
+
+	public var isDownscroll(get, never):Bool;
+
+	function get_isDownscroll():Bool
+		return SaveData.data.downscroll == true;
+
+	public var showNotesplash:Bool = false;
+	public var noteStyle:funkin.play.notes.notestyle.NoteStyle = new funkin.play.notes.notestyle.NoteStyle('funkin');
+	public var onNoteIncoming:flixel.util.FlxSignal.FlxTypedSignal<Dynamic->Void> = new flixel.util.FlxSignal.FlxTypedSignal<Dynamic->Void>();
+	public var holdNotes:Array<Dynamic> = [];
+	public var noteSplashes:{members:Array<Dynamic>} = {members: []};
+
+	// the engine already handled the hit -JloorDev
+	public function hitNote(note:Dynamic, ?removeNote:Bool):Void {}
+
+	public function playNoteSplash(direction:Int):Void {}
+
+	public function getXPos(direction:Int):Float {
+		var s = getByIndex(direction);
+		return s != null ? s.x - x : 0;
+	}
+
 	public function getByIndex(index:Int):StrumNote {
 		var a = arrows();
 		if (index < 0 || index >= a.length)
@@ -61,18 +124,17 @@ class Strumline {
 
 	public var x(get, set):Float;
 
-	function get_x():Float {
-		var a = arrows();
-		return a.length > 0 ? a[0].x : 0;
-	}
+	function get_x():Float
+		return groupX();
 
 	function set_x(v:Float):Float {
 		var a = arrows();
 		if (a.length == 0)
 			return v;
-		var offset = v - a[0].x;
+		var offset = v - groupX();
 		for (s in a)
 			s.x += offset;
+		_groupX = v;
 		return v;
 	}
 

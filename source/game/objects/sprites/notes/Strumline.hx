@@ -203,7 +203,6 @@ class Strumline {
 			splash = new NoteSplash(keys, strum.x, strum.y, splashesSkinData, noteSkin, direction % keys, noteType);
 		}
 		splashes.add(splash);
-		splash.playAnim('note$direction', true);
 	}
 
 	public function recycleSplash(splash:NoteSplash):Void {

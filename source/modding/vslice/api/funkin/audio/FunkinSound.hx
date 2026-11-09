@@ -7,7 +7,8 @@ import flixel.sound.FlxSound;
 // shortcut: not a FlxSound subclass (FlxSound has its own load), so `:FunkinSound` in scripts is read as Dynamic -JloorDev
 @:keep
 class FunkinSound {
-	public static function load(path:String, volume:Float = 1.0, looped:Bool = false, autoDestroy:Bool = false, autoPlay:Bool = false, ?persist:Bool,
+	// a String or the Sound that Paths.sound() returns -JloorDev
+	public static function load(path:Dynamic, volume:Float = 1.0, looped:Bool = false, autoDestroy:Bool = false, autoPlay:Bool = false, ?persist:Bool,
 			?onComplete:Void->Void, ?onLoad:Void->Void):Null<FlxSound> {
 		var asset = soundAsset(path);
 		var sound = new FlxSound();
@@ -22,7 +23,7 @@ class FunkinSound {
 		return sound;
 	}
 
-	public static function playOnce(path:String, volume:Float = 1.0, ?onComplete:Void->Void, ?onLoad:Void->Void):Null<FlxSound>
+	public static function playOnce(path:Dynamic, volume:Float = 1.0, ?onComplete:Void->Void, ?onLoad:Void->Void):Null<FlxSound>
 		return load(path, volume, false, true, true, false, onComplete, onLoad);
 
 	static function soundAsset(path:Dynamic):Dynamic {

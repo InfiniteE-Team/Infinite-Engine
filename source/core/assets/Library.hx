@@ -73,12 +73,14 @@ class Library {
 				}
 				// V-Slice mods keep data/characters, data/stages... without the game folder -JloorDev
 				if (modding.vslice.VSlice.isActive() && file.startsWith('data/game/')) {
-					var vslicePath = '$modsFolder/${ModsRegistry.currentMod}/data/${file.substr('data/game/'.length)}';
-					if (FileSystem.exists(vslicePath)) {
-						@:privateAccess
-						Paths.pathCache.set(file, vslicePath);
-						return vslicePath;
-					}
+					var rest = file.substr('data/game/'.length);
+					// base game files the mod expects, its _merge patches are written against these -JloorDev
+					for (vslicePath in ['$modsFolder/${ModsRegistry.currentMod}/data/$rest', '$baseFolder/data/vslice/$rest'])
+						if (FileSystem.exists(vslicePath)) {
+							@:privateAccess
+							Paths.pathCache.set(file, vslicePath);
+							return vslicePath;
+						}
 				}
 			}
 		}
@@ -96,7 +98,7 @@ class Library {
 		@:privateAccess {
 			var pathsToRemove = [
 				for (k => v in Paths.pathCache)
-					if (v != null && v.startsWith(modsFolder)) k
+					if (v != null && (v.startsWith(modsFolder) || v.startsWith('$baseFolder/data/vslice/'))) k
 			];
 			for (trash in pathsToRemove)
 				Paths.pathCache.remove(trash);

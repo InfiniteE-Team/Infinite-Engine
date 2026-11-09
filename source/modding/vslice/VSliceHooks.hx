@@ -8,11 +8,15 @@ class VSliceHooks {
 	static final PER_FRAME = ['update', 'onUpdate', 'onStepHit', 'onBeatHit', 'onAnimationFrame'];
 
 	public static var failures:Int = 0;
+	public static var modEvents:Map<String, funkin.play.event.SongEvent> = new Map();
 
 	public static function reset():Void {
 		receivers = [];
 		broken = new haxe.ds.ObjectMap();
 		failures = 0;
+		modEvents = new Map();
+		funkin.play.GameOverSubState.reset();
+		funkin.play.character.BaseCharacter.clearWrappers();
 		funkin.Conductor.stepHit.removeAll();
 		funkin.Conductor.beatHit.removeAll();
 	}
@@ -40,6 +44,11 @@ class VSliceHooks {
 	public static function call(receiver:Dynamic, hook:String, event:Dynamic):Void {
 		if (broken.get(receiver)?.contains(hook) == true)
 			return;
+		if (Std.isOfType(receiver, funkin.modding.module.Module)) {
+			var module:funkin.modding.module.Module = cast receiver;
+			if (!module.active || !module.runsInGameplay())
+				return;
+		}
 		var fn = Reflect.field(receiver, hook);
 		if (fn == null || !Reflect.isFunction(fn))
 			return;
@@ -74,7 +83,8 @@ class VSliceHooks {
 	}
 
 	static function nameOf(receiver:Dynamic):String {
-		var id:String = Reflect.getProperty(receiver, 'stageId') ?? Reflect.getProperty(receiver, 'characterId') ?? Reflect.getProperty(receiver, 'id');
+		var id:String = Reflect.getProperty(receiver, 'stageId') ?? Reflect.getProperty(receiver, 'characterId') ?? Reflect.getProperty(receiver, 'moduleId')
+			?? Reflect.getProperty(receiver, 'id');
 		return id ?? Type.getClassName(Type.getClass(receiver));
 	}
 
@@ -90,11 +100,14 @@ class VSliceHooks {
 	}
 
 	public static function songEvent(e:core.json.song.SongData.EventsData):Void {
-		if (receivers.length == 0)
-			return;
 		var args:Dynamic = e.arguments;
 		var kind:String = args?.vsKind ?? e.name;
 		var value:Dynamic = args?.vsValue ?? args;
+		var own = modEvents.get(kind);
+		if (own != null)
+			call(own, 'handleEvent', new funkin.data.song.SongEventData(e.time, kind, value));
+		if (receivers.length == 0)
+			return;
 		dispatch('onSongEvent', event('SONG_EVENT', {eventData: {eventKind: kind, value: value, time: e.time}}));
 	}
 
@@ -109,12 +122,17 @@ class VSliceHooks {
 			getMustHitNote: () -> note?.mustPress == true
 		};
 		return event(type, {
+			// the engine already scored it, scripts that redo the hit must not score it again -JloorDev
 			note: {
 				kind: note?.noteType,
 				noteData: data,
 				direction: dir % 4,
-				mustPress: note?.mustPress == true
+				mustPress: note?.mustPress == true,
+				scoreable: false,
+				isHoldNote: false,
+				holdNoteSprite: null
 			},
+			doesNotesplash: false,
 			judgement: judgement,
 			isComboBreak: false,
 			healthChange: 0.0,

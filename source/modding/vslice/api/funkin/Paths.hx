@@ -22,6 +22,9 @@ class Paths {
 	public static function sound(key:String, ?library:String):Dynamic
 		return fileSound(core.assets.Paths.getPath(key, 'sound'));
 
+	public static function soundRandom(key:String, min:Int, max:Int, ?library:String):Dynamic
+		return sound(key + FlxG.random.int(min, max), library);
+
 	public static function music(key:String, ?library:String):Dynamic
 		return fileSound(core.assets.Paths.getPath(key, 'music'));
 

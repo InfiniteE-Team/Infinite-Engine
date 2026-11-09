@@ -12,14 +12,19 @@ class VSliceCharacters {
 		var raw:Dynamic = FormatJson.readJson(path);
 		if (raw == null || raw.render != null || raw.assetPath == null || raw.animations == null)
 			return raw;
-		var main = stripLibrary(raw.assetPath);
-		if (Library.findLib('images/$main.png') == null && Library.findLib('images/$main/Animation.json') == null) {
-			Console.log('[V-Slice] ${haxe.io.Path.withoutDirectory(path)} needs "$main" from the base game, using the engine bf', true);
-			return FormatJson.readJson('${Library.baseFolder}/data/game/characters/bf.json');
-		}
 		var id = haxe.io.Path.withoutExtension(path);
-		var dataDir = ~/data\/(game\/)?characters\//;
+		var dataDir = ~/data\/(game\/|vslice\/)?characters\//;
 		id = dataDir.match(id) ? dataDir.matchedRight() : haxe.io.Path.withoutDirectory(id);
+		raw = applyMerge('data/characters/$id.json', raw);
+		var main = stripLibrary(raw.assetPath);
+		// the base game characters live in images/game/ here -JloorDev
+		if (!hasAtlas(main) && hasAtlas('game/$main'))
+			raw.assetPath = main = 'game/$main';
+		if (!hasAtlas(main)) {
+			var fallback = haxe.io.Path.withoutDirectory(path).startsWith('gf') ? 'gf' : 'bf';
+			Console.log('[V-Slice] ${haxe.io.Path.withoutDirectory(path)} needs "$main" from the base game, using the engine $fallback', true);
+			return FormatJson.readJson('${Library.baseFolder}/data/game/characters/$fallback.json');
+		}
 		return convertCharacter(raw, id);
 	}
 
@@ -27,6 +32,13 @@ class VSliceCharacters {
 		var scale:Float = raw.scale ?? 1.0;
 		var isPixel:Bool = raw.isPixel == true;
 		var global:Dynamic = raw.offsets;
+
+		var main = stripLibrary(raw.assetPath);
+		var atlases = new Map<String, String>();
+		var others:Array<String> = [];
+		for (a in (raw.animations : Array<Dynamic>))
+			if (a.assetPath != null && !others.contains(stripLibrary(a.assetPath)))
+				others.push(stripLibrary(a.assetPath));
 
 		var anims:Array<AnimData> = [];
 		for (a in (raw.animations : Array<Dynamic>)) {
@@ -42,6 +54,12 @@ class VSliceCharacters {
 			};
 			if (a.assetPath != null)
 				anim.filePath = stripLibrary(a.assetPath);
+			else if (others.length > 0 && !atlasHas(atlases, main, a.prefix)) {
+				// V-Slice pools the labels of every atlas the character loads -JloorDev
+				var owner = Lambda.find(others, o -> atlasHas(atlases, o, a.prefix));
+				if (owner != null)
+					anim.filePath = owner;
+			}
 			anims.push(anim);
 		}
 
@@ -124,6 +142,20 @@ class VSliceCharacters {
 				]
 			}
 		};
+	}
+
+	static function hasAtlas(path:String):Bool
+		return Library.findLib('images/$path.png') != null || Library.findLib('images/$path/Animation.json') != null;
+
+	static function atlasHas(cache:Map<String, String>, path:String, prefix:String):Bool {
+		if (prefix == null)
+			return false;
+		if (!cache.exists(path)) {
+			var file = Library.findLib('images/$path/Animation.json') ?? Library.findLib('images/$path.xml');
+			cache.set(path, file != null ? sys.io.File.getContent(file) : '');
+		}
+		var text = cache.get(path);
+		return text.indexOf('"$prefix"') >= 0 || text.indexOf('name="$prefix') >= 0;
 	}
 
 	static function pngHeight(path:String):Int {

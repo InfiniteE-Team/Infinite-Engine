@@ -346,6 +346,8 @@ class FunkinSprite extends animate.FlxAnimate {
 			alpha = props.alpha;
 		if (props.visible != null)
 			visible = props.visible;
+		if (props.angle != null)
+			angle = props.angle;
 		if (props.flipX != null) {
 			flipX = props.flipX;
 			baseFlipX = flipX;

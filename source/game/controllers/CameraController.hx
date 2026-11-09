@@ -97,7 +97,8 @@ class CameraController {
 
 	public function snapCameraTo(x:Float, y:Float):Void {
 		camPoint.setPosition(x, y);
-		camGame.scroll.set(x - (camGame.width * 0.5), y - (camGame.height * 0.5));
+		// setting scroll by hand ignores the zoom -JloorDev
+		camGame.snapToTarget();
 	}
 
 	public function centerCamera(?a:Character, ?b:Character, ?lock:Bool = true) {
@@ -110,8 +111,19 @@ class CameraController {
 		isLock = lock;
 	}
 
+	var gameBop:Float = 0;
+	var hudBop:Float = 0;
+
 	public function lerpZoom(elapsed:Float):Void {
 		var lerpVal:Float = FlxMath.bound(elapsed * 3.125, 0, 1);
+		// V-Slice zoom follows its tweens exactly, only the bop decays -JloorDev
+		if (modding.vslice.VSlice.isActive()) {
+			gameBop = FlxMath.lerp(gameBop, 0, lerpVal);
+			hudBop = FlxMath.lerp(hudBop, 0, lerpVal);
+			camGame.zoom = defaultZoom + gameBop;
+			camHUD.zoom = 1.0 + hudBop;
+			return;
+		}
 		camGame.zoom = FlxMath.lerp(camGame.zoom, defaultZoom, lerpVal);
 		camHUD.zoom = FlxMath.lerp(camHUD.zoom, 1.0, lerpVal);
 	}
@@ -119,7 +131,12 @@ class CameraController {
 	public function bumpZoom() {
 		if (!zoomEnabled)
 			return;
-		if (camGame.zoom < 1.35) {
+		if (camGame.zoom >= 1.35)
+			return;
+		if (modding.vslice.VSlice.isActive()) {
+			gameBop += 0.015 * bopIntensity;
+			hudBop += 0.03 * bopIntensity;
+		} else {
 			camGame.zoom += 0.015 * bopIntensity;
 			camHUD.zoom += 0.03 * bopIntensity;
 		}

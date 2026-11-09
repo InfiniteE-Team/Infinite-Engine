@@ -3,6 +3,7 @@ package modding.vslice;
 import sys.FileSystem;
 import core.json.menus.FreeplayData;
 import core.json.menus.storymenu.WeekData;
+import core.json.extensions.SpriteData.ObjectData;
 import modding.vslice.VSlice.*;
 
 // V-Slice songs as the menus want them: freeplay list, story weeks, charts, difficulties and albums -JloorDev
@@ -63,13 +64,47 @@ class VSliceSongs {
 			weeks.push({
 				week: file.substr(0, file.length - 5),
 				priority: weeks.length,
-				weekGraphic: null,
+				weekGraphic: level.titleAsset != null ? stripLibrary(level.titleAsset) : null,
 				chars: [],
+				charProps: [for (i => p in (level.props ?? [] : Array<Dynamic>)) storyProp(p, i)].filter(p -> p != null),
+				color: level.background,
 				description: name,
 				songs: songs
 			});
 		}
 		return weeks;
+	}
+
+	static function storyProp(prop:Dynamic, index:Int):Null<ObjectData> {
+		var path = stripLibrary(prop.assetPath);
+		// V-Slice's layout; its band starts at y 56, ours at 70 -JloorDev
+		var position = [num(prop.offsets, 0) + FlxG.width * 0.25 * index, num(prop.offsets, 1) + 14];
+		if (core.assets.Library.findLib('images/$path.png') == null) {
+			// base game props aren't in the mod, use ours with the same name -JloorDev
+			var engineProp:ObjectData = FormatJson.readJson(Paths.getPath('data/menus/storymenu/chars/${haxe.io.Path.withoutDirectory(path)}', 'json'));
+			if (engineProp != null)
+				engineProp.position = position;
+			return engineProp;
+		}
+		var anims:Array<Dynamic> = prop.animations ?? [];
+		var scale:Float = prop.scale ?? 1.0;
+		return {
+			name: haxe.io.Path.withoutDirectory(path),
+			path: path,
+			position: position,
+			folder: '',
+			scale: [scale, scale],
+			anims: [
+				for (a in anims)
+					{
+						name: a.name,
+						prefix: a.prefix,
+						indices: a.frameIndices,
+						framerate: a.frameRate ?? 24,
+						looped: a.looped == true
+					}
+			]
+		};
 	}
 
 	public static function freeplay():FreeplayData {

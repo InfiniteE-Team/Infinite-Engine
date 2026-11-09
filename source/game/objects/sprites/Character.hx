@@ -105,8 +105,9 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 			default:
 				var charPath:String = 'data/game/characters/$curCharacter';
 				if (!Paths.exists('$charPath.json')) {
-					Console.log('[Character] WARNING: No character data found for "$curCharacter" and it will be replaced to bf.json');
-					charPath = 'data/game/characters/bf';
+					var fallback = curCharacter.startsWith('gf') ? 'gf' : 'bf';
+					Console.log('[Character] WARNING: No character data found for "$curCharacter" and it will be replaced to $fallback.json');
+					charPath = 'data/game/characters/$fallback';
 				}
 
 				characterData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath(charPath, JSON));
@@ -130,17 +131,6 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 					x: camOff != null ? (camOff[0] ?? 0) : 0,
 					y: camOff != null ? (camOff[1] ?? 0) : 0
 				};
-				if (curCharacter == 'bf' && modding.vslice.VSlice.isActive()) {
-					if (modding.mods.ModData.ModConfig.apiMods != '0.8.4') {
-						var pos = characterData.gameplay.position;
-						if (pos != null) {
-							pos[0] = (pos[0] ?? 0) + 50;
-							pos[1] = (pos[1] ?? 0) + 100;
-						}
-					}
-					cameraOffset.x += 180;
-					cameraOffset.y += 150;
-				}
 
 				var gameplayPos = characterData.gameplay.position;
 				if (gameplayPos != null)
@@ -160,6 +150,13 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 
 		applyPlayerFlip();
 		attachVSlice();
+
+		// without a firstAnim the atlas shows its bare frame until the first dance -JloorDev
+		if (layers.length > 0 && (layers[0].currentAnim == null || layers[0].currentAnim == '')) {
+			var start = existsAnim('danceLeft') ? 'danceLeft' : 'idle';
+			if (existsAnim(start))
+				playAnimRaw(start, true);
+		}
 
 		#if HSCRIPT_ALLOWED
 		script.call('postCreate', []);
@@ -358,6 +355,8 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 
 	public function getCameraMovementPose():Point {
 		var curAnim = layers[0].currentAnim;
+		if (isMiss || curAnim.indexOf('miss') != -1)
+			return {x: 0, y: 0};
 		if (curAnim.indexOf('LEFT') != -1)
 			return {x: -intensityCam, y: 0};
 		if (curAnim.indexOf('RIGHT') != -1)

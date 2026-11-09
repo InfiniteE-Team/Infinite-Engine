@@ -93,7 +93,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 
 	var vsliceScript:funkin.play.stage.Stage = null;
 	var brokenHooks:Map<String, Bool> = new Map();
-	var charLayerZ:Int = 0;
+	public var charLayerZ(default, null):Int = 0;
 
 	function runVSliceScript():Void {
 		try {
@@ -108,6 +108,17 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 		callVSlice('onCreate', {});
 		sortByZ();
 		modding.vslice.VSliceHooks.register(vsliceScript);
+	}
+
+	// V-Slice passes every character through the stage script -JloorDev
+	public function addVSliceCharacter(char:Character, type:String):Void {
+		if (vsliceScript == null || char == null)
+			return;
+		try {
+			vsliceScript.addCharacter(funkin.play.character.BaseCharacter.wrap(char), type);
+		} catch (err:Dynamic) {
+			Console.log('[V-Slice] $stage.addCharacter failed: $err', true);
+		}
 	}
 
 	function callVSlice(hook:String, e:Dynamic):Void {

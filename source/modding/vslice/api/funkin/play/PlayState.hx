@@ -30,11 +30,18 @@ class PlayState {
 	public var cameraBopMultiplier(get, set):Float;
 	public var currentCameraZoom(get, set):Float;
 	public var defaultHUDCameraZoom:Float = 1.0;
+	public var songScore(get, set):Int;
+	public var songEvents(get, never):Array<Dynamic>;
+	public var startingSong(get, never):Bool;
+	public var conductorInUse(get, never):funkin.Conductor;
+	public var playerVocalsVolume(never, set):Float;
+	public var opponentVocalsVolume(never, set):Float;
 
 	public var currentSongScript:funkin.play.song.Song;
 	public var isInCutscene:Bool = false;
 	public var isInCountdown:Bool = false;
 	public var mayPauseGame:Bool = true;
+	public var isPracticeMode:Bool = false;
 	public var isChartingMode:Bool = false;
 	public var isMinimalMode:Bool = false;
 	public var justUnpaused:Bool = false;
@@ -191,6 +198,69 @@ class PlayState {
 		else if (currentStage != null)
 			currentStage.add(obj);
 		return obj;
+	}
+
+	function get_songEvents():Array<Dynamic> {
+		var list:Array<core.json.song.SongData.EventsData> = game.PlayState.SONG?.songData?.gameplay?.events ?? [];
+		return [
+			for (e in list)
+				{
+					eventKind: e.arguments?.vsKind ?? e.name,
+					time: e.time,
+					value: e.arguments?.vsValue ?? e.arguments
+				}
+		];
+	}
+
+	public function refresh():Void
+		currentStage?.refresh();
+
+	function get_songScore():Int
+		return engine()?.playStateConfig?.score ?? 0;
+
+	function set_songScore(v:Int):Int {
+		if (engine()?.playStateConfig != null)
+			engine().playStateConfig.score = v;
+		return v;
+	}
+
+	function get_startingSong():Bool
+		return engine()?.isInCountdown == true;
+
+	function get_conductorInUse():funkin.Conductor
+		return funkin.Conductor.instance;
+
+	function set_playerVocalsVolume(v:Float):Float {
+		setVocals(engine()?.chars?.boyfriend, v);
+		return v;
+	}
+
+	function set_opponentVocalsVolume(v:Float):Float {
+		setVocals(engine()?.chars?.dad, v);
+		return v;
+	}
+
+	function setVocals(char:game.objects.sprites.Character, v:Float):Void {
+		if (char != null)
+			engine()?.gameAudio?.setVocalVolumeByName(char.id, v);
+	}
+
+	public function popUpScore(judgement:String, ?combo:Int):Void {
+		var cfg = engine()?.playStateConfig;
+		engine()?.controllerHUD?.rating?.onRatingPopUp(judgement, combo ?? cfg?.combo ?? 0);
+	}
+
+	public function applyScore(score:Int, judgement:String, healthChange:Float, isComboBreak:Bool):Void {
+		var cfg = engine()?.playStateConfig;
+		if (cfg == null)
+			return;
+		cfg.score += score;
+		cfg.health += healthChange;
+		cfg.rating = judgement;
+		if (isComboBreak)
+			cfg.combo = 0;
+		else
+			cfg.combo++;
 	}
 
 	public function remove(obj:FlxBasic):FlxBasic {

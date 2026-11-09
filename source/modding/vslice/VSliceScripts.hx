@@ -31,6 +31,10 @@ class VSliceScripts {
 			return 'song';
 		if (StringTools.endsWith(base, 'Character'))
 			return 'character';
+		if (base == 'Module')
+			return 'module';
+		if (base == 'SongEvent')
+			return 'event';
 		return null;
 	}
 
@@ -53,8 +57,14 @@ class VSliceScripts {
 			classes.set(CLASS_DECL.matched(1), {path: path, className: CLASS_DECL.matched(1), base: base});
 			var kind = kindOf(base);
 			var rest = CLASS_DECL.matchedRight();
-			if (kind == null || !SUPER_CALL.match(rest))
+			if (kind == null)
 				continue;
+			// like V-Slice, a module without its own id is named after its class -JloorDev
+			if (!SUPER_CALL.match(rest)) {
+				if (kind == 'module')
+					index.set('module:${CLASS_DECL.matched(1)}', {path: path, className: CLASS_DECL.matched(1), base: base});
+				continue;
+			}
 			var id = SUPER_CALL.matched(1);
 			if (kind == 'song' && VARIATION.match(SUPER_CALL.matchedRight().substr(0, 80)))
 				id += ':' + VARIATION.matched(1);
@@ -72,6 +82,14 @@ class VSliceScripts {
 			var env = new hxscript.Environment();
 			for (k => v in modding.scripting.ScriptHandler.globalEnv.variables)
 				env.variables.set(k, v);
+			// a missing class becomes null instead of breaking the whole script -JloorDev
+			var missing = ~/\/\/ no V-Slice API for this yet: import\s+[\w.]*?(\w+)\s*;/;
+			var rest = main.src;
+			while (missing.match(rest)) {
+				if (!env.variables.exists(missing.matched(1)))
+					env.variables.set(missing.matched(1), null);
+				rest = missing.matchedRight();
+			}
 			env.addModule(main.module);
 			for (dep in dependencies(main.src, entry.className))
 				env.addModule(dep);
@@ -95,7 +113,42 @@ class VSliceScripts {
 		if (typeName != entry.className)
 			src = new EReg('class\\s+${entry.className}\\b', '').replace(src, 'class $typeName');
 		src = prepareScript(src, base);
+		reportMissingApi(src, entry.path);
 		return {module: new hxscript.Module(src, typeName, [], entry.path), typeName: typeName, src: src};
+	}
+
+	static var reported:Map<String, Bool> = new Map();
+
+	// warns about V-Slice API a script uses that we don't have yet -JloorDev
+	static function reportMissingApi(src:String, path:String):Void {
+		var file = haxe.io.Path.withoutDirectory(path);
+		var check = (cls:Class<Dynamic>, member:String, isStatic:Bool) -> {
+			var name = Type.getClassName(cls);
+			var fields = isStatic ? Type.getClassFields(cls) : Type.getInstanceFields(cls);
+			if (fields.contains(member) || fields.contains('get_$member') || fields.contains('set_$member') || reported.exists('$name.$member'))
+				return;
+			reported.set('$name.$member', true);
+			Console.log('[V-Slice] $file uses $name.$member, the engine does not have it yet', true);
+		};
+		var patterns:Array<{r:EReg, cls:Class<Dynamic>}> = [
+			{r: ~/funkin\.play\.PlayState\.instance\??\.(\w+)/, cls: funkin.play.PlayState},
+			{r: ~/\bcurrentStage\??\.(\w+)/, cls: funkin.play.stage.Stage}
+		];
+		for (p in patterns) {
+			var rest = src;
+			while (p.r.match(rest)) {
+				check(p.cls, p.r.matched(1), false);
+				rest = p.r.matchedRight();
+			}
+		}
+		var staticCall = ~/\b(funkin(?:\.[a-z]\w*)*\.[A-Z]\w*)\.([a-z]\w*)\s*\(/;
+		var rest = src;
+		while (staticCall.match(rest)) {
+			var cls = Type.resolveClass(staticCall.matched(1));
+			if (cls != null)
+				check(cls, staticCall.matched(2), true);
+			rest = staticCall.matchedRight();
+		}
 	}
 
 	static function baseClassOf(base:String):Null<Class<Dynamic>> {
@@ -103,6 +156,8 @@ class VSliceScripts {
 			case 'Stage': funkin.play.stage.Stage;
 			case 'Song': funkin.play.song.Song;
 			case 'FunkinSprite': funkin.graphics.FunkinSprite;
+			case 'Module': funkin.modding.module.Module;
+			case 'SongEvent': funkin.play.event.SongEvent;
 			default: StringTools.endsWith(base, 'Character') ? funkin.play.character.BaseCharacter : null;
 		};
 	}
@@ -144,6 +199,73 @@ class VSliceScripts {
 	public static function loadSongScript(songId:String):Null<funkin.play.song.Song>
 		return load('song', songId, funkin.play.song.Song);
 
+	public static function loadModules():Array<funkin.modding.module.Module> {
+		find('', '');
+		var modules:Array<funkin.modding.module.Module> = [];
+		for (key in index.keys())
+			if (StringTools.startsWith(key, 'module:')) {
+				var m:funkin.modding.module.Module = load('module', key.substr('module:'.length), funkin.modding.module.Module);
+				if (m != null) {
+					m.moduleId ??= key.substr('module:'.length);
+					modules.push(m);
+				}
+			}
+		modules.sort((a, b) -> a.priority - b.priority);
+		return modules;
+	}
+
+	public static function loadEvents():Map<String, funkin.play.event.SongEvent> {
+		find('', '');
+		var events:Map<String, funkin.play.event.SongEvent> = new Map();
+		for (key in index.keys())
+			if (StringTools.startsWith(key, 'event:')) {
+				var e:funkin.play.event.SongEvent = load('event', key.substr('event:'.length), funkin.play.event.SongEvent);
+				if (e != null)
+					events.set(e.id, e);
+			}
+		return events;
+	}
+
+	static var schemaCache:{mod:String, list:Array<game.controllers.events.EventManager.EventSchema>} = null;
+
+	// the chart editor shows these next to the engine's events -JloorDev
+	public static function eventSchemas():Array<game.controllers.events.EventManager.EventSchema> {
+		if (!VSlice.isActive())
+			return [];
+		if (schemaCache != null && schemaCache.mod == VSlice.modRoot())
+			return schemaCache.list;
+		var list:Array<game.controllers.events.EventManager.EventSchema> = [];
+		for (id => event in loadEvents()) {
+			var raw:Dynamic = null;
+			try {
+				raw = event.getEventSchema();
+			} catch (e:Dynamic) {
+				Console.log('[V-Slice] $id.getEventSchema failed: $e', true);
+			}
+			var fields:Array<Dynamic> = raw == null ? [] : (Std.isOfType(raw, Array) ? raw : (raw.fields ?? []));
+			list.push({
+				name: id,
+				fields: [
+					for (f in fields)
+						{
+							key: f.name,
+							kind: switch (f.type) {
+								case 'integer' | 'float': 'float';
+								case 'bool': 'bool';
+								default: 'text';
+							},
+							step: f.step ?? (f.type == 'integer' ? 1.0 : 0.1),
+							min: f.min,
+							max: f.max,
+							def: f.defaultValue
+						}
+				]
+			});
+		}
+		schemaCache = {mod: VSlice.modRoot(), list: list};
+		return list;
+	}
+
 	public static function attachCharacter(host:game.objects.sprites.Character):funkin.play.character.BaseCharacter {
 		var shim:funkin.play.character.BaseCharacter = load('character', host.curCharacter, funkin.play.character.MultiAnimateAtlasCharacter);
 		shim ??= new funkin.play.character.BaseCharacter(host.curCharacter);
@@ -171,7 +293,8 @@ class VSliceScripts {
 			'AnimateAtlasCharacter',
 			'MultiAnimateAtlasCharacter',
 			'FunkinSprite',
-			'Bopper'
+			'Bopper',
+			'CharacterType'
 		];
 		for (i in 0...lines.length) {
 			// the script runs on its own, its package (rewired.stages...) means nothing here -JloorDev
@@ -179,6 +302,18 @@ class VSliceScripts {
 				lines[i] = '// ' + lines[i];
 			if (!importLine.match(lines[i]))
 				continue;
+			// what the engine passes is rarely the exact V-Slice type -JloorDev
+			if (StringTools.startsWith(importLine.matched(1), 'funkin.'))
+				dynamicTypes.push(importLine.matched(2) ?? importLine.matched(1).split('.').pop());
+			// Module.Type imports, our shims keep each type in its own file -JloorDev
+			var parts = importLine.matched(1).split('.');
+			if (parts.length > 2 && !typeKnown(importLine.matched(1)) && ~/^[A-Z]/.match(parts[parts.length - 2])) {
+				var flat = parts.slice(0, parts.length - 2).concat([parts[parts.length - 1]]).join('.');
+				if (typeKnown(flat)) {
+					lines[i] = StringTools.replace(lines[i], importLine.matched(1), flat);
+					importLine.match(lines[i]);
+				}
+			}
 			// openfl's AssetType is an enum abstract hxscript can't import; its values are plain strings -JloorDev
 			if (importLine.matched(1) == 'openfl.utils.AssetType'
 				|| importLine.matched(1) == 'openfl.utils.Assets'
@@ -202,7 +337,10 @@ class VSliceScripts {
 			var hasOverride = overrideWord.match(lines[i]);
 			if (inBase && !hasOverride)
 				lines[i] = ~/^(\s*)/.replace(lines[i], '$1override ');
-			else if (!inBase && hasOverride)
+			// Polymod doesn't check hook params, onUpdate(elapsed:Float) still gets the event -JloorDev
+			if (inBase)
+				lines[i] = ~/(\bfunction\s+\w+\s*\()([^)]*)\)/.map(lines[i], m -> m.matched(1) + ~/(\w+)\s*:\s*[\w.<>]+/g.replace(m.matched(2), '$1:Dynamic') + ')');
+			else if (hasOverride)
 				lines[i] = overrideWord.replace(lines[i], '');
 		}
 
@@ -210,6 +348,10 @@ class VSliceScripts {
 		src = ~/\bnew\s+FlxSprite\s*\(/g.replace(src, 'new funkin.graphics.FunkinSprite(');
 		src = ~/\bnew\s+FlxBackdrop\s*\(/g.replace(src, 'new funkin.compat.LegacyBackdrop(');
 		src = ~/\bAssetType\.([A-Z_]+)/g.replace(src, '"$1"');
+		src = ~/\bFlxKey\.fromString\s*\(/g.replace(src, 'funkin.compat.FlxCompat.fromString(');
+		src = ~/\bFlxG\.keys\.(anyJustPressed|anyPressed|anyJustReleased)\s*\(/g.replace(src, 'funkin.compat.FlxCompat.$1(');
+		src = ~/(?<![\w.?])((?!this\b)\w+(?:\.\w+)*)\??\.zIndex\s*=(?!=)\s*([^;]+);/g.replace(src, 'funkin.compat.FlxCompat.setZIndex($1, $2);');
+		src = ~/\bthis\.superClass\b/g.replace(src, 'this');
 		// once a field holds a function hxscript won't let it be reassigned, so the `x = null` cleanup of a callback field
 		// (obliterated's focus callbacks) is dropped; the callback was already unregistered and the rest of the cleanup runs -JloorDev
 		var funcVar = ~/\bvar\s+(\w+)\s*:\s*\(?[\w<>?, ]*\)?\s*->[^;=]*;/;
@@ -229,7 +371,28 @@ class VSliceScripts {
 			var names = [for (k in classes.keys()) k].join('|');
 			src = new EReg('\\bcast\\s*\\(([^,()]+),\\s*(?:$names)\\s*\\)', 'g').replace(src, '(cast $1)');
 		}
-		src = new EReg(':\\s*(\\w*ScriptEvent|${dynamicTypes.join('|')})\\b', 'g').replace(src, ':Dynamic');
+		// only real annotations, `{state: MainMenuState}` is a value -JloorDev
+		var typeNames = '(\\w*ScriptEvent|${dynamicTypes.join('|')})\\b(?!\\s*[.(])';
+		var inSignature = new EReg(':\\s*$typeNames', 'g');
+		var inVar = new EReg('(\\b(?:var|final)\\s+\\w+\\s*):\\s*$typeNames', 'g');
+		src = [
+			for (line in src.split('\n'))
+				~/\bfunction\b|\bcatch\s*\(/.match(line) ? inSignature.replace(line, ':Dynamic') : inVar.replace(line, '$1:Dynamic')
+		].join('\n');
+		// hxscript picks the engine class for a short name (Paths, PlayState...) even with the funkin import -JloorDev
+		var funkinImport = ~/(?:^|;)\s*import\s+(funkin(?:\.\w+)*)\.(\w+)\s*;/m;
+		var rest = src;
+		var qualified:Array<String> = [];
+		while (funkinImport.match(rest)) {
+			var name = funkinImport.matched(2);
+			var full = funkinImport.matched(1) + '.' + name;
+			rest = funkinImport.matchedRight();
+			if (qualified.contains(name))
+				continue;
+			qualified.push(name);
+			src = new EReg('(^|[^\\w.])$name(\\s*\\.)', 'gm').replace(src, '$1$full$2');
+			src = new EReg('\\bnew\\s+$name\\s*\\(', 'g').replace(src, 'new $full(');
+		}
 		return src;
 	}
 

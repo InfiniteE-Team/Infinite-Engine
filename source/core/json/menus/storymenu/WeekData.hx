@@ -8,4 +8,6 @@ typedef WeekData = {
 	var description:String;
 	var songs:Array<FreeplayData.SongData>;
 	var ?stickerPack:String;
+	var ?color:String;
+	var ?charProps:Array<core.json.extensions.SpriteData.ObjectData>;
 }
