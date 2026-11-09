@@ -12,6 +12,8 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 	public var vocalsMap:Map<String, Sound> = new Map();
 	public var onInstReady:() -> Void;
 
+	public var playerVocals:Array<Sound> = [];
+
 	public var soundMisses:Array<FlxSound> = [];
 
 	public function new() {
@@ -27,6 +29,7 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 		inst = null;
 		vocals = null;
 		vocalsGroup = [];
+		playerVocals = [];
 		vocalsMap = new Map();
 		for (miss in soundMisses) {
 			FlxG.sound.list.remove(miss, true);
@@ -92,6 +95,10 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 			vocalsGroup.push(v);
 			vocalsMap.set(s.id, v);
 			add(v);
+
+			var charData = Lambda.find(SONG.chars, c -> c.id == s.id);
+			if (charData != null && game.controllers.CharacterController.namesPlayer.contains(charData.role))
+				playerVocals.push(v);
 		}
 		if (vocalsGroup.length > 0)
 			vocals = vocalsGroup[0];
@@ -110,15 +117,18 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 		if (vocalsGroup.length == 0)
 			return;
 
+		var isSplit = playerVocals.length > 0 && playerVocals.length < vocalsGroup.length;
+
 		for (voice in vocalsGroup) {
 			if (voice == null)
 				continue;
-
 			if (SONG.vocs == null || SONG.needVoices) {
-				if (isMiss)
-					voice.volume = 0;
-				else if (voice.volume < 1)
+				if (isMiss) {
+					if (!isSplit || playerVocals.contains(voice))
+						voice.volume = 0;
+				} else if (voice.volume < 1) {
 					voice.volume = Math.min(1, voice.volume + elapsed);
+				}
 			}
 		}
 	}
@@ -140,10 +150,10 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 	}
 
 	public function onMiss():Void {
-		for (voice in vocalsGroup) {
+		var toMute = playerVocals.length > 0 ? playerVocals : vocalsGroup;
+		for (voice in toMute)
 			if (voice != null)
 				voice.volume = 0;
-		}
 
 		if (soundMisses.length > 0) {
 			var randomMiss = FlxG.random.getObject(soundMisses);

@@ -68,7 +68,7 @@ class NoteController {
 	public var keys:Int = 4;
 	public var isDownscroll:Bool = false;
 	public var isMiddlescroll:Bool = false;
-	public var noteTypeManager:NoteTypeManager;
+	public var noteTypeManager:NoteTypeController;
 	public var charController:CharacterController = null;
 	public var playStateConfig:PlayStateConfig;
 	public var gameAudio:core.audio.GameAudio;
@@ -392,7 +392,7 @@ class NoteController {
 		noteSpawnIndex = 0;
 		rawNoteIndex = 0;
 		unspawnNotes = [];
-		noteTypeManager = new NoteTypeManager();
+		noteTypeManager = new NoteTypeController();
 		noteTypeManager.initFromNotes(daSong.songData.notes);
 
 		charMap = new Map();
@@ -700,7 +700,10 @@ class NoteController {
 				sustain.flipY = downscroll;
 				sustain.y = downscroll ? body.y - endH : body.y + (body.frameHeight * body.scale.y);
 				var strumMid = sustain.strum.y + (sustain.strum.frameHeight * 0.5) - sustain.strum.offset.y;
-				sustain.alpha = downscroll ? (sustain.y >= strumMid ? 0 : 1) : ((sustain.y + endH) <= strumMid ? 0 : 1);
+
+				var strumAlpha = sustain.strumline?.alpha ?? 1.0;
+				var posAlpha = downscroll ? (sustain.y >= strumMid ? 0.0 : 1.0) : ((sustain.y + endH) <= strumMid ? 0.0 : 1.0);
+				sustain.alpha = posAlpha * strumAlpha;
 				#if HSCRIPT_ALLOWED
 				if (scriptNC.hasScripts)
 					scriptNC.call("onEndSustainMovement", [songTime]);

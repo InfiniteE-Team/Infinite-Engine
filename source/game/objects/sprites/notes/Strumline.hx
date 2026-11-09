@@ -85,8 +85,6 @@ class Strumline {
 		for (h in holdsplashes.members)
 			if (h != null)
 				h.alpha = v;
-		if (blackBack != null)
-			blackBack.alpha = v;
 		return v;
 	}
 
@@ -231,6 +229,7 @@ class Strumline {
 		} else {
 			splash = new NoteSplash(keys, strum.x, strum.y, splashesSkinData, noteSkin, direction % keys, noteType);
 		}
+		splash.alpha = _alpha;
 		splashes.add(splash);
 	}
 
@@ -256,6 +255,7 @@ class Strumline {
 		} else {
 			hs = new HoldSplash(keys, strum.x, strum.y, holdSkinData, noteSkin, direction % keys, noteType);
 		}
+		hs.alpha = _alpha;
 		holdsplashes.add(hs);
 		holdSplashToStrum.set(hs, strum);
 	}

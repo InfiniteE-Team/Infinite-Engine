@@ -437,6 +437,8 @@ class GameplayEditor extends MusicBeatState {
 				songLength = gameAudio.inst.length;
 				buildGrid(songLength);
 			};
+		} else {
+			Console.log('Error loading the audio');
 		}
 
 		RhythmCore.reset(SONG.bpmSong);

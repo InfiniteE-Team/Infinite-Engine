@@ -3,7 +3,7 @@ package game.controllers;
 import game.objects.sprites.notes.Note;
 import modding.scripting.ScriptHandler;
 
-class NoteTypeManager {
+class NoteTypeController {
 	var handlers:Map<String, ScriptHandler> = [];
 
 	public function new() {}
