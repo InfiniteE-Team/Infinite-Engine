@@ -80,8 +80,7 @@ class StoryMenuState extends MusicBeatState {
 		if (weeks.length == 0) {
 			buildNoWeeksWarning();
 		} else {
-			if (curWeek > 0)
-				buildArrows();
+			buildArrows();
 			buildDiffSelector();
 			refreshWeek(false);
 			refreshDiff();
