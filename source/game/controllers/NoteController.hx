@@ -438,6 +438,7 @@ class NoteController {
 			note = new Note(data.time, keys, strum.x, 0, effectiveSkin, skinForChar, data.lane, data.type);
 		}
 		note.ID = globalLane;
+		note.alpha = strums.alpha;
 		note.direction = globalLane;
 		note.localLane = data.lane;
 		note.strumTime = data.time;
@@ -471,6 +472,7 @@ class NoteController {
 			sustain.mustPress = note.mustPress;
 			sustain.noteControl = this;
 			sustain.strum = strum;
+			sustain.alpha = strums.alpha;
 			sustain.noteType = data.type ?? 'normal';
 			sustain.flipY = strums.isDownscroll;
 			sustain.visible = strums.notesVisible;
@@ -498,6 +500,7 @@ class NoteController {
 			sustainEnd.mustPress = note.mustPress;
 			sustainEnd.noteControl = this;
 			sustainEnd.strum = strum;
+			sustainEnd.alpha = strums.alpha;
 			sustainEnd.parentNote = sustain;
 			sustainEnd.noteType = data.type ?? 'normal';
 			sustainEnd.flipY = strums.isDownscroll;
