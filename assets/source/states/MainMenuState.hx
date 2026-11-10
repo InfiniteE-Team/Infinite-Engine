@@ -99,7 +99,7 @@ class MainMenuState extends ScriptState {
 						acceptOption = true;
 						MusicBeatState.switchState(() -> new states.menus.CreditsState());
 					case 'options':
-						openSubState(new OptionsMenuSubstate());
+						openSubState(new OptionsMenuSubstate([FlxG.camera]));
 				}
 			});
 		}

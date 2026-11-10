@@ -7,7 +7,7 @@ import flixel.sound.FlxSound;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 
-class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
+class PauseMenuSubstate extends states.substates.BlurSubState {
 	var bg:FlxSprite;
 
 	var text:FlxText;
@@ -40,6 +40,10 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 
 	var modeDifficultyChanging:Bool = false;
 
+	public function new() {
+		super(2.0);
+	}
+
 	override public function create() {
 		super.create();
 
@@ -64,8 +68,6 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 
 		pauseMenuMusic.volume = 0.5;
 		pauseMenuMusic.play();
-
-		this.camera = FlxG.cameras.list[FlxG.cameras.list.length - 1];
 
 		bg = new FlxSprite().makeGraphic(1280, 720, FlxColor.BLACK);
 		bg.antialiasing = SaveData.data.antialiasing;
@@ -199,7 +201,7 @@ class PauseMenuSubstate extends states.substates.MusicBeatSubstate {
 						options.push('Exit to Menu');
 						reloadMenuOptions();
 					case "Options":
-						openSubState(new states.substates.menus.OptionsMenuSubstate());
+						openSubState(new OptionsMenuSubstate([camSubStateBlur]));
 					case "Exit to Menu":
 						game.PlayStateConfig.blueBalled = 0;
 						#if HSCRIPT_ALLOWED

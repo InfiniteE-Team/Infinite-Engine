@@ -7,7 +7,7 @@ import core.json.menus.OptionData;
 import flixel.graphics.frames.FlxAtlasFrames;
 import states.substates.menus.options.Keybind;
 
-class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
+class OptionsMenuSubstate extends states.substates.BlurSubState {
 	var categoryTexts:Array<FlxText> = [];
 	var categoryGraphics:Array<FlxSprite> = [];
 	var categories:Array<String> = ['Visual', 'Gameplay', 'Keybinds', 'Debug'];
@@ -113,6 +113,9 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 	// Character preview
 	var character:game.objects.sprites.Character;
 
+	public function new(?targetCams:Array<flixel.FlxCamera>)
+		super(2.0, targetCams);
+
 	override public function create() {
 		super.create();
 
@@ -121,8 +124,6 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		contentCam = new Camera(330, 130, 900, CONTENT_H);
 		contentCam.bgColor = 0x00000000;
 		FlxG.cameras.add(contentCam, false);
-
-		this.camera = FlxG.cameras.list[FlxG.cameras.list.length - 2];
 
 		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, 0xFF050505);
 		bg.alpha = 0.7;
@@ -133,9 +134,10 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		limit.y += 50;
 		add(limit);
 
-		var options:FlxSprite = new FlxSprite(0, 10).loadGraphic(Paths.getPath('menus/options/Options_logo', 'image'));
-		options.scale.set(0.9, 0.9);
-		options.updateHitbox();
+		var options:FlxSprite = new FlxSprite(0, 10);
+		options.frames = Paths.getPath('menus/options/Options', 'animated');
+		options.animation.addByPrefix('idle', 'Options', 24, true);
+		options.animation.play('idle');
 		options.screenCenter(X);
 		add(options);
 
@@ -143,7 +145,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 			var text:FlxText = new FlxText(50, 150 + (i * 50), 0, categories[i]);
 			text.setFormat(Paths.getPath('Funkin.otf', 'font'), 34, 0xFFFFFFFF, "left");
 			text.ID = i;
-			text.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+			text.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 1, 1);
 			text.antialiasing = SaveData.data.antialiasing;
 			text.scrollFactor.set(0, 0);
 			categoryTexts.push(text);
@@ -254,7 +256,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 
 			var optText:FlxText = new FlxText(20, 20 + (i * 50), 0, opt.name);
 			optText.setFormat(Paths.getPath('Funkin.otf', 'font'), 26, 0xFFFFFFFF, "left");
-			optText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+			optText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 1, 1);
 			optText.cameras = [contentCam];
 			itemTexts.push(optText);
 			add(optText);
@@ -336,7 +338,7 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 	function createText(text:String):FlxText {
 		var valText = new FlxText(330 + 355, 20, 0, text);
 		valText.setFormat(Paths.getPath('Funkin.otf', 'font'), 26, 0xFFFFFFFF, "right");
-		valText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
+		valText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 1, 1);
 		valText.cameras = [contentCam];
 		return valText;
 	}
@@ -673,7 +675,8 @@ class OptionsMenuSubstate extends states.substates.MusicBeatSubstate {
 		ps.playStateConfig.isBotplay = SaveData.data.botplay;
 
 		// V-Slice scripts lay out their own HUD (space notes...) once, from where the arrows are; reload so they redo it -JloorDev
-		var layoutChanged = ps.noteController.isDownscroll != SaveData.data.downscroll || ps.noteController.isMiddlescroll != SaveData.data.middlescroll;
+		var layoutChanged = ps.noteController.isDownscroll != SaveData.data.downscroll
+			|| ps.noteController.isMiddlescroll != SaveData.data.middlescroll;
 		if (layoutChanged && modding.vslice.VSlice.isActive() && modding.vslice.VSliceHooks.active) {
 			var song = ps.songFolder;
 			var diff = ps.curDifficulty;
