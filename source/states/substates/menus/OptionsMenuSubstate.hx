@@ -6,6 +6,9 @@ import flixel.text.FlxText;
 import core.json.menus.OptionData;
 import flixel.graphics.frames.FlxAtlasFrames;
 import states.substates.menus.options.Keybind;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import flixel.util.FlxSpriteUtil;
 
 class OptionsMenuSubstate extends states.substates.BlurSubState {
 	var categoryTexts:Array<FlxText> = [];
@@ -17,6 +20,8 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 	var keybindsMenu:states.substates.menus.options.KeybindsMenu;
 
 	static final CONTENT_H:Int = 412;
+
+	var gridBg:FlxSprite;
 
 	var categoryOptions:Map<String, Array<OptionData>> = [
 		'Visual' => [
@@ -129,6 +134,17 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 		bg.alpha = 0.7;
 		add(bg);
 
+		gridBg = new FlxSprite(30, 130);
+		gridBg.makeGraphic(1220, 565, 0xCC0E0E0E, true);
+		var cellSize:Int = 28;
+		var lineColor:Int = 0x12FFFFFF;
+		for (gx in 0...Std.int(1220 / cellSize) + 2)
+			FlxSpriteUtil.drawLine(gridBg, gx * cellSize, 0, gx * cellSize, 565, {color: lineColor, thickness: 1});
+		for (gy in 0...Std.int(565 / cellSize) + 2)
+			FlxSpriteUtil.drawLine(gridBg, 0, gy * cellSize, 1220, gy * cellSize, {color: lineColor, thickness: 1});
+		gridBg.scrollFactor.set(0, 0);
+		add(gridBg);
+
 		var limit:FlxSprite = new FlxSprite().loadGraphic(Paths.getPath('menus/options/LimitsMenu', 'image'));
 		limit.screenCenter();
 		limit.y += 50;
@@ -163,8 +179,8 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 			add(image);
 		}
 
-		descText = new FlxText(0, bg.y + bg.height - 100, bg.width - 40, "");
-		descText.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFFFFFF00, "center");
+		descText = new FlxText(350, bg.y + bg.height - 140, bg.width - 70, "");
+		descText.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFFFFFF00, "left");
 		descText.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 1.5, 1);
 		add(descText);
 
@@ -177,10 +193,9 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 
 		if (character != null) {
 			character.visible = false;
-			character.setPosition(FlxG.width - 450, FlxG.height - 420);
+			character.setPosition(FlxG.width - 450, FlxG.height - 500);
 			character.scale.set(0.7, 0.7);
 			character.updateHitbox();
-
 			if (character.layers != null) {
 				for (layer in character.layers) {
 					if (layer != null) {
@@ -209,15 +224,46 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 
 		changeCategory(0);
 		updateVisualFocus();
+
+		bg.alpha = 0;
+		FlxTween.tween(bg, {alpha: 0.7}, 0.35, {ease: FlxEase.quadOut});
+
+		var limitOrigY = limit.y;
+		limit.y += 40;
+		limit.alpha = 0;
+		FlxTween.tween(limit, {alpha: 1, y: limitOrigY}, 0.55, {ease: FlxEase.expoOut, startDelay: 0.05});
+
+		var optOrigY = options.y;
+		options.y -= 28;
+		options.alpha = 0;
+		FlxTween.tween(options, {alpha: 1, y: optOrigY}, 0.55, {ease: FlxEase.backOut, startDelay: 0.08});
+
+		gridBg.alpha = 0;
+		FlxTween.tween(gridBg, {alpha: 1}, 0.4, {ease: FlxEase.quadOut, startDelay: 0.14});
+
+		for (i in 0...categoryTexts.length) {
+			var txt = categoryTexts[i];
+			var origX = txt.x;
+			txt.x -= 55;
+			txt.alpha = 0;
+			FlxTween.tween(txt, {alpha: 1, x: origX}, 0.45, {ease: FlxEase.expoOut, startDelay: 0.12 + i * 0.075});
+		}
+
+		for (i in 0...categoryGraphics.length) {
+			var spr = categoryGraphics[i];
+			spr.alpha = 0;
+			FlxTween.tween(spr, {alpha: 1}, 0.4, {ease: FlxEase.quadOut, startDelay: 0.18 + i * 0.075});
+		}
+
+		descText.alpha = 0;
+		FlxTween.tween(descText, {alpha: 1}, 0.4, {ease: FlxEase.quadOut, startDelay: 0.42});
 	}
 
 	function changeCategory(change:Int = 0) {
 		curCategory = (curCategory + change + categories.length) % categories.length;
 
-		for (i in 0...categoryTexts.length) {
+		for (i in 0...categoryTexts.length)
 			categoryTexts[i].color = (i == curCategory) ? 0xFFFFFF00 : 0xFFFFFFFF;
-			categoryTexts[i].alpha = (i == curCategory) ? 1.0 : 0.6;
-		}
 
 		curSelectedOption = 0;
 
@@ -233,10 +279,14 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 			keybindsMenu = null;
 		}
 
-		for (txt in itemTexts)
+		for (txt in itemTexts) {
+			FlxTween.cancelTweensOf(txt);
 			txt.destroy();
-		for (val in valueTexts)
+		}
+		for (val in valueTexts) {
+			FlxTween.cancelTweensOf(val);
 			val.destroy();
+		}
 		itemTexts = [];
 		valueTexts = [];
 
@@ -318,7 +368,6 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 						if (index < 0)
 							index = 0;
 					}
-
 					if (index < 0 || index >= options.length)
 						index = 0;
 
@@ -327,12 +376,24 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 					valSprite = valText;
 					valText.text = '< ' + Std.string(Reflect.field(SaveData.data, opt.saveField)) + ' >';
 			}
-
 			valueTexts.push(valSprite);
 			add(valSprite);
 		}
 
 		updateSelection(0);
+
+		for (i in 0...itemTexts.length) {
+			var txt = itemTexts[i];
+			var origX = txt.x;
+			txt.x -= 22;
+			txt.alpha = 0;
+			FlxTween.tween(txt, {x: origX, alpha: 1}, 0.28, {ease: FlxEase.expoOut, startDelay: i * 0.038});
+		}
+		for (i in 0...valueTexts.length) {
+			var spr = valueTexts[i];
+			spr.alpha = 0;
+			FlxTween.tween(spr, {alpha: 1}, 0.22, {ease: FlxEase.quadOut, startDelay: 0.04 + i * 0.038});
+		}
 	}
 
 	function createText(text:String):FlxText {
@@ -393,22 +454,18 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 			if (itemTexts != null && itemTexts.length > 0 && curSelectedOption < itemTexts.length) {
 				if (itemTexts[curSelectedOption] != null) {
 					itemTexts[curSelectedOption].color = 0xFFFFFFFF;
-					itemTexts[curSelectedOption].alpha = 0.6;
 				}
 				if (valueTexts != null && valueTexts[curSelectedOption] != null) {
 					if (Std.isOfType(valueTexts[curSelectedOption], FlxText)) {
 						cast(valueTexts[curSelectedOption], FlxText).color = 0xFFFFFFFF;
 					}
-					valueTexts[curSelectedOption].alpha = 0.6;
 				}
 			}
-		} else {
+		} else {/*
 			if (categoryTexts != null && categoryTexts.length > 0 && curCategory < categoryTexts.length) {
-				if (categoryTexts[curCategory] != null) {
+				if (categoryTexts[curCategory] != null)
 					categoryTexts[curCategory].color = 0xFFFFFFFF;
-					categoryTexts[curCategory].alpha = 0.6;
-				}
-			}
+			}*/
 
 			for (i in 0...itemTexts.length) {
 				if (i == curSelectedOption) {
@@ -591,6 +648,9 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 			return;
 		}
 
+		if (descText != null)
+			descText.visible = !isCategory;
+
 		if (Controls.UI_LEFT) {
 			if (!isCategory
 				&& hasOptions
@@ -748,6 +808,12 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 			remove(character);
 			character.destroy();
 			character = null;
+		}
+
+		if (gridBg != null) {
+			remove(gridBg);
+			gridBg.destroy();
+			gridBg = null;
 		}
 
 		if (contentCam != null) {
