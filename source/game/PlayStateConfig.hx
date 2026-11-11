@@ -45,7 +45,7 @@ class PlayStateConfig {
 	public static var storyWeekName:String = "";
 	public static var storyScore:Int = 0;
 
-	public static var ratingType:String = 'default';
+	public static var ratingSkin:String = 'default';
 
 	//
 
