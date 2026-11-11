@@ -9,6 +9,28 @@ class Library {
 
 	public function new() {}
 
+	public static function initPaths():Void {
+		#if android
+		var externalBase = android.content.Context.getExternalFilesDir();
+		if (externalBase == null || externalBase == '')
+			externalBase = '/sdcard/Android/data/com.infiniteTeam.infiniteEngine/files';
+		modsFolder = haxe.io.Path.join([externalBase, 'mods']);
+		baseFolder = haxe.io.Path.join([externalBase, 'assets']);
+
+		for (folder in [modsFolder, baseFolder]) {
+			if (!sys.FileSystem.exists(folder)) {
+				try {
+					sys.FileSystem.createDirectory(folder);
+				} catch (e:Dynamic) {
+					Console.log('could not create $folder: $e', true);
+				}
+			}
+		}
+
+		Console.log('Android paths — base: $baseFolder | mods: $modsFolder');
+		#end
+	}
+
 	public static function getAvailableMods():Array<String> {
 		var modNames:Array<String> = [];
 
@@ -75,7 +97,10 @@ class Library {
 				if (modding.vslice.VSlice.isActive() && file.startsWith('data/game/')) {
 					var rest = file.substr('data/game/'.length);
 					// base game files the mod expects, its _merge patches are written against these -JloorDev
-					for (vslicePath in ['$modsFolder/${ModsRegistry.currentMod}/data/$rest', '$baseFolder/data/vslice/$rest'])
+					for (vslicePath in [
+						'$modsFolder/${ModsRegistry.currentMod}/data/$rest',
+						'$baseFolder/data/vslice/$rest'
+					])
 						if (FileSystem.exists(vslicePath)) {
 							@:privateAccess
 							Paths.pathCache.set(file, vslicePath);

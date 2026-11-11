@@ -21,34 +21,23 @@ import core.render.FixedBitmapData;
 @:access(openfl.display.OpenGLRenderer)
 @:access(openfl.geom.ColorTransform)
 class Camera extends flixel.FlxCamera {
-	static final SHADER_BLEND_MODES:Array<String> = [
-		"overlay",
-		"hardlight",
-		"darken",
-		"lighten",
-		"difference",
-		"exclusion",
-		"hue",
-		"saturation",
-		"color",
-		"luminosity",
-		"invert"
-	];
-
-	static final BLEND_TO_INT:Map<String, Int> = [
-		"overlay" => 4,
-		"hardlight" => 5,
-		"darken" => 6,
-		"lighten" => 7,
-		"difference" => 8,
-		"exclusion" => 9,
-		"hue" => 10,
-		"saturation" => 11,
-		"color" => 12,
-		"luminosity" => 13,
-		"invert" => 14,
-		"softlight" => 15
-	];
+	private static inline function getBlendInt(blendStr:String):Int {
+		return switch (blendStr) {
+			case "overlay": 4;
+			case "hardlight": 5;
+			case "darken": 6;
+			case "lighten": 7;
+			case "difference": 8;
+			case "exclusion": 9;
+			case "hue": 10;
+			case "saturation": 11;
+			case "color": 12;
+			case "luminosity": 13;
+			case "invert": 14;
+			case "softlight": 15;
+			default: -1;
+		}
+	}
 
 	var blendShader:CustomBlendShader;
 	var backgroundFrame:FlxFrame;
@@ -94,7 +83,9 @@ class Camera extends flixel.FlxCamera {
 	override function drawPixels(?frame:FlxFrame, ?pixels:BitmapData, matrix:FlxMatrix, ?transform:ColorTransform, ?blend:BlendMode, ?smoothing:Bool = false,
 			?shader:FlxShader):Void {
 		var blendStr = blend != null ? @:privateAccess blend.toString().toLowerCase() : null;
-		if (blendStr != null && SHADER_BLEND_MODES.contains(blendStr)) {
+		var blendIndex = blendStr != null ? getBlendInt(blendStr) : -1;
+
+		if (blendIndex != -1) {
 			if (cameraTexture == null)
 				cameraTexture = FixedBitmapData.create(this.width, this.height);
 			core.render.BitmapDataUtil.drawCameraScreen(cameraTexture, this);
@@ -122,7 +113,7 @@ class Camera extends flixel.FlxCamera {
 
 			blendShader.sourceSwag = blendRenderTexture.graphic.bitmap;
 			blendShader.backgroundSwag = cameraTexture;
-			blendShader.blendSwag = BLEND_TO_INT.get(blendStr) ?? 0;
+			blendShader.blendSwag = blendIndex;
 
 			backgroundFrame.parent.bitmap = blendRenderTexture.graphic.bitmap;
 
