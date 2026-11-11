@@ -32,8 +32,8 @@ class TitleState extends ScriptState {
 		gfDance.antialiasing = SaveData.data.antialiasing;
 		add(gfDance);
 
-		titleText = new FunkinSprite(100, FlxG.height * 0.8, true);
-		titleText.frames = Paths.getPath('menus/title/title-screen-text', 'animated');
+		titleText = new FunkinSprite(#if mobile 70 #else 100 #end, FlxG.height * 0.8, true);
+		titleText.frames = Paths.getPath(#if mobile 'menus/title/title-screen-text-mobile' #else 'menus/title/title-screen-text', 'animated');
 		titleText.addAnim('idle', 'Idle', 24, true);
 		titleText.addAnim('press', 'Confirm', 24, true);
 		titleText.antialiasing = SaveData.data.antialiasing;
@@ -48,7 +48,14 @@ class TitleState extends ScriptState {
 		if (acceptOption)
 			return;
 
-		if (Controls.ACCEPT) {
+		var accept = Controls.ACCEPT;
+
+		#if mobile
+		if (TouchUtil.justPressed())
+			accept = true;
+		#end
+
+		if (accept) {
 			acceptOption = true;
 			FlxG.camera.flash(FlxColor.WHITE, 1);
 			titleText.playAnim('press');

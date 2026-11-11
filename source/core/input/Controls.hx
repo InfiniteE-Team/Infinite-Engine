@@ -1,4 +1,4 @@
-package core.config;
+package core.input;
 
 import flixel.input.keyboard.FlxKey;
 

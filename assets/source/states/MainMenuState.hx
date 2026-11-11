@@ -78,6 +78,18 @@ class MainMenuState extends ScriptState {
 		if (upP)
 			change(-1);
 
+		#if mobile
+		for (i in 0...options.length) {
+			if (TouchUtil.justPressed(options[i])) {
+				if (curSelected == i) {
+					accept = true;
+				} else {
+					change(i - curSelected);
+				}
+			}
+		}
+		#end
+
 		if (FlxG.keys.justPressed.TAB)
 			MusicBeatState.switchState(() -> new states.menus.ModsState());
 
@@ -124,15 +136,11 @@ class MainMenuState extends ScriptState {
 		for (i in 0...options.length) {
 			var item:FlxSprite = options[i];
 
-			if (i == curSelected) {
-				item.animation.play('selected');
-				item.centerOffsets();
-			} else {
-				item.animation.play('idle');
-				item.centerOffsets();
-			}
+			item.animation.play(i == curSelected ? 'selected' : 'idle');
 
-			item.x = (FlxG.width - item.width) / 2; // centre
+			item.x = (FlxG.width - item.width) / 2; // center
+
+			item.centerOffsets();
 		}
 	}
 }

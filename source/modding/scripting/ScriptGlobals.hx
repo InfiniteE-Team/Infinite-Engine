@@ -29,7 +29,11 @@ class ScriptGlobals {
 		'core.assets.FunkinSprite',
 		'core.rhythm.RhythmCore',
 		'modding.scripting.ScriptHandler',
-		'core.config.Controls',
+		// input
+		'core.input.Controls',
+		#if FORCE_TOUCH
+		'core.input.TouchInput',
+		#end
 		'states.MusicBeatState',
 		// Audio
 		'core.audio.Sound',
@@ -117,7 +121,10 @@ class ScriptGlobals {
 		set("RhythmCore", core.rhythm.RhythmCore);
 		set("FPSCounter", core.ui.FPSCounter);
 		set("ScriptHandler", modding.scripting.ScriptHandler);
-		set("Controls", core.config.Controls);
+		set("Controls", Controls);
+		#if FORCE_TOUCH
+		set("TouchInput", TouchInput);
+		#end
 		set("MusicBeatState", states.MusicBeatState);
 		set("StoryMenuState", states.menus.StoryMenuState);
 		set("AudioAnalyzer", core.audio.AudioAnalyzer);
