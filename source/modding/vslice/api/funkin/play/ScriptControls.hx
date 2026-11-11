@@ -1,7 +1,5 @@
 package funkin.play;
 
-import core.config.Controls;
-
 // PlayState.instance.controls for V-Slice scripts, read from the engine's UI keys (accept skips cutscenes) -JloorDev
 @:keep
 class ScriptControls {

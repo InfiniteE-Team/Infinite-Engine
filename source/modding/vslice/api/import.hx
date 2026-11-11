@@ -7,8 +7,11 @@ import utils.json.Point;
 import utils.InfiniteUtil;
 import core.json.FormatJson;
 import core.config.SaveData;
-import core.config.Controls;
+// input
+import core.input.Controls;
+#if FORCE_TOUCH
+import core.input.mobile.TouchInput;
+#end
 
 using StringTools;
-
 using Lambda;
