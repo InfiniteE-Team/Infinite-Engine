@@ -41,7 +41,7 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 
 		var ratingSprite = getFromPool(ratingPool);
 
-		var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.ratingType}/$ratingName', 'image');
+		var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.ratingSkin}/$ratingName', 'image');
 		var skinData = getSkinData('rating', ratingName);
 
 		setupSprite(ratingSprite, skinData != null && skinData.path != null ? skinData.path : defaultPath, skinData != null && skinData.scale != null ? skinData.scale : 0.7,
@@ -79,7 +79,7 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 			var numScore = getFromPool(numberPool);
 			var digitStr = Std.string(Std.int(i));
 
-			var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.ratingType}/nums/digit-$i', 'image');
+			var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.ratingSkin}/nums/digit-$i', 'image');
 			var skinDigit = getSkinData('number', digitStr);
 
 			var spacing = skinDigit != null && skinDigit.spacing != null ? skinDigit.spacing : 32;
@@ -112,7 +112,7 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 		killPoolInstant(missPool);
 
 		var rating = getFromPool(missPool);
-		var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.ratingType}/miss', 'image');
+		var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.ratingSkin}/miss', 'image');
 		var skinData = getSkinData('miss', 'miss');
 
 		setupSprite(rating, skinData != null && skinData.path != null ? skinData.path : defaultPath, skinData != null && skinData.scale != null ? skinData.scale : 0.7,

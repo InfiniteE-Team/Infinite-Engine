@@ -277,7 +277,7 @@ class NoteController {
 		holdSkinData = skinPart(noteSkin, 'holdsplashes');
 		popupsData = NoteSkins.read(noteSkin, 'popups');
 
-		var ratingPath = Paths.getPath('data/game/ui/popup/${game.PlayStateConfig.ratingType}', 'json');
+		var ratingPath = Paths.getPath('data/game/ui/popup/${game.PlayStateConfig.ratingSkin}', 'json');
 		ratingData = FormatJson.readJson(ratingPath);
 		if (ratingData == null || ratingData.ratings == null) {
 			trace("WARNING: ratings.json not found or invalid");
