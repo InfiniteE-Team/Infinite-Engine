@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build ${{ matrix.platform }}
+    name: ${{ matrix.platform }}
     permissions: write-all
     runs-on: ${{ matrix.os }}
 
@@ -45,7 +45,7 @@ jobs:
               haxelib run lime config ANDROID_NDK_ROOT $ANDROID_NDK_LATEST_HOME
               haxelib run lime config JAVA_HOME $JAVA_HOME_17_X64
               haxelib run lime config ANDROID_SETUP true
-            artifact_path: export/release/android/bin/app/build/outputs/apk/release/*.apk
+            artifact_path: export/android/bin/app/build/outputs/apk/release/*.apk
 
     steps:
       - name: Pull the New Commit
