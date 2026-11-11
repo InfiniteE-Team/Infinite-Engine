@@ -11,7 +11,7 @@ class Library {
 
 	public static function initPaths():Void {
 		#if android
-		var externalBase = android.content.Context.getExternalFilesDir();
+		var externalBase = extension.androidtools.content.Context.getExternalFilesDir();
 		if (externalBase == null || externalBase == '')
 			externalBase = '/sdcard/Android/data/com.infiniteTeam.infiniteEngine/files';
 		modsFolder = haxe.io.Path.join([externalBase, 'mods']);
