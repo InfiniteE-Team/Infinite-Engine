@@ -59,6 +59,6 @@ class PlayStateConfig {
 		combo = 0;
 		hitNotes = 0;
 		totalNotes = 0;
-		ratingType = 'default';
+		ratingSkin = 'default';
 	}
 }
