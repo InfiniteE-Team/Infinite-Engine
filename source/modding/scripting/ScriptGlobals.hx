@@ -123,7 +123,7 @@ class ScriptGlobals {
 		set("ScriptHandler", modding.scripting.ScriptHandler);
 		set("Controls", Controls);
 		#if FORCE_TOUCH
-		set("TouchInput", TouchInput);
+		set("TouchInput", core.input.mobile.TouchInput);
 		#end
 		set("MusicBeatState", states.MusicBeatState);
 		set("StoryMenuState", states.menus.StoryMenuState);

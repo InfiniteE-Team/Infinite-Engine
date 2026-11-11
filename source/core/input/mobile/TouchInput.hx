@@ -1,7 +1,6 @@
 package core.input.mobile;
 
-@:keep
-class TouchUtil {
+class TouchInput {
     public static function justPressed(?area:flixel.FlxObject):Bool {
         #if mobile
         for (touch in FlxG.touches.list)
