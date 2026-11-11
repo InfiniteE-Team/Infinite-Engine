@@ -56,11 +56,13 @@ class StoryMenuState extends MusicBeatState {
 		script.call("onCreate", []);
 		#end
 
+		#if DISCORD_ALLOWED
 		core.api.DiscordAPI.instance.setPresence({
 			state: "In the Menu",
 			details: "Infinite Engine",
 			largeImageKey: "icon"
 		});
+		#end
 
 		core.audio.MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102);
 
