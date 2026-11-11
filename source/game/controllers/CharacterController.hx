@@ -164,8 +164,8 @@ class CharacterController extends FunkinObjectRegistry {
 								playStateConfig.score += ratingType.score;
 								playStateConfig.health += ratingType.health;
 								playStateConfig.combo++;
-								note.rating = ratingType.rating;
-								playStateConfig.rating = ratingType.rating;
+								note.rating = ratingType.name;
+								playStateConfig.rating = ratingType.name;
 							}
 							for (sustain in noteController.sustains.members) {
 								if (sustain == null || !sustain.alive)

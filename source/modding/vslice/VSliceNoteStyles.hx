@@ -1,7 +1,7 @@
 package modding.vslice;
 
 import core.assets.Library;
-import core.json.objects.NoteSkinData;
+import core.json.game.objects.NoteSkinData;
 import core.json.extensions.SpriteData.AnimData;
 import modding.vslice.VSlice.*;
 

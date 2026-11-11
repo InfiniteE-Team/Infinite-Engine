@@ -5,7 +5,7 @@ import core.assets.FunkinSprite;
 import core.rhythm.RhythmCore;
 import game.controllers.NoteController;
 import core.render.shaders.hardcode.RGBShader;
-import core.json.objects.NoteSkinData;
+import core.json.game.objects.NoteSkinData;
 
 class Note extends FunkinSprite {
 	public var noteType:String = 'normal';

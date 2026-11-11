@@ -45,6 +45,8 @@ class PlayStateConfig {
 	public static var storyWeekName:String = "";
 	public static var storyScore:Int = 0;
 
+	public static var ratingType:String = 'default';
+
 	//
 
 	public function new() {}
@@ -57,9 +59,6 @@ class PlayStateConfig {
 		combo = 0;
 		hitNotes = 0;
 		totalNotes = 0;
-	}
-
-	public function configRating(rating:String) {
-		this.rating = rating;
+		ratingType = 'default';
 	}
 }

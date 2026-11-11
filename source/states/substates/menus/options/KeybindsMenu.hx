@@ -5,7 +5,7 @@ import flixel.text.FlxText;
 import flixel.input.keyboard.FlxKey;
 import core.assets.FunkinSprite;
 import game.objects.sprites.notes.StrumNote;
-import core.json.objects.NoteSkinData;
+import core.json.game.objects.NoteSkinData;
 
 class KeybindsMenu extends flixel.group.FlxGroup {
 	var curKeyCount:Int = 4;

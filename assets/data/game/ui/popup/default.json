@@ -1,7 +1,7 @@
 {
     "ratings": [
         {
-            "rating": "sick",
+            "name": "sick",
             "path": "sick",
             "score": 350,
             "health": 0.10,
@@ -9,21 +9,21 @@
             "splash": true
         },
         {
-            "rating": "good",
+            "name": "good",
             "path": "good",
             "score": 200,
             "health": 0.05,
             "window": 90
         },
         {
-            "rating": "bad",
+            "name": "bad",
             "path": "bad",
             "score": 100,
             "health": -0.03,
             "window": 135
         },
         {
-            "rating": "shit",
+            "name": "shit",
             "path": "shit",
             "score": 50,
             "health": -0.03,
@@ -31,7 +31,7 @@
             "miss": true
         },
         {
-            "rating": "miss",
+            "name": "miss",
             "path": "miss",
             "score": -100,
             "health": -0.04,

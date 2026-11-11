@@ -1,11 +1,11 @@
-package core.json.song;
+package core.json.game.objects;
 
 typedef RatingData = {
 	var ratings:Array<RatingDataType>;
 }
 
 typedef RatingDataType = {
-	var rating:String;
+	var name:String;
 	var path:String;
 	var score:Int;
 

@@ -2,7 +2,7 @@ package states.substates;
 
 import game.PlayState;
 import flixel.tweens.FlxTween;
-import core.json.objects.CharacterData;
+import core.json.game.objects.CharacterData;
 import game.objects.sprites.Character;
 
 class GameOverSubstate extends MusicBeatSubstate {

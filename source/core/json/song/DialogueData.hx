@@ -1,7 +1,7 @@
 package core.json.song;
 import core.enums.ElementType;
 import core.json.extensions.AudioData;
-import core.json.objects.StageData.StageElement;
+import core.json.game.objects.StageData.StageElement;
 import core.json.extensions.SpriteData.ObjectData;
 
 typedef DialogueData = {

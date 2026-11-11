@@ -1,8 +1,9 @@
 package core.audio;
 
+import funkin.vis.dsp.Bar;
 import flixel.sound.FlxSound;
-import funkin.vis.dsp.SpectralAnalyzer;
 import lime.media.AudioSource;
+import funkin.vis.dsp.SpectralAnalyzer;
 
 class AudioAnalyzer {
 	public var analyzer:SpectralAnalyzer;

@@ -4,7 +4,7 @@ import flixel.group.FlxSpriteGroup;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxColor;
-import core.json.objects.AlphabetData;
+import core.json.menus.AlphabetData;
 import core.enums.AlphabetStyle;
 
 class Alphabet extends core.assets.FunkinSprite {

@@ -1,7 +1,7 @@
 package core.render.shaders.hardcode;
 
 import flixel.addons.display.FlxRuntimeShader;
-import core.json.objects.NoteSkinData;
+import core.json.game.objects.NoteSkinData;
 
 class RGBShader {
 	static var _src:String = null;

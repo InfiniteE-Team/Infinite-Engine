@@ -111,8 +111,8 @@ class InputController {
 			if (ratingType != null) {
 				playStateConfig.score += ratingType.score;
 				playStateConfig.health += ratingType.health;
-				bestNote.rating = ratingType.rating;
-				playStateConfig.rating = ratingType.rating;
+				bestNote.rating = ratingType.name;
+				playStateConfig.rating = ratingType.name;
 				playStateConfig.hitNotes++;
 				playStateConfig.totalNotes++;
 

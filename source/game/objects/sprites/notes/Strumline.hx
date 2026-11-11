@@ -1,6 +1,6 @@
 package game.objects.sprites.notes;
 
-import core.json.objects.NoteSkinData;
+import core.json.game.objects.NoteSkinData;
 import core.json.song.SongData.SongConfig;
 import flixel.group.FlxGroup.FlxTypedGroup;
 #if HSCRIPT_ALLOWED

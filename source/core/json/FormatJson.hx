@@ -32,7 +32,7 @@ class FormatJson {
 		return cast AleJson.parse(data);
 	}
 
-	public static function getIconDataPlaceholder(?customData:core.json.objects.CharacterData.IconData):core.json.objects.CharacterData.IconData {
+	public static function getIconDataPlaceholder(?customData:core.json.game.objects.CharacterData.IconData):core.json.game.objects.CharacterData.IconData {
 		if (customData == null) {
 			return {
 				props: null,
@@ -49,7 +49,7 @@ class FormatJson {
 		};
 	}
 
-	public static function getCharDataPlaceholder():core.json.objects.CharacterData {
+	public static function getCharDataPlaceholder():core.json.game.objects.CharacterData {
 		return {
 			meta: {
 				isPlayer: true

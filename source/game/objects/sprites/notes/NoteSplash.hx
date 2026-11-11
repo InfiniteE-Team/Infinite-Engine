@@ -1,6 +1,6 @@
 package game.objects.sprites.notes;
 
-import core.json.objects.NoteSkinData;
+import core.json.game.objects.NoteSkinData;
 import core.assets.FunkinSprite;
 import core.rhythm.RhythmCore;
 import core.render.shaders.hardcode.RGBShader;

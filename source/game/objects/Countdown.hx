@@ -3,7 +3,7 @@ package game.objects;
 import flixel.util.FlxTimer;
 import flixel.tweens.FlxTween;
 import core.assets.FunkinSprite;
-import core.json.objects.CountdownData;
+import core.json.game.objects.CountdownData;
 
 class Countdown extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite> {
 	public var skipCountdown:Bool = false;

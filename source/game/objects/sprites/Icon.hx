@@ -1,6 +1,6 @@
 package game.objects.sprites;
 
-import core.json.objects.CharacterData;
+import core.json.game.objects.CharacterData;
 
 class Icon extends modding.scripting.types.sprites.ScriptedSprite {
 	public var bumpInBeats:Bool = true;

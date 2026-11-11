@@ -2,7 +2,7 @@ package game.objects.sprites.notes;
 
 import core.json.extensions.SpriteData.ObjectData;
 import core.render.shaders.hardcode.RGBShader;
-import core.json.objects.NoteSkinData;
+import core.json.game.objects.NoteSkinData;
 import core.assets.FunkinSprite;
 
 class StrumNote extends FunkinSprite {

@@ -767,7 +767,7 @@ class GameplayEditor extends MusicBeatState {
 				continue;
 
 			try {
-				var skinData:core.json.objects.NoteSkinData = game.objects.sprites.notes.NoteSkins.read(skin, 'strumnotes');
+				var skinData:core.json.game.objects.NoteSkinData = game.objects.sprites.notes.NoteSkins.read(skin, 'strumnotes');
 				if (skinData == null)
 					continue;
 

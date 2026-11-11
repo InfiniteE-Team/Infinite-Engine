@@ -1,7 +1,7 @@
-package core.json.objects;
+package core.json.game.objects;
 
 import core.json.extensions.SpriteData.ObjectData;
-import core.json.objects.NoteSkinData;
+import core.json.game.objects.NoteSkinData;
 
 typedef NoteTypeData = {
     var ?meta:NoteTypeMeta;
