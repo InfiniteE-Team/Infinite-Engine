@@ -86,6 +86,10 @@ jobs:
           haxelib --global run hmm setup
           haxelib --global run hmm install
 
+      - name: Pre-Build Commands
+        if: ${{ matrix.pre_build_commands }}
+        run: ${{ matrix.pre_build_commands }}
+
       - name: Build for ${{ matrix.platform }}
         run: ${{ matrix.build_cmd }}
 

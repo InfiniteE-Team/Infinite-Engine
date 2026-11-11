@@ -87,9 +87,9 @@
 
 	<haxedef name="DEBUG_CONSOLE" />
 
-	<haxedef name="hxscript_hl" />
+	<haxedef name="hxscript_hl" if="hl" />
 	<haxedef name="hxscript_host" value="modding,game,states,core,utils,funkin" />
-	<haxedef name="hxscript_no_hl_bridges" />
+	<haxedef name="hxscript_no_hl_bridges" if="hl" />
 
 	<haxedef name="HXCPP_CHECK_POINTER" if="desktop" />
 	<haxedef name="HXCPP_STACK_LINE" if="desktop" />
