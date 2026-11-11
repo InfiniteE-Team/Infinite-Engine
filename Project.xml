@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project>
-
+<project xmlns:config="http://lime.openfl.org/2011/config">
 	<!-- _________________________ Application Settings _________________________ -->
 
-	<app title="Friday Night Funkin': Infinite Engine" file="InfiniteEngine" main="core.Main" version="0.1.0" company="infiniteTeam" package="com.infiniteTeam.infiniteEngine" />
+	<app title="Friday Night Funkin': Infinite Engine" file="InfiniteEngine" main="core.Main"
+		version="0.1.0" company="infiniteTeam" package="com.infiniteTeam.infiniteEngine" />
 
-	<!--The flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a html file
+	<!--The
+	flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a
+	html file
 		or you can set the actual size of your file manually at "FlxPreloaderBase-onUpdate-bytesTotal"-->
 	<!-- <app preloader="Preloader" resizable="true" /> -->
 	<app preloader="flixel.system.FlxPreloader" />
 
-	<!--Minimum without FLX_NO_GAMEPAD: 11.8, without FLX_NO_NATIVE_CURSOR: 11.2-->
+	<!--Minimum
+	without FLX_NO_GAMEPAD: 11.8, without FLX_NO_NATIVE_CURSOR: 11.2-->
 	<set name="SWF_VERSION" value="11.8" />
 
 	<!-- ____________________________ Defines ___________________________ -->
 
 	<define name="CRASH_HANDLER" if="desktop" />
-	<define name="HSCRIPT_ALLOWED"/>
+	<define name="HSCRIPT_ALLOWED" />
 	<define name="LUA_ALLOWED" if="cpp" />
-	<define name="DISCORD_ALLOWED" if="desktop"/>
-	<define name="VIDEO_ALLOWED" if="cpp"/>
+	<define name="DISCORD_ALLOWED" if="desktop" />
+	<define name="VIDEO_ALLOWED" if="cpp" />
 
-	<define name="HX_WINDOWS" if="windows cpp"/>
+	<define name="HX_WINDOWS" if="windows cpp" />
 
 	<!-- ____________________________ Template Settings ___________________________ -->
 	<template path="assets/alsoft.ini" />
 
 	<!-- ____________________________ Window Settings ___________________________ -->
 
-	<!--These window settings apply to all targets-->
-	<window width="1280" height="720" fps="1000" background="#000000" hardware="true" vsync="false"/>
-
-	<!--Desktop-specific-->
+	<!--These
+	window settings apply to all targets-->
+	<window width="1280" height="720" fps="1000" background="#000000" hardware="true" vsync="false" />
 	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" />
-
-	<!--Mobile-specific-->
 	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" />
 
 	<!-- _____________________________ Path Settings ____________________________ -->
@@ -43,43 +43,47 @@
 	<source path="source" />
 	<source path="source/modding/vslice/api" />
 
-	<assets path="assets"/>
+	<assets path="assets" />
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
-	<haxelib name="flixel"/>
-	<haxelib name="flixel-addons"/>
-	<haxelib name="flixel-animate"/>
-	<haxelib name="openfl"/>
+	<haxelib name="flixel" />
+	<haxelib name="flixel-addons" />
+	<haxelib name="flixel-animate" />
+	<haxelib name="openfl" />
 
-	<haxelib name="hxscript" if="HSCRIPT_ALLOWED"/>
+	<haxelib name="hxscript" if="HSCRIPT_ALLOWED" />
 
-	<haxelib name="ale-json"/>
+	<haxelib name="ale-json" />
 
-	<haxelib name="hxvlc" if="VIDEO_ALLOWED"/>
-	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED"/>
-	<haxelib name="hxluajit" if="LUA_ALLOWED"/>
-	<haxelib name="sl-windows-api" if="windows"/>
+	<haxelib name="hxvlc" if="VIDEO_ALLOWED" />
+	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED" />
+	<haxelib name="hxluajit" if="LUA_ALLOWED" />
+	<haxelib name="sl-windows-api" if="windows" />
 
 	<haxelib name="funkin.vis" />
 	<haxelib name="grig.audio" />
 
-	<haxelib name="foxlite"/>
+	<haxelib name="foxlite" />
 
-	<!--<haxelib name="window-modcharting"/>-->
+	<!--<haxelib
+	name="window-modcharting"/>-->
 
 	<!-- ______________________________ Haxedefines _____________________________ -->
 
-	<!--Disable the Flixel core focus lost screen-->
+	<!--Disable
+	the Flixel core focus lost screen-->
 	<haxedef name="FLX_NO_FOCUS_LOST_SCREEN" />
 
-	<!--Disable the Flixel core debugger. Automatically gets set whenever you compile in release mode!-->
+	<!--Disable
+	the Flixel core debugger. Automatically gets set whenever you compile in release mode!-->
 	<haxedef name="FLX_NO_DEBUG" unless="debug" />
 
-	<!--Enable this for Nape release builds for a serious peformance improvement-->
+	<!--Enable
+	this for Nape release builds for a serious peformance improvement-->
 	<haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
 
-	<haxedef name="HXCPP_DEBUG_LINK"/>
+	<haxedef name="HXCPP_DEBUG_LINK" />
 
 	<haxedef name="DEBUG_CONSOLE" />
 
@@ -88,7 +92,7 @@
 	<haxedef name="hxscript_no_hl_bridges" />
 
 	<haxedef name="HXCPP_CHECK_POINTER" if="desktop" />
-    <haxedef name="HXCPP_STACK_LINE" if="desktop" />
+	<haxedef name="HXCPP_STACK_LINE" if="desktop" />
 
 	<!--HxScript-->
 	<haxedef name="hxscript_host" value="modding,game,states,core,utils,funkin" />
@@ -98,6 +102,23 @@
 	<haxeflag name="--macro" value="include('modding.scripting.interfaces')" />
 	<haxeflag name="--macro" value="include('funkin', true, ['funkin.vis'])" />
 
-	<!-- Place custom nodes like icons here -->
+	<!-- Android -->
+
+	<config:android>
+		<gradle-properties org.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m" />
+	</config:android>
+
+	<architecture exclude="armv7" if="android" />
+
+	<config:android permission="android.permission.READ_EXTERNAL_STORAGE" if="android" />
+	<config:android permission="android.permission.WRITE_EXTERNAL_STORAGE" if="android" />
+
+	<config:android permission="android.permission.MANAGE_EXTERNAL_STORAGE" />
+	<config:android permission="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+	<config:android permission="android.permission.INTERNET" />
+	<config:android permission="android.permission.ACCESS_NETWORK_STATE" />
+
+
 	<icon path="assets/icon.png" />
 </project>
