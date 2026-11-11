@@ -24,6 +24,7 @@
 	<define name="DISCORD_ALLOWED" if="desktop" />
 	<define name="VIDEO_ALLOWED" if="cpp" />
 
+	<define name="FORCE_TOUCH" if="mobile" />
 	<define name="HX_WINDOWS" if="windows cpp" />
 
 	<!-- ____________________________ Template Settings ___________________________ -->
@@ -42,7 +43,6 @@
 	<set name="BUILD_DIR" value="export" />
 	<source path="source" />
 	<source path="source/modding/vslice/api" />
-
 	<assets path="assets" />
 
 	<!-- _______________________________ Libraries ______________________________ -->
@@ -66,6 +66,9 @@
 
 	<haxelib name="foxlite" />
 
+	<haxelib name="extension-androidtools" if="android" />
+	<haxelib name="extension-orientation" if="mobile" />
+
 	<!--<haxelib
 	name="window-modcharting"/>-->
 
@@ -87,15 +90,13 @@
 
 	<haxedef name="DEBUG_CONSOLE" />
 
-	<haxedef name="hxscript_hl" if="hl" />
-	<haxedef name="hxscript_host" value="modding,game,states,core,utils,funkin" />
-	<haxedef name="hxscript_no_hl_bridges" if="hl" />
-
 	<haxedef name="HXCPP_CHECK_POINTER" if="desktop" />
 	<haxedef name="HXCPP_STACK_LINE" if="desktop" />
 
 	<!--HxScript-->
+	<haxedef name="hxscript_hl" if="hl" />
 	<haxedef name="hxscript_host" value="modding,game,states,core,utils,funkin" />
+	<haxedef name="hxscript_no_hl_bridges" if="hl" />
 
 	<!-- _______________________________Compiler Flags _______________________________ -->
 	<haxeflag name="--macro" value="include('foxlite')" />
