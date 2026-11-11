@@ -33,6 +33,7 @@ https://nightly.link/InfiniteE-Team/Infinite-Engine/workflows/init.yml/dev/Linux
 
 **Contributors**:
 - InaTheCat (Game Tester)
+- Mohammad (Discord Server and Assets)
 
 Follow the official game! [Friday Night Funkin](https://github.com/FunkinCrew/Funkin) by FunkinCrew
 Some or all elements come from the original game; we do not own the game or the files extracted from it. 
