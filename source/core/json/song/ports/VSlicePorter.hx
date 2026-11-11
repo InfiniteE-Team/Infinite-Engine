@@ -203,7 +203,7 @@ class VSlicePorter implements FormatChartConverter {
 					case 'dad' | 'opponent': 'dad';
 					default: target;
 				};
-				return {name: 'Play Special Anim', args: {char: char, anim: v.anim}};
+				return {name: 'Play Anim', args: {char: char, anim: v.anim}};
 			case 'ScrollSpeed':
 				var scroll:Float = v.scroll ?? 1.0;
 				return {name: 'Change Scroll Speed', args: {

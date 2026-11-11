@@ -28,9 +28,30 @@ class EventManager {
 			name: 'Camera Follow',
 			fields: [
 				{key: 'char', kind: 'char'},
-				{key: 'x', kind: 'float', step: 10, min: -5000, max: 5000, def: 0},
-				{key: 'y', kind: 'float', step: 10, min: -5000, max: 5000, def: 0},
-				{key: 'duration', kind: 'float', step: 1, min: 0, max: 256, def: 4},
+				{
+					key: 'x',
+					kind: 'float',
+					step: 10,
+					min: -5000,
+					max: 5000,
+					def: 0
+				},
+				{
+					key: 'y',
+					kind: 'float',
+					step: 10,
+					min: -5000,
+					max: 5000,
+					def: 0
+				},
+				{
+					key: 'duration',
+					kind: 'float',
+					step: 1,
+					min: 0,
+					max: 256,
+					def: 4
+				},
 				{key: 'ease', kind: 'text', def: 'CLASSIC'}
 			]
 		},
@@ -46,18 +67,55 @@ class EventManager {
 		{
 			name: 'Change Scroll Speed',
 			fields: [
-				{key: 'speed', kind: 'float', step: 0.1, min: 0.5, max: 6, def: 1.5},
-				{key: 'duration', kind: 'float', step: 1, min: 0, max: 256, def: 0},
+				{
+					key: 'speed',
+					kind: 'float',
+					step: 0.1,
+					min: 0.5,
+					max: 6,
+					def: 1.5
+				},
+				{
+					key: 'duration',
+					kind: 'float',
+					step: 1,
+					min: 0,
+					max: 256,
+					def: 0
+				},
 				{key: 'ease', kind: 'text', def: 'linear'}
 			]
 		},
-		{name: 'Change BPM', fields: [{key: 'bpm', kind: 'float', step: 1, min: 20, max: 400, def: 120}]},
-		{name: 'Play Special Anim', fields: [{key: 'char', kind: 'char'}, {key: 'anim', kind: 'text', def: 'hey'}]},
+		{name: 'Change BPM', fields: [
+			{
+				key: 'bpm',
+				kind: 'float',
+				step: 1,
+				min: 20,
+				max: 400,
+				def: 120
+			}
+		]},
+		{name: 'Play Anim', fields: [{key: 'char', kind: 'char'}, {key: 'anim', kind: 'text', def: 'hey'}]},
 		{
 			name: 'Zoom Camera',
 			fields: [
-				{key: 'zoom', kind: 'float', step: 0.05, min: 0.1, max: 5, def: 1},
-				{key: 'duration', kind: 'float', step: 1, min: 0, max: 256, def: 4},
+				{
+					key: 'zoom',
+					kind: 'float',
+					step: 0.05,
+					min: 0.1,
+					max: 5,
+					def: 1
+				},
+				{
+					key: 'duration',
+					kind: 'float',
+					step: 1,
+					min: 0,
+					max: 256,
+					def: 4
+				},
 				{key: 'ease', kind: 'text', def: 'expoOut'},
 				{key: 'mode', kind: 'text', def: 'stage'}
 			]
@@ -65,13 +123,30 @@ class EventManager {
 		{name: 'Change Note Skin', fields: [{key: 'char', kind: 'char'}, {key: 'skin', kind: 'text', def: 'default'}]},
 		{
 			name: 'Play Video',
-			fields: [{key: 'video', kind: 'text', def: ''}, {key: 'camera', kind: 'text', def: 'other'}]
+			fields: [
+				{key: 'video', kind: 'text', def: ''},
+				{key: 'camera', kind: 'text', def: 'other'}
+			]
 		},
 		{
 			name: 'Camera Bop',
 			fields: [
-				{key: 'rate', kind: 'float', step: 1, min: 0, max: 16, def: 4},
-				{key: 'intensity', kind: 'float', step: 0.1, min: 0, max: 5, def: 1}
+				{
+					key: 'rate',
+					kind: 'float',
+					step: 1,
+					min: 0,
+					max: 16,
+					def: 4
+				},
+				{
+					key: 'intensity',
+					kind: 'float',
+					step: 0.1,
+					min: 0,
+					max: 5,
+					def: 1
+				}
 			]
 		}
 	];
@@ -257,7 +332,8 @@ class EventManager {
 						PlayState.instance.noteController.targetScrollSpeed = newSpeed;
 					else {
 						var steps:Float = event.arguments.duration;
-						PlayState.instance.noteController.tweenScrollSpeed(newSpeed, steps * core.rhythm.RhythmCore.stepInMs / 1000, easeByName(event.arguments.ease));
+						PlayState.instance.noteController.tweenScrollSpeed(newSpeed, steps * core.rhythm.RhythmCore.stepInMs / 1000,
+							easeByName(event.arguments.ease));
 					}
 				}
 			case 'Change BPM':
@@ -266,16 +342,19 @@ class EventManager {
 					core.rhythm.RhythmCore.changeBPM(newBPM);
 					PlayState.instance?.rhythmTracker?.onBpmChange();
 				}
-			case 'Play Special Anim':
+			case 'Play Anim':
 				var charId = event.arguments.char;
 				var animKey = event.arguments.anim;
 				if (charId == null || animKey == null) {
-					Console.log('[EventManager] Play Special Anim: "char" or "anim" are missing from the arguments');
+					Console.log('[EventManager] Play Anim: "char" or "anim" are missing from the arguments');
 					return;
 				}
-				var success = PlayState.instance.chars.playSpecialAnim(charId, animKey);
-				if (!success)
-					Console.log('[EventManager] Play Special Anim: could not be reproduced "$animKey" in "$charId"');
+				var char = PlayState.instance.chars.get(charId);
+				if (char == null || !char.existsAnim(animKey)) {
+					Console.log('[EventManager] Play Anim: could not be reproduced "$animKey" in "$charId"');
+					return;
+				}
+				char.playAnim(animKey, true);
 			case 'Zoom Camera':
 				var cam = PlayState.instance.cameraController;
 				var zoom:Float = event.arguments.zoom ?? 1.0;

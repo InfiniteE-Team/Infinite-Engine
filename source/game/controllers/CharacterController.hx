@@ -397,7 +397,7 @@ class CharacterController extends FunkinObjectRegistry {
 	public function cryGf() {
 		for (gf in gfChars) {
 			if (gf.existsAnim('sad'))
-				gf.playAnim('sad');
+				gf.playAnim('sad', true);
 		}
 	}
 
@@ -438,13 +438,6 @@ class CharacterController extends FunkinObjectRegistry {
 		if (charScript != null)
 			charScript.call("postSing", []);
 		#end
-	}
-
-	public function playSpecialAnim(charId:String, animKey:String):Bool {
-		if (!existsId(charId))
-			return false;
-		var char = cast(get(charId), Character);
-		return char.playSpecialAnim(animKey);
 	}
 
 	public function isPlayerMissing():Bool

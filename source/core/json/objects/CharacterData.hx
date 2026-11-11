@@ -23,7 +23,6 @@ typedef GameplayData = {
 
 	var ?idleAfterSing:Bool;
 	var ?singTime:Float;
-	var ?specialAnims:Dynamic;
 }
 
 typedef CharDeath = {

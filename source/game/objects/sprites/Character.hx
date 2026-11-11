@@ -78,6 +78,8 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 
 	var singTime:Float = 2;
 
+	static final SKIP_PREFIXES:Array<String> = ['sing', 'idle', 'dance', 'miss', 'bop', 'sad'];
+
 	static final CHAR_ANIMS:Array<String> = ['singLEFT', 'singDOWN', 'singUP', 'singRIGHT'];
 
 	public static function getCharAnim(direction:Int):String {
@@ -255,6 +257,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		isSing = false;
 		isMiss = false;
 		singCountTime = 0;
+		specialAnimName = null;
 
 		#if HSCRIPT_ALLOWED
 		if (script != null)
@@ -280,47 +283,43 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 
 	var specialAnimName:String = null;
 
-	public function playSpecialAnim(animKey:String):Bool {
-		var data:Dynamic = characterData?.gameplay?.specialAnims != null ? Reflect.field(characterData.gameplay.specialAnims, animKey) : null;
-		var animName:String = data != null ? data.anim : animKey;
-		if (animName == null || !existsAnim(animName))
+	function isSpecialAnimName(name:String):Bool {
+		if (name == null)
 			return false;
-
-		var canInterrupt = data != null ? (data.interrupt ?? false) : true;
-		if (!canInterrupt && (isSing || isMiss))
-			return false;
-
-		#if HSCRIPT_ALLOWED
-		if (script.callCancellable('onSpecialAnim', [animKey, animName]))
-			return false;
-		#end
-
-		var force = data != null ? (data.force ?? true) : true;
-		playAnim(animName, force);
-		isSpecial = true;
-		isSing = false;
-		isMiss = false;
-		singCountTime = 0;
-		specialAnimName = layers.length > 0 ? layers[0].currentAnim : animName;
-
-		#if HSCRIPT_ALLOWED
-		script.call('postSpecialAnim', [animKey, animName]);
-		#end
-
+		var lower = name.toLowerCase();
+		for (prefix in SKIP_PREFIXES)
+			if (lower.startsWith(prefix))
+				return false;
 		return true;
 	}
 
 	override public function playAnim(name:String, ?force:Bool = true) {
+		var special = isSpecialAnimName(name);
+
+		if (!special) {
+			isSpecial = false;
+			specialAnimName = null;
+		}
+
 		if (vslice != null && !_vsliceBroken.exists('playAnimation')) {
 			_vsliceAnim = '';
 			try {
 				vslice.playAnimation(name, force);
-				return;
 			} catch (e:Dynamic) {
 				vsliceFailed('playAnimation', e);
+				playAnimRaw(name, force);
 			}
+		} else {
+			playAnimRaw(name, force);
 		}
-		playAnimRaw(name, force);
+
+		if (special) {
+			isSpecial = true;
+			isSing = false;
+			isMiss = false;
+			singCountTime = 0;
+			specialAnimName = layers.length > 0 ? layers[0].currentAnim : name;
+		}
 	}
 
 	public function playAnimRaw(name:String, ?force:Bool = true) {

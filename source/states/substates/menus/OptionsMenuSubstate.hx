@@ -193,7 +193,7 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 
 		if (character != null) {
 			character.visible = false;
-			character.setPosition(FlxG.width - 450, FlxG.height - 500);
+			character.setPosition(FlxG.width - 450, FlxG.height - 450);
 			character.scale.set(0.7, 0.7);
 			character.updateHitbox();
 			if (character.layers != null) {

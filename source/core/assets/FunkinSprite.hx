@@ -408,7 +408,7 @@ class FunkinSprite extends animate.FlxAnimate {
 	public function getAnimOffset():Null<Point>
 		return offsets.get(currentAnim) ?? {x: 0, y: 0};
 
-	var registeredAnims:Array<String> = [];
+	public var registeredAnims:Array<String> = [];
 
 	function _registerAnim(name:String) {
 		if (!registeredAnims.contains(name))

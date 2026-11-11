@@ -169,12 +169,12 @@ class PreviewEvents {
 					var v = Std.parseFloat(Std.string(arg(e, 'bpm')));
 					if (!Math.isNaN(v) && v > 0)
 						bpm = v;
-				case 'Play Special Anim':
+				case 'Play Anim':
 					if (!silent) {
 						var id:String = arg(e, 'char');
 						var anim:String = arg(e, 'anim');
 						if (id != null && anim != null)
-							chars.playSpecialAnim(id, anim);
+							chars.get(id).playAnim(anim, true);
 					}
 			}
 		} catch (err:Dynamic) {
