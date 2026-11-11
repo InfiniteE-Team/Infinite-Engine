@@ -32,7 +32,7 @@ class ConfigMain extends flixel.FlxState {
 		FlxG.mouse.visible = false;
 
 		#if android
-		extension.androidtools.Permissions.requestPermissions('android.permission.MANAGE_EXTERNAL_STORAGE');
+		extension.androidtools.Permissions.requestPermissions(['android.permission.MANAGE_EXTERNAL_STORAGE']);
 		#end
 
 		core.assets.Library.initPaths();
