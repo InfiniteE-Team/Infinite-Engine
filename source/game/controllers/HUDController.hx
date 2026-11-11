@@ -43,7 +43,7 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 		healthBarY = FlxG.height * (SaveData.data.downscroll ? barYDOWNSCROLL : barYNORMAL);
 
 		healthBarBG = new FunkinSprite(0, healthBarY + 5, true);
-		healthBarBG.loadGraphic(Paths.getPath('game/hud/healthBar', 'image'));
+		healthBarBG.loadGraphic(Paths.getPath('game/ui/healthBar', 'image'));
 		healthBarBG.scrollFactor.set(0, 0);
 		healthBarBG.x = (FlxG.width - healthBarBG.width) * 0.5;
 		healthBarBG.antialiasing = SaveData.data.antialiasing;

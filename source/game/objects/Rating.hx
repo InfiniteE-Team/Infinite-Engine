@@ -11,7 +11,7 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 	#if HSCRIPT_ALLOWED
 	var scripRat:ScriptHandler;
 	#end
-	// rating
+
 	var ratingPool:Array<FunkinSprite> = [];
 	var numberPool:Array<FunkinSprite> = [];
 	var missPool:Array<FunkinSprite> = [];
@@ -19,10 +19,6 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 
 	public var onNoteHitPlayer:Void->Void;
 	public var onNoteHitMiss:Void->Void;
-
-	public var PIXEL_ZOOM:Float = 6;
-
-	public var isPixel:Bool = false;
 
 	public function new(x:Float = 0, y:Float = 0, script:ScriptHandler) {
 		super(x, y);
@@ -39,74 +35,39 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 		if (scripRat?.hasScripts && scripRat?.callCancellable('onRatingPopUp', [ratingName, combo]))
 			return;
 		#end
-		var pixelPart1 = 'normal/score/';
-		var pixelPart2 = '';
-
-		if (isPixel) {
-			pixelPart1 = 'pixel/score/';
-			pixelPart2 = '-pixel';
-		}
 
 		killPoolInstant(ratingPool);
 		killPoolInstant(numberPool);
 
 		var ratingSprite = getFromPool(ratingPool);
-		ratingSprite.alpha = 1;
-		ratingSprite.visible = true;
 
-		var skinRating = getSkinRating('ratings', ratingName);
-		if (skinRating != null) {
-			if (poolPaths.get(ratingSprite) != skinRating.path) {
-				ratingSprite.loadGraphic(skinRating.path);
-				poolPaths.set(ratingSprite, skinRating.path);
-			}
-		} else {
-			if (poolPaths.get(ratingSprite) != Paths.getPath('game/hud/' + pixelPart1 + ratingName + pixelPart2, 'image')) {
-				ratingSprite.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + ratingName + pixelPart2, 'image'));
-				poolPaths.set(ratingSprite, Paths.getPath('game/hud/' + pixelPart1 + ratingName + pixelPart2, 'image'));
-			}
+		var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.ratingType}/$ratingName', 'image');
+		var skinData = getSkinData('rating', ratingName);
+
+		setupSprite(ratingSprite, skinData != null && skinData.path != null ? skinData.path : defaultPath, skinData != null && skinData.scale != null ? skinData.scale : 0.7,
+			this.x + (skinData != null && skinData.offsetX != null ? skinData.offsetX : -160),
+			this.y + (skinData != null && skinData.offsetY != null ? skinData.offsetY : -90));
+
+		#if HSCRIPT_ALLOWED
+		if (scripRat?.hasScripts && scripRat?.call('onCustomRatingAnimation', [ratingSprite, ratingName]) == true) {
+			if (combo >= 10)
+				onShowComboNumbers(combo);
+			return;
 		}
+		#end
 
-		ratingSprite.x = this.x - 160;
-		ratingSprite.y = this.y - 90;
-
-		ratingSprite.scale.set(1, 1);
-		ratingSprite.updateHitbox();
-		if (!isPixel) {
-			ratingSprite.setGraphicSize(Std.int(ratingSprite.width * 0.7));
-		} else {
-			ratingSprite.setGraphicSize(Std.int(ratingSprite.width * PIXEL_ZOOM * 0.7));
-		}
-		ratingSprite.updateHitbox();
-
-		var sx = ratingSprite.scale.x * 1.15;
-		var sy = ratingSprite.scale.y * 1.15;
-		FlxTween.tween(ratingSprite.scale, {x: sx, y: sy}, 0.07, {
-			ease: FlxEase.quadOut,
-			onComplete: function(_) {
-				if (ratingSprite == null || !ratingSprite.alive)
-					return;
-				FlxTween.tween(ratingSprite.scale, {x: ratingSprite.scale.x / 1.15, y: ratingSprite.scale.y / 1.15}, 0.10, {ease: FlxEase.quadIn});
-			}
-		});
-
-		FlxTween.tween(ratingSprite, {alpha: 0}, 0.20, {
-			startDelay: 0.45,
-			ease: FlxEase.quadIn,
-			onComplete: function(_) {
-				ratingSprite.kill();
-			}
-		});
+		playStandardPopupTween(ratingSprite);
 
 		if (combo >= 10)
-			onShowComboNumbers(combo, pixelPart1, pixelPart2);
+			onShowComboNumbers(combo);
 	}
 
-	function onShowComboNumbers(combo:Int, pixelPart1:String, pixelPart2:String) {
+	function onShowComboNumbers(combo:Int) {
 		#if HSCRIPT_ALLOWED
-		if (scripRat.hasScripts && scripRat.callCancellable('onShowComboNumbers', [combo, pixelPart1, pixelPart2]))
+		if (scripRat?.hasScripts && scripRat.callCancellable('onShowComboNumbers', [combo]))
 			return;
 		#end
+
 		var comboStr = StringTools.lpad(Std.string(combo), "0", 3);
 		var separatedScore = [];
 
@@ -116,53 +77,105 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 		var daLoop = 0;
 		for (i in separatedScore) {
 			var numScore = getFromPool(numberPool);
-			numScore.alpha = 1;
-			numScore.visible = true;
-			var skinDigit = getSkinRating('numbers', Std.string(Std.int(i)));
-			if (skinDigit != null) {
-				if (poolPaths.get(numScore) != skinDigit.path) {
-					numScore.loadGraphic(skinDigit.path);
-					poolPaths.set(numScore, skinDigit.path);
-				}
-			} else {
-				if (poolPaths.get(numScore) != Paths.getPath('game/hud/' + pixelPart1 + 'nums/digit-' + Std.int(i) + pixelPart2, 'image')) {
-					numScore.loadGraphic(Paths.getPath('game/hud/' + pixelPart1 + 'nums/digit-' + Std.int(i) + pixelPart2, 'image'));
-					poolPaths.set(numScore, Paths.getPath('game/hud/' + pixelPart1 + 'nums/digit-' + Std.int(i) + pixelPart2, 'image'));
-				}
+			var digitStr = Std.string(Std.int(i));
+
+			var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.ratingType}/nums/digit-$i', 'image');
+			var skinDigit = getSkinData('number', digitStr);
+
+			var spacing = skinDigit != null && skinDigit.spacing != null ? skinDigit.spacing : 32;
+
+			setupSprite(numScore, skinDigit != null && skinDigit.path != null ? skinDigit.path : defaultPath, skinDigit != null && skinDigit.scale != null ? skinDigit.scale : 0.38,
+				this.x
+				+ (spacing * daLoop)
+				+ (skinDigit != null && skinDigit.offsetX != null ? skinDigit.offsetX : -90),
+				this.y
+				+ (skinDigit != null && skinDigit.offsetY != null ? skinDigit.offsetY : 20));
+
+			#if HSCRIPT_ALLOWED
+			if (scripRat?.hasScripts && scripRat?.call('onCustomNumberAnimation', [numScore, i, daLoop]) == true) {
+				daLoop++;
+				continue;
 			}
+			#end
 
-			numScore.x = this.x + (32 * daLoop) - 90;
-			numScore.y = this.y + 20;
-
-			numScore.scale.set(1, 1);
-			numScore.updateHitbox();
-			if (!isPixel) {
-				numScore.setGraphicSize(Std.int(numScore.width * 0.38));
-			} else {
-				numScore.setGraphicSize(Std.int(numScore.width * 5.4));
-			}
-			numScore.updateHitbox();
-
-			FlxTween.tween(numScore, {"scale.x": numScore.scale.x * 1.15, "scale.y": numScore.scale.y * 1.15}, 0.07, {
-				ease: FlxEase.quadOut,
-				onComplete: function(_) {
-					FlxTween.tween(numScore, {"scale.x": numScore.scale.x / 1.15, "scale.y": numScore.scale.y / 1.15}, 0.10, {
-						ease: FlxEase.quadIn
-					});
-				}
-			});
-			FlxTween.tween(numScore, {alpha: 0}, 0.20, {
-				startDelay: 0.45,
-				ease: FlxEase.quadIn,
-				onComplete: function(_) {
-					numScore.kill();
-				}
-			});
+			playStandardPopupTween(numScore);
 			daLoop++;
 		}
 	}
 
-	public function getSkinRating(type:String, details:String):Dynamic {
+	public function onMissPopup() {
+		#if HSCRIPT_ALLOWED
+		if (scripRat?.hasScripts && scripRat.callCancellable('onMissPopup', []))
+			return;
+		#end
+
+		killPoolInstant(missPool);
+
+		var rating = getFromPool(missPool);
+		var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.ratingType}/miss', 'image');
+		var skinData = getSkinData('miss', 'miss');
+
+		setupSprite(rating, skinData != null && skinData.path != null ? skinData.path : defaultPath, skinData != null && skinData.scale != null ? skinData.scale : 0.7,
+			this.x + (skinData != null && skinData.offsetX != null ? skinData.offsetX : -145),
+			this.y + (skinData != null && skinData.offsetY != null ? skinData.offsetY : -90));
+
+		#if HSCRIPT_ALLOWED
+		if (scripRat?.hasScripts && scripRat?.call('onCustomMissAnimation', [rating]) == true)
+			return;
+		#end
+
+		playStandardPopupTween(rating);
+	}
+
+	/**
+	 * Configure the visibility, graphic, scale, and position of a sprite in a clean way.
+	 */
+	function setupSprite(sprite:FunkinSprite, assetPath:String, scaleMultiplier:Float, posX:Float, posY:Float) {
+		sprite.alpha = 1;
+		sprite.visible = true;
+
+		if (poolPaths.get(sprite) != assetPath) {
+			sprite.loadGraphic(assetPath);
+			poolPaths.set(sprite, assetPath);
+		}
+
+		sprite.x = posX;
+		sprite.y = posY;
+
+		sprite.scale.set(1, 1);
+		sprite.updateHitbox();
+		sprite.setGraphicSize(Std.int(sprite.width * scaleMultiplier));
+		sprite.updateHitbox();
+	}
+
+	/*
+	 * Effect Bump
+	 */
+	function playStandardPopupTween(sprite:FunkinSprite) {
+		var sx = sprite.scale.x * 1.15;
+		var sy = sprite.scale.y * 1.15;
+
+		FlxTween.tween(sprite.scale, {x: sx, y: sy}, 0.07, {
+			ease: FlxEase.quadOut,
+			onComplete: function(_) {
+				if (sprite == null || !sprite.alive)
+					return;
+				FlxTween.tween(sprite.scale, {x: sprite.scale.x / 1.15, y: sprite.scale.y / 1.15}, 0.10, {
+					ease: FlxEase.quadIn
+				});
+			}
+		});
+
+		FlxTween.tween(sprite, {alpha: 0}, 0.20, {
+			startDelay: 0.45,
+			ease: FlxEase.quadIn,
+			onComplete: function(_) {
+				sprite.kill();
+			}
+		});
+	}
+
+	public function getSkinData(type:String, details:String):Dynamic {
 		#if HSCRIPT_ALLOWED
 		if (scripRat.hasScripts) {
 			var result = scripRat.call('onSkinRating', [type, details]);
@@ -171,59 +184,6 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 		}
 		#end
 		return game.PlayState.instance?.noteController?.popupImage(type, details);
-	}
-
-	public function onMissPopup() {
-		#if HSCRIPT_ALLOWED
-		if (scripRat.hasScripts && scripRat.callCancellable('onMissPopup', []))
-			return;
-		#end
-		killPoolInstant(missPool);
-
-		var rating = getFromPool(missPool);
-		rating.alpha = 1;
-		rating.visible = true;
-
-		if (isPixel) {
-			if (poolPaths.get(rating) != Paths.getPath('game/hud/pixel/score/miss-pixel', 'image')) {
-				rating.loadGraphic(Paths.getPath('game/hud/pixel/score/miss-pixel', 'image'));
-				poolPaths.set(rating, Paths.getPath('game/hud/pixel/score/miss-pixel', 'image'));
-			}
-		} else {
-			if (poolPaths.get(rating) != Paths.getPath('game/hud/normal/score/miss', 'image')) {
-				rating.loadGraphic(Paths.getPath('game/hud/normal/score/miss', 'image'));
-				poolPaths.set(rating, Paths.getPath('game/hud/normal/score/miss', 'image'));
-			}
-		}
-
-		rating.x = this.x - 145;
-		rating.y = this.y - 90;
-
-		rating.scale.set(1, 1);
-		rating.updateHitbox();
-		if (!isPixel) {
-			rating.setGraphicSize(Std.int(rating.width * 0.7));
-		} else {
-			rating.setGraphicSize(Std.int(rating.width * PIXEL_ZOOM * 0.7));
-		}
-		rating.updateHitbox();
-
-		// Bump appears
-		FlxTween.tween(rating, {"scale.x": rating.scale.x * 1.15, "scale.y": rating.scale.y * 1.15}, 0.07, {
-			ease: FlxEase.quadOut,
-			onComplete: function(_) {
-				FlxTween.tween(rating, {"scale.x": rating.scale.x / 1.15, "scale.y": rating.scale.y / 1.15}, 0.10, {
-					ease: FlxEase.quadIn
-				});
-			}
-		});
-		FlxTween.tween(rating, {alpha: 0}, 0.20, {
-			startDelay: 0.45,
-			ease: FlxEase.quadIn,
-			onComplete: function(_) {
-				rating.kill();
-			}
-		});
 	}
 
 	public function killPoolInstant(pool:Array<FunkinSprite>) {

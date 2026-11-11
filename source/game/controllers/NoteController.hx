@@ -5,8 +5,8 @@ import game.PlayStateConfig;
 import core.json.song.SongData.NoteData;
 import core.json.song.SongData.SongConfig;
 import core.json.engine.GlobalData.GlobalConfig;
-import core.json.song.RatingData;
-import core.json.objects.NoteSkinData;
+import core.json.game.objects.RatingData;
+import core.json.game.objects.NoteSkinData;
 import game.objects.sprites.notes.*;
 import flixel.group.FlxGroup.FlxTypedGroup;
 #if HSCRIPT_ALLOWED
@@ -43,7 +43,7 @@ class NoteController {
 	var cachedRatings:Array<Dynamic> = [];
 	var cachedMissHealth:Float = -0.04;
 	var cachedMissScore:Int = -10;
-	var noteTypeCache:Map<String, core.json.objects.NoteTypeData> = new Map();
+	var noteTypeCache:Map<String, core.json.game.objects.NoteTypeData> = new Map();
 
 	var daSong:SongConfig = new SongConfig();
 	var globalData:GlobalConfig;
@@ -277,7 +277,7 @@ class NoteController {
 		holdSkinData = skinPart(noteSkin, 'holdsplashes');
 		popupsData = NoteSkins.read(noteSkin, 'popups');
 
-		var ratingPath = Paths.getPath('data/game/ratings', 'json');
+		var ratingPath = Paths.getPath('data/game/ui/popup/${game.PlayStateConfig.ratingType}', 'json');
 		ratingData = FormatJson.readJson(ratingPath);
 		if (ratingData == null || ratingData.ratings == null) {
 			trace("WARNING: ratings.json not found or invalid");
@@ -897,13 +897,13 @@ class NoteController {
 		return result;
 	}
 
-	function getNoteTypeData(noteType:String):Null<core.json.objects.NoteTypeData> {
+	function getNoteTypeData(noteType:String):Null<core.json.game.objects.NoteTypeData> {
 		if (noteType == null || noteType == 'normal' || noteType == '')
 			return null;
 		if (noteTypeCache.exists(noteType))
 			return noteTypeCache.get(noteType);
 		var path = Paths.getPath('data/game/notetypes/$noteType', 'json');
-		var data:core.json.objects.NoteTypeData = path != null ? FormatJson.readJson(path) : null;
+		var data:core.json.game.objects.NoteTypeData = path != null ? FormatJson.readJson(path) : null;
 		noteTypeCache.set(noteType, data);
 		return data;
 	}

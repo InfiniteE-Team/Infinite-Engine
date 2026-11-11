@@ -3,9 +3,9 @@ package states.menus;
 import flixel.tweens.FlxTween;
 import core.assets.FunkinSprite;
 import core.json.song.SongData.SongConfig;
-import core.json.objects.CharacterData;
-import core.json.objects.StageData;
-import core.json.objects.NoteSkinData;
+import core.json.game.objects.CharacterData;
+import core.json.game.objects.StageData;
+import core.json.game.objects.NoteSkinData;
 import states.menus.objects.FunkinLoadingCharacter;
 import core.json.menus.loading.LoadingCharacterData;
 

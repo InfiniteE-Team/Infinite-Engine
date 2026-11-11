@@ -1,4 +1,4 @@
-package core.json.objects;
+package core.json.game.objects;
 
 import core.json.extensions.AudioData;
 import core.json.extensions.SpriteData.ObjectData;

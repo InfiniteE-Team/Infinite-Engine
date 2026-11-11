@@ -2,7 +2,7 @@ package game.objects.sprites;
 
 import flixel.FlxBasic;
 import core.assets.FunkinSprite;
-import core.json.objects.StageData;
+import core.json.game.objects.StageData;
 import flixel.group.FlxGroup.FlxTypedGroup;
 #if HSCRIPT_ALLOWED
 import modding.scripting.ScriptHandler;

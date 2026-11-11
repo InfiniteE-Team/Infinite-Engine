@@ -1,11 +1,13 @@
 package core.api;
 
+#if DISCORD_ALLOWED
 import hxdiscord_rpc.Discord;
 import hxdiscord_rpc.Types.DiscordButton;
 import hxdiscord_rpc.Types.DiscordEventHandlers;
 import hxdiscord_rpc.Types.DiscordRichPresence;
 import hxdiscord_rpc.Types.DiscordUser;
 import sys.thread.Thread;
+#end
 
 class DiscordAPI {
 	static final DISCORD_CLIENT_ID:Null<String> = "1534274562496270356"; // Replace with your actual Discord client ID
@@ -14,6 +16,7 @@ class DiscordAPI {
 	static var _instance:Null<DiscordAPI> = null;
 
 	public static function initWithId(clientId:String):Void {
+		#if DISCORD_ALLOWED
 		trace(' DISCORD Initializing connection...');
 
 		if (clientId == null || clientId == "" || clientId.contains(" ")) {
@@ -27,6 +30,7 @@ class DiscordAPI {
 		}
 
 		instance.createDaemon();
+		#end
 	}
 
 	static function get_instance():DiscordAPI {
@@ -37,9 +41,12 @@ class DiscordAPI {
 		return DiscordAPI._instance;
 	}
 
+	#if DISCORD_ALLOWED
 	var handlers:DiscordEventHandlers;
+	#end
 
 	private function new() {
+		#if DISCORD_ALLOWED
 		trace(' DISCORD Initializing event handlers...');
 
 		handlers = new DiscordEventHandlers();
@@ -47,6 +54,7 @@ class DiscordAPI {
 		handlers.ready = cpp.Function.fromStaticFunction(onReady);
 		handlers.disconnected = cpp.Function.fromStaticFunction(onDisconnected);
 		handlers.errored = cpp.Function.fromStaticFunction(onError);
+		#end
 	}
 
 	/**
@@ -59,23 +67,29 @@ class DiscordAPI {
 	var daemon:Null<Thread> = null;
 
 	function createDaemon():Void {
+		#if DISCORD_ALLOWED
 		daemon = Thread.create(doDaemonWork);
+		#end
 	}
 
 	function doDaemonWork():Void {
+		#if DISCORD_ALLOWED
 		while (true) {
 			Discord.RunCallbacks();
 			Sys.sleep(2);
 		}
+		#end
 	}
 
 	public function shutdown():Void {
+		#if DISCORD_ALLOWED
 		trace(' DISCORD Shutting down...');
-
 		Discord.Shutdown();
+		#end
 	}
 
 	public function setPresence(params:DiscordAPIPresenceParams):Void {
+		#if DISCORD_ALLOWED
 		var presence:DiscordRichPresence = new DiscordRichPresence();
 
 		// Presence should always be playing the game.
@@ -91,8 +105,10 @@ class DiscordAPI {
 		presence.smallImageKey = cast(params.smallImageKey, Null<String>) ?? "";
 
 		Discord.UpdatePresence(cpp.RawConstPointer.addressOf(presence));
+		#end
 	}
 
+	#if DISCORD_ALLOWED
 	private static function onReady(request:cpp.RawConstPointer<DiscordUser>):Void {
 		trace(' DISCORD Client has connected!');
 
@@ -114,6 +130,7 @@ class DiscordAPI {
 	private static function onError(errorCode:Int, message:cpp.ConstCharStar):Void {
 		trace(' DISCORD Client has received an error! ($errorCode) "${Std.string(message)}"');
 	}
+	#end
 }
 
 typedef DiscordAPIPresenceParams = {

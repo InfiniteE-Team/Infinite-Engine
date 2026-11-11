@@ -1,6 +1,6 @@
 package modding.vslice;
 
-import core.json.objects.StageData;
+import core.json.game.objects.StageData;
 import core.json.extensions.SpriteData.AnimData;
 import modding.vslice.VSlice.*;
 

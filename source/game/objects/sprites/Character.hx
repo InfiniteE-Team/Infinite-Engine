@@ -1,7 +1,7 @@
 package game.objects.sprites;
 
 import core.assets.FunkinSprite;
-import core.json.objects.CharacterData;
+import core.json.game.objects.CharacterData;
 
 class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 	public static var parent:Character;

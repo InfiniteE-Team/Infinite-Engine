@@ -1,4 +1,4 @@
-package core.json.objects;
+package core.json.menus;
 
 import core.enums.AlphabetStyle;
 
