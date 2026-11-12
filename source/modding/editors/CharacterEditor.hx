@@ -59,6 +59,9 @@ class CharacterEditor extends MusicBeatState {
 	var savedUndoLength:Int = 0;
 
 	public var char:Character = null;
+
+	var ghostChar:Character = null;
+
 	public var curCharacter:String = 'bf';
 
 	var keysLocked:Bool = false;
@@ -102,6 +105,12 @@ class CharacterEditor extends MusicBeatState {
 		add(selectionObj);
 
 		createHUD();
+
+		ghostChar = loadCharacter('idk', curCharacter, 0, 0);
+		ghostChar.alpha = 0.7;
+		for (layer in ghostChar.layers)
+			layer.alpha = 0.7;
+		ghostChar.visible = false;
 
 		char = loadCharacter('idk', curCharacter, 0, 0);
 
@@ -183,6 +192,12 @@ class CharacterEditor extends MusicBeatState {
 			Console.log('Chars data not loading in list');
 
 		final dd2 = new DropDown(0, 30, curCharacter, chars, function(selected) {
+			for (layer in ghostChar.layers)
+				remove(ghostChar, true);
+			remove(ghostChar, true);
+			ghostChar.destroy();
+			ghostChar = null;
+
 			if (char == null)
 				return;
 
@@ -202,6 +217,12 @@ class CharacterEditor extends MusicBeatState {
 			selectedLayerName = '';
 
 			curCharacter = selected;
+			ghostChar = loadCharacter('idk', selected, 0, 0);
+			ghostChar.alpha = 0.7;
+			for (layer in ghostChar.layers)
+				layer.alpha = 0.7;
+			ghostChar.visible = false;
+
 			char = loadCharacter('idk', selected, 0, 0);
 
 			if (char.characterData != null
@@ -489,9 +510,7 @@ class CharacterEditor extends MusicBeatState {
 
 		for (i in 0...layerData.anims.length) {
 			var name = layerData.anims[i].name;
-			var btn = new StatsButton(20, 180 + i * 40, name, null, camHud, null, null, function() {
-				// ghost character function
-			});
+			var btn = createAnimButton(20, 180 + i * 40, name);
 			btn.scrollFactor.set(0, 0);
 			btn.cameras = [camHud];
 			animButtons.push(btn);
@@ -504,6 +523,17 @@ class CharacterEditor extends MusicBeatState {
 		} else {
 			activeAnim = '';
 		}
+	}
+
+	function createAnimButton(x:Float, y:Float, name:String):StatsButton {
+		var btn:StatsButton = null;
+		btn = new StatsButton(x, y, name, null, camHud, null, null, function() {
+			ghostChar.playAnim(btn.label.text, true);
+			ghostChar.visible = btn.isVisibleHit;
+		});
+		btn.scrollFactor.set(0, 0);
+		btn.cameras = [camHud];
+		return btn;
 	}
 
 	function refreshLayerList() {

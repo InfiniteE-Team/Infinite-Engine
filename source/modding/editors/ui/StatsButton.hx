@@ -85,6 +85,8 @@ class StatsButton extends Button {
 		baseY = y;
 	}
 
+	public var isVisibleHit:Bool = false;
+
 	override public function update(elapsed:Float) {
 		super.update(elapsed);
 
@@ -95,10 +97,12 @@ class StatsButton extends Button {
 		if (onVisibleCallback != null) {
 			var visibleHit = detectHit(mx, my, visibleHandle);
 
-			visibleHandle.alpha = visibleHit ? 0.7 : 1.0;
-
-			if (visibleHit && FlxG.mouse.justPressed)
+			if (visibleHit && FlxG.mouse.justPressed) {
+				isVisibleHit = !isVisibleHit;
 				onVisibleCallback();
+			}
+
+			visibleHandle.alpha = isVisibleHit ? 0.7 : 1.0;
 		}
 
 		if (onDragCallback != null) {

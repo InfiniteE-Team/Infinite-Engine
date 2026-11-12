@@ -83,6 +83,11 @@ jobs:
           haxelib --global run hmm install
           haxelib run libhxcpp setup
 
+      - name: Build Hxcpp Command-Line Tools
+        run: |
+          cd $(haxelib libpath libhxcpp)/tools/hxcpp
+          haxe compile.hxml
+
       - name: Pre-Build Commands
         if: ${{ matrix.pre_build_commands }}
         run: ${{ matrix.pre_build_commands }}

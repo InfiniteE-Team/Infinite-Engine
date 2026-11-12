@@ -95,14 +95,6 @@ class PlayState extends MusicBeatState {
 				SONG = new SongConfig();
 				SONG.configSong(songFolder, DiffsUtils.difficulties[curDifficulty]);
 			case 1:
-				camGame = new Camera();
-				camHUD = new Camera();
-				camHUD.bgColor.alpha = 0;
-				camOther = new Camera();
-				camOther.bgColor.alpha = 0;
-				camSubtitles = new Camera();
-				camSubtitles.bgColor.alpha = 0;
-				cameraController = new CameraController(camGame, camHUD);
 				titleGameplay();
 				setDiscordPresence();
 			case 2:
@@ -176,8 +168,10 @@ class PlayState extends MusicBeatState {
 		buildStrumsAndNotes();
 
 		// V-Slice modules set themselves up here, once the strumlines exist -JloorDev
-		modding.vslice.VSliceHooks.dispatch('onSongLoaded', modding.vslice.VSliceHooks.event('SONG_LOADED', {id: songFolder, events: funkin.play.PlayState.instance?.songEvents ?? []}));
-		modding.vslice.VSliceHooks.dispatch('onStateChangeEnd', modding.vslice.VSliceHooks.event('STATE_CHANGE_END', {targetState: funkin.play.PlayState.instance}));
+		modding.vslice.VSliceHooks.dispatch('onSongLoaded',
+			modding.vslice.VSliceHooks.event('SONG_LOADED', {id: songFolder, events: funkin.play.PlayState.instance?.songEvents ?? []}));
+		modding.vslice.VSliceHooks.dispatch('onStateChangeEnd',
+			modding.vslice.VSliceHooks.event('STATE_CHANGE_END', {targetState: funkin.play.PlayState.instance}));
 
 		if (!cutscene.tryPlay(songFolder, 'intro', () -> startCountdown()))
 			startCountdown();
@@ -202,14 +196,20 @@ class PlayState extends MusicBeatState {
 		lime.app.Application.current.window.title = modding.mods.ModData.ModConfig.title + " - Song: " + curSong;
 
 	public function addCameras() {
-		if (camGame != null)
-			FlxG.cameras.reset(camGame);
-		if (camHUD != null)
-			FlxG.cameras.add(camHUD, false);
-		if (camOther != null)
-			FlxG.cameras.add(camOther, false);
-		if (camSubtitles != null)
-			FlxG.cameras.add(camSubtitles, false);
+		camGame = new Camera();
+		camHUD = new Camera();
+		camHUD.bgColor.alpha = 0;
+		camOther = new Camera();
+		camOther.bgColor.alpha = 0;
+		camSubtitles = new Camera();
+		camSubtitles.bgColor.alpha = 0;
+
+		cameraController = new CameraController(camGame, camHUD);
+
+		FlxG.cameras.reset(camGame);
+		FlxG.cameras.add(camHUD, false);
+		FlxG.cameras.add(camOther, false);
+		FlxG.cameras.add(camSubtitles, false);
 	}
 
 	function buildStageAndChars():Void {
@@ -853,6 +853,11 @@ class PlayState extends MusicBeatState {
 			camGame.destroy();
 		if (camHUD != null)
 			camHUD.destroy();
+		if (camOther != null)
+			camOther.destroy();
+		if (camSubtitles != null)
+			camSubtitles.destroy();
+
 		if (cameraController != null)
 			cameraController.destroy();
 		if (gameAudio != null)
@@ -891,6 +896,8 @@ class PlayState extends MusicBeatState {
 		// cameras
 		camGame = null;
 		camHUD = null;
+		camOther = null;
+		camSubtitles = null;
 
 		noteController = null;
 

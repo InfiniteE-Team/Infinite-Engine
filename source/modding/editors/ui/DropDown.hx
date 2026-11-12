@@ -44,7 +44,7 @@ class DropDown extends FlxSpriteGroup {
 		header.updateHitbox();
 		add(header);
 
-		headerLabel = new FlxText(header2.x + 5, 0, 150, options.length > 0 ? optionInit : '');
+		headerLabel = new FlxText(header2.x + 5, 0, 200, options.length > 0 ? optionInit : '');
 		headerLabel.setFormat(Paths.getPath('Funkin.otf', 'font'), 28, FlxColor.BLACK, 'left');
 		headerLabel.y = (header.height / 2) - (headerLabel.height / 2);
 		add(headerLabel);
