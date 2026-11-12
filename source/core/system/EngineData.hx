@@ -9,5 +9,7 @@ class EngineData {
 
 	public static final COLOR_PRELOADER_BAR:FlxColor = 0xFFA4FF11;
 
+	public static inline var DEFAULT_ICON:String = "icon";
+
 	public function new() {}
 }

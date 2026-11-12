@@ -26,6 +26,7 @@ class ModConfig {
 
 	public static var title(get, never):String;
 	public static var apiMods(get, never):String;
+	public static var appIconPath(get, never):String;
 
 	public function new() {}
 
@@ -35,19 +36,17 @@ class ModConfig {
 		if (jsonPath == null || !FileSystem.exists(jsonPath)) {
 			trace('No meta.json found, using the engine defaults.');
 			modData = null;
-			lime.app.Application.current.window.title = title;
-			return;
-		}
-
-		try {
-			modData = FormatJson.readJson(jsonPath);
-			if (modData.appIcon != null && modData.appIcon != "")
-				setAppIcon(Paths.getPath(modData.appIcon+'.png'));
-		} catch (e:Dynamic) {
-			Console.log('Error to parsed the mod: $e');
+		} else {
+			try {
+				modData = FormatJson.readJson(jsonPath);
+			} catch (e:Dynamic) {
+				Console.log('Error to parsed the mod: $e');
+				modData = null;
+			}
 		}
 
 		lime.app.Application.current.window.title = title;
+		updateAppIcon();
 	}
 
 	private static function get_title():String {
@@ -63,6 +62,16 @@ class ModConfig {
 		return modData.api_version ?? "0.1.0";
 	}
 
+	private static function get_appIconPath():String {
+		if (modData != null && modData.appIcon != null && modData.appIcon != "") {
+			var modIcon = Paths.getPath(modData.appIcon + '.png');
+			if (FileSystem.exists(modIcon)) {
+				return modIcon;
+			}
+		}
+		return Paths.getPath(core.system.EngineData.DEFAULT_ICON + '.png');
+	}
+
 	public static function loadForMod(modName:String):ModData {
 		var modPath = '${core.assets.Library.modsFolder}/$modName/meta.json';
 		// V-Slice mods ship Polymod's meta instead -JloorDev
@@ -76,6 +85,10 @@ class ModConfig {
 			Console.log('Error parsing meta for mod $modName: $e');
 			return null;
 		}
+	}
+
+	public static function updateAppIcon():Void {
+		setAppIcon(appIconPath);
 	}
 
 	public static function setAppIcon(iconPath:String):Void {
