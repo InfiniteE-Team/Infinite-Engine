@@ -44,18 +44,9 @@ class MusicBeatState extends State {
 			skipNextTransIn = false;
 			return;
 		}
-		/*
-			var pack = MusicBeatState.nextStickerPack;
-			MusicBeatState.nextStickerPack = null;
-
-			if (pack != null && pack.length > 0) {
-				modding.custom.transitions.StickerOverlay.instance().leave();
-		} else {*/
-		var isGlobalSkip = core.ConfigMain.globalData != null && core.ConfigMain.globalData.skipTrans == true;
 		if (!skipNextTransIn && !isGlobalSkip)
 			openSubState(new modding.custom.transitions.CustomTransition(true, 0.2));
 		skipNextTransIn = false;
-		// }
 	}
 
 	#if HSCRIPT_ALLOWED
@@ -70,16 +61,19 @@ class MusicBeatState extends State {
 	}
 	#end
 
+	public function reloadStateScript() {
+		#if HSCRIPT_ALLOWED
+		script.hotReload();
+		#end
+		MusicBeatState.resetState();
+	}
+
 	override function update(elapsed:Float):Void {
 		super.update(elapsed);
 
 		if (core.ConfigMain.globalData.developerMode) {
-			if (FlxG.keys.justPressed.F5) {
-				#if HSCRIPT_ALLOWED
-				script.hotReload();
-				#end
-				MusicBeatState.resetState();
-			}
+			if (FlxG.keys.justPressed.F5)
+				reloadStateScript();
 			if (FlxG.keys.justPressed.F4)
 				infoHelp.openUI();
 		}

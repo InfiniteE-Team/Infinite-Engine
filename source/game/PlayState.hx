@@ -95,6 +95,14 @@ class PlayState extends MusicBeatState {
 				SONG = new SongConfig();
 				SONG.configSong(songFolder, DiffsUtils.difficulties[curDifficulty]);
 			case 1:
+				camGame = new Camera();
+				camHUD = new Camera();
+				camHUD.bgColor.alpha = 0;
+				camOther = new Camera();
+				camOther.bgColor.alpha = 0;
+				camSubtitles = new Camera();
+				camSubtitles.bgColor.alpha = 0;
+				cameraController = new CameraController(camGame, camHUD);
 				titleGameplay();
 				setDiscordPresence();
 			case 2:
@@ -196,20 +204,22 @@ class PlayState extends MusicBeatState {
 		lime.app.Application.current.window.title = modding.mods.ModData.ModConfig.title + " - Song: " + curSong;
 
 	public function addCameras() {
-		camGame = new Camera();
-		camHUD = new Camera();
-		camHUD.bgColor.alpha = 0;
-		camOther = new Camera();
-		camOther.bgColor.alpha = 0;
-		camSubtitles = new Camera();
-		camSubtitles.bgColor.alpha = 0;
+		if (camGame != null)
+			FlxG.cameras.reset(camGame);
+		if (camHUD != null)
+			FlxG.cameras.add(camHUD, false);
+		if (camOther != null)
+			FlxG.cameras.add(camOther, false);
+		if (camSubtitles != null)
+			FlxG.cameras.add(camSubtitles, false);
+	}
 
-		cameraController = new CameraController(camGame, camHUD);
-
-		FlxG.cameras.reset(camGame);
-		FlxG.cameras.add(camHUD, false);
-		FlxG.cameras.add(camOther, false);
-		FlxG.cameras.add(camSubtitles, false);
+	override public function reloadStateScript() {
+		#if HSCRIPT_ALLOWED
+		script.hotReload();
+		#end
+		if (game.PlayState.instance != null)
+			MusicBeatState.switchState(() -> new states.menus.LoadingState(songFolder, curDifficulty));
 	}
 
 	function buildStageAndChars():Void {
