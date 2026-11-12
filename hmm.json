@@ -38,11 +38,11 @@
             "version": "1.0.0"
         },
         {
-            "name": "hxcpp",
+            "name": "libhxcpp",
             "type": "git",
             "dir": null,
             "ref": "main",
-            "url": "https://github.com/ALE-Psych-Crew/hxcpp"
+            "url": "https://github.com/openfl/libhxcpp/"
         },
         {
             "name": "hxvlc",
