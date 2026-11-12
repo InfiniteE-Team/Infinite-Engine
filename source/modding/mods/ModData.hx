@@ -42,7 +42,7 @@ class ModConfig {
 		try {
 			modData = FormatJson.readJson(jsonPath);
 			if (modData.appIcon != null && modData.appIcon != "")
-				setAppIcon(modData.appIcon);
+				setAppIcon(Paths.getPath(modData.appIcon+'.png'));
 		} catch (e:Dynamic) {
 			Console.log('Error to parsed the mod: $e');
 		}
@@ -87,7 +87,6 @@ class ModConfig {
 
 		try {
 			var iconImage:Image = Image.fromFile(iconPath);
-
 			if (iconImage != null && Application.current != null && Application.current.window != null) {
 				Application.current.window.setIcon(iconImage);
 			}

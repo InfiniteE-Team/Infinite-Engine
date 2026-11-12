@@ -291,7 +291,7 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 		valueTexts = [];
 
 		if (categories[curCategory] == 'Keybinds') {
-			core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.9, 1.1);
+			core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.8, 1);
 			keybindsMenu = new states.substates.menus.options.KeybindsMenu(contentCam);
 			add(keybindsMenu);
 			return;
@@ -407,7 +407,7 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 	function updateSelection(change:Int = 0) {
 		var currentList = categoryOptions.get(categories[curCategory]);
 
-		core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.9, 1.1);
+		core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.8, 1);
 		if (currentList == null || currentList.length == 0) {
 			descText.text = "Press ENTER to configure controls.";
 			return;
@@ -444,11 +444,10 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 	function updateVisualFocus() {
 		if (isCategory) {
 			for (i in 0...categoryTexts.length) {
-				if (i == curCategory) {
+				if (i == curCategory)
 					categoryTexts[i].color = 0xFFFFFF00;
-				} else {
+				else
 					categoryTexts[i].color = 0xFFFFFFFF;
-				}
 			}
 
 			if (itemTexts != null && itemTexts.length > 0 && curSelectedOption < itemTexts.length) {
@@ -461,12 +460,7 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 					}
 				}
 			}
-		} else {/*
-			if (categoryTexts != null && categoryTexts.length > 0 && curCategory < categoryTexts.length) {
-				if (categoryTexts[curCategory] != null)
-					categoryTexts[curCategory].color = 0xFFFFFFFF;
-			}*/
-
+		} else {
 			for (i in 0...itemTexts.length) {
 				if (i == curSelectedOption) {
 					itemTexts[i].color = 0xFFFFFF00;
@@ -490,7 +484,7 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 		if (currentList == null || currentList.length == 0)
 			return;
 
-		core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.9, 1);
+		core.audio.SoundFX.randomPitch(Paths.getPath('menus/scrollMenu', 'sound'), 0.8, 1);
 
 		var opt = currentList[curSelectedOption];
 		var currentValue:Dynamic = Reflect.field(SaveData.data, opt.saveField);
