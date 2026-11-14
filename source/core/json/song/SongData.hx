@@ -171,7 +171,7 @@ class SongConfig {
 			loadSeparateMeta(raw, songFolder);
 
 			if (meta == null)
-				meta = tryLoadVSliceMeta(songFolder);
+				meta = tryLoadVSliceMeta(songFolder, diff);
 			var converted = ChartPorter.tryConvert(raw, diff, meta);
 			songData = converted ?? cast raw;
 
@@ -276,8 +276,9 @@ class SongConfig {
 		raw.meta = base;
 	}
 
-	private function tryLoadVSliceMeta(songFolder:String):Dynamic {
-		var path = core.assets.Library.findLib('songs/$songFolder/$songFolder-metadata.json');
+	private function tryLoadVSliceMeta(songFolder:String, diff:String):Dynamic {
+		var diffMeta:String = (diff != 'easy' && diff != 'normal' && diff != 'hard') ? '-$diff' : '';
+		var path = core.assets.Library.findLib('songs/$songFolder/$songFolder-metadata$diffMeta.json');
 		if (path != null && sys.FileSystem.exists(path)) {
 			var meta:Dynamic = FormatJson.readJson(path);
 			if (meta != null) {
