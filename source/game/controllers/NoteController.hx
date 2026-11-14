@@ -593,7 +593,7 @@ class NoteController {
 				note.alpha = 0.4;
 				if (charController != null)
 					charController.playMissAnim(note.direction);
-				note.strumline?.input.onMiss(playStateConfig, this, gameAudio);
+				note.strumline?.input.applyMiss(playStateConfig, this, gameAudio);
 			}
 			if (!note.mustPress && note.wasGoodHit && !note.alive)
 				toDestroySet.set(note, true);
@@ -604,7 +604,7 @@ class NoteController {
 					note.alpha = 0.4;
 					if (charController != null)
 						charController.playMissAnim(note.direction);
-					note.strumline?.input.onMiss(playStateConfig, this, gameAudio);
+					note.strumline?.input.applyMiss(playStateConfig, this, gameAudio);
 				}
 				toDestroySet.set(note, true);
 			} else if (downscroll && note.y > FlxG.height) {
@@ -613,7 +613,7 @@ class NoteController {
 					note.alpha = 0.4;
 					if (charController != null)
 						charController.playMissAnim(note.direction);
-					note.strumline?.input.onMiss(playStateConfig, this, gameAudio);
+					note.strumline?.input.applyMiss(playStateConfig, this, gameAudio);
 				}
 				toDestroySet.set(note, true);
 			}

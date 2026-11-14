@@ -16,7 +16,7 @@ class CharacterController extends FunkinObjectRegistry {
 
 	public var chars:Character;
 
-	// compatibility vars
+	// compat vars
 	public var boyfriend(get, set):Character;
 
 	function get_boyfriend():Character
@@ -56,8 +56,6 @@ class CharacterController extends FunkinObjectRegistry {
 		return v;
 	}
 
-	var control:Controls;
-
 	public var rating:game.objects.Rating;
 
 	public static var namesPlayer:Array<String> = ['bf', 'boyfriend', 'player'];
@@ -86,8 +84,6 @@ class CharacterController extends FunkinObjectRegistry {
 
 	public function new(?id:String, ?x:Float = 0, ?y:Float = 0) {
 		super(id, x, y);
-		control = core.ConfigMain.controls;
-		FlxG.stage.addEventListener(openfl.events.KeyboardEvent.KEY_DOWN, onStageKeyDown);
 	}
 
 	public function initControllers(nc:NoteController, audio:GameAudio, cfg:PlayStateConfig):Void {
@@ -102,7 +98,7 @@ class CharacterController extends FunkinObjectRegistry {
 					PlayState.instance.script.call('onNoteHit', [note]);
 			}
 		};
-		noteController.input.onNoteMiss = function() {
+		noteController.input.onMiss = function() {
 			@:privateAccess {
 				if (PlayState.instance?.script != null)
 					PlayState.instance.script.call('onNoteMiss', []);
@@ -121,9 +117,9 @@ class CharacterController extends FunkinObjectRegistry {
 	}
 
 	public function loadCharacter(id:String, name:String, role:String, targetGroup:FlxTypedGroup<flixel.FlxBasic>, script:ScriptHandler):Character {
-		if (existsId(id)) {
+		if (existsId(id))
 			return cast(get(id), Character);
-		}
+
 		chars = new Character(id, name);
 		chars.isPlayer = namesPlayer.contains(role);
 		chars.applyPlayerFlip();
@@ -145,72 +141,40 @@ class CharacterController extends FunkinObjectRegistry {
 		return chars;
 	}
 
-	public function processInput(noteController:NoteController, gameAudio:GameAudio, playStateConfig:PlayStateConfig) {
+	public function processInput(noteController:NoteController, gameAudio:GameAudio, playStateConfig:PlayStateConfig):Void {
 		for (char in playerChars) {
 			var strums = noteController.getCharStrums(char.id);
 			#if HSCRIPT_ALLOWED
 			var charScript = scriptMap.get(char.id);
 			#end
+
 			for (i in 0...strums.length) {
 				if (playStateConfig.botplayOn) {
-					var note = noteController.getHittableNote(char.id, i, true);
-					if (note != null) {
-						var diff = note.strumTime - core.rhythm.RhythmCore.songPosition;
-						if (diff <= 0) {
-							strums[i].startConfirm();
-							note.wasGoodHit = true;
-							var ratingType = noteController.getRatingForDiff(0);
-							if (ratingType != null) {
-								playStateConfig.score += ratingType.score;
-								playStateConfig.health += ratingType.health;
-								playStateConfig.combo++;
-								note.rating = ratingType.name;
-								playStateConfig.rating = ratingType.name;
-							}
-							for (sustain in noteController.sustains.members) {
-								if (sustain == null || !sustain.alive)
-									continue;
-								if (sustain.strum == strums[i] && sustain.strumTime == note.strumTime)
-									sustain.wasNoteHit = true;
-							}
-							note.kill();
-							strums[i].confirmHoldTimer = 0;
-							if (ratingType != null && ratingType.splash)
-								noteController.spawnSplash(strums[i], i, note.noteType);
-
-							setSing(char, note.direction);
-							char.isMiss = false;
-							modding.vslice.VSliceHooks.dispatch('onNoteHit', modding.vslice.VSliceHooks.noteEvent('NOTE_HIT', note, note.rating));
-						}
-					}
-					var holdingActive = noteController.getStrumline(char.id)?.activeOpponentHolds.exists(i);
-					if (holdingActive)
-						strums[i].playAnim('confirm' + i, false);
-					else if (strums[i].confirmHoldTimer < 0)
-						strums[i].playAnim('static' + i, true);
+					processBotplayLane(char, strums, i, noteController, playStateConfig);
 				} else {
-					updatePlayerLane(char, strums, i, noteController, gameAudio, playStateConfig);
+					processPlayerLane(char, strums, i, noteController, gameAudio, playStateConfig);
 				}
 			}
 		}
+
+		// opponent / cpu
 		for (char in opponentChars) {
 			var strums = noteController.getCharStrums(char.id);
 			#if HSCRIPT_ALLOWED
 			var charScript = scriptMap.get(char.id);
 			#end
+
 			for (i in 0...strums.length) {
 				var note = noteController.getHittableNote(char.id, i, false);
 				if (note != null) {
 					input.isCPUHit(strums, noteController, char.id, i, false);
 					modding.vslice.VSliceHooks.dispatch('onNoteHit', modding.vslice.VSliceHooks.noteEvent('NOTE_HIT', note, 'sick'));
 					#if HSCRIPT_ALLOWED
-					if (charScript != null)
-						charScript.call("onNoteHitCPU", [note]);
+					charScript?.call("onNoteHitCPU", [note]);
 					#end
 				} else {
 					#if HSCRIPT_ALLOWED
-					if (charScript != null)
-						charScript.call("onNoteSustainCPU", []);
+					charScript?.call("onNoteSustainCPU", []);
 					#end
 					var holdingActive = noteController.getStrumline(char.id)?.activeOpponentHolds.exists(i);
 					if (holdingActive) {
@@ -220,128 +184,90 @@ class CharacterController extends FunkinObjectRegistry {
 						strums[i].playAnim('static' + i, true);
 					}
 					#if HSCRIPT_ALLOWED
-					if (charScript != null)
-						charScript.call("postNoteSustainCPU", []);
+					charScript?.call("postNoteSustainCPU", []);
 					#end
 				}
 			}
 		}
 	}
 
-	public function playMissAnim(dir:Int):Void {
-		for (char in playerChars) {
-			var offset = noteController?.charStrumOffsets.get(char.id) ?? 0;
-			if (rating != null)
-				rating.onNoteHitMiss();
-			var localDir = dir - offset;
-			if (localDir < 0 || localDir >= 4)
-				continue;
-			char.playAnim(Character.getCharAnim(dir) + 'miss', true);
-			char.isSing = false;
-			char.isMiss = true;
-			char.singCountTime = 0;
-			#if HSCRIPT_ALLOWED
-			var charScript = scriptMap.get(char.id);
-			if (charScript != null)
-				charScript.call("onNoteHitMiss", []);
-			#end
-		}
-	}
-
-	public function isSinging(noteController:NoteController) {
-		for (char in opponentChars) {
-			var strums = noteController.getCharStrums(char.id);
-			for (i in 0...strums.length) {
-				var note = noteController.getHittableNote(char.id, i, false);
-				if (note != null) {
-					setSing(char, note.direction);
-					continue;
-				}
-
-				var globalLane = noteController.charStrumOffsets.get(char.id);
-				var holdingActive = noteController.getStrumline(char.id)?.activeOpponentHolds.exists(i);
-				if (holdingActive)
-					holdSing(char, globalLane + i);
-				else if (strums[i].confirmHoldTimer < 0)
-					strums[i].playAnim('static' + i, true);
-			}
-		}
-	}
-
-	function onStageKeyDown(e:openfl.events.KeyboardEvent):Void {
-		if (PlayState.instance == null || PlayState.instance.paused)
+	function processPlayerLane(char:Character, strums:Array<game.objects.sprites.notes.StrumNote>, i:Int, nc:NoteController, audio:GameAudio,
+			cfg:PlayStateConfig):Void {
+		if (cfg.inputLocked)
 			return;
-		if (noteController == null)
-			return;
-		if (!control.justPressedKeyCode(e.keyCode))
-			return;
-
-		for (i in control.getLanesForKey("noteKeys", e.keyCode))
-			onLaneKeyDown(i);
-	}
-
-	function onLaneKeyDown(i:Int):Void {
-		if (playStateConfig.botplayOn || playStateConfig.inputLocked)
-			return;
-
-		for (char in playerChars) {
-			var strums = noteController.getCharStrums(char.id);
-			if (i >= strums.length)
-				continue;
-
-			var hitNote = input.attemptHit(strums, char.id, noteController, gameAudio, playStateConfig, i);
-
-			#if HSCRIPT_ALLOWED
-			var charScript = scriptMap.get(char.id);
-			#end
-
-			if (hitNote != null) {
-				setSing(char, hitNote.direction);
-				char.isMiss = false;
-				modding.vslice.VSliceHooks.dispatch('onNoteHit', modding.vslice.VSliceHooks.noteEvent('NOTE_HIT', hitNote, hitNote.rating));
-				if (rating != null)
-					rating.onNoteHitPlayer();
-				#if HSCRIPT_ALLOWED
-				if (charScript != null)
-					charScript.call("onNoteHitPlayer", [hitNote]);
-				#end
-			} else if (!input.isGhostTapping) {
-				modding.vslice.VSliceHooks.dispatch('onNoteGhostMiss',
-					modding.vslice.VSliceHooks.event('NOTE_GHOST_MISS', {dir: i, hasMissed: true, playAnim: true}));
-				char.playAnim(Character.getCharAnim(i) + 'miss', true);
-				char.isSing = false;
-				char.isMiss = true;
-				char.singCountTime = 0;
-			}
-		}
-	}
-
-	function updatePlayerLane(char:Character, strums, i:Int, nc:NoteController, audio:GameAudio, cfg:PlayStateConfig) {
-		input.isPlayerHit(strums, char.id, nc, audio, cfg, i);
 
 		#if HSCRIPT_ALLOWED
 		var charScript = scriptMap.get(char.id);
 		#end
 
-		if (!input.control.getGroupInput("noteKeys")[i])
-			getCharMiss(char, nc, strums, i);
+		switch input.processLane(i, strums[i], nc, audio, cfg) {
+			case NoteHit(note):
+				setSing(char, note.direction);
+				char.isMiss = false;
+				modding.vslice.VSliceHooks.dispatch('onNoteHit', modding.vslice.VSliceHooks.noteEvent('NOTE_HIT', note, note.rating));
+				if (rating != null)
+					rating.onNoteHitPlayer();
+				#if HSCRIPT_ALLOWED
+				charScript?.call("onNoteHitPlayer", [note]);
+				#end
 
-		var songPos = core.rhythm.RhythmCore.songPosition;
-		for (sustain in nc.sustains.members) {
-			if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != strums[i])
-				continue;
-			if (songPos < sustain.strumTime || songPos > sustain.strumTime + sustain.length)
-				continue;
-			if (input.control.getGroupInput("noteKeys")[i])
+			case GhostTap:
+				if (!input.isGhostTapping) {
+					modding.vslice.VSliceHooks.dispatch('onNoteGhostMiss',
+						modding.vslice.VSliceHooks.event('NOTE_GHOST_MISS', {dir: i, hasMissed: true, playAnim: true}));
+					char.playAnim(Character.getCharAnim(i) + 'miss', true);
+					char.isSing = false;
+					char.isMiss = true;
+					char.singCountTime = 0;
+				}
+
+			case SustainHeld(sustain):
 				holdSing(char, sustain.direction);
-			else
+
+			case SustainDropped | Nothing:
 				getCharMiss(char, nc, strums, i);
 		}
 
 		#if HSCRIPT_ALLOWED
-		if (charScript != null)
-			charScript.call("postNoteHitPlayer", []);
+		charScript?.call("postNoteHitPlayer", []);
 		#end
+	}
+
+	function processBotplayLane(char:Character, strums:Array<game.objects.sprites.notes.StrumNote>, i:Int, nc:NoteController, cfg:PlayStateConfig):Void {
+		var note = nc.getHittableNote(char.id, i, true);
+		if (note != null) {
+			var diff = note.strumTime - core.rhythm.RhythmCore.songPosition;
+			if (diff <= 0) {
+				strums[i].startConfirm();
+				note.wasGoodHit = true;
+				var ratingType = nc.getRatingForDiff(0);
+				if (ratingType != null) {
+					cfg.score += ratingType.score;
+					cfg.health += ratingType.health;
+					cfg.combo++;
+					note.rating = ratingType.name;
+					cfg.rating = ratingType.name;
+				}
+				for (sustain in nc.sustains.members) {
+					if (sustain == null || !sustain.alive)
+						continue;
+					if (sustain.strum == strums[i] && sustain.strumTime == note.strumTime)
+						sustain.wasNoteHit = true;
+				}
+				note.kill();
+				strums[i].confirmHoldTimer = 0;
+				if (ratingType != null && ratingType.splash)
+					nc.spawnSplash(strums[i], i, note.noteType);
+				setSing(char, note.direction);
+				char.isMiss = false;
+				modding.vslice.VSliceHooks.dispatch('onNoteHit', modding.vslice.VSliceHooks.noteEvent('NOTE_HIT', note, note.rating));
+			}
+		}
+		var holdingActive = nc.getStrumline(char.id)?.activeOpponentHolds.exists(i);
+		if (holdingActive)
+			strums[i].playAnim('confirm' + i, false);
+		else if (strums[i].confirmHoldTimer < 0)
+			strums[i].playAnim('static' + i, true);
 	}
 
 	public function getCharMiss(char:Character, noteController:NoteController, strums, i:Int):Void {
@@ -359,23 +285,58 @@ class CharacterController extends FunkinObjectRegistry {
 			cryGf();
 			#if HSCRIPT_ALLOWED
 			var charScript = scriptMap.get(char.id);
-			if (charScript != null)
-				charScript.call("onNoteHitMiss", [note]);
+			charScript?.call("onNoteHitMiss", [note]);
 			#end
 		}
 	}
 
+	public function playMissAnim(dir:Int):Void {
+		for (char in playerChars) {
+			var offset = noteController?.charStrumOffsets.get(char.id) ?? 0;
+			var localDir = dir - offset;
+			if (localDir < 0 || localDir >= 4)
+				continue;
+			if (rating != null)
+				rating.onNoteHitMiss();
+			char.playAnim(Character.getCharAnim(dir) + 'miss', true);
+			char.isSing = false;
+			char.isMiss = true;
+			char.singCountTime = 0;
+			#if HSCRIPT_ALLOWED
+			var charScript = scriptMap.get(char.id);
+			charScript?.call("onNoteHitMiss", []);
+			#end
+		}
+	}
+
+	public function isSinging(noteController:NoteController):Void {
+		for (char in opponentChars) {
+			var strums = noteController.getCharStrums(char.id);
+			for (i in 0...strums.length) {
+				var note = noteController.getHittableNote(char.id, i, false);
+				if (note != null) {
+					setSing(char, note.direction);
+					continue;
+				}
+				var globalLane = noteController.charStrumOffsets.get(char.id);
+				var holdingActive = noteController.getStrumline(char.id)?.activeOpponentHolds.exists(i);
+				if (holdingActive)
+					holdSing(char, globalLane + i);
+				else if (strums[i].confirmHoldTimer < 0)
+					strums[i].playAnim('static' + i, true);
+			}
+		}
+	}
+
 	public function danceAll():Void {
-		for (chars in [playerChars, opponentChars, gfChars]) {
+		for (chars in [playerChars, opponentChars, gfChars])
 			for (char in chars)
 				char.dance();
-		}
 	}
 
 	public function removeChar(id:String):Void {
 		if (!existsId(id))
 			return;
-
 		chars = cast(get(id), Character);
 		for (layer in chars.layers) {
 			PlayState.instance.remove(layer);
@@ -384,60 +345,28 @@ class CharacterController extends FunkinObjectRegistry {
 		PlayState.instance.remove(chars);
 		chars.destroy();
 		registry.remove(id);
-
 		playerChars.remove(chars);
 		opponentChars.remove(chars);
 		gfChars.remove(chars);
-
 		#if HSCRIPT_ALLOWED
 		scriptMap.remove(id);
 		#end
 	}
 
-	public function cryGf() {
-		for (gf in gfChars) {
+	public function cryGf():Void {
+		for (gf in gfChars)
 			if (gf.existsAnim('sad'))
 				gf.playAnim('sad', true);
-		}
 	}
 
-	public function resetAll() {
-		for (chars in [playerChars, opponentChars, gfChars]) {
+	public function resetAll():Void {
+		for (chars in [playerChars, opponentChars, gfChars])
 			for (char in chars) {
 				char.isSing = false;
 				char.isMiss = false;
 				char.singCountTime = 0;
 			}
-		}
 		danceAll();
-	}
-
-	// utils
-
-	function holdSing(char:Character, dir:Int) {
-		var cur = char.layers.length > 0 ? char.layers[0].currentAnim : null;
-		if (char.isSing && cur != null && cur.startsWith(Character.getCharAnim(dir))) {
-			char.singCountTime = 0;
-			return;
-		}
-		setSing(char, dir);
-	}
-
-	inline function setSing(char:Character, dir:Int) {
-		#if HSCRIPT_ALLOWED
-		var charScript = scriptMap.get(char.id);
-		if (charScript != null)
-			charScript.call("onSing", [dir]);
-		#end
-
-		char.playAnim(Character.getCharAnim(dir), true);
-		char.singCountTime = 0;
-		char.isSing = true;
-
-		#if HSCRIPT_ALLOWED
-		if (charScript != null)
-			charScript.call("postSing", []);
-		#end
 	}
 
 	public function isPlayerMissing():Bool
@@ -446,10 +375,29 @@ class CharacterController extends FunkinObjectRegistry {
 	public function getActiveSingingChar():Null<Character>
 		return Lambda.find(playerChars, c -> c.isSing) ?? Lambda.find(opponentChars, c -> c.isSing);
 
-	//
+	function holdSing(char:Character, dir:Int):Void {
+		var cur = char.layers.length > 0 ? char.layers[0].currentAnim : null;
+		if (char.isSing && cur != null && cur.startsWith(Character.getCharAnim(dir))) {
+			char.singCountTime = 0;
+			return;
+		}
+		setSing(char, dir);
+	}
+
+	inline function setSing(char:Character, dir:Int):Void {
+		#if HSCRIPT_ALLOWED
+		var charScript = scriptMap.get(char.id);
+		charScript?.call("onSing", [dir]);
+		#end
+		char.playAnim(Character.getCharAnim(dir), true);
+		char.singCountTime = 0;
+		char.isSing = true;
+		#if HSCRIPT_ALLOWED
+		charScript?.call("postSing", []);
+		#end
+	}
 
 	override public function destroy():Void {
-		FlxG.stage.removeEventListener(openfl.events.KeyboardEvent.KEY_DOWN, onStageKeyDown);
 		playerChars = null;
 		opponentChars = null;
 		noteController = null;

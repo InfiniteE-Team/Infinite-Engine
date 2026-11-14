@@ -1,158 +1,40 @@
 package game.controllers;
 
-import game.objects.sprites.notes.Note;
-import game.controllers.NoteController;
+import core.enums.InputType;
 import core.audio.GameAudio;
+import game.controllers.NoteController;
+import game.objects.sprites.notes.Note;
+import game.objects.sprites.notes.StrumNote;
+import game.objects.sprites.notes.NoteSustain;
 
 class InputController {
-	public var isGood:Bool = false;
-
 	public var isGhostTapping:Bool = true;
-
 	public var control:Controls;
 
-	public var isMiss:Void->Void = function() {};
-
-	public var onNoteHit:game.objects.sprites.notes.Note->Void = function(_) {};
-	public var onNoteMiss:Void->Void = function() {};
+	public var onNoteHit:Note->Void = function(_) {};
+	public var onMiss:Void->Void = function() {};
 	public var onSustainDrop:Void->Void = function() {};
 
 	public function new() {
 		control = core.ConfigMain.controls;
 	}
 
-	public function isPlayerHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, charId:String, noteController:NoteController, gameAudio:GameAudio,
-			playStateConfig:PlayStateConfig, i):Void {
-		var isPressed = control.getGroupInput("noteKeys")[i];
+	// player
+	public function processLane(i:Int, strum:StrumNote, noteController:NoteController, gameAudio:GameAudio, playStateConfig:PlayStateConfig):InputType {
+		if (control.justPressed("noteKeys", i))
+			return onPressed(i, strum, noteController, gameAudio, playStateConfig);
 
-		if (isPressed) {
-			var songPos = core.rhythm.RhythmCore.songPosition;
-			for (sustain in noteController.sustains.members) {
-				if (sustain == null || !sustain.alive || !sustain.mustPress)
-					continue;
-				if (sustain.strum != charStrums[i])
-					continue;
-				if (sustain.isSustainEnd)
-					continue;
+		if (control.getGroupInput("noteKeys")[i])
+			return onHeld(i, strum, noteController);
 
-				var canHold = sustain.wasNoteHit && songPos >= sustain.strumTime - 50 && songPos <= sustain.strumTime + sustain.length;
-				if (canHold) {
-					if (!sustain.isHeld) {
-						noteController.spawnHoldSplash(charStrums[i], i, sustain.noteType);
-					}
-					sustain.isHeld = true;
-					charStrums[i].playAnim('confirm' + i, false);
-				} else if (sustain.isHeld) {
-					sustain.isHeld = false;
-					noteController.stopHoldSplash(charStrums[i]);
-				}
-			}
-		} else { // release key
-			var wasHolding = false;
+		if (control.justReleased("noteKeys", i))
+			return onReleased(i, strum, noteController, gameAudio, playStateConfig);
 
-			for (sustain in noteController.sustains.members) {
-				if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != charStrums[i])
-					continue;
-
-				var songPos = core.rhythm.RhythmCore.songPosition;
-				if (sustain.isHeld) {
-					wasHolding = true;
-					var remaining = (sustain.strumTime + sustain.length) - songPos;
-					if (remaining > 50) {
-						sustain.wasMissed = true;
-						sustain.canBeHit = false;
-						if (onSustainDrop != null)
-							onSustainDrop();
-						onMiss(playStateConfig, noteController, gameAudio);
-					}
-				}
-				sustain.isHeld = false;
-			}
-
-			if (wasHolding)
-				noteController.stopHoldSplash(charStrums[i]);
-
-			charStrums[i].playAnim('static' + i, true);
-		}
+		return Nothing;
 	}
 
-	public function attemptHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, charId:String, noteController:NoteController, gameAudio:GameAudio,
-			playStateConfig:PlayStateConfig, i:Int):Note {
-		var hasActiveSustain = false;
-		for (sustain in noteController.sustains.members) {
-			if (sustain == null || !sustain.alive || !sustain.mustPress || sustain.strum != charStrums[i])
-				continue;
-			if (sustain.isHeld) {
-				hasActiveSustain = true;
-				break;
-			}
-		}
-
-		var bestNote:Note = null;
-		var bestDiff:Float = Math.POSITIVE_INFINITY;
-
-		for (note in noteController.notes.members) {
-			if (note == null || !note.alive || !note.mustPress || note.wasGoodHit || note.wasMissed)
-				continue;
-			if (note.strum != charStrums[i])
-				continue;
-
-			var diff = Math.abs(note.strumTime - core.rhythm.RhythmCore.songPosition);
-			if (diff <= noteController.worstWindow && diff < bestDiff) {
-				bestDiff = diff;
-				bestNote = note;
-			}
-		}
-
-		if (bestNote != null) {
-			// HIT REAL
-			var ratingType = noteController.getRatingForDiff(bestDiff);
-
-			if (ratingType != null) {
-				playStateConfig.score += ratingType.score;
-				playStateConfig.health += ratingType.health;
-				bestNote.rating = ratingType.name;
-				playStateConfig.rating = ratingType.name;
-				playStateConfig.hitNotes++;
-				playStateConfig.totalNotes++;
-
-				if (ratingType.miss == true)
-					playStateConfig.combo = 0;
-				else
-					playStateConfig.combo++;
-			}
-
-			bestNote.wasGoodHit = true;
-			for (sustain in noteController.sustains.members) {
-				if (sustain == null || !sustain.alive)
-					continue;
-				if (sustain.strum == charStrums[i] && sustain.strumTime == bestNote.strumTime)
-					sustain.wasNoteHit = true;
-			}
-
-			bestNote.kill();
-			charStrums[i].playAnim('confirm' + i, false);
-			charStrums[i].confirmHoldTimer = -1;
-
-			if (ratingType.splash)
-				noteController.spawnSplash(charStrums[i], i, bestNote.noteType);
-
-			if (onNoteHit != null) {
-				onNoteHit(bestNote);
-				noteController.noteTypeManager?.onNoteHit(bestNote);
-			}
-			return bestNote;
-		} else {
-			charStrums[i].playAnim('press' + i, true);
-			if (!isGhostTapping)
-				onMiss(playStateConfig, noteController, gameAudio);
-		}
-		return null;
-	}
-
-	public function onMiss(playStateConfig:PlayStateConfig, noteController:NoteController, gameAudio:GameAudio, ?missedNote:Note) {
-		if (isMiss != null)
-			isMiss();
+	public function applyMiss(playStateConfig:PlayStateConfig, noteController:NoteController, gameAudio:GameAudio, ?missedNote:Note):Void {
+		onMiss();
 		gameAudio.onMiss();
 		noteController.noteTypeManager?.onNoteMiss(missedNote);
 		playStateConfig.health += noteController.getHealthDrain(missedNote);
@@ -162,8 +44,111 @@ class InputController {
 		playStateConfig.totalNotes++;
 	}
 
-	public function isCPUHit(charStrums:Array<game.objects.sprites.notes.StrumNote>, noteController:NoteController, charId:String, i:Int,
-			mustPress:Bool = false) {
+	function onPressed(i:Int, strum:StrumNote, nc:NoteController, audio:GameAudio, cfg:PlayStateConfig):InputType {
+		var note = findBestNote(strum, nc);
+		if (note != null) {
+			registerHit(i, note, strum, nc, cfg);
+			onNoteHit(note);
+			nc.noteTypeManager?.onNoteHit(note);
+			return NoteHit(note);
+		}
+		strum.playAnim('press$i', true);
+		if (!isGhostTapping)
+			applyMiss(cfg, nc, audio);
+		return GhostTap;
+	}
+
+	function onHeld(i:Int, strum:StrumNote, nc:NoteController):InputType {
+		var songPos = core.rhythm.RhythmCore.songPosition;
+		var heldSustain:NoteSustain = null;
+		for (sustain in nc.sustains.members) {
+			if (!isSustainOnStrum(sustain, strum))
+				continue;
+			var canHold = sustain.wasNoteHit && songPos >= sustain.strumTime - 50 && songPos <= sustain.strumTime + sustain.length;
+			if (canHold) {
+				if (!sustain.isHeld)
+					nc.spawnHoldSplash(strum, i, sustain.noteType);
+				sustain.isHeld = true;
+				strum.playAnim('confirm$i', false);
+				heldSustain = sustain;
+			} else if (sustain.isHeld) {
+				// sustain finished
+				sustain.isHeld = false;
+				nc.stopHoldSplash(strum);
+			}
+		}
+		return heldSustain != null ? SustainHeld(heldSustain) : Nothing;
+	}
+
+	function onReleased(i:Int, strum:StrumNote, nc:NoteController, audio:GameAudio, cfg:PlayStateConfig):InputType {
+		var songPos = core.rhythm.RhythmCore.songPosition;
+		var dropped = false;
+		for (sustain in nc.sustains.members) {
+			if (!isSustainOnStrum(sustain, strum) || !sustain.isHeld)
+				continue;
+			sustain.isHeld = false;
+			nc.stopHoldSplash(strum);
+			var remaining = (sustain.strumTime + sustain.length) - songPos;
+			if (remaining > 50) {
+				sustain.wasMissed = true;
+				sustain.canBeHit = false;
+				onSustainDrop();
+				applyMiss(cfg, nc, audio);
+				dropped = true;
+			}
+		}
+		strum.playAnim('static$i', true);
+		return dropped ? SustainDropped : Nothing;
+	}
+
+	// Find the note closest to the current `strumTime` within the hit range.
+	function findBestNote(strum:StrumNote, nc:NoteController):Null<Note> {
+		var best:Note = null;
+		var bestDiff = Math.POSITIVE_INFINITY;
+		var songPos = core.rhythm.RhythmCore.songPosition;
+		for (note in nc.notes.members) {
+			if (note == null || !note.alive || !note.mustPress || note.wasGoodHit || note.wasMissed)
+				continue;
+			if (note.strum != strum)
+				continue;
+			var diff = Math.abs(note.strumTime - songPos);
+			if (diff <= nc.worstWindow && diff < bestDiff) {
+				bestDiff = diff;
+				best = note;
+			}
+		}
+		return best;
+	}
+
+	// note hit: scoring, sustains, animation, splash.
+	function registerHit(i:Int, note:Note, strum:StrumNote, nc:NoteController, cfg:PlayStateConfig):Void {
+		var diff = Math.abs(note.strumTime - core.rhythm.RhythmCore.songPosition);
+		var rating = nc.getRatingForDiff(diff);
+		if (rating != null) {
+			cfg.score += rating.score;
+			cfg.health += rating.health;
+			note.rating = rating.name;
+			cfg.rating = rating.name;
+			cfg.hitNotes++;
+			cfg.totalNotes++;
+			cfg.combo = rating.miss == true ? 0 : cfg.combo + 1;
+		}
+		note.wasGoodHit = true;
+		for (sustain in nc.sustains.members)
+			if (sustain != null && sustain.alive && sustain.strum == strum && sustain.strumTime == note.strumTime)
+				sustain.wasNoteHit = true;
+		note.kill();
+		strum.playAnim('confirm$i', false);
+		strum.confirmHoldTimer = -1;
+		if (rating?.splash)
+			nc.spawnSplash(strum, i, note.noteType);
+	}
+
+	inline function isSustainOnStrum(s:NoteSustain, strum:StrumNote):Bool
+		return s != null && s.alive && s.mustPress && s.strum == strum && !s.isSustainEnd;
+
+	// cpu
+	public function isCPUHit(charStrums:Array<StrumNote>, noteController:NoteController, charId:String, i:Int, mustPress:Bool = false):Void {
 		var note = noteController.getHittableNote(charId, i, mustPress);
 		if (note != null) {
 			charStrums[i].startConfirm();
