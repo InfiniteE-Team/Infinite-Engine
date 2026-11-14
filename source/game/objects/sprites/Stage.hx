@@ -124,6 +124,18 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 		}
 	}
 
+	public function getBF():Character {
+		return game.PlayState.instance?.chars?.boyfriend;
+	}
+
+	public function getGF():Character {
+		return game.PlayState.instance?.chars?.gf;
+	}
+
+	public function getDad():Character {
+		return game.PlayState.instance?.chars?.dad;
+	}
+
 	function callVSlice(hook:String, e:Dynamic):Void {
 		if (vsliceScript == null || brokenHooks.exists(hook))
 			return;

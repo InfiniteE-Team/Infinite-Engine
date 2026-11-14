@@ -43,14 +43,14 @@ class ComboPositionSubstate extends states.substates.MusicBeatSubstate {
 		add(bg);
 
 		previewRating = new FunkinSprite(0, 0, true);
-		previewRating.loadGraphic(Paths.getPath('game/hud/normal/score/sick', 'image'));
+		previewRating.loadGraphic(Paths.getPath('game/ui/popup/default/sick', 'image'));
 		previewRating.setGraphicSize(Std.int(previewRating.width * 0.7));
 		previewRating.updateHitbox();
 		previewRating.scrollFactor.set(0, 0);
 		add(previewRating);
 
 		previewNum = new FunkinSprite(0, 0, true);
-		previewNum.loadGraphic(Paths.getPath('game/hud/normal/score/nums/digit-0', 'image'));
+		previewNum.loadGraphic(Paths.getPath('game/ui/popup/default/nums/digit-0', 'image'));
 		previewNum.setGraphicSize(Std.int(previewNum.width * 0.38));
 		previewNum.updateHitbox();
 		previewNum.scrollFactor.set(0, 0);

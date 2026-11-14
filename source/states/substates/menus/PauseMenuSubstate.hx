@@ -217,7 +217,7 @@ class PauseMenuSubstate extends states.substates.BlurSubState {
 					else
 						options = defaultOptions;
 					reloadMenuOptions();
-				} else {
+				} else { // Change Difficulty
 					var selectedDiffString = options[curSelect].toLowerCase();
 
 					var diffIndex = core.rhythm.DiffsUtils.difficulties.indexOf(selectedDiffString);
@@ -226,7 +226,6 @@ class PauseMenuSubstate extends states.substates.BlurSubState {
 
 					core.rhythm.DiffsUtils.diffCurrent = core.rhythm.DiffsUtils.difficulties[diffIndex];
 
-					resumeFunction();
 					game.PlayStateConfig.blueBalled = 0;
 					close();
 

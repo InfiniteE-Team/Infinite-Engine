@@ -465,6 +465,10 @@ class PlayState extends MusicBeatState {
 			return;
 		#end
 
+		#if HSCRIPT_ALLOWED
+		script.call('onEndSong', []);
+		#end
+
 		modding.vslice.VSliceHooks.dispatch('onSongEnd', modding.vslice.VSliceHooks.event('SONG_END'));
 
 		cameraController.char = null;

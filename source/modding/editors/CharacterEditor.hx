@@ -88,6 +88,9 @@ class CharacterEditor extends MusicBeatState {
 	override public function create() {
 		super.create();
 
+		if (FlxG.mouse != null)
+			FlxG.mouse.visible = true;
+
 		core.audio.MasterAudio.playMenu(Paths.getPath('menus/artistic-expression/artistic-expression', 'music'), 0.6, 137);
 
 		createCameras();

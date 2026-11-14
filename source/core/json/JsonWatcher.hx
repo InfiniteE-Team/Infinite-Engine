@@ -2,23 +2,23 @@ package core.json;
 import sys.FileSystem;
 
 class JsonWatcher {
-	static var _paths:Array<String> = [];
-	static var _mtimes:Array<Float> = [];
-	static var _callbacks:Array<Void->Void> = [];
+	static var paths:Array<String> = [];
+	static var mtimes:Array<Float> = [];
+	static var callbacks:Array<Void->Void> = [];
 
 	// fixed multi saved JSONs spamming callbacks
-	static var _cooldown:Float = 0;
+	static var cooldown:Float = 0;
 	static final COOLDOWN_SECS:Float = 0.3;
 
 	public static function watch(path:String, ?callback:Void->Void):Void {
 		if (path == null || !FileSystem.exists(path))
 			return;
-		if (_paths.contains(path))
+		if (paths.contains(path))
 			return;
 
-		_paths.push(path);
-		_mtimes.push(FileSystem.stat(path).mtime.getTime());
-		_callbacks.push(callback ?? FlxG.resetState);
+		paths.push(path);
+		mtimes.push(FileSystem.stat(path).mtime.getTime());
+		callbacks.push(callback ?? FlxG.resetState);
 	}
 
 	public static function watchAndRead<T>(path:String, ?callback:Void->Void):Null<T> {
@@ -27,45 +27,38 @@ class JsonWatcher {
 	}
 
     public static function updateSwitch():Void {
-		if (_paths.length == 0)
+		if (paths.length == 0)
 			return;
 
-		for (i in 0..._paths.length) {
-			if (!FileSystem.exists(_paths[i]))
+		for (i in 0...paths.length) {
+			if (!FileSystem.exists(paths[i]))
 				continue;
 
-			var currentMtime = FileSystem.stat(_paths[i]).mtime.getTime();
-			if (currentMtime > _mtimes[i]) {
-				_mtimes[i] = currentMtime;
-
-				Console.log('JSON change detected ${_paths[i]}');
-				var cb = _callbacks[i];
-				if (cb != null)
-					cb();
-				break;
-			}
+			var currentMtime = FileSystem.stat(paths[i]).mtime.getTime();
+			if (currentMtime > mtimes[i])
+				mtimes[i] = currentMtime;
 		}
 	}
 
 	public static function update(elapsed:Float):Void {
-		if (_paths.length == 0)
+		if (paths.length == 0)
 			return;
-		if (_cooldown > 0) {
-			_cooldown -= elapsed;
+		if (cooldown > 0) {
+			cooldown -= elapsed;
 			return;
 		}
 
-		for (i in 0..._paths.length) {
-			if (!FileSystem.exists(_paths[i]))
+		for (i in 0...paths.length) {
+			if (!FileSystem.exists(paths[i]))
 				continue;
 
-			var currentMtime = FileSystem.stat(_paths[i]).mtime.getTime();
-			if (currentMtime > _mtimes[i]) {
-				_mtimes[i] = currentMtime;
-				_cooldown = COOLDOWN_SECS;
+			var currentMtime = FileSystem.stat(paths[i]).mtime.getTime();
+			if (currentMtime > mtimes[i]) {
+				mtimes[i] = currentMtime;
+				cooldown = COOLDOWN_SECS;
 
-				Console.log('JSON change detected ${_paths[i]}');
-				var cb = _callbacks[i];
+				Console.log('JSON change detected ${paths[i]}');
+				var cb = callbacks[i];
 				if (cb != null)
 					cb();
 				break;
@@ -74,18 +67,18 @@ class JsonWatcher {
 	}
 
 	public static function clear():Void {
-		_paths = [];
-		_mtimes = [];
-		_callbacks = [];
-		_cooldown = 0;
+		paths = [];
+		mtimes = [];
+		callbacks = [];
+		cooldown = 0;
 	}
 
 	public static function unwatch(path:String):Void {
-		var i = _paths.indexOf(path);
+		var i = paths.indexOf(path);
 		if (i < 0)
 			return;
-		_paths.splice(i, 1);
-		_mtimes.splice(i, 1);
-		_callbacks.splice(i, 1);
+		paths.splice(i, 1);
+		mtimes.splice(i, 1);
+		callbacks.splice(i, 1);
 	}
 }
