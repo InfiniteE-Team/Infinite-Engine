@@ -281,7 +281,8 @@ class ResultScreen extends ScriptState {
 				FlxTween.tween(rating, {x: FlxG.width * 0.6}, 0.6, {ease: FlxEase.elasticInOut});
 				new FlxTimer().start(0.4, function(_) {
 					FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
-					FlxG.camera.flash(0xFFFFFFFF, 0.4);
+					if (SaveData.data.flashingLights)
+						FlxG.camera.flash(0xFFFFFFFF, 0.4);
 				});
 			});
 		});

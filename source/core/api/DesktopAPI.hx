@@ -34,6 +34,10 @@ class DesktopAPI {
 		openfl.Lib.application.window.borderless = value;
 	}
 
+	public static function setAutoPause(value:Bool) {
+		FlxG.autoPause = value;
+	}
+
 	public static function configWindow() {
 		switch (SaveData.data.windowmode) {
 			case 'Fullscreen':

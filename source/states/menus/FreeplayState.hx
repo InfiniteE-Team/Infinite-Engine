@@ -315,7 +315,8 @@ class FreeplayState extends MusicBeatState {
 		if (Controls.ACCEPT && hasSongs()) {
 			acceptOption = true;
 			FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
-			FlxG.camera.flash(0xFFFFFFFF, 0.4);
+			if (SaveData.data.flashingLights)
+				FlxG.camera.flash(0xFFFFFFFF, 0.4);
 
 			var songSelected:String = freeplayData.songData[curSelected].song;
 

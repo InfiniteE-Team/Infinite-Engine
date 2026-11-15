@@ -17,7 +17,8 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 @:keep
 class StoryMenuState extends MusicBeatState {
 	var weeks:Array<core.json.menus.storymenu.WeekData> = [];
-	var curWeek:Int = 0;
+
+	public static var curWeek:Int = 0;
 
 	var acceptOption:Bool = false;
 
@@ -523,7 +524,8 @@ class StoryMenuState extends MusicBeatState {
 			midChar.acceptWeek();
 
 		FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
-		FlxG.camera.flash(0xFFFFFFFF, 0.4);
+		if (SaveData.data.flashingLights)
+			FlxG.camera.flash(0xFFFFFFFF, 0.4);
 
 		PlayStateConfig.isStoryMode = true;
 		PlayStateConfig.curWeek = curWeek;

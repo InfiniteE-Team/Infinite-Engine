@@ -54,7 +54,7 @@ class State extends flixel.FlxState {
 		if (volumeTween != null)
 			volumeTween.cancel();
 
-		volumeTween = flixel.tweens.FlxTween.tween(FlxG.sound, {volume: lastVolume * 0.4}, 0.5);
+		volumeTween = flixel.tweens.FlxTween.tween(FlxG.sound, {volume: lastVolume * 0.3}, 0.5);
 	}
 
 	override public function onFocus():Void {
@@ -71,7 +71,6 @@ class State extends flixel.FlxState {
 			volumeTween.destroy();
 			volumeTween = null;
 		}
-
 		core.assets.Paths.clearCache();
 
 		super.destroy();

@@ -20,6 +20,11 @@ class SaveData {
 		if (SaveData.data.windowmode == null)
 			SaveData.data.windowmode = 'Windowed';
 
+		if (SaveData.data.autoPause == null)
+			SaveData.data.autoPause = false;
+
+		core.api.DesktopAPI.setAutoPause(SaveData.data.autoPause);
+
 		if (SaveData.data.comboPosX == null)
 			SaveData.data.comboPosX = FlxG.width * 0.54;
 
@@ -32,8 +37,13 @@ class SaveData {
 		if (SaveData.data.antialiasing == null)
 			SaveData.data.antialiasing = true;
 
+		flixel.FlxSprite.defaultAntialiasing = SaveData.data.antialiasing;
+
 		if (SaveData.data.shaders == null)
 			SaveData.data.shaders = true;
+
+		if (SaveData.data.flashingLights == null)
+			SaveData.data.flashingLights = true;
 
 		if (SaveData.data.downscroll == null)
 			SaveData.data.downscroll = false;

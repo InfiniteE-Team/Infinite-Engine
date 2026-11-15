@@ -15,7 +15,8 @@ class TitleState extends ScriptState {
 	override public function create() {
 		super.create();
 
-		FlxG.camera.flash(FlxColor.WHITE, 2);
+		if (SaveData.data.flashingLights)
+			FlxG.camera.flash(FlxColor.WHITE, 2);
 		MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102);
 		RhythmCore.changeBPM(102);
 
@@ -57,7 +58,8 @@ class TitleState extends ScriptState {
 
 		if (accept) {
 			acceptOption = true;
-			FlxG.camera.flash(FlxColor.WHITE, 1);
+			if (SaveData.data.flashingLights)
+				FlxG.camera.flash(FlxColor.WHITE, 1);
 			titleText.playAnim('press');
 			FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
 			new FlxTimer().start(1, function(tmr:FlxTimer) {

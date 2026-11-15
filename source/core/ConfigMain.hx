@@ -79,10 +79,6 @@ class ConfigMain extends flixel.FlxState {
 		cursor = new CursorConfig();
 		cursor.loadCursor();
 
-		flixel.FlxSprite.defaultAntialiasing = true;
-
-		FlxG.autoPause = false;
-
 		if (mainState != null) {
 			var innerState:() -> MusicBeatState = () -> {
 				var cls = Type.resolveClass(mainState);

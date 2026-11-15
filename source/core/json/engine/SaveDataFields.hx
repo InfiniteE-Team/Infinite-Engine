@@ -8,6 +8,13 @@ typedef SaveDataFields = {
 	var ?antialiasing:Bool;
 	var ?shaders:Bool;
 
+	/**
+	 * If disabled, flashing lights in the main menu and other areas will be less intense.
+	 * @default `true`
+	 */
+	var ?flashingLights:Bool;
+	var ?autoPause:Bool;
+
 	// gameplay
 	var ?downscroll:Bool;
 	var ?middlescroll:Bool;

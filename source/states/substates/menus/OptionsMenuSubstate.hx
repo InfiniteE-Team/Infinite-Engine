@@ -50,7 +50,21 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 				description: 'Enables advanced visual effects.',
 				saveField: 'shaders',
 				type: CHECKBOX
+			},
+			{
+				name: 'Flashing Lights',
+				description: 'When disabled, flashing effects are dampened. Useful for people with photosensitive epilepsy.',
+				saveField: 'flashingLights',
+				type: CHECKBOX
 			}
+			#if desktop
+			, {
+				name: 'Pause on Unfocus',
+				description: 'When enabled, the game automatically pauses when losing focus.',
+				saveField: 'autoPause',
+				type: CHECKBOX
+			},
+			#end
 		],
 		'Gameplay' => [
 			{
@@ -72,7 +86,7 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 				type: CHECKBOX
 			},
 			{
-				name: 'Lane Backdrop',
+				name: 'Strumline Background',
 				description: 'Increase or decrease the opacity of the lane background in your notes.',
 				saveField: 'laneBackdrop',
 				type: NUMBER(0, 100, 5),
@@ -193,7 +207,7 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 
 		if (character != null) {
 			character.visible = false;
-			character.setPosition(FlxG.width - 450, FlxG.height - 450);
+			character.setPosition(FlxG.width - 450, FlxG.height - 400);
 			character.scale.set(0.7, 0.7);
 			character.updateHitbox();
 			if (character.layers != null) {
@@ -326,7 +340,7 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 
 			switch (opt.type) {
 				case CHECKBOX:
-					valSprite = new FlxSprite(900 - 200, 15 + (i * 50));
+					valSprite = new FlxSprite(900 - 200, 15 + (i * 51));
 					valSprite.frames = Paths.getPath('menus/options/check_box', 'animated');
 					valSprite.animation.addByPrefix('uncheck', 'UnCheck0000', 24, false);
 					valSprite.animation.addByPrefix('check', 'Check0000', 24, false);
@@ -507,6 +521,9 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 					FlxSprite.defaultAntialiasing = newValue;
 					updateAntialiasingLive(newValue);
 				}
+
+				if (opt.saveField == 'autoPause')
+					core.api.DesktopAPI.setAutoPause(newValue);
 			case NUMBER(min, max, step):
 				var newValue:Float = currentValue + (direction * step);
 				if (newValue < min)

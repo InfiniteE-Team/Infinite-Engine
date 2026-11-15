@@ -32,7 +32,7 @@ class PauseMenuSubstate extends states.substates.BlurSubState {
 
 	public var pauseMenuMusic:FlxSound;
 
-	static var _cachedPauseMusic:FlxSound;
+	static var cachedPauseMusic:FlxSound;
 
 	var nameSong:FlxText;
 	var difficulty:FlxText;
@@ -56,16 +56,15 @@ class PauseMenuSubstate extends states.substates.BlurSubState {
 		if (game.PlayState.instance.isInCutscene)
 			options = optionsCutscene;
 
-		if (_cachedPauseMusic == null) {
+		if (cachedPauseMusic == null) {
 			pauseMenuMusic = new FlxSound();
 			pauseMenuMusic.load(Paths.getPath('menus/pauseInfinite', "music"), false);
 			pauseMenuMusic.looped = true;
 			FlxG.sound.list.add(pauseMenuMusic);
-			_cachedPauseMusic = pauseMenuMusic;
+			cachedPauseMusic = pauseMenuMusic;
 		} else {
-			pauseMenuMusic = _cachedPauseMusic;
+			pauseMenuMusic = cachedPauseMusic;
 		}
-
 		pauseMenuMusic.volume = 0.5;
 		pauseMenuMusic.play();
 
@@ -294,7 +293,7 @@ class PauseMenuSubstate extends states.substates.BlurSubState {
 			FlxG.sound.list.remove(pauseMenuMusic, true);
 			pauseMenuMusic.destroy();
 			pauseMenuMusic = null;
-			_cachedPauseMusic = null;
+			cachedPauseMusic = null;
 		}
 
 		super.destroy();

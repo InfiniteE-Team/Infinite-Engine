@@ -871,7 +871,8 @@ class CharacterEditor extends MusicBeatState {
 		sys.io.File.saveContent(path, json);
 
 		Console.log('[CharacterEditor] Saved: $path');
-		FlxG.camera.flash(FlxColor.WHITE, 0.3);
+		if (SaveData.data.flashingLights)
+			FlxG.camera.flash(FlxColor.WHITE, 0.3);
 
 		savedUndoLength = undoStack.length;
 		updateAdvertency();

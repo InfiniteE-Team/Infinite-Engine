@@ -98,7 +98,8 @@ class MainMenuState extends ScriptState {
 
 		if (accept) {
 			FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
-			FlxG.camera.flash(0xFFFFFFFF, 0.4);
+			if (SaveData.data.flashingLights)
+				FlxG.camera.flash(0xFFFFFFFF, 0.4);
 			new FlxTimer().start(1, function() {
 				switch (menuOptions[curSelected]) {
 					case 'storymode':
