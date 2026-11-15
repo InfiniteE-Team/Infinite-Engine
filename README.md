@@ -11,8 +11,8 @@ The infinite engine is an FNF engine written from scratch in HaxeFlixel.
 - [SL-Windows-API](https://github.com/Slushi-Github/SL-Windows-API) by Slushi
 - [ALE-Json](https://github.com/AlejoGDOfficial/ALE-Json) by AlejoGDOfficial
 
-<img width="480" height="280" alt="image" src="https://github.com/user-attachments/assets/2a8835ec-ddf4-49ed-abfe-94427bc5ebaa" />
-<img width="481" height="280" alt="image" src="https://github.com/user-attachments/assets/273392c3-9915-4564-a194-590d1661454f" />
+<img width="481" height="270" alt="image" src="https://github.com/user-attachments/assets/7bc9f036-bd91-4f0d-9a61-1ad77c926ea6" />
+<img width="481" height="280" alt="image" src="https://github.com/user-attachments/assets/46f29ec7-3eba-4853-8336-a35e227fe271" />
 
 **WorkFlows:**
 - [Windows](https://nightly.link/InfiniteE-Team/Infinite-Engine/workflows/init.yml/dev/Windows%20Build.zip)
