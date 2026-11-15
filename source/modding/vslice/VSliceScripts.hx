@@ -400,7 +400,8 @@ class VSliceScripts {
 				lines[i] = ~/^(\s*)/.replace(lines[i], '$1override ');
 			// Polymod doesn't check hook params, onUpdate(elapsed:Float) still gets the event -JloorDev
 			if (inBase)
-				lines[i] = ~/(\bfunction\s+\w+\s*\()([^)]*)\)/.map(lines[i], m -> m.matched(1) + ~/(\w+)\s*:\s*[\w.<>]+/g.replace(m.matched(2), '$1:Dynamic') + ')');
+				lines[i] = ~/(\bfunction\s+\w+\s*\()([^)]*)\)/.map(lines[i],
+					m -> m.matched(1) + ~/(\w+)\s*:\s*[\w.<>]+/g.replace(m.matched(2), '$1:Dynamic') + ')');
 			else if (hasOverride)
 				lines[i] = overrideWord.replace(lines[i], '');
 		}
@@ -457,6 +458,8 @@ class VSliceScripts {
 			src = new EReg('(^|[^\\w.])$name(\\s*\\.)', 'gm').replace(src, '$1$full$2');
 			src = new EReg('\\bnew\\s+$name\\s*\\(', 'g').replace(src, 'new $full(');
 		}
+		src = ~/\bvar\s+(\w+)\s*:\s*FlxSprite\s*=\s*(?:funkin\.play\.)?PlayState\.instance\??\.(opponentStrumline|playerStrumline)/g.replace(src,
+			'var $1:Dynamic = funkin.play.PlayState.instance?.$2');
 		return src;
 	}
 

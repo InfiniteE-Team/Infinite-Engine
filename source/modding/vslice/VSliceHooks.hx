@@ -83,8 +83,8 @@ class VSliceHooks {
 	}
 
 	static function nameOf(receiver:Dynamic):String {
-		var id:String = Reflect.getProperty(receiver, 'stageId') ?? Reflect.getProperty(receiver, 'characterId') ?? Reflect.getProperty(receiver, 'moduleId')
-			?? Reflect.getProperty(receiver, 'id');
+		var id:String = Reflect.getProperty(receiver,
+			'stageId') ?? Reflect.getProperty(receiver, 'characterId') ?? Reflect.getProperty(receiver, 'moduleId') ?? Reflect.getProperty(receiver, 'id');
 		return id ?? Type.getClassName(Type.getClass(receiver));
 	}
 

@@ -31,6 +31,7 @@ class Strumline {
 		return v;
 	}
 
+	var _alpha:Float = 1.0;
 	public var alpha(get, set):Float;
 	public var visible(get, set):Bool;
 
@@ -44,6 +45,11 @@ class Strumline {
 			result = result.concat(ps.noteController.getCharStrums(c.id));
 		return result;
 	}
+
+	public var members(get, never):Array<Dynamic>;
+
+	function get_members():Array<Dynamic>
+		return cast arrows();
 
 	public static var INITIAL_OFFSET:Float = 0;
 	public static var STRUMLINE_SIZE:Float = 104;
@@ -170,25 +176,36 @@ class Strumline {
 		return v;
 	}
 
+	function getStrumlineBase():game.objects.sprites.notes.Strumline {
+		var ps = game.PlayState.instance;
+		if (ps?.chars == null || ps.noteController == null)
+			return null;
+		var side = playerSide ? @:privateAccess ps.chars.playerChars : @:privateAccess ps.chars.opponentChars;
+		return side.length > 0 ? ps.noteController.getStrumline(side[0].id) : null;
+	}
+
 	function get_alpha():Float {
-		var a = arrows();
-		return a.length > 0 ? a[0].alpha : 1;
+		var sl = getStrumlineBase();
+		return sl != null ? sl.alpha : _alpha;
 	}
 
 	function set_alpha(v:Float):Float {
-		for (s in arrows())
-			s.alpha = v;
+		_alpha = v;
+		var sl = getStrumlineBase();
+		if (sl != null)
+			sl.alpha = v;
 		return v;
 	}
 
 	function get_visible():Bool {
-		var a = arrows();
-		return a.length > 0 ? a[0].visible : true;
+		var sl = getStrumlineBase();
+		return sl != null ? sl.alpha > 0 : _alpha > 0;
 	}
 
 	function set_visible(v:Bool):Bool {
-		for (s in arrows())
-			s.visible = v;
+		var sl = getStrumlineBase();
+		if (sl != null)
+			sl.alpha = v ? _alpha : 0;
 		return v;
 	}
 }

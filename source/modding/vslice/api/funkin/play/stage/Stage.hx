@@ -77,6 +77,8 @@ class Stage {
 		return funkin.play.character.BaseCharacter.wrap(c);
 
 	public function addCharacter(character:Dynamic, charType:String):Void {
+		if (character == null)
+			return;
 		var c:Character = Std.isOfType(character,
 			funkin.play.character.BaseCharacter) ? cast(character, funkin.play.character.BaseCharacter).host : Std.downcast(character, Character);
 		if (host != null && c != null && !host.charLayer.members.contains(c))
