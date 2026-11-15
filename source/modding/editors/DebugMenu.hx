@@ -3,6 +3,8 @@ package modding.editors;
 import flixel.text.FlxText;
 
 class DebugMenu extends MusicBeatState {
+	public static var inDebugMenu:Bool = false;
+
 	var text:FlxText;
 	var options:Array<FlxText> = [];
 	var curOption:Int = 0;
@@ -11,6 +13,8 @@ class DebugMenu extends MusicBeatState {
 
 	override public function create() {
 		super.create();
+
+		inDebugMenu = true;
 
 		core.audio.MasterAudio.playMenu(Paths.getPath('menus/artistic-expression/artistic-expression', 'music'), 0.6, 137);
 
@@ -60,6 +64,7 @@ class DebugMenu extends MusicBeatState {
 
 		if (Controls.BACK) {
 			isAccept = true;
+			inDebugMenu = false;
 			modding.scripting.types.ScriptClass.switchState('MainMenuState');
 		}
 	}

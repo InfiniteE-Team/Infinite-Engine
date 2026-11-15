@@ -247,6 +247,9 @@ class GameplayEditor extends MusicBeatState {
 	override public function create() {
 		super.create();
 
+		if (FlxG.sound.music != null)
+			FlxG.sound.music.stop();
+
 		songDir = folder != null && folder != '' ? folder : (game.PlayState.instance?.songFolder ?? 'untitled');
 		#if sys
 		var resolvedDir = resolveSongDir(songDir);
@@ -2220,7 +2223,9 @@ class GameplayEditor extends MusicBeatState {
 			if (index < 0)
 				index = states.menus.FreeplayState.curDiff;
 			MusicBeatState.switchState(() -> new states.menus.LoadingState(songDir, index));
-		} else
+		} else if (DebugMenu.inDebugMenu)
+			MusicBeatState.switchState(() -> new DebugMenu());
+		else
 			MusicBeatState.switchState(() -> new states.menus.FreeplayState());
 	}
 
