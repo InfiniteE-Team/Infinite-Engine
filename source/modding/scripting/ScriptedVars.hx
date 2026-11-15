@@ -16,7 +16,7 @@ class ScriptedVars {
 		script.expose('iconP1', game.controllerHUD.iconP1);
 		script.expose('iconP2', game.controllerHUD.iconP2);
 		script.expose('scoreText', game.controllerHUD.scoreText);
-		script.expose('rating', game.controllerHUD.rating);
+		script.expose('combo', game.controllerHUD.combo);
 
 		script.expose('getStrumline', game.noteController.getStrumline);
 		script.expose("boyfriend", game.chars.boyfriend);

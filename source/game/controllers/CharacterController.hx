@@ -56,7 +56,7 @@ class CharacterController extends FunkinObjectRegistry {
 		return v;
 	}
 
-	public var rating:game.objects.Rating;
+	public var rating:game.objects.PopUp;
 
 	public static var namesPlayer:Array<String> = ['bf', 'boyfriend', 'player'];
 	public static var namesGf:Array<String> = ['gf', 'girlfriend', 'mid', 'idk'];
@@ -242,9 +242,9 @@ class CharacterController extends FunkinObjectRegistry {
 				note.wasGoodHit = true;
 				var ratingType = nc.getRatingForDiff(0);
 				if (ratingType != null) {
-					cfg.score += ratingType.score;
+					PlayStateConfig.score += ratingType.score;
 					cfg.health += ratingType.health;
-					cfg.combo++;
+					PlayStateConfig.combo++;
 					note.rating = ratingType.name;
 					cfg.rating = ratingType.name;
 				}

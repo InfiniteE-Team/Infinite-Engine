@@ -38,10 +38,10 @@ class InputController {
 		gameAudio.onMiss();
 		noteController.noteTypeManager?.onNoteMiss(missedNote);
 		playStateConfig.health += noteController.getHealthDrain(missedNote);
-		playStateConfig.score += noteController.getMissScore();
-		playStateConfig.misses++;
-		playStateConfig.combo = 0;
-		playStateConfig.totalNotes++;
+		PlayStateConfig.score += noteController.getMissScore();
+		PlayStateConfig.misses++;
+		PlayStateConfig.combo = 0;
+		PlayStateConfig.totalNotes++;
 	}
 
 	function onPressed(i:Int, strum:StrumNote, nc:NoteController, audio:GameAudio, cfg:PlayStateConfig):InputType {
@@ -125,13 +125,13 @@ class InputController {
 		var diff = Math.abs(note.strumTime - core.rhythm.RhythmCore.songPosition);
 		var rating = nc.getRatingForDiff(diff);
 		if (rating != null) {
-			cfg.score += rating.score;
+			PlayStateConfig.score += rating.score;
 			cfg.health += rating.health;
 			note.rating = rating.name;
 			cfg.rating = rating.name;
-			cfg.hitNotes++;
-			cfg.totalNotes++;
-			cfg.combo = rating.miss == true ? 0 : cfg.combo + 1;
+			PlayStateConfig.hitNotes++;
+			PlayStateConfig.totalNotes++;
+			PlayStateConfig.combo = rating.miss == true ? 0 : PlayStateConfig.combo + 1;
 		}
 		note.wasGoodHit = true;
 		for (sustain in nc.sustains.members)

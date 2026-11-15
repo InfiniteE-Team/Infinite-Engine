@@ -38,6 +38,15 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 		createStage();
 	}
 
+	public function getBF():Dynamic
+		return getCharacterByRole('bf');
+
+	public function getDad():Dynamic
+		return getCharacterByRole('dad');
+
+	public function getGF():Dynamic
+		return getCharacterByRole('gf');
+
 	#if HSCRIPT_ALLOWED
 	function initStageScript():Void {
 		stageScript = new ScriptHandler(this);
@@ -89,16 +98,17 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 				if (Lambda.exists(stageData.elements, e -> e.zIndex != null))
 					runVSliceScript();
 		}
-		#if HSCRIPT_ALLOWED
-		stageScript.call('postCreate', []);
-		#end
 	}
 
 	var vsliceScript:funkin.play.stage.Stage = null;
 	var brokenHooks:Map<String, Bool> = new Map();
+
 	public var charLayerZ(default, null):Int = 0;
 
 	function runVSliceScript():Void {
+		#if HSCRIPT_ALLOWED
+		stageScript.call('postCreate', []);
+		#end
 		try {
 			vsliceScript = modding.vslice.VSliceScripts.loadStageScript(this, stage);
 		} catch (e:Dynamic) {
@@ -122,18 +132,6 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 		} catch (err:Dynamic) {
 			Console.log('[V-Slice] $stage.addCharacter failed: $err', true);
 		}
-	}
-
-	public function getBF():Character {
-		return game.PlayState.instance?.chars?.boyfriend;
-	}
-
-	public function getGF():Character {
-		return game.PlayState.instance?.chars?.gf;
-	}
-
-	public function getDad():Character {
-		return game.PlayState.instance?.chars?.dad;
 	}
 
 	function callVSlice(hook:String, e:Dynamic):Void {
@@ -186,6 +184,16 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 	}
 
 	public function getCharacterByRole(role:String):Null<Character> {
+		var ctrl = game.PlayState.instance?.chars;
+		if (ctrl == null)
+			return null;
+		if (game.controllers.CharacterController.namesPlayer.contains(role))
+			return ctrl.boyfriend;
+		if (game.controllers.CharacterController.namesOpponent.contains(role))
+			return ctrl.dad;
+		if (game.controllers.CharacterController.namesGf.contains(role))
+			return ctrl.gf;
+
 		for (m in charLayer.members) {
 			var c = Std.downcast(m, Character);
 			if (c != null && c.id == role)

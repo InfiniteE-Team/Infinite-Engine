@@ -2,10 +2,10 @@ package game.controllers;
 
 import game.PlayState;
 import game.objects.Bar;
+import game.objects.PopUp;
 import flixel.text.FlxText;
 import core.assets.FunkinSprite;
 import game.objects.sprites.Icon;
-import game.objects.Rating;
 #if HSCRIPT_ALLOWED
 import modding.scripting.ScriptHandler;
 #end
@@ -24,7 +24,7 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 	public var healthBar:Bar;
 	public var healthBarY:Float = 0;
 	public var scoreText:FlxText;
-	public var rating:Rating;
+	public var combo:PopUp;
 
 	var intendedScore:Float = 0;
 
@@ -94,8 +94,8 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 		}
 		updateIconPositions(0.016);
 
-		rating = new Rating(SaveData.data.comboPosX, SaveData.data.comboPosY, scriptHUD);
-		add(rating);
+		combo = new PopUp(SaveData.data.comboPosX, SaveData.data.comboPosY, scriptHUD);
+		add(combo);
 
 		#if HSCRIPT_ALLOWED
 		scriptHUD.call("postCreateHUD", []);
@@ -133,14 +133,14 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 			return;
 		#end
 
-		intendedScore = flixel.math.FlxMath.lerp(intendedScore, PlayState.instance.playStateConfig.score, flixel.math.FlxMath.bound(elapsed * 16, 0, 1));
+		intendedScore = flixel.math.FlxMath.lerp(intendedScore, game.PlayStateConfig.score, flixel.math.FlxMath.bound(elapsed * 16, 0, 1));
 
 		var displayScore:String = InfiniteUtil.formatNumber(Math.round(intendedScore));
 
 		if (SaveData.data.botplay)
 			scoreText.text = 'BOTPLAY';
 		else
-			scoreText.text = 'Score: $displayScore // Combo Breaks: ${PlayState.instance.playStateConfig.misses}';
+			scoreText.text = 'Score: $displayScore // Combo Breaks: ${game.PlayStateConfig.misses}';
 	}
 
 	public function applyDownscroll(newDownscroll:Bool):Void {
@@ -220,8 +220,8 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 
 	override function destroy() {
 		super.destroy();
-		rating.destroy();
-		rating = null;
+		combo.destroy();
+		combo = null;
 		scoreText.destroy();
 		scoreText = null;
 		iconP1 = null;

@@ -262,11 +262,10 @@ class PlayState {
 		currentStage?.refresh();
 
 	function get_songScore():Int
-		return engine()?.playStateConfig?.score ?? 0;
+		return game.PlayStateConfig.score ?? 0;
 
 	function set_songScore(v:Int):Int {
-		if (engine()?.playStateConfig != null)
-			engine().playStateConfig.score = v;
+		game.PlayStateConfig.score = v;
 		return v;
 	}
 
@@ -293,20 +292,20 @@ class PlayState {
 
 	public function popUpScore(judgement:String, ?combo:Int):Void {
 		var cfg = engine()?.playStateConfig;
-		engine()?.controllerHUD?.rating?.onRatingPopUp(judgement, combo ?? cfg?.combo ?? 0);
+		engine()?.controllerHUD?.combo?.onComboPopUp(judgement, combo ?? game.PlayStateConfig?.combo ?? 0);
 	}
 
 	public function applyScore(score:Int, judgement:String, healthChange:Float, isComboBreak:Bool):Void {
 		var cfg = engine()?.playStateConfig;
 		if (cfg == null)
 			return;
-		cfg.score += score;
+		game.PlayStateConfig.score += score;
 		cfg.health += healthChange;
 		cfg.rating = judgement;
 		if (isComboBreak)
-			cfg.combo = 0;
+			game.PlayStateConfig.combo = 0;
 		else
-			cfg.combo++;
+			game.PlayStateConfig.combo++;
 	}
 
 	public function remove(o:Dynamic):Dynamic {

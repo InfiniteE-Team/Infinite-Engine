@@ -7,7 +7,7 @@ import core.assets.FunkinSprite;
 class ComboPositionSubstate extends states.substates.MusicBeatSubstate {
 	var camSubstate:Camera;
 
-	var previewRating:FunkinSprite;
+	var previewCombo:FunkinSprite;
 	var previewNum:FunkinSprite;
 	var hintText:FlxText;
 	var posText:FlxText;
@@ -42,12 +42,12 @@ class ComboPositionSubstate extends states.substates.MusicBeatSubstate {
 		bg.alpha = 0.95;
 		add(bg);
 
-		previewRating = new FunkinSprite(0, 0, true);
-		previewRating.loadGraphic(Paths.getPath('game/ui/popup/default/sick', 'image'));
-		previewRating.setGraphicSize(Std.int(previewRating.width * 0.7));
-		previewRating.updateHitbox();
-		previewRating.scrollFactor.set(0, 0);
-		add(previewRating);
+		previewCombo = new FunkinSprite(0, 0, true);
+		previewCombo.loadGraphic(Paths.getPath('game/ui/popup/default/sick', 'image'));
+		previewCombo.setGraphicSize(Std.int(previewCombo.width * 0.7));
+		previewCombo.updateHitbox();
+		previewCombo.scrollFactor.set(0, 0);
+		add(previewCombo);
 
 		previewNum = new FunkinSprite(0, 0, true);
 		previewNum.loadGraphic(Paths.getPath('game/ui/popup/default/nums/digit-0', 'image'));
@@ -75,8 +75,8 @@ class ComboPositionSubstate extends states.substates.MusicBeatSubstate {
 		var cx:Float = SaveData.data.comboPosX;
 		var cy:Float = SaveData.data.comboPosY;
 
-		previewRating.x = cx - 160;
-		previewRating.y = cy - 90;
+		previewCombo.x = cx - 160;
+		previewCombo.y = cy - 90;
 
 		previewNum.x = cx - 90;
 		previewNum.y = cy + 20;
@@ -91,7 +91,7 @@ class ComboPositionSubstate extends states.substates.MusicBeatSubstate {
 		var my = FlxG.mouse.y;
 
 		if (FlxG.mouse.justPressed) {
-			if (previewRating.overlapsPoint(FlxG.mouse.getWorldPosition(camSubstate), true, camSubstate)
+			if (previewCombo.overlapsPoint(FlxG.mouse.getWorldPosition(camSubstate), true, camSubstate)
 				|| previewNum.overlapsPoint(FlxG.mouse.getWorldPosition(camSubstate), true, camSubstate)) {
 				isDragging = true;
 				dragOffsetX = mx - SaveData.data.comboPosX;

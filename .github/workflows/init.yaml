@@ -85,7 +85,7 @@ jobs:
 
       - name: Build Hxcpp Command-Line Tools
         run: |
-          cd $(haxelib libpath libhxcpp)/tools/hxcpp
+          cd "$(haxelib libpath libhxcpp)/tools/hxcpp"
           haxe compile.hxml
 
       - name: Pre-Build Commands

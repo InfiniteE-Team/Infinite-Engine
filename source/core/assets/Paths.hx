@@ -1,16 +1,15 @@
 package core.assets;
 
-import sys.io.File;
-import animate.FlxAnimateFrames;
 import sys.FileSystem;
 import game.PlayState;
+import animate.FlxAnimateFrames;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.graphics.frames.FlxFramesCollection;
 
+@:nullSafety
 class Paths {
 	private static var pathCache = new Map<String, String>();
 	private static var cache = new Map<String, Dynamic>();
-
 	public static var currentSong:String = "";
 
 	public static function getPath(fileName:String, ?type:core.enums.AssetType = DEFAULT):Dynamic {
@@ -66,7 +65,7 @@ class Paths {
 	public static function readText(path:String):String {
 		if (!FileSystem.exists(path))
 			return "";
-		var text = File.getContent(path);
+		var text = sys.io.File.getContent(path);
 		if (text.length > 0 && text.charCodeAt(0) == 0xFEFF)
 			text = text.substr(1);
 		return text;
@@ -94,21 +93,19 @@ class Paths {
 	}
 
 	public static function getAnimated(fileName:String):Dynamic {
-		var resolvedPath = Library.findLib('images/$fileName.png') ?? Library.findLib('images/$fileName');
-		var cacheKey = resolvedPath ?? fileName;
+		final assetPath:String = Paths.getPath(fileName, 'image') ?? Paths.getPath(fileName, 'astc');
+		final cacheKey = assetPath ?? fileName;
 
 		if (cache.exists(cacheKey))
 			return cache.get(cacheKey);
 
-		var imagePath = getPath(fileName, 'image');
-		var folder = resolvedPath;
-		var result:Dynamic = null;
+		var result:Null<Dynamic> = null;
 
-		var graphic:flixel.graphics.FlxGraphic = null;
-		if (imagePath != null) {
+		var graphic:Null<flixel.graphics.FlxGraphic> = null;
+		if (assetPath != null) {
 			graphic = FlxG.bitmap.get(cacheKey);
 			if (graphic == null) {
-				var bmp = openfl.display.BitmapData.fromFile(imagePath);
+				var bmp = openfl.display.BitmapData.fromFile(assetPath);
 				graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, cacheKey);
 				graphic.persist = true;
 
@@ -127,6 +124,7 @@ class Paths {
 			return false;
 		}
 
+		final folder = Library.findLib('images/$fileName');
 		if (folder != null && FileSystem.exists('$folder/Animation.json')) {
 			result = FlxAnimateFrames.fromAnimate(folder);
 		} else {
@@ -167,8 +165,8 @@ class Paths {
 		}
 
 		var formatDetected = "image";
-		var folderPath:String = null;
-		var atlasPath:String = null;
+		var folderPath:Null<String> = null;
+		var atlasPath:Null<String> = null;
 		var animFolder = Library.findLib('images/$fileName');
 		if (animFolder != null && FileSystem.exists('$animFolder/Animation.json')) {
 			formatDetected = "animate";
@@ -185,42 +183,49 @@ class Paths {
 
 		// CPU / RAM
 		sys.thread.Thread.create(function() {
-			var img:lime.graphics.Image = null;
+			var img:Null<lime.graphics.Image> = null;
 			try {
-				img = lime.graphics.Image.fromFile(imagePath);
+				final loaded = lime.graphics.Image.fromFile(imagePath);
+				img = loaded;
 			} catch (e:Dynamic) {
 				Console.log('cacheAutoAsync: could not decode "$imagePath": $e', true);
 			}
-			var rawData:String = null;
+			var rawData:Null<String> = null;
 			try {
-				rawData = atlasPath != null ? readText(atlasPath) : null;
+				if (atlasPath != null) {
+					final text = readText(atlasPath);
+					rawData = text;
+				}
 			} catch (e:Dynamic) {}
 
 			haxe.MainLoop.runInMainThread(function() {
-				var finalAsset:Dynamic = null;
-
+				var finalAsset:Null<Dynamic> = null;
 				if (img != null && !cache.exists(imagePath)) {
 					try {
 						var bmp = openfl.display.BitmapData.fromImage(img);
 						var graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, imagePath);
 						graphic.persist = true;
-
 						@:privateAccess
 						graphic.bitmap.getTexture(FlxG.stage.context3D);
 						graphic.bitmap.disposeImage();
-						img.buffer = null;
+						if (img != null) {
+							final i = img;
+							@:nullSafety(Off)
+							i.buffer = null;
+						}
 						img = null;
 
 						try {
 							switch (formatDetected) {
 								case "animate":
-									finalAsset = FlxAnimateFrames.fromAnimate(folderPath);
+									if (folderPath != null)
+										finalAsset = FlxAnimateFrames.fromAnimate(folderPath);
 								case "sparrow":
-									finalAsset = FlxAtlasFrames.fromSparrow(graphic, rawData);
+									finalAsset = FlxAtlasFrames.fromSparrow(graphic, rawData ?? "");
 								case "json":
-									finalAsset = FlxAtlasFrames.fromTexturePackerJson(graphic, rawData);
+									finalAsset = FlxAtlasFrames.fromTexturePackerJson(graphic, rawData ?? "");
 								case "pack":
-									finalAsset = FlxAtlasFrames.fromLibGdx(graphic, rawData);
+									finalAsset = FlxAtlasFrames.fromLibGdx(graphic, rawData ?? "");
 								default:
 									finalAsset = graphic;
 							}
@@ -241,9 +246,11 @@ class Paths {
 						Console.log('cacheAutoAsync: could not upload "$imagePath": $e', true);
 					}
 				} else if (img != null) {
-					img.buffer = null;
-					img = null;
+					final i = img;
+					@:nullSafety(Off)
+					i.buffer = null;
 				}
+				img = null;
 				if (onComplete != null) {
 					onComplete(cache.get(imagePath) ?? finalAsset);
 				}
@@ -252,10 +259,12 @@ class Paths {
 	}
 
 	public static function clearCache():Void {
-		for (_ => asset in cache) {
+		for (_ => asset in (cache : Map<String, Null<Dynamic>>)) {
 			if (asset is FlxFramesCollection) {
-				var frames = cast(asset, FlxFramesCollection);
+				var rawAsset:Null<Dynamic> = asset;
+				var frames:Null<FlxFramesCollection> = rawAsset == null ? null : cast rawAsset;
 				if (frames != null && frames.parent != null) {
+					@:nullSafety(Off)
 					if (FlxG.bitmap.checkCache(frames.parent.key)) {
 						frames.parent.persist = false;
 						frames.parent.destroyOnNoUse = true;
@@ -264,7 +273,9 @@ class Paths {
 					}
 				}
 			} else if (asset is flixel.graphics.FlxGraphic) {
-				var graphic = cast(asset, flixel.graphics.FlxGraphic);
+				var rawAsset:Null<Dynamic> = asset;
+				var graphic:Null<flixel.graphics.FlxGraphic> = rawAsset == null ? null : cast rawAsset;
+				@:nullSafety(Off)
 				if (graphic != null && FlxG.bitmap.checkCache(graphic.key)) {
 					graphic.persist = false;
 					graphic.destroyOnNoUse = true;

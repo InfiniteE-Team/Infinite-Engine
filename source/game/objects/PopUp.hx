@@ -7,18 +7,19 @@ import core.assets.FunkinSprite;
 import modding.scripting.ScriptHandler;
 #end
 
-class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite> {
+@:nullSafety
+class PopUp extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite> {
 	#if HSCRIPT_ALLOWED
 	var scripRat:ScriptHandler;
 	#end
 
-	var ratingPool:Array<FunkinSprite> = [];
+	var comboPool:Array<FunkinSprite> = [];
 	var numberPool:Array<FunkinSprite> = [];
 	var missPool:Array<FunkinSprite> = [];
 	var poolPaths:Map<FunkinSprite, String> = [];
 
-	public var onNoteHitPlayer:Void->Void;
-	public var onNoteHitMiss:Void->Void;
+	public var onNoteHitPlayer:Void->Void = () -> {};
+    public var onNoteHitMiss:Void->Void = () -> {};
 
 	public function new(x:Float = 0, y:Float = 0, script:ScriptHandler) {
 		super(x, y);
@@ -26,37 +27,37 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 		#if HSCRIPT_ALLOWED
 		scripRat = script;
 		#end
-		onNoteHitPlayer = () -> onRatingPopUp(PlayState.instance.playStateConfig.rating, PlayState.instance.playStateConfig.combo);
+		onNoteHitPlayer = () -> onComboPopUp(PlayState.instance.playStateConfig.rating, game.PlayStateConfig.combo);
 		onNoteHitMiss = onMissPopup;
 	}
 
-	public function onRatingPopUp(ratingName:String, combo:Int) {
+	public function onComboPopUp(comboName:String, combo:Int) {
 		#if HSCRIPT_ALLOWED
-		if (scripRat?.hasScripts && scripRat?.callCancellable('onRatingPopUp', [ratingName, combo]))
+		if (scripRat?.hasScripts && scripRat?.callCancellable('onComboPopUp', [comboName, combo]))
 			return;
 		#end
 
-		killPoolInstant(ratingPool);
+		killPoolInstant(comboPool);
 		killPoolInstant(numberPool);
 
-		var ratingSprite = getFromPool(ratingPool);
+		var comboSprite = getFromPool(comboPool);
 
-		var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.ratingSkin}/$ratingName', 'image');
-		var skinData = getSkinData('rating', ratingName);
+		var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.comboSkin}/$comboName', 'image');
+		var skinData = getSkinData('rating', comboName);
 
-		setupSprite(ratingSprite, skinData != null && skinData.path != null ? skinData.path : defaultPath, skinData != null && skinData.scale != null ? skinData.scale : 0.7,
+		setupSprite(comboSprite, skinData != null && skinData.path != null ? skinData.path : defaultPath, skinData != null && skinData.scale != null ? skinData.scale : 0.7,
 			this.x + (skinData != null && skinData.offsetX != null ? skinData.offsetX : -160),
 			this.y + (skinData != null && skinData.offsetY != null ? skinData.offsetY : -90));
 
 		#if HSCRIPT_ALLOWED
-		if (scripRat?.hasScripts && scripRat?.call('onCustomRatingAnimation', [ratingSprite, ratingName]) == true) {
+		if (scripRat?.hasScripts && scripRat?.call('onCustomComboAnimation', [comboSprite, comboName]) == true) {
 			if (combo >= 10)
 				onShowComboNumbers(combo);
 			return;
 		}
 		#end
 
-		playStandardPopupTween(ratingSprite);
+		playStandardPopupTween(comboSprite);
 
 		if (combo >= 10)
 			onShowComboNumbers(combo);
@@ -77,9 +78,9 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 		var daLoop = 0;
 		for (i in separatedScore) {
 			var numScore = getFromPool(numberPool);
-			var digitStr = Std.string(Std.int(i));
+			var digitStr = Std.string(i);
 
-			var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.ratingSkin}/nums/digit-$i', 'image');
+			var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.comboSkin}/nums/digit-$i', 'image');
 			var skinDigit = getSkinData('number', digitStr);
 
 			var spacing = skinDigit != null && skinDigit.spacing != null ? skinDigit.spacing : 32;
@@ -112,7 +113,7 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 		killPoolInstant(missPool);
 
 		var rating = getFromPool(missPool);
-		var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.ratingSkin}/miss', 'image');
+		var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.comboSkin}/miss', 'image');
 		var skinData = getSkinData('miss', 'miss');
 
 		setupSprite(rating, skinData != null && skinData.path != null ? skinData.path : defaultPath, skinData != null && skinData.scale != null ? skinData.scale : 0.7,
@@ -178,7 +179,7 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 	public function getSkinData(type:String, details:String):Dynamic {
 		#if HSCRIPT_ALLOWED
 		if (scripRat.hasScripts) {
-			var result = scripRat.call('onSkinRating', [type, details]);
+			var result = scripRat.call('onSkinCombo', [type, details]);
 			if (result != null && result != false)
 				return result;
 		}
@@ -211,7 +212,7 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 	}
 
 	override public function destroy() {
-		for (s in ratingPool) {
+		for (s in comboPool) {
 			remove(s);
 			s.destroy();
 		}
@@ -223,7 +224,7 @@ class Rating extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprit
 			remove(s);
 			s.destroy();
 		}
-		ratingPool = [];
+		comboPool = [];
 		numberPool = [];
 		missPool = [];
 		super.destroy();

@@ -28,6 +28,12 @@
             "url": "https://github.com/MaybeMaru/flixel-animate"
         },
         {
+            "name": "astc-compressor",
+            "type": "git",
+            "ref": "6c0fa6f46d3547ca58859b6ede87e659018a7ff5",
+            "url": "https://github.com/KarimAkra/astc-compressor"
+        },
+        {
             "name": "hxscript",
             "type": "haxelib",
             "version": "2.0.6"
@@ -42,7 +48,7 @@
             "type": "git",
             "dir": null,
             "ref": "main",
-            "url": "https://github.com/openfl/libhxcpp/"
+            "url": "https://github.com/openfl/libhxcpp"
         },
         {
             "name": "hxvlc",
@@ -82,10 +88,10 @@
             "type": "haxelib"
         },
         {
-			"name": "extension-androidtools",
-			"type": "haxelib",
-			"version": "2.2.2"
-		},
+            "name": "extension-androidtools",
+            "type": "haxelib",
+            "version": "2.2.2"
+        },
         {
             "name": "extension-orientation",
             "type": "git",

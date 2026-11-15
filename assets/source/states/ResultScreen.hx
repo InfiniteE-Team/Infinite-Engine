@@ -15,23 +15,20 @@ class ResultScreen extends ScriptState {
 
 	var ratingPath:String = 'SS';
 
-	var playStateConfig:PlayStateConfig;
-
-	public function new(config:PlayStateConfig) {
+	public function new() {
 		super();
-		this.playStateConfig = config;
-		ratingPath = calculateRank(config);
+		ratingPath = calculateRank();
 	}
 
-	function calculateRank(config:PlayStateConfig):String {
-		if (config.totalNotes <= 0)
+	function calculateRank():String {
+		if (PlayStateConfig.totalNotes <= 0)
 			return 'F';
 
-		var accuracy:Float = config.hitNotes / config.totalNotes;
+		var accuracy:Float = PlayStateConfig.hitNotes / PlayStateConfig.totalNotes;
 
-		if (config.misses == 0 && accuracy == 1.0)
+		if (PlayStateConfig.misses == 0 && accuracy == 1.0)
 			return 'SS';
-		if (config.misses == 0)
+		if (PlayStateConfig.misses == 0)
 			return 'S';
 		if (accuracy >= 0.90)
 			return 'A';
@@ -102,7 +99,7 @@ class ResultScreen extends ScriptState {
 		@:privateAccess
 		var highScore:Int = SaveScore.getScore(PlayState.SONG.songName, states.menus.FreeplayState.curDiff);
 
-		newHighScore = playStateConfig.score > highScore;
+		newHighScore = PlayStateConfig.score > highScore;
 
 		if (newHighScore) {
 			highscoreSprite.frames = Paths.getPath('menus/resultScreen/highscoreNew', 'animated');
@@ -276,7 +273,7 @@ class ResultScreen extends ScriptState {
 	}
 
 	function onScoreFinished() {
-		animateScore(playStateConfig.score);
+		animateScore(PlayStateConfig.score);
 
 		new FlxTimer().start(3.687, function(_) {
 			MasterAudio.playMenu(Paths.getPath('menus/resultScreen/$ratingPath/results', 'music'), 0.6, 126);

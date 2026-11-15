@@ -163,7 +163,7 @@ class PlayState extends MusicBeatState {
 		controllerHUD.cameras = [camHUD];
 		add(controllerHUD);
 
-		chars.rating = controllerHUD.rating;
+		chars.rating = controllerHUD.combo;
 
 		subtitleManager.cameras = [camSubtitles];
 		add(subtitleManager);
@@ -484,12 +484,12 @@ class PlayState extends MusicBeatState {
 		var doTransition = () -> {
 		#end
 			if (!PlayStateConfig.isStoryMode) {
-				core.config.SaveScore.saveSong(songFolder, playStateConfig.score, curDifficulty);
+				core.config.SaveScore.saveSong(songFolder, PlayStateConfig.score, curDifficulty);
 				new flixel.util.FlxTimer().start(0.9, (_) -> {
-					modding.scripting.types.ScriptClass.switchState('ResultScreen', [playStateConfig]);
+					modding.scripting.types.ScriptClass.switchState('ResultScreen');
 				});
 			} else {
-				PlayStateConfig.storyScore += playStateConfig.score;
+				PlayStateConfig.storyScore += PlayStateConfig.score;
 				if (PlayStateConfig.storyPlaylist.length > 0) {
 					var nextSong = PlayStateConfig.storyPlaylist[0];
 					PlayStateConfig.storyPlaylist.shift();
@@ -501,7 +501,7 @@ class PlayState extends MusicBeatState {
 					new flixel.util.FlxTimer().start(0.9, (_) -> {
 						PlayStateConfig.isStoryMode = false;
 						PlayStateConfig.storyScore = 0;
-						modding.scripting.types.ScriptClass.switchState('ResultScreen', [playStateConfig]);
+						modding.scripting.types.ScriptClass.switchState('ResultScreen');
 					});
 				}
 			}
@@ -625,7 +625,7 @@ class PlayState extends MusicBeatState {
 	function startScript() {
 		initScript();
 		script.loadFolder('songs/$songFolder/scripts');
-		script.loadFolder('scripts/gameplay');
+		script.loadFolder('scripts/game');
 		script.executeAll();
 	}
 
@@ -697,7 +697,7 @@ class PlayState extends MusicBeatState {
 			controllerHUD.cameras = [camHUD];
 			add(controllerHUD);
 
-			chars.rating = controllerHUD.rating;
+			chars.rating = controllerHUD.combo;
 		}
 
 		#if HSCRIPT_ALLOWED

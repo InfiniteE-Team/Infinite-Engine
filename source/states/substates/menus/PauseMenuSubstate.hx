@@ -219,16 +219,11 @@ class PauseMenuSubstate extends states.substates.BlurSubState {
 					reloadMenuOptions();
 				} else { // Change Difficulty
 					var selectedDiffString = options[curSelect].toLowerCase();
-
 					var diffIndex = core.rhythm.DiffsUtils.difficulties.indexOf(selectedDiffString);
 					if (diffIndex == -1)
 						diffIndex = 0;
-
 					core.rhythm.DiffsUtils.diffCurrent = core.rhythm.DiffsUtils.difficulties[diffIndex];
-
 					game.PlayStateConfig.blueBalled = 0;
-					close();
-
 					var currentSongName = game.PlayState.instance.songFolder;
 
 					MusicBeatState.switchState(() -> new states.menus.LoadingState(currentSongName, diffIndex));

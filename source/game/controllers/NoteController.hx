@@ -277,7 +277,7 @@ class NoteController {
 		holdSkinData = skinPart(noteSkin, 'holdsplashes');
 		popupsData = NoteSkins.read(noteSkin, 'popups');
 
-		var ratingPath = Paths.getPath('data/game/ui/popup/${game.PlayStateConfig.ratingSkin}', 'json');
+		var ratingPath = Paths.getPath('data/game/ui/popup/${game.PlayStateConfig.comboSkin}', 'json');
 		ratingData = FormatJson.readJson(ratingPath);
 		if (ratingData == null || ratingData.ratings == null) {
 			trace("WARNING: ratings.json not found or invalid");
@@ -702,7 +702,7 @@ class NoteController {
 				var strumMid = sustain.strum.y + (sustain.strum.frameHeight * 0.5) - sustain.strum.offset.y;
 
 				var strumAlpha = sustain.strumline?.alpha ?? 1.0;
-				var posAlpha = downscroll ? (sustain.y >= strumMid ? 0.0 : 1.0) : ((sustain.y + endH) <= strumMid ? 0.0 : 1.0);
+				var posAlpha = downscroll ? (sustain.y >= strumMid ? 0.0 : 1.0) : (sustain.y <= strumMid ? 0.0 : 1.0);
 				sustain.alpha = posAlpha * strumAlpha;
 				#if HSCRIPT_ALLOWED
 				if (scriptNC.hasScripts)
