@@ -41,7 +41,7 @@ class NumberStepper extends FlxSpriteGroup {
 		plus.x = box.x + box.width;
 
 		valueText = new FlxText(box.x, 0, box.width, '');
-		valueText.setFormat(Paths.getPath('Funkin.otf', 'font'), 12, FlxColor.BLACK, 'center');
+		valueText.setFormat(Paths.getPath('Funkin.otf', 'font'), 16, FlxColor.BLACK, 'center');
 		valueText.y = (box.height - valueText.height) / 2;
 
 		for (child in [minus, box, plus, valueText])

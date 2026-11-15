@@ -55,6 +55,24 @@ class InputController {
 		strum.playAnim('press$i', true);
 		if (!isGhostTapping)
 			applyMiss(cfg, nc, audio);
+
+		var songPos = core.rhythm.RhythmCore.songPosition;
+		var missTarget:Note = null;
+		var bestDiff = Math.POSITIVE_INFINITY;
+		for (n in nc.notes.members) {
+			if (n == null || !n.alive || !n.mustPress || n.strum != strum || n.wasGoodHit || n.wasMissed)
+				continue;
+			if (songPos < n.strumTime - nc.worstWindow)
+				continue;
+			var d = Math.abs(n.strumTime - songPos);
+			if (d < bestDiff) {
+				bestDiff = d;
+				missTarget = n;
+			}
+		}
+		if (missTarget != null)
+			missTarget.wasMissed = true;
+
 		return GhostTap;
 	}
 
@@ -64,7 +82,7 @@ class InputController {
 		for (sustain in nc.sustains.members) {
 			if (!isSustainOnStrum(sustain, strum))
 				continue;
-			var canHold = sustain.wasNoteHit && songPos >= sustain.strumTime - 50 && songPos <= sustain.strumTime + sustain.length;
+			var canHold = sustain.wasNoteHit && !sustain.wasMissed && songPos >= sustain.strumTime - 50 && songPos <= sustain.strumTime + sustain.length;
 			if (canHold) {
 				if (!sustain.isHeld)
 					nc.spawnHoldSplash(strum, i, sustain.noteType);
@@ -75,8 +93,19 @@ class InputController {
 				// sustain finished
 				sustain.isHeld = false;
 				nc.stopHoldSplash(strum);
+				strum.playAnim('press$i', true);
 			}
 		}
+
+		if (heldSustain == null) {
+			var anim = strum.currentAnim ?? '';
+			if (anim.startsWith('confirm')) {
+				var curAnim = strum.animation?.curAnim;
+				if (curAnim == null || curAnim.finished)
+					strum.playAnim('press$i', true);
+			}
+		}
+
 		return heldSustain != null ? SustainHeld(heldSustain) : Nothing;
 	}
 
@@ -92,6 +121,7 @@ class InputController {
 			if (remaining > 50) {
 				sustain.wasMissed = true;
 				sustain.canBeHit = false;
+				//nc.holdKill(strum);
 				onSustainDrop();
 				applyMiss(cfg, nc, audio);
 				dropped = true;

@@ -441,7 +441,7 @@ class CharacterEditor extends MusicBeatState {
 		g.add(importButton);
 
 		filesText = new FlxText(col1, y + 50, 160, '');
-		filesText.setFormat(Paths.getPath('Funkin.otf', 'font'), 10, FlxColor.WHITE, 'left');
+		filesText.setFormat(Paths.getPath('Funkin.otf', 'font'), 14, FlxColor.WHITE, 'left');
 		filesText.cameras = [camHud];
 		g.add(filesText);
 
@@ -452,7 +452,7 @@ class CharacterEditor extends MusicBeatState {
 		inputBg.cameras = [camHud];
 		g.add(inputBg);
 
-		gameOverInput = new flixel.text.FlxInputText(inputBg.x + 4, inputBg.y + 1, inputBg.width - 8, '', 12, FlxColor.BLACK, FlxColor.TRANSPARENT);
+		gameOverInput = new flixel.text.FlxInputText(inputBg.x + 4, inputBg.y + 1, inputBg.width - 8, '', 10, FlxColor.BLACK, FlxColor.TRANSPARENT);
 		gameOverInput.cameras = [camHud];
 		gameOverInput.onTextChange.add((text, _) -> setDeathCharacter(text));
 		g.add(gameOverInput);
@@ -515,7 +515,7 @@ class CharacterEditor extends MusicBeatState {
 		label(g, px + 20, y + 125, 'Prefix:');
 		animPrefixInput = input(g, px + 20, y + 145);
 		animPrefixInput.onEnter.add(setAnimPrefix);
-		label(g, px + 180, y + 147, '(Enter to apply)').size = 10;
+		label(g, px + 180, y + 147, '(Enter to apply)').size = 16;
 	}
 
 	function input(group:flixel.group.FlxGroup, x:Float, y:Float):flixel.text.FlxInputText {
@@ -525,7 +525,7 @@ class CharacterEditor extends MusicBeatState {
 		bg.cameras = [camHud];
 		group.add(bg);
 
-		final field = new flixel.text.FlxInputText(x + 4, y + 1, bg.width - 8, '', 12, FlxColor.BLACK, FlxColor.TRANSPARENT);
+		final field = new flixel.text.FlxInputText(x + 4, y + 1, bg.width - 8, '', 10, FlxColor.BLACK, FlxColor.TRANSPARENT);
 		field.cameras = [camHud];
 		group.add(field);
 		return field;
@@ -554,7 +554,13 @@ class CharacterEditor extends MusicBeatState {
 		while (layerData.anims.exists(a -> a.name == name))
 			name = 'newAnim${++n}';
 
-		final data:core.json.extensions.SpriteData.AnimData = {name: name, prefix: '', framerate: 24, looped: false, offsets: [0, 0]};
+		final data:core.json.extensions.SpriteData.AnimData = {
+			name: name,
+			prefix: '',
+			framerate: 24,
+			looped: false,
+			offsets: [0, 0]
+		};
 		final owner = layerData;
 		owner.anims.push(data);
 		refreshAnimList(selectedLayerName, name);
@@ -630,7 +636,9 @@ class CharacterEditor extends MusicBeatState {
 		flipYBox.setChecked(first?.flipY == true);
 
 		gameOverInput.text = data.gameplay.death?.character ?? '';
-		filesText.text = [for (i => l in data.render.layers) '${i + 1}. ${haxe.io.Path.withoutDirectory(l.path ?? l.name)}.png'].join('\n');
+		filesText.text = [
+			for (i => l in data.render.layers) '${i + 1}. ${haxe.io.Path.withoutDirectory(l.path ?? l.name)}.png'
+		].join('\n');
 	}
 
 	// the ANIM.PROP fields follow the selected anim, offsets also move with the arrow keys -JloorDev
@@ -840,25 +848,33 @@ class CharacterEditor extends MusicBeatState {
 			sys.io.File.copy(pngSrc, destPng);
 
 		if (atlasSrc != null) {
-			var destAtlas = '$destDir/$baseName.$atlasExt';
-			if (!sys.FileSystem.exists(destAtlas))
-				sys.io.File.copy(atlasSrc, destAtlas);
+            var destAtlas = '$destDir/$baseName.$atlasExt';
+            if (!sys.FileSystem.exists(destAtlas))
+                sys.io.File.copy(atlasSrc, destAtlas);
 
-			// a json that isn't a TexturePacker sheet (an Animate atlas) throws while parsing -JloorDev
-			var frames = null;
-			try {
-				frames = atlasExt == 'xml' ? flixel.graphics.frames.FlxAtlasFrames.fromSparrow(destPng,
-					destAtlas) : flixel.graphics.frames.FlxAtlasFrames.fromTexturePackerJson(destPng, destAtlas);
-			} catch (e:Dynamic) {
-				Console.log('[CharacterEditor] could not parse $atlasSrc: $e', true);
-			}
-			if (frames == null) {
-				showImportError('Failed to parse atlas:\n$baseName.$atlasExt');
-				Console.log('[CharacterEditor] frames null for: $atlasSrc', true);
-				return;
-			}
-			sprite.frames = frames;
-		} else {
+            var frames:flixel.graphics.frames.FlxAtlasFrames = null;
+            try {
+                var bmp = openfl.display.BitmapData.fromFile(destPng);
+                if (bmp != null) {
+                    var graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, destPng);
+                    var atlasData = sys.io.File.getContent(destAtlas);
+                    if (atlasData.length > 0 && atlasData.charCodeAt(0) == 65279) {
+                        atlasData = atlasData.substr(1);
+                    }
+                    frames = atlasExt == 'xml' ? flixel.graphics.frames.FlxAtlasFrames.fromSparrow(graphic,
+                        atlasData) : flixel.graphics.frames.FlxAtlasFrames.fromTexturePackerJson(graphic, atlasData);
+                }
+            } catch (e:Dynamic) {
+                Console.log('[CharacterEditor] could not parse $atlasSrc: $e', true);
+            }
+
+            if (frames == null) {
+                showImportError('Failed to parse atlas:\n$baseName.$atlasExt');
+                Console.log('[CharacterEditor] frames null for: $atlasSrc', true);
+                return;
+            }
+            sprite.frames = frames;
+        } else {
 			var bmp = openfl.display.BitmapData.fromFile(destPng);
 			if (bmp == null) {
 				showImportError('Failed to load:\n$baseName.png');
