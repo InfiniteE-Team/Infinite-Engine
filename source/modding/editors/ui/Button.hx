@@ -49,7 +49,8 @@ class Button extends flixel.group.FlxSpriteGroup {
 		var mouse = FlxG.mouse.getViewPosition(cam != null ? cam : FlxG.camera);
 		var mx = mouse.x;
 		var my = mouse.y;
-		isHovered = mx >= x && mx <= x + bg.width && my >= y && my <= y + bg.height;
+		// scrolled out of its list, it can't be clicked either -JloorDev
+		isHovered = visible && mx >= x && mx <= x + bg.width && my >= y && my <= y + bg.height;
 
 		if (isHovered) {
 			if (FlxG.mouse.pressed) {

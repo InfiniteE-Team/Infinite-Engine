@@ -9,6 +9,7 @@ class Sound extends flixel.sound.FlxSound {
 	public static var streamedCache:Map<String, openfl.media.Sound> = new Map();
 
 	public var soundType:SoundType;
+	// kept on destroy: FlxSound.load() calls destroy() itself, clearing it lost the path of every loaded sound -JloorDev
 	public var soundPath:String;
 
 	public var onLoaded:() -> Void;
@@ -86,11 +87,5 @@ class Sound extends flixel.sound.FlxSound {
 
 		if (streamedCache != null)
 			streamedCache.clear();
-	}
-
-	override public function destroy():Void {
-		soundPath = null;
-
-		super.destroy();
 	}
 }

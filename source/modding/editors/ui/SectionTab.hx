@@ -49,8 +49,9 @@ class SectionTab extends FlxSpriteGroup {
 		return i * (tabW + gap);
 	}
 
+	// centered on its tab -JloorDev
 	function getTabX(i:Int):Float {
-		return getTabStartX(i) + (tabW * 0.5) - 40;
+		return getTabStartX(i) + (tabW - activeSprite.width) * 0.5;
 	}
 
 	function build(tabs:Array<TabEntry>) {
@@ -100,7 +101,7 @@ class SectionTab extends FlxSpriteGroup {
 		activeIndex = index;
 		tweening = true;
 
-		FlxTween.tween(activeSprite, {x: getTabX(index)}, 0.15, {
+		FlxTween.tween(activeSprite, {x: x + getTabX(index)}, 0.15, {
 			ease: FlxEase.quadOut,
 			onComplete: (_) -> {
 				tweening = false;

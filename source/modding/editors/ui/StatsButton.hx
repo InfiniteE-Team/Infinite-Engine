@@ -78,6 +78,12 @@ class StatsButton extends Button {
 		}
 	}
 
+	// the list scrolled, it snaps back here after a drag -JloorDev
+	public function setBaseY(y:Float) {
+		if (!dragging)
+			this.y = baseY = y;
+	}
+
 	public function setDragContext(index:Int, total:Int, stepHeight:Float) {
 		myIndex = index;
 		totalItems = total;
@@ -89,6 +95,8 @@ class StatsButton extends Button {
 
 	override public function update(elapsed:Float) {
 		super.update(elapsed);
+		if (!visible && !dragging)
+			return;
 
 		var mouse = FlxG.mouse.getViewPosition(cam != null ? cam : FlxG.camera);
 		var mx = mouse.x;

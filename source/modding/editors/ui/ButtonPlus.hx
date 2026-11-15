@@ -13,7 +13,7 @@ class ButtonPlus extends Button {
 		label.destroy();
 
 		bg = new FlxSprite();
-		bg.frames = Paths.getPath('menus/editors/ui/+button', 'image');
+		bg.loadGraphic(Paths.getPath('menus/editors/ui/+button', 'image'));
 		bg.scale.set(0.6, 0.6);
 		bg.updateHitbox();
 		add(bg);

@@ -126,6 +126,7 @@ class CharacterEditor extends MusicBeatState {
 			refreshAnimList(char.characterData.render.layers[0].name);
 			refreshLayerList();
 		}
+		refreshCharProps();
 
 		FlxG.cameras.remove(camHud, false);
 		FlxG.cameras.add(camHud, false);
@@ -170,6 +171,18 @@ class CharacterEditor extends MusicBeatState {
 
 		add(tabAnimGroup);
 		add(tabLayersGroup);
+
+		scrollTrack = new flixel.FlxSprite(278, LIST_TOP).loadGraphic(Paths.getPath('menus/editors/ui/slidebar', 'image'));
+		scrollTrack.setGraphicSize(scrollTrack.width, LIST_BOTTOM - LIST_TOP);
+		scrollTrack.updateHitbox();
+		scrollTrack.alpha = 0.35;
+		scrollTrack.cameras = [camHud];
+		add(scrollTrack);
+
+		scrollThumb = new flixel.FlxSprite(278, LIST_TOP).loadGraphic(Paths.getPath('menus/editors/ui/slidebar', 'image'));
+		scrollThumb.color = 0xFFCC0040;
+		scrollThumb.cameras = [camHud];
+		add(scrollThumb);
 
 		add(sectionTab);
 
@@ -235,6 +248,8 @@ class CharacterEditor extends MusicBeatState {
 				refreshAnimList(char.characterData.render.layers[0].name);
 				refreshLayerList();
 			}
+			refreshCharProps();
+			animPropsKey = '';
 
 			centerCameraOnChar();
 		}, camHud);
@@ -286,6 +301,11 @@ class CharacterEditor extends MusicBeatState {
 		infoAnim.cameras = [camHud];
 		tabAnimGroup.add(infoAnim);
 
+		newAnimButton = new ButtonPlus(20, 180, 'New Anim', addNewAnim, camHud);
+		newAnimButton.scrollFactor.set(0, 0);
+		newAnimButton.cameras = [camHud];
+		tabAnimGroup.add(newAnimButton);
+
 		if (char != null
 			&& char.characterData != null
 			&& char.characterData.render != null
@@ -313,34 +333,429 @@ class CharacterEditor extends MusicBeatState {
 		tabLayersGroup.add(info);
 	}
 
+	// right side
+	var propsTab:SectionTab;
+	var animPropGroup:flixel.group.FlxGroup;
+	var charPropGroup:flixel.group.FlxGroup;
+
+	var filesText:FlxText;
+	var gameOverInput:flixel.text.FlxInputText;
+	var camX:NumberStepper;
+	var camY:NumberStepper;
+	var charX:NumberStepper;
+	var charY:NumberStepper;
+	var alphaStepper:NumberStepper;
+	var sizeStepper:NumberStepper;
+	var playableBox:CheckBox;
+	var flipXBox:CheckBox;
+	var flipYBox:CheckBox;
+
+	var newAnimButton:ButtonPlus;
+
+	// left lists scroll inside the panel -JloorDev
+	static final LIST_TOP:Float = 180;
+	static final LIST_BOTTOM:Float = 610;
+	static final ROW:Float = 40;
+
+	var listScroll:Float = 0;
+	var scrollTrack:flixel.FlxSprite;
+	var scrollThumb:flixel.FlxSprite;
+	var draggingThumb:Bool = false;
+	var animNameInput:flixel.text.FlxInputText;
+	var animPrefixInput:flixel.text.FlxInputText;
+	var offsetX:NumberStepper;
+	var offsetY:NumberStepper;
+	var fpsStepper:NumberStepper;
+	var loopBox:CheckBox;
+	var animPropsKey:String = '';
+
 	function tabRight() {
-		final tab = new Tab(FlxG.width * 0.72, 20, 'Símbolo 9');
+		final px = FlxG.width * 0.72;
+		final py = 20.0;
+
+		final tab = new Tab(px, py, 'Símbolo 9');
 		tab.cameras = [camHud];
 		add(tab);
 
-		final importButton = new Button(0, 0, 'Import', function() {
-			core.api.FileDialog.open('Select a file to import.', 'Images|*.png|Atlas|*.xml;*.json', function(path) {
-				importAsset(path);
-			});
-		}, camHud);
-		importButton.cameras = [camHud];
-		add(importButton);
-		tab.addItem(importButton, 20, 80);
+		final lowerTab = new Tab(px, py + 320, 'Símbolo 9');
+		lowerTab.cameras = [camHud];
+		add(lowerTab);
 
-		final saveButton = new Button(0, 0, 'Save', function() {
-			saveCharacter();
-		}, camHud);
-		saveButton.cameras = [camHud];
-		add(saveButton);
-		tab.addItem(saveButton, 20, 120);
+		animPropGroup = new flixel.group.FlxGroup();
+		charPropGroup = new flixel.group.FlxGroup();
+		animPropGroup.visible = false;
+		add(animPropGroup);
+		add(charPropGroup);
 
-		importErrorText = new flixel.text.FlxText(FlxG.width * 0.72 + 10, 185, 270, '');
+		propsTab = new SectionTab(px + 20, py + 15, tab.getWidth() - 40, 0.3, [{label: 'ANIM.PROP'}, {label: 'CHAR.PROP'}], camHud, (index) -> {
+			animPropGroup.visible = index == 0;
+			charPropGroup.visible = index == 1;
+		});
+		propsTab.cameras = [camHud];
+		add(propsTab);
+		propsTab.selectTab(1);
+
+		buildCharProps(px, py + 75);
+		buildAnimProps(px, py + 75);
+
+		importErrorText = new flixel.text.FlxText(px + 10, py + 340, 270, '');
 		importErrorText.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, flixel.util.FlxColor.RED, 'left');
 		importErrorText.setBorderStyle(flixel.text.FlxText.FlxTextBorderStyle.OUTLINE, flixel.util.FlxColor.BLACK, 1);
 		importErrorText.scrollFactor.set(0, 0);
 		importErrorText.visible = false;
 		importErrorText.cameras = [camHud];
 		add(importErrorText);
+	}
+
+	function label(group:flixel.group.FlxGroup, x:Float, y:Float, text:String):FlxText {
+		var t = new FlxText(x, y, 0, text);
+		t.setFormat(Paths.getPath('Funkin.otf', 'font'), 14, FlxColor.WHITE, 'left');
+		t.cameras = [camHud];
+		group.add(t);
+		return t;
+	}
+
+	function stepper(group:flixel.group.FlxGroup, x:Float, y:Float, name:String, step:Float, onChange:Float->Void, decimals:Int = 0, min:Float = -99999,
+			max:Float = 99999):NumberStepper {
+		label(group, x, y, name);
+		var s = new NumberStepper(x + 18, y, 0, step, camHud, onChange, decimals, min, max);
+		s.cameras = [camHud];
+		group.add(s);
+		return s;
+	}
+
+	function buildCharProps(px:Float, y:Float) {
+		final g = charPropGroup;
+		final col1 = px + 20;
+		final col2 = px + 130;
+		final col3 = px + 245;
+
+		label(g, col1, y, 'Files:');
+		final importButton = new Button(col1, y + 20, 'Import', function() {
+			core.api.FileDialog.open('Select a file to import.', 'Images|*.png|Atlas|*.xml;*.json', function(path) {
+				importAsset(path);
+				refreshCharProps();
+			});
+		}, camHud);
+		importButton.cameras = [camHud];
+		g.add(importButton);
+
+		filesText = new FlxText(col1, y + 50, 160, '');
+		filesText.setFormat(Paths.getPath('Funkin.otf', 'font'), 10, FlxColor.WHITE, 'left');
+		filesText.cameras = [camHud];
+		g.add(filesText);
+
+		label(g, col2 + 60, y, 'Game Over:');
+		final inputBg = new flixel.FlxSprite(col2 + 60, y + 20).loadGraphic(Paths.getPath('menus/editors/ui/inputText', 'image'));
+		inputBg.scale.set(0.6, 0.6);
+		inputBg.updateHitbox();
+		inputBg.cameras = [camHud];
+		g.add(inputBg);
+
+		gameOverInput = new flixel.text.FlxInputText(inputBg.x + 4, inputBg.y + 1, inputBg.width - 8, '', 12, FlxColor.BLACK, FlxColor.TRANSPARENT);
+		gameOverInput.cameras = [camHud];
+		gameOverInput.onTextChange.add((text, _) -> setDeathCharacter(text));
+		g.add(gameOverInput);
+
+		final newGameOver = new ButtonPlus(col2 + 60, y + 44, 'New GameOver', function() {
+			gameOverInput.text = '$curCharacter-dead';
+			setDeathCharacter(gameOverInput.text);
+		}, camHud);
+		newGameOver.label.size = 14;
+		newGameOver.label.y = newGameOver.y + (newGameOver.bg.height - newGameOver.label.height) / 2;
+		newGameOver.cameras = [camHud];
+		g.add(newGameOver);
+
+		final rows = y + 95;
+		label(g, col1, rows, 'Camera:');
+		camX = stepper(g, col1, rows + 20, 'X:', 5, v -> setCameraOffset(0, v));
+		camY = stepper(g, col1, rows + 42, 'Y:', 5, v -> setCameraOffset(1, v));
+
+		label(g, col2, rows, 'Character:');
+		charX = stepper(g, col2, rows + 20, 'X:', 5, v -> moveCharacter(v, char.y));
+		charY = stepper(g, col2, rows + 42, 'Y:', 5, v -> moveCharacter(char.x, v));
+
+		playableBox = new CheckBox(col3, rows, 'Playable', false, camHud, v -> {
+			char.characterData.meta ??= {};
+			char.characterData.meta.isPlayer = v;
+			markChanged();
+		});
+		flipXBox = new CheckBox(col3, rows + 20, 'FlipX', false, camHud, v -> setFlip(v, flipYBox.checked));
+		flipYBox = new CheckBox(col3, rows + 42, 'FlipY', false, camHud, v -> setFlip(flipXBox.checked, v));
+		for (box in [playableBox, flipXBox, flipYBox]) {
+			box.cameras = [camHud];
+			g.add(box);
+		}
+
+		alphaStepper = stepper(g, col1, rows + 75, 'a:', 0.1, setAlpha, 1, 0, 1);
+		sizeStepper = stepper(g, col2, rows + 75, 'Size:', 0.05, setSize, 2, 0.05, 10);
+		sizeStepper.x += 18;
+
+		final saveButton = new Button(col3 - 30, rows + 105, 'Save', saveCharacter, camHud);
+		saveButton.cameras = [camHud];
+		g.add(saveButton);
+	}
+
+	function buildAnimProps(px:Float, y:Float) {
+		final g = animPropGroup;
+		label(g, px + 20, y, 'Offset:');
+		offsetX = stepper(g, px + 20, y + 20, 'X:', 1, v -> setAnimOffset(v, offsetY.value));
+		offsetY = stepper(g, px + 20, y + 42, 'Y:', 1, v -> setAnimOffset(offsetX.value, v));
+
+		label(g, px + 130, y, 'Animation:');
+		fpsStepper = stepper(g, px + 130, y + 20, 'FPS:', 1, setAnimFramerate, 0, 1, 120);
+		fpsStepper.x += 18;
+		loopBox = new CheckBox(px + 130, y + 42, 'Loop', false, camHud, setAnimLooped);
+		loopBox.cameras = [camHud];
+		g.add(loopBox);
+
+		label(g, px + 20, y + 80, 'Name:');
+		animNameInput = input(g, px + 20, y + 100);
+		animNameInput.onEnter.add(renameAnim);
+		label(g, px + 20, y + 125, 'Prefix:');
+		animPrefixInput = input(g, px + 20, y + 145);
+		animPrefixInput.onEnter.add(setAnimPrefix);
+		label(g, px + 180, y + 147, '(Enter to apply)').size = 10;
+	}
+
+	function input(group:flixel.group.FlxGroup, x:Float, y:Float):flixel.text.FlxInputText {
+		final bg = new flixel.FlxSprite(x, y).loadGraphic(Paths.getPath('menus/editors/ui/inputText', 'image'));
+		bg.scale.set(0.6, 0.6);
+		bg.updateHitbox();
+		bg.cameras = [camHud];
+		group.add(bg);
+
+		final field = new flixel.text.FlxInputText(x + 4, y + 1, bg.width - 8, '', 12, FlxColor.BLACK, FlxColor.TRANSPARENT);
+		field.cameras = [camHud];
+		group.add(field);
+		return field;
+	}
+
+	function isTyping():Bool {
+		for (field in [gameOverInput, animNameInput, animPrefixInput])
+			if (field != null && field.hasFocus)
+				return true;
+		return false;
+	}
+
+	function selectedLayerData():Null<core.json.extensions.SpriteData.ObjectData>
+		return char?.characterData?.render?.layers?.find(l -> l.name == selectedLayerName);
+
+	// adds an empty anim to the selected layer, its prefix is set from ANIM.PROP -JloorDev
+	function addNewAnim() {
+		var layerData = selectedLayerData();
+		if (layerData == null) {
+			showImportError('Select a layer first');
+			return;
+		}
+		layerData.anims ??= [];
+		var name = 'newAnim';
+		var n = 1;
+		while (layerData.anims.exists(a -> a.name == name))
+			name = 'newAnim${++n}';
+
+		final data:core.json.extensions.SpriteData.AnimData = {name: name, prefix: '', framerate: 24, looped: false, offsets: [0, 0]};
+		final owner = layerData;
+		owner.anims.push(data);
+		refreshAnimList(selectedLayerName, name);
+		propsTab.selectTab(0);
+		markChanged();
+
+		pushAction({
+			undo: () -> {
+				owner.anims.remove(data);
+				refreshAnimList(owner.name);
+			},
+			redo: () -> {
+				owner.anims.push(data);
+				refreshAnimList(owner.name, data.name);
+			}
+		});
+	}
+
+	function renameAnim(newName:String) {
+		var data = animData(activeAnim);
+		newName = StringTools.trim(newName);
+		if (data == null || newName == '' || newName == activeAnim)
+			return;
+		if (selectedLayerData().anims.exists(a -> a.name == newName)) {
+			showImportError('"$newName" already exists');
+			return;
+		}
+		var offset = selectedLayer.offsets.get(activeAnim);
+		data.name = newName;
+		if (offset != null)
+			selectedLayer.offsets.set(newName, offset);
+		registerAnim(data);
+		refreshAnimList(selectedLayerName, newName);
+		markChanged();
+	}
+
+	function setAnimPrefix(prefix:String) {
+		var data = animData(activeAnim);
+		if (data == null)
+			return;
+		data.prefix = prefix;
+		registerAnim(data);
+		selectedLayer.playAnim(data.name, true);
+		markChanged();
+	}
+
+	function registerAnim(data:core.json.extensions.SpriteData.AnimData) {
+		if (data.prefix == null || data.prefix == '')
+			return;
+		try {
+			selectedLayer.addAnim(data.name, data.prefix, data.framerate ?? 24, data.looped == true, data.indices);
+		} catch (e:Dynamic) {
+			showImportError('Prefix "${data.prefix}" not found');
+		}
+	}
+
+	// fills the CHAR.PROP fields from the loaded character -JloorDev
+	function refreshCharProps() {
+		if (char == null || char.characterData == null || camX == null)
+			return;
+		var data = char.characterData;
+		var cam = data.gameplay.cameraOffset ?? [0.0, 0.0];
+		camX.setValue(cam[0]);
+		camY.setValue(cam[1]);
+		charX.setValue(char.x);
+		charY.setValue(char.y);
+
+		var first = data.render.layers.length > 0 ? data.render.layers[0] : null;
+		alphaStepper.setValue(first?.alpha ?? 1.0);
+		sizeStepper.setValue(first?.scale != null ? first.scale[0] : 1.0);
+		playableBox.setChecked(data.meta?.isPlayer == true);
+		flipXBox.setChecked(first?.flipX == true);
+		flipYBox.setChecked(first?.flipY == true);
+
+		gameOverInput.text = data.gameplay.death?.character ?? '';
+		filesText.text = [for (i => l in data.render.layers) '${i + 1}. ${haxe.io.Path.withoutDirectory(l.path ?? l.name)}.png'].join('\n');
+	}
+
+	// the ANIM.PROP fields follow the selected anim, offsets also move with the arrow keys -JloorDev
+	function refreshAnimProps() {
+		if (offsetX == null || selectedLayer == null || activeAnim == '')
+			return;
+		var off = selectedLayer.offsets.get(activeAnim);
+		offsetX.setValue(off?.x ?? 0);
+		offsetY.setValue(off?.y ?? 0);
+
+		var key = '$selectedLayerName|$activeAnim';
+		if (key == animPropsKey)
+			return;
+		animPropsKey = key;
+		var anim = selectedLayer.animation.getByName(activeAnim);
+		var data = animData(activeAnim);
+		fpsStepper.setValue(anim?.frameRate ?? data?.framerate ?? 24);
+		loopBox.setChecked(anim?.looped ?? data?.looped == true);
+		animNameInput.text = activeAnim;
+		animPrefixInput.text = data?.prefix ?? '';
+	}
+
+	function markChanged() {
+		advertency.visible = true;
+	}
+
+	function setCameraOffset(axis:Int, v:Float) {
+		var data = char.characterData.gameplay;
+		data.cameraOffset ??= [0, 0];
+		data.cameraOffset[axis] = v;
+		if (axis == 0)
+			char.cameraOffset.x = v;
+		else
+			char.cameraOffset.y = v;
+		markChanged();
+	}
+
+	// the layers keep their own position, they move along with the character -JloorDev
+	function moveCharacter(x:Float, y:Float) {
+		var dx = x - char.x;
+		var dy = y - char.y;
+		char.setPosition(x, y);
+		for (layer in char.layers)
+			layer.setPosition(layer.x + dx, layer.y + dy);
+		markChanged();
+	}
+
+	function setFlip(x:Bool, y:Bool) {
+		for (i => layer in char.layers) {
+			layer.flipX = x;
+			layer.flipY = y;
+			if (i < char.characterData.render.layers.length) {
+				char.characterData.render.layers[i].flipX = x;
+				char.characterData.render.layers[i].flipY = y;
+			}
+		}
+		markChanged();
+	}
+
+	function setAlpha(v:Float) {
+		for (i => layer in char.layers) {
+			layer.alpha = v;
+			if (i < char.characterData.render.layers.length)
+				char.characterData.render.layers[i].alpha = v;
+		}
+		markChanged();
+	}
+
+	function setSize(v:Float) {
+		for (i => layer in char.layers) {
+			layer.scale.set(v, v);
+			if (i < char.characterData.render.layers.length)
+				char.characterData.render.layers[i].scale = [v, v];
+		}
+		markChanged();
+	}
+
+	function setDeathCharacter(name:String) {
+		var gameplay = char.characterData.gameplay;
+		gameplay.death ??= {};
+		gameplay.death.character = name != '' ? name : null;
+		markChanged();
+	}
+
+	function setAnimOffset(x:Float, y:Float) {
+		if (selectedLayer == null || activeAnim == '')
+			return;
+		var old = selectedLayer.offsets.get(activeAnim) ?? {x: 0.0, y: 0.0};
+		final spr = selectedLayer;
+		final anim = activeAnim;
+		final fx = old.x;
+		final fy = old.y;
+		applyOffset(spr, anim, x, y);
+		pushAction({
+			undo: () -> applyOffset(spr, anim, fx, fy),
+			redo: () -> applyOffset(spr, anim, x, y)
+		});
+	}
+
+	function animData(name:String):Null<core.json.extensions.SpriteData.AnimData> {
+		var layerData = char.characterData.render.layers.find(l -> l.name == selectedLayerName);
+		return layerData?.anims?.find(a -> a.name == name);
+	}
+
+	function setAnimFramerate(v:Float) {
+		var anim = selectedLayer?.animation.getByName(activeAnim);
+		if (anim == null)
+			return;
+		anim.frameRate = v;
+		var data = animData(activeAnim);
+		if (data != null)
+			data.framerate = Std.int(v);
+		markChanged();
+	}
+
+	function setAnimLooped(v:Bool) {
+		var anim = selectedLayer?.animation.getByName(activeAnim);
+		if (anim == null)
+			return;
+		anim.looped = v;
+		var data = animData(activeAnim);
+		if (data != null)
+			data.looped = v;
+		selectedLayer.playAnim(activeAnim, true);
+		markChanged();
 	}
 
 	function showImportError(msg:String) {
@@ -429,8 +844,14 @@ class CharacterEditor extends MusicBeatState {
 			if (!sys.FileSystem.exists(destAtlas))
 				sys.io.File.copy(atlasSrc, destAtlas);
 
-			var frames = atlasExt == 'xml' ? flixel.graphics.frames.FlxAtlasFrames.fromSparrow(destPng,
-				destAtlas) : flixel.graphics.frames.FlxAtlasFrames.fromTexturePackerJson(destPng, destAtlas);
+			// a json that isn't a TexturePacker sheet (an Animate atlas) throws while parsing -JloorDev
+			var frames = null;
+			try {
+				frames = atlasExt == 'xml' ? flixel.graphics.frames.FlxAtlasFrames.fromSparrow(destPng,
+					destAtlas) : flixel.graphics.frames.FlxAtlasFrames.fromTexturePackerJson(destPng, destAtlas);
+			} catch (e:Dynamic) {
+				Console.log('[CharacterEditor] could not parse $atlasSrc: $e', true);
+			}
 			if (frames == null) {
 				showImportError('Failed to parse atlas:\n$baseName.$atlasExt');
 				Console.log('[CharacterEditor] frames null for: $atlasSrc', true);
@@ -500,7 +921,7 @@ class CharacterEditor extends MusicBeatState {
 		Console.log('[CharacterEditor] Layer added: $layerName');
 	}
 
-	function refreshAnimList(layerName:String) {
+	function refreshAnimList(layerName:String, ?select:String) {
 		for (btn in animButtons) {
 			remove(btn);
 			btn.destroy();
@@ -521,7 +942,7 @@ class CharacterEditor extends MusicBeatState {
 		}
 
 		if (layerData.anims.length > 0) {
-			activeAnim = layerData.anims[0].name;
+			activeAnim = select != null && layerData.anims.exists(a -> a.name == select) ? select : layerData.anims[0].name;
 			char.playAnim(activeAnim, true);
 		} else {
 			activeAnim = '';
@@ -537,6 +958,44 @@ class CharacterEditor extends MusicBeatState {
 		btn.scrollFactor.set(0, 0);
 		btn.cameras = [camHud];
 		return btn;
+	}
+
+	function placeRow(btn:flixel.FlxSprite, index:Int, height:Float = 32) {
+		var y = LIST_TOP + index * ROW - listScroll;
+		if (Std.isOfType(btn, StatsButton))
+			cast(btn, StatsButton).setBaseY(y);
+		else
+			btn.y = y;
+		btn.visible = y >= LIST_TOP - 4 && y + height <= LIST_BOTTOM + 4;
+	}
+
+	function layoutLists() {
+		var onAnims = tabAnimGroup.visible;
+		var rows = onAnims ? animButtons.length + 1 : layerButtons.length;
+		var maxScroll = Math.max(0, rows * ROW - (LIST_BOTTOM - LIST_TOP));
+		listScroll = FlxMath.bound(listScroll, 0, maxScroll);
+
+		var trackH = LIST_BOTTOM - LIST_TOP;
+		var thumbH = Math.max(30, trackH * trackH / (rows * ROW));
+		var m = FlxG.mouse.getViewPosition(camHud);
+		if (FlxG.mouse.justPressed && maxScroll > 0 && scrollTrack.overlapsPoint(m, true, camHud))
+			draggingThumb = true;
+		if (!FlxG.mouse.pressed)
+			draggingThumb = false;
+		if (draggingThumb)
+			listScroll = FlxMath.bound((m.y - LIST_TOP - thumbH / 2) / (trackH - thumbH), 0, 1) * maxScroll;
+
+		for (i => btn in animButtons)
+			placeRow(btn, i);
+		for (i => btn in layerButtons)
+			placeRow(btn, i);
+		if (newAnimButton != null)
+			placeRow(newAnimButton, animButtons.length, newAnimButton.height);
+
+		scrollTrack.visible = scrollThumb.visible = maxScroll > 0;
+		scrollThumb.setGraphicSize(scrollThumb.frameWidth, thumbH);
+		scrollThumb.updateHitbox();
+		scrollThumb.y = LIST_TOP + (maxScroll > 0 ? listScroll / maxScroll : 0) * (trackH - thumbH);
 	}
 
 	function refreshLayerList() {
@@ -676,6 +1135,10 @@ class CharacterEditor extends MusicBeatState {
 		if (char == null)
 			return;
 
+		var panelX = FlxG.mouse.getViewPosition(camHud).x;
+		if (FlxG.mouse.justPressed && (panelX >= FlxG.width * 0.72 || panelX <= 300))
+			return;
+
 		if (FlxG.mouse.justPressed) {
 			var mousePos = FlxG.mouse.getWorldPosition(camEditor);
 			var anyLayerDragging = false;
@@ -761,7 +1224,7 @@ class CharacterEditor extends MusicBeatState {
 		var my = mouseScreen.y;
 
 		for (btn in animButtons) {
-			var isHover = mx >= btn.x && mx <= btn.x + btn.width && my >= btn.y && my <= btn.y + btn.height;
+			var isHover = btn.visible && mx >= btn.x && mx <= btn.x + btn.width && my >= btn.y && my <= btn.y + btn.height;
 			var isActive = btn.label.text == activeAnim;
 
 			if (isHover && FlxG.mouse.justPressed) {
@@ -794,7 +1257,7 @@ class CharacterEditor extends MusicBeatState {
 		var my = mouseScreen.y;
 
 		for (btn in layerButtons) {
-			var isHover = mx >= btn.x && mx <= btn.x + btn.width && my >= btn.y && my <= btn.y + btn.height;
+			var isHover = btn.visible && mx >= btn.x && mx <= btn.x + btn.width && my >= btn.y && my <= btn.y + btn.height;
 			var isActive = btn.label.text == selectedLayerName;
 
 			if (isHover && FlxG.mouse.justPressed) {
@@ -1024,13 +1487,17 @@ class CharacterEditor extends MusicBeatState {
 			saveCharacter();
 		}
 
+		var typing = isTyping();
+
 		movementMouse(hit);
 
 		sectionTab.handleInput();
+		propsTab.handleInput();
+		refreshAnimProps();
 
 		handleUndoRedo();
 
-		if (!FlxG.keys.pressed.CONTROL && !FlxG.keys.pressed.WINDOWS)
+		if (!typing && !FlxG.keys.pressed.CONTROL && !FlxG.keys.pressed.WINDOWS)
 			adjustOffsets();
 
 		selectionAnims();
@@ -1048,10 +1515,15 @@ class CharacterEditor extends MusicBeatState {
 			hoverText.visible = false;
 		}
 
-		if (FlxG.mouse.wheel != 0)
-			camEditor.zoom = Math.max(0.25, Math.min(3.0, camEditor.zoom + (FlxG.mouse.wheel > 0 ? 0.1 : -0.1)));
+		if (FlxG.mouse.wheel != 0) {
+			if (FlxG.mouse.getViewPosition(camHud).x <= 300)
+				listScroll -= FlxG.mouse.wheel * ROW;
+			else
+				camEditor.zoom = Math.max(0.25, Math.min(3.0, camEditor.zoom + (FlxG.mouse.wheel > 0 ? 0.1 : -0.1)));
+		}
+		layoutLists();
 
-		if (Controls.BACK) {
+		if (!typing && Controls.BACK) {
 			keysLocked = true;
 			MusicBeatState.switchState(() -> new DebugMenu());
 		}
