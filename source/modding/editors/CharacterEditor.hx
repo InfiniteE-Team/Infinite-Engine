@@ -858,9 +858,6 @@ class CharacterEditor extends MusicBeatState {
                 if (bmp != null) {
                     var graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, destPng);
                     var atlasData = sys.io.File.getContent(destAtlas);
-                    if (atlasData.length > 0 && atlasData.charCodeAt(0) == 65279) {
-                        atlasData = atlasData.substr(1);
-                    }
                     frames = atlasExt == 'xml' ? flixel.graphics.frames.FlxAtlasFrames.fromSparrow(graphic,
                         atlasData) : flixel.graphics.frames.FlxAtlasFrames.fromTexturePackerJson(graphic, atlasData);
                 }
