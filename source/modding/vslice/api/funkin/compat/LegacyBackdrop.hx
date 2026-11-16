@@ -4,7 +4,6 @@ import flixel.addons.display.FlxBackdrop;
 import flixel.util.FlxAxes;
 
 // shortcut: V-Slice mods still call FlxBackdrop(graphic, scrollX, scrollY, repeatX, repeatY) from flixel-addons 2, mapped onto 4.x -JloorDev
-@:keep
 class LegacyBackdrop extends FlxBackdrop {
 	public var zIndex:Int = 0;
 

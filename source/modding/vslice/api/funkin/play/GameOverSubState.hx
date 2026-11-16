@@ -1,7 +1,6 @@
 package funkin.play;
 
 // V-Slice GameOverSubState for scripts: instance exists while the engine's game over is open -JloorDev
-@:keep
 class GameOverSubState {
 	public static var instance:GameOverSubState = null;
 	public static var blueballed:Bool = false;

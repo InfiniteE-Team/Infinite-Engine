@@ -8,8 +8,6 @@ import flixel.util.FlxColor;
 // V-Slice's FunkinSprite on flixel-animate like V-Slice's own, so scripts can load texture atlases too
 // .hxc scripts also get it in place of FlxSprite, since they set zIndex on it -JloorDev
 @:scriptable
-@:keepSub
-@:keep
 class FunkinSprite extends FlxAnimate {
 	public var zIndex:Int = 0;
 

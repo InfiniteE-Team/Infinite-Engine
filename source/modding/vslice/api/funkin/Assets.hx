@@ -1,7 +1,6 @@
 package funkin;
 
 // Assets Text for Shaders in V-Slice
-@:keep
 class Assets {
     public static function getText(id:String):String {
         if (sys.FileSystem.exists(id))

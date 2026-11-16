@@ -1,6 +1,5 @@
 package funkin.util;
 
-@:keep
 class ReflectUtil {
 	public static function getClassNameOf(obj:Dynamic):String {
 		var cls = Type.getClass(obj);

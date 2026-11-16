@@ -1,11 +1,10 @@
 package modding.scripting;
 
 import hxscript.Script;
-import hxscript.Environment;
 import hxscript.Module;
 
 class ScriptHandler {
-	public static var globalEnv:Environment = new Environment();
+	public static var globalEnv:ScriptEnvironment = new ScriptEnvironment();
 
 	var scripts:Array<Script> = [];
 	var luaScripts:Array<modding.scripting.lua.LuaScript> = [];
@@ -89,6 +88,53 @@ class ScriptHandler {
 		}
 	}
 
+	public static function loadModuleFile(filePath:String, ?knownPath:String):Null<Module> {
+		if (moduleRegistry.exists(filePath))
+			return moduleRegistry.get(filePath);
+
+		var content:String;
+		try {
+			content = sys.io.File.getContent(filePath);
+		} catch (e) {
+			Console.log('[ScriptHandler] Could not be read $filePath: ${e.message}');
+			return null;
+		}
+
+		scanAndLoadImports(content, filePath);
+
+		var fileName = haxe.io.Path.withoutDirectory(haxe.io.Path.withoutExtension(filePath));
+		var pack = derivePackage(filePath);
+
+		var mod = new Module(content, fileName, pack, filePath);
+		mod.onParsingError = e -> Console.log('[$fileName] Parse error: ${e.message}');
+		mod.onProgramError = e -> Console.log('[$fileName] Runtime error: ${e.message}');
+
+		moduleRegistry.set(filePath, mod);
+		globalEnv.addModule(mod);
+
+		mod.init(globalEnv);
+		mod.start(globalEnv);
+		mod.startTypes(globalEnv);
+
+		for (_ => type in mod.types)
+			globalEnv.variables.set(type.name, type);
+
+		Console.log('[ScriptHandler] module loaded: $filePath');
+		return mod;
+	}
+
+	static function scanAndLoadImports(content:String, originPath:String):Void {
+		// `import a.b.C;` or `import a.b.*;`
+		var reg = ~/^[ \t]*import\s+([\w.]+)(\.\*)?;[ \t]*(\r?\n)?/gm;
+		reg.map(content, function(r) {
+			var importPath = r.matched(1);
+			var filePath = globalEnv.importPathToFile(importPath);
+			if (filePath != null && sys.FileSystem.exists(filePath) && !moduleRegistry.exists(filePath))
+				loadModuleFile(filePath, importPath);
+			return r.matched(0);
+		});
+	}
+
 	public function executeAll():Void {
 		for (path in pendingPaths) {
 			var script = buildScript(path);
@@ -100,6 +146,14 @@ class ScriptHandler {
 		}
 		pendingPaths = [];
 		callCache.clear();
+
+		#if hxscript_cppia
+		if (hxscript.compile.Compiler.available) {
+			var mods = [for (_ => m in moduleRegistry) m];
+			if (mods.length > 0)
+				hxscript.compile.Compiler.compile(globalEnv, mods);
+		}
+		#end
 	}
 
 	public function call(name:String, args:Array<Dynamic>):Dynamic {
@@ -164,13 +218,17 @@ class ScriptHandler {
 	}
 
 	function buildScript(path:String):Null<Script> {
-		var content:String;
+		var rawContent:String;
 		try {
-			content = sys.io.File.getContent(path);
+			rawContent = sys.io.File.getContent(path);
 		} catch (e) {
 			Console.log('[${haxe.io.Path.withoutDirectory(path)}] Cannot read file: ${e.message}');
 			return null;
 		}
+
+		scanAndLoadImports(rawContent, path);
+
+		var content = ~/^[ \t]*import\s+[\w.]+(\.\*)?;[ \t]*(\r?\n)?/gm.replace(rawContent, '');
 
 		var scriptName = haxe.io.Path.withoutDirectory(path);
 		var script = new Script(content, scriptName, globalEnv);
@@ -190,6 +248,21 @@ class ScriptHandler {
 		return script;
 	}
 
+	static function derivePackage(filePath:String):Array<String> {
+		var base = core.assets.Library.baseFolder + '/';
+		var rel = filePath.startsWith(base) ? filePath.substr(base.length) : filePath;
+
+		var mod = modding.mods.ModsRegistry.currentMod;
+		if (mod != null) {
+			var modBase = core.assets.Library.modsFolder + '/$mod/';
+			if (filePath.startsWith(modBase))
+				rel = filePath.substr(modBase.length);
+		}
+		var parts = haxe.io.Path.withoutExtension(rel).split('/');
+		parts.pop();
+		return parts.filter(p -> p.length > 0);
+	}
+
 	function setupScript(script:Script):Void {
 		var interp = Std.downcast(script.interp, modding.scripting.GameInterp);
 		if (interp != null)
@@ -206,7 +279,11 @@ class ScriptHandler {
 	}
 
 	function reload(i:Int):Void {
-		moduleRegistry.get(paths[i])?.snapshot();
+		#if hxscript_cppia
+		hxscript.compile.Compiler.reset();
+		#end
+		if (moduleRegistry.exists(paths[i]))
+			moduleRegistry.get(paths[i]).snapshot();
 
 		var content = sys.io.File.getContent(paths[i]);
 		scripts[i].parse(content);

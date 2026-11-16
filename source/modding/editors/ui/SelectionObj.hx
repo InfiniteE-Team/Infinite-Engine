@@ -2,7 +2,7 @@ package modding.editors.ui;
 
 import flixel.FlxSprite;
 
-class SelectionObj extends flixel.group.FlxSpriteGroup {
+class SelectionObj extends flixel.group.FlxSpriteContainer {
 	var cornerTL:FlxSprite;
 	var cornerTR:FlxSprite;
 	var cornerBL:FlxSprite;

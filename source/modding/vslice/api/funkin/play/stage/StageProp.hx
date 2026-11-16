@@ -1,7 +1,6 @@
 package funkin.play.stage;
 
 // a V-Slice stage prop: engine sprite plus the zIndex/danceEvery/playAnimation scripts touch -JloorDev
-@:keep
 class StageProp extends core.assets.FunkinSprite {
 	public var zIndex:Int = 0;
 	public var danceEvery:Float = 0;

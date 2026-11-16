@@ -1,7 +1,6 @@
 package funkin.play.notes;
 
 // for scripts that draw and judge their own notes -JloorDev
-@:keep
 class NoteSprite extends funkin.graphics.FunkinSprite {
 	public var noteData:Dynamic;
 	public var direction:Int;

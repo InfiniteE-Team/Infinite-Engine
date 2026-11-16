@@ -1,7 +1,6 @@
 package funkin.util.assets;
 
 // V-Slice FlxAnimationUtil for scripts: registers V-Slice animation data on a sprite (atlas or sparrow) -JloorDev
-@:keep
 class FlxAnimationUtil {
 	public static function addTextureAtlasAnimations(target:Dynamic, animations:Array<Dynamic>):Void {
 		if (target == null || animations == null)

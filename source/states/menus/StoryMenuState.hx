@@ -14,7 +14,6 @@ import core.assets.FunkinSprite;
 import flixel.tweens.FlxTween.FlxTweenType;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
-@:keep
 class StoryMenuState extends MusicBeatState {
 	var weeks:Array<core.json.menus.storymenu.WeekData> = [];
 

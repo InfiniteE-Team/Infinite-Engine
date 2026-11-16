@@ -2,7 +2,6 @@ package game.objects.cutscenes;
 
 #if VIDEO_ALLOWED
 import hxvlc.util.Handle;
-
 class VideoSprite extends SafeVideoSprite {
 	public var finishCallback:Void->Void;
 	public var errorCallback:String->Void;
@@ -21,46 +20,46 @@ class VideoSprite extends SafeVideoSprite {
 	}
 
 	function init(path:String, loop:Bool) {
-		Handle.initAsync(function(success:Bool):Void { 
-            if (!success)
-                return;
+		Handle.initAsync(function(success:Bool):Void {
+			if (!success)
+				return;
 
-            antialiasing = SaveData.data.antialiasing; 
+			antialiasing = SaveData.data.antialiasing;
 
-            bitmap.onEncounteredError.add(function(message:String) {
-                Console.log('VLC not load: $message', true);
+			bitmap.onEncounteredError.add(function(message:String) {
+				Console.log('VLC not load: $message', true);
 
-                if (errorCallback != null)
-                    errorCallback(message);
-            });
+				if (errorCallback != null)
+					errorCallback(message);
+			});
 
-            bitmap.onEndReached.add(function() {
-                if (finishCallback != null)
-                    finishCallback();
-            });
+			bitmap.onEndReached.add(function() {
+				if (finishCallback != null)
+					finishCallback();
+			});
 
-            bitmap.onFormatSetup.add(function():Void {
-                if (bitmap != null && bitmap.bitmapData != null) {
-                    final scale:Float = Math.min(FlxG.width / bitmap.bitmapData.width, FlxG.height / bitmap.bitmapData.height);
+			bitmap.onFormatSetup.add(function():Void {
+				if (bitmap != null && bitmap.bitmapData != null) {
+					final scale:Float = Math.min(FlxG.width / bitmap.bitmapData.width, FlxG.height / bitmap.bitmapData.height);
 
-                    setGraphicSize(bitmap.bitmapData.width * scale, bitmap.bitmapData.height * scale);
-                    updateHitbox();
+					setGraphicSize(bitmap.bitmapData.width * scale, bitmap.bitmapData.height * scale);
+					updateHitbox();
 
-                    isLoaded = true;
+					isLoaded = true;
 
-                    if (loadCallback != null)
-                        loadCallback();
-                }
-            });
+					if (loadCallback != null)
+						loadCallback();
+				}
+			});
 
-            try {
-                if (load(path, loop ? ['input-repeat=65545'] : null)) {
-                    play(); 
-                }
-            } catch (e:Dynamic) {
-                Console.log('VLC not load!: $e', true);
-            }
-        });
+			try {
+				if (load(path, loop ? ['input-repeat=65545'] : null)) {
+					play();
+				}
+			} catch (e:Dynamic) {
+				Console.log('VLC not load!: $e', true);
+			}
+		});
 	}
 }
 #end

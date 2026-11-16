@@ -25,7 +25,6 @@ class MusicBeatState extends State {
 		#if HSCRIPT_ALLOWED
 		if (script == null)
 			initScript();
-		// script.call("onCreate", []);
 		#end
 		super.create();
 

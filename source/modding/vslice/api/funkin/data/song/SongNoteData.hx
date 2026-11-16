@@ -1,6 +1,6 @@
 package funkin.data.song;
 
-@:keep
+
 class SongNoteData {
 	public var time:Float;
 	public var data:Int;

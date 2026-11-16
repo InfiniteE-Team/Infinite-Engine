@@ -238,7 +238,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 					sprite = prop;
 				} else
 					sprite = new FunkinSprite();
-				sprite.loadProps(element.props, 'game/stages/$stage');
+				sprite.loadProps(element.props, 'game/stages');
 				elements.push(sprite);
 				add(sprite);
 
@@ -247,7 +247,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 
 			case 'backdrop':
 				var sprite = new core.assets.FunkinBackdrop(0, 0);
-				sprite.loadProps(element.props, 'game/stages/$stage');
+				sprite.loadProps(element.props, 'game/stages');
 				if (element.props.velocityX != null)
 					sprite.velocityX = element.props.velocityX;
 				if (element.props.velocityY != null)

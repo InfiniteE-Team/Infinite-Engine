@@ -2,8 +2,6 @@ package funkin.play.event;
 
 // a mod's own song event, the chart editor lists it with its schema -JloorDev
 @:scriptable
-@:keepSub
-@:keep
 class SongEvent {
 	public var id:String;
 

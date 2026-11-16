@@ -4,7 +4,6 @@ import flixel.FlxG;
 import flixel.input.keyboard.FlxKey;
 
 // bits of V-Slice's flixel fork that scripts expect, the script loader points the calls here -JloorDev
-@:keep
 class FlxCompat {
 	// inline in flixel, so scripts can't call it -JloorDev
 	public static function fromString(s:String):Int

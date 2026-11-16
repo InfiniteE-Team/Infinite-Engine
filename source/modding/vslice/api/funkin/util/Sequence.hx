@@ -3,7 +3,6 @@ package funkin.util;
 import flixel.util.FlxTimer;
 
 // V-Slice Sequence: callbacks at set times (seconds), the backbone of scripted cutscenes -JloorDev
-@:keep
 class Sequence {
 	public var running(get, never):Bool;
 	public var finished(default, null):Bool = false;

@@ -277,7 +277,7 @@ class CharacterEditor extends MusicBeatState {
 	var tab2:Tab;
 
 	function tabLeft() {
-		tab2 = new Tab(10, 20, 'Símbolo 10');
+		tab2 = new Tab(10, 20, 287, 615);
 		tab2.cameras = [camHud];
 		add(tab2);
 
@@ -286,14 +286,13 @@ class CharacterEditor extends MusicBeatState {
 	}
 
 	function buildAnimTab() {
-		final pan = new flixel.FlxSprite(0, 0).loadGraphic(Paths.getPath('menus/editors/ui/pan', 'image'));
+		final pan:flixel.FlxSprite = new flixel.FlxSprite();
+		pan.loadGraphic(modding.editors.ui.Utils.roundGraphic(261.6, 49.8));
 		pan.scrollFactor.set(0, 0);
 		pan.antialiasing = SaveData.data.antialiasing;
-		pan.scale.set(0.6, 0.6);
-		pan.updateHitbox();
 		pan.cameras = [camHud];
 		tabAnimGroup.add(pan);
-		tab2.addItem(pan, 15, 70);
+		tab2.addItem(pan, 5, 50);
 
 		infoAnim = new FlxText(30, 95, FlxG.width, "Idle [0/0]\nOffset: [0, 0]");
 		infoAnim.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFF181818, 'left');
@@ -317,15 +316,6 @@ class CharacterEditor extends MusicBeatState {
 	}
 
 	function buildLayersTab() {
-		final pan = new flixel.FlxSprite(0, 0).loadGraphic(Paths.getPath('menus/editors/ui/pan', 'image'));
-		pan.scrollFactor.set(0, 0);
-		pan.antialiasing = SaveData.data.antialiasing;
-		pan.scale.set(0.6, 0.6);
-		pan.updateHitbox();
-		pan.cameras = [camHud];
-		tabLayersGroup.add(pan);
-		tab2.addItem(pan, 15, 70);
-
 		info = new FlxText(30, 95, FlxG.width, "char x: \nchar y: ");
 		info.setFormat(Paths.getPath('Funkin.otf', 'font'), 20, 0xFF181818, 'left');
 		info.scrollFactor.set(0, 0);
@@ -373,11 +363,11 @@ class CharacterEditor extends MusicBeatState {
 		final px = FlxG.width * 0.72;
 		final py = 20.0;
 
-		final tab = new Tab(px, py, 'Símbolo 9');
+		final tab = new Tab(px, py, 352, 292);
 		tab.cameras = [camHud];
 		add(tab);
 
-		final lowerTab = new Tab(px, py + 320, 'Símbolo 9');
+		final lowerTab = new Tab(px, py + 320, 352, 292);
 		lowerTab.cameras = [camHud];
 		add(lowerTab);
 

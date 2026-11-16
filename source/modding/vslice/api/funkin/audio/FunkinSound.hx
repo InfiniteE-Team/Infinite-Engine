@@ -5,7 +5,6 @@ import flixel.sound.FlxSound;
 
 // V-Slice FunkinSound for scripts: load/playOnce giving a plain FlxSound, reading mod files directly
 // shortcut: not a FlxSound subclass (FlxSound has its own load), so `:FunkinSound` in scripts is read as Dynamic -JloorDev
-@:keep
 class FunkinSound {
 	// a String or the Sound that Paths.sound() returns -JloorDev
 	public static function load(path:Dynamic, volume:Float = 1.0, looped:Bool = false, autoDestroy:Bool = false, autoPlay:Bool = false, ?persist:Bool,

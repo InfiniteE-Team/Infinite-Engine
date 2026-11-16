@@ -5,8 +5,6 @@ import game.objects.sprites.Character;
 
 // V-Slice Stage API for .hxc stage scripts: they extend this and the engine stage does the work -JloorDev
 @:scriptable
-@:keepSub
-@:keep
 class Stage {
 	public var stageId:String;
 	public var id(get, never):String;

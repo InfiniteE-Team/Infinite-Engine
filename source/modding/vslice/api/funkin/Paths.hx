@@ -4,7 +4,6 @@ import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxAtlasFrames;
 
 // V-Slice's Paths for .hxc scripts, resolved through the engine's mod-aware paths -JloorDev
-@:keep
 class Paths {
 	public static function getSparrowAtlas(key:String, ?library:String):FlxAtlasFrames {
 		var frames:Dynamic = core.assets.Paths.getAnimated(key);

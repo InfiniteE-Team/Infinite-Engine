@@ -1,6 +1,5 @@
 package utils;
 
-import flixel.group.FlxSpriteGroup;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import flixel.util.FlxColor;
@@ -58,7 +57,7 @@ class Alphabet extends core.assets.FunkinSprite {
 	}
 }
 
-class AlphabetGroup extends FlxSpriteGroup {
+class AlphabetGroup extends flixel.group.FlxSpriteContainer {
 	public var text(default, set):String;
 	public var style(default, null):AlphabetStyle;
 	public var separation:Float;

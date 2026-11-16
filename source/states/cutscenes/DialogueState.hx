@@ -2,7 +2,7 @@ package states.cutscenes;
 
 import core.json.song.DialogueData;
 
-class DialogueState extends flixel.group.FlxSpriteGroup {
+class DialogueState extends flixel.group.FlxSpriteContainer {
 	// dialogues for time
 	var timeline:Float = 0;
 	// dialogues for shifts

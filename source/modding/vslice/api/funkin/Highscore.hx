@@ -1,6 +1,5 @@
 package funkin;
 
-@:keep
 class Highscore {
 	public static var tallies:Tallies = new Tallies();
 }

@@ -1,7 +1,6 @@
 package funkin.util;
 
 // same math as the engine's notes -JloorDev
-@:keep
 class GRhythmUtil {
 	public static var HIT_WINDOW_MS:Float = 160;
 

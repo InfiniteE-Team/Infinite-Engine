@@ -16,6 +16,7 @@ class FPS extends openfl.display.FPS {
 		autoSize = TextFieldAutoSize.LEFT;
 		defaultTextFormat = new openfl.text.TextFormat(Paths.getPath("5by7_b.ttf", "font"), 13, color);
 		var glow = new openfl.filters.GlowFilter(glowColor, 1.0, 6, 6, 100, BitmapFilterQuality.MEDIUM);
+		text = 'FPS: 0\n\nTask MEM: 0.0 MB / 0.0 MB';
 		filters = [glow];
 	}
 

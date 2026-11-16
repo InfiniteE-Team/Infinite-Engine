@@ -1,6 +1,6 @@
 package funkin.data.song;
 
-@:keep
+
 class SongEventData {
 	public var time:Float;
 	public var eventKind:String;

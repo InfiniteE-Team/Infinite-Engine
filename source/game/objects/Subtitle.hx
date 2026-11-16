@@ -2,11 +2,10 @@ package game.objects;
 
 import flixel.FlxSprite;
 import flixel.text.FlxText;
-import flixel.group.FlxSpriteGroup;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 
-class Subtitle extends FlxSpriteGroup {
+class Subtitle extends flixel.group.FlxSpriteGroup {
 	var bg:FlxSprite;
 	var subs:FlxText;
     var hideTimer:FlxTimer;

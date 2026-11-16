@@ -2,8 +2,6 @@ package funkin.play.song;
 
 // V-Slice Song for song scripts (data/songs/<id> cutscenes, intros, outros): just the id and the hooks -JloorDev
 @:scriptable
-@:keepSub
-@:keep
 class Song {
 	public var id:String;
 

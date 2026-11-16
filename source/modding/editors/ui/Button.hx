@@ -4,7 +4,7 @@ import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 
-class Button extends flixel.group.FlxSpriteGroup {
+class Button extends flixel.group.FlxSpriteContainer {
 	public var bg:FlxSprite;
 	public var label:FlxText;
 

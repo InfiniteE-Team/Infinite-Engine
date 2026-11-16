@@ -3,10 +3,9 @@ package modding.editors.ui;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import flixel.group.FlxSpriteGroup;
 
 // the "- [ value ] +" box, shift steps ten times more -JloorDev
-class NumberStepper extends FlxSpriteGroup {
+class NumberStepper extends flixel.group.FlxSpriteContainer {
 	public var value(default, null):Float = 0;
 
 	var minus:FlxSprite;

@@ -1,7 +1,6 @@
 package funkin.play.scoring;
 
 // uses the engine's rating windows whatever system is asked for -JloorDev
-@:keep
 class Scoring {
 	public static var PBOT1_SICK_THRESHOLD:Float = 45;
 	public static var PBOT1_GOOD_THRESHOLD:Float = 90;

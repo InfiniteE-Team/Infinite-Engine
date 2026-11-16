@@ -2,8 +2,6 @@ package funkin.play.stage;
 
 // V-Slice Bopper for scripts: a sprite that dances on the beat with per-animation offsets -JloorDev
 @:scriptable
-@:keepSub
-@:keep
 class Bopper extends funkin.graphics.FunkinSprite {
 	public var danceEvery:Float = 1;
 	public var shouldBop:Bool = true;

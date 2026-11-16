@@ -4,7 +4,6 @@ import flixel.FlxG;
 import flixel.FlxBasic;
 
 // V-Slice reads the mouse through this off mobile, so mods like Baldi's keypad work with a click -JloorDev
-@:keep
 class TouchUtil {
 	public static var touch(get, never):Dynamic;
 	public static var pressed(get, never):Bool;

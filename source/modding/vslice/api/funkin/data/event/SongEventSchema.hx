@@ -1,6 +1,6 @@
 package funkin.data.event;
 
-@:keep
+
 class SongEventSchema {
 	public var fields:Array<Dynamic>;
 

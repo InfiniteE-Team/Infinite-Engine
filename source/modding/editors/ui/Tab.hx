@@ -1,31 +1,38 @@
 package modding.editors.ui;
 
-import flixel.FlxSprite;
-import flixel.group.FlxSpriteGroup;
+class Tab extends flixel.group.FlxSpriteContainer {
+	public var bg:flixel.FlxSprite;
 
-class Tab extends FlxSpriteGroup {
-	var bg:FlxSprite;
-	var items:Array<flixel.FlxBasic> = [];
-
-	public function new(x:Float, y:Float, type:String) {
+	public function new(?x:Float = 0, ?y:Float = 0, ?width:Float = 1, ?height:Float = 1) {
 		super(x, y);
 
-		bg = new FlxSprite();
-		bg.frames = Paths.getPath('menus/editors/ui/tabs', 'animated');
-		bg.animation.addByPrefix('idle', type, 24, true);
-		bg.animation.play('idle');
-		bg.scale.set(0.6, 0.6);
-		bg.updateHitbox();
+		final w:Int = Math.ceil(width);
+		final h:Int = Math.ceil(height);
+
+		final colors:Array<Int> = [0x29042E, 0x29042E, 0x00032B];
+		final alphas:Array<Float> = [1.0, 1.0, 1.0];
+		final ratios:Array<Int> = [0, 80, 255];
+
+		final matrix:openfl.geom.Matrix = new openfl.geom.Matrix();
+		matrix.createGradientBox(w, h, Math.PI / 2, 0, 0);
+
+		final shape:openfl.display.Shape = new openfl.display.Shape();
+		shape.graphics.beginGradientFill(openfl.display.GradientType.LINEAR, colors, alphas, ratios, matrix);
+
+		shape.graphics.drawRoundRect(0, 0, w, h, 24 * 2, 24 * 2);
+		shape.graphics.endFill();
+
+		final bitmap:openfl.display.BitmapData = new openfl.display.BitmapData(w, h, true, 0x00000000);
+		bitmap.draw(shape);
+
+		bg = new flixel.FlxSprite(0, 0);
+		bg.loadGraphic(flixel.graphics.FlxGraphic.fromBitmapData(bitmap, false, null, false));
 		add(bg);
 	}
 
-	public function addItem(item:flixel.FlxBasic, offsetX:Float = 0, offsetY:Float = 0) {
-		if (Std.isOfType(item, flixel.FlxObject)) {
-			var obj = cast(item, flixel.FlxObject);
-			obj.x = x + offsetX;
-			obj.y = y + offsetY;
-		}
-		items.push(item);
+	public function addItem(item:flixel.FlxSprite, offsetX:Float = 0, offsetY:Float = 0):Void {
+		item.setPosition(this.x + offsetX, this.y + offsetY);
+		add(item);
 	}
 
 	public function getWidth():Float

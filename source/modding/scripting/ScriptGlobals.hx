@@ -70,17 +70,25 @@ class ScriptGlobals {
 		initialized = true;
 
 		hxscript.Config.interpClass = modding.scripting.GameInterp;
-
 		Boot.importGlobals(hxClassPaths);
-
 		registerValues((k, v) -> Config.globalVariables.set(k, v));
+
+		#if HSCRIPT_ALLOWED
+		ScriptHandler.globalEnv.scriptFolders = [core.assets.Library.baseFolder];
+		#end
 
 		#if windows
 		Config.globalVariables.set('WindowsAPI', winapi.WindowsAPI);
 		Config.globalVariables.set('WindowsGDI', winapi.gdi.WindowsGDI);
 		#end
 
+		#if HSCRIPT_ALLOWED
 		hxscript.setup.Shims.register();
+
+		#if hxscript_cppia
+		hxscript.compile.Compiler.ambient = hxClassPaths;
+		#end
+		#end
 	}
 
 	public static function initLua():Void {

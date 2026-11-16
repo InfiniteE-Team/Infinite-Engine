@@ -1,6 +1,5 @@
 package modding.custom.transitions;
 
-import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
 import flixel.group.FlxGroup.FlxTypedGroup;

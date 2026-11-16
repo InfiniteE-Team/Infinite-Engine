@@ -1,7 +1,6 @@
 package funkin.util;
 
 // no haptics on desktop -JloorDev
-@:keep
 class HapticUtil {
 	public static var hapticsAvailable:Bool = false;
 

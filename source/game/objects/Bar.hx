@@ -5,7 +5,7 @@ import flixel.util.FlxColor;
 import core.enums.AssignementsBar;
 import core.assets.FunkinSprite;
 
-class Bar extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite> {
+class Bar extends flixel.group.FlxSpriteContainer.FlxTypedSpriteContainer<FunkinSprite> {
 	public var isSpriteSheet:Bool = false;
 	public var spriteSheetPath:String = '';
 	public var assignment:AssignementsBar = 'LEFT_TO_RIGHT';

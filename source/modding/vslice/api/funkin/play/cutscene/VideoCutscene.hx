@@ -1,8 +1,6 @@
 package funkin.play.cutscene;
 
 // VideoCutscenes for Cutscenes V-Slice
-
-@:keep
 class VideoCutscene extends game.objects.cutscenes.Cutscene {
 	public static function play(path:String, ?cutsceneType:CutsceneType = STARTING):Void {
 		var cutscene = new VideoCutscene();

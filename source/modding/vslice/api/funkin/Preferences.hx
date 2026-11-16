@@ -1,7 +1,6 @@
 package funkin;
 
 // V-Slice Preferences for scripts, from the engine's save where it has the same option -JloorDev
-@:keep
 class Preferences {
 	public static var downscroll(get, never):Bool;
 	public static var flashingLights(get, never):Bool;

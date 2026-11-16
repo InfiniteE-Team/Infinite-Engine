@@ -98,13 +98,18 @@
 	<haxedef name="hxscript_host" value="modding,game,states,core,utils,funkin" />
 	<haxedef name="hxscript_no_hl_bridges" if="hl" />
 
+	<!--<haxedef name="hxscript_cppia" if="release" />-->
+	<!--<haxedef name="scriptable" if="release" />-->
+
+	<haxedef name="no_dce" if="release" />
+
 	<!-- _______________________________Compiler Flags _______________________________ -->
 	<haxeflag name="--macro" value="include('foxlite')" />
 	<haxeflag name="--macro" value="include('modding.scripting.interfaces')" />
 	<haxeflag name="--macro" value="include('funkin', true, ['funkin.vis'])" />
+	<!--<haxeflag name="-macro" value="exclude('hxvlc')" if="release" /> -->
 
 	<!-- Android -->
-
 	<config:android>
 		<gradle-properties org.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m" />
 	</config:android>

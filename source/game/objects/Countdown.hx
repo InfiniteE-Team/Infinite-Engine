@@ -5,7 +5,7 @@ import flixel.tweens.FlxTween;
 import core.assets.FunkinSprite;
 import core.json.game.objects.CountdownData;
 
-class Countdown extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite> {
+class Countdown extends flixel.group.FlxSpriteContainer.FlxTypedSpriteContainer<FunkinSprite> {
 	public var skipCountdown:Bool = false;
 	public var curCountdown:String = 'default';
 	public var countData:CountdownData;

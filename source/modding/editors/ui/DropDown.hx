@@ -3,9 +3,8 @@ package modding.editors.ui;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import flixel.group.FlxSpriteGroup;
 
-class DropDown extends FlxSpriteGroup {
+class DropDown extends flixel.group.FlxSpriteContainer {
 	var header:FlxSprite;
 	var header2:FlxSprite;
 	var headerLabel:FlxText;

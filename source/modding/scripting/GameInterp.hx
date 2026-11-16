@@ -74,6 +74,12 @@ class GameInterp extends Interp {
 			}
 		}
 
+		if (environment != null && environment.variables.exists(id)) {
+			var v = environment.variables.get(id);
+			variables.set(id, v);
+			return v;
+		}
+
 		return super.resolve(id);
 	}
 

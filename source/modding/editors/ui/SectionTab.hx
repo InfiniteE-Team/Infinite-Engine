@@ -1,6 +1,5 @@
 package modding.editors.ui;
 
-import flixel.group.FlxSpriteGroup;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.tweens.FlxTween;
@@ -11,7 +10,7 @@ typedef TabEntry = {
 	var label:String;
 }
 
-class SectionTab extends FlxSpriteGroup {
+class SectionTab extends flixel.group.FlxSpriteContainer {
 	public var activeIndex:Int = 0;
 
 	var tabCount:Int;

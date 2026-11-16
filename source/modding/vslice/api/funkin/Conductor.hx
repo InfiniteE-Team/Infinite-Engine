@@ -3,7 +3,6 @@ package funkin;
 import core.rhythm.RhythmCore;
 
 // V-Slice's Conductor.instance, read from the engine's RhythmCore -JloorDev
-@:keep
 class Conductor {
 	public static var instance(default, null):Conductor = new Conductor();
 

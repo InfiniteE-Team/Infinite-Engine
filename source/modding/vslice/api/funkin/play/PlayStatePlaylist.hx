@@ -1,7 +1,6 @@
 package funkin.play;
 
 // V-Slice PlayStatePlaylist for scripts, read from the engine's story flag -JloorDev
-@:keep
 class PlayStatePlaylist {
 	public static var isStoryMode(get, never):Bool;
 	public static var campaignId:String = null;

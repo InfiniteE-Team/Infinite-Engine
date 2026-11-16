@@ -1,6 +1,5 @@
 package funkin.play.notes.notestyle;
 
-@:keep
 class NoteStyle {
 	public var id:String;
 

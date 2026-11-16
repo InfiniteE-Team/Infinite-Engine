@@ -2,8 +2,6 @@ package funkin.modding.module;
 
 // V-Slice Module: a script that gets every gameplay event -JloorDev
 @:scriptable
-@:keepSub
-@:keep
 class Module {
 	public var moduleId:String;
 	public var priority:Int;

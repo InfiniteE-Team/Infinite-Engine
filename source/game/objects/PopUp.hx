@@ -8,7 +8,7 @@ import modding.scripting.ScriptHandler;
 #end
 
 @:nullSafety
-class PopUp extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite> {
+class PopUp extends flixel.group.FlxSpriteContainer.FlxTypedSpriteContainer<FunkinSprite> {
 	#if HSCRIPT_ALLOWED
 	var scripRat:ScriptHandler;
 	#end
@@ -19,7 +19,7 @@ class PopUp extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite
 	var poolPaths:Map<FunkinSprite, String> = [];
 
 	public var onNoteHitPlayer:Void->Void = () -> {};
-    public var onNoteHitMiss:Void->Void = () -> {};
+	public var onNoteHitMiss:Void->Void = () -> {};
 
 	public function new(x:Float = 0, y:Float = 0, script:ScriptHandler) {
 		super(x, y);
@@ -212,21 +212,11 @@ class PopUp extends flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup<FunkinSprite
 	}
 
 	override public function destroy() {
-		for (s in comboPool) {
-			remove(s);
-			s.destroy();
-		}
-		for (s in numberPool) {
-			remove(s);
-			s.destroy();
-		}
-		for (s in missPool) {
-			remove(s);
-			s.destroy();
-		}
 		comboPool = [];
 		numberPool = [];
 		missPool = [];
+		poolPaths.clear();
+
 		super.destroy();
 	}
 }

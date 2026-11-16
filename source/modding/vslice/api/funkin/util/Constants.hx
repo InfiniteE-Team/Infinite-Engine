@@ -1,7 +1,6 @@
 package funkin.util;
 
 // the V-Slice constants scripts read (camera bops, steps per beat) -JloorDev
-@:keep
 class Constants {
 	public static var STEPS_PER_BEAT:Int = 4;
 	public static var BEATS_PER_MEASURE:Int = 4;

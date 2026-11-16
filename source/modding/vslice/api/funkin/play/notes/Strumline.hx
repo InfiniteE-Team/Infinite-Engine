@@ -5,7 +5,6 @@ import game.objects.sprites.notes.StrumNote;
 // V-Slice Strumline for scripts: one side's arrows, enough for cutscenes fading or hiding them
 // shortcut: only alpha/visible/x/y offsets; notes, hold covers and per-strumline speed aren't separate here -JloorDev
 
-@:keep
 class Strumline {
 	// which side's arrows this is, isPlayer can change but the side doesn't -JloorDev
 	final playerSide:Bool;
@@ -212,7 +211,6 @@ class Strumline {
 
 // shortcut: alpha/visible reach the notes on screen now, notes spawned later keep their own until set again -JloorDev
 
-@:keep
 class StrumlineNotes {
 	var isPlayer:Bool;
 	var _alpha:Float = 1;

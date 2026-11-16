@@ -5,8 +5,6 @@ import game.objects.sprites.Character;
 
 // V-Slice BaseCharacter for character scripts: wraps the engine Character, which keeps drawing and singing -JloorDev
 @:scriptable
-@:keepSub
-@:keep
 class BaseCharacter {
 	public var characterId:String;
 	public var host:Character;

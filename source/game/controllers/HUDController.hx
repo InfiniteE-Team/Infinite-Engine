@@ -10,7 +10,7 @@ import game.objects.sprites.Icon;
 import modding.scripting.ScriptHandler;
 #end
 
-class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic> {
+class HUDController extends flixel.group.FlxSpriteContainer {
 	#if HSCRIPT_ALLOWED
 	var scriptHUD:ScriptHandler;
 	#end
@@ -123,7 +123,7 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 			}
 		}
 
-		_updateLosingAnim();
+		updateLosingAnim();
 		updateIconPositions(elapsed);
 	}
 
@@ -157,7 +157,7 @@ class HUDController extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic>
 		#end
 	}
 
-	function _updateLosingAnim():Null<Dynamic> {
+	function updateLosingAnim():Null<Dynamic> {
 		#if HSCRIPT_ALLOWED
 		if (scriptHUD.hasScripts && scriptHUD.callCancellable('onIconAnim', []))
 			return null;

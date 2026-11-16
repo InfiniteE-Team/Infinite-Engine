@@ -6,7 +6,6 @@ import flixel.FlxCamera;
 import flixel.FlxObject;
 
 // the slice of V-Slice's PlayState.instance that stage scripts read, backed by the engine PlayState -JloorDev
-@:keep
 class PlayState {
 	public static var instance:PlayState;
 

@@ -3,7 +3,7 @@ package states.menus.objects;
 import openfl.filters.GlowFilter;
 import openfl.filters.BitmapFilterQuality;
 
-class CardFreeplay extends flixel.group.FlxSpriteGroup {
+class CardFreeplay extends flixel.group.FlxSpriteContainer {
 	public var card:core.assets.FunkinSprite;
 	public var black:core.assets.FunkinSprite;
 	public var songText:flixel.text.FlxText;
