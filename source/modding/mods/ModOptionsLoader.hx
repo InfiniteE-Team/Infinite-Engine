@@ -10,7 +10,7 @@ class ModOptionsLoader {
 	public static function load():Map<String, Array<OptionData>> {
 		var result:Map<String, Array<OptionData>> = [];
 
-		var path = core.assets.Library.findLib('data/options.json');
+		var path = Paths.getPath('menus/options/options', 'json');
 		if (path == null || !sys.FileSystem.exists(path))
 			return result;
 

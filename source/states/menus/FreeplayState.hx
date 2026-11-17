@@ -82,7 +82,7 @@ class FreeplayState extends MusicBeatState {
 
 		core.audio.MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102);
 
-		freeplayData = modding.vslice.VSlice.isActive() ? modding.vslice.VSliceSongs.freeplay() : FormatJson.readJson(Paths.getPath('songs/listSong', 'json'));
+		freeplayData = modding.vslice.VSlice.isActive() ? modding.vslice.VSliceSongs.freeplay() : FormatJson.readJson(Paths.getPath('game/songs/listSong', 'json'));
 
 		#if HSCRIPT_ALLOWED
 		if (script.callCancellable("onCreateCancel", []))
@@ -122,11 +122,11 @@ class FreeplayState extends MusicBeatState {
 				var iconName:String = freeplayData.songData[i].icon;
 				var charData = charDataCache.get(iconName);
 				if (charData == null) {
-					charData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('data/game/characters/' + iconName, 'json'));
+					charData = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('game/characters/$iconName/$iconName', 'json'));
 					charDataCache.set(iconName, charData);
 				}
 
-				var icon:Icon = new Icon(false, charData);
+				var icon:Icon = new Icon(false, charData, iconName);
 				if (icon != null) {
 					icon.scale.set(0.48 * icon.baseScale, 0.48 * icon.baseScale);
 					icon.updateHitbox();
@@ -238,7 +238,7 @@ class FreeplayState extends MusicBeatState {
 			disk.x = FlxG.width * 0.96 - disk.width;
 			add(disk);
 		} else {
-			var noExists = new FlxText(0, FlxG.height / 2 - 35, FlxG.width, "There are no songs! - Create your music list in 'songs/listSong.json'");
+			var noExists = new FlxText(0, FlxG.height / 2 - 35, FlxG.width, "There are no songs! - Create your music list in 'game/songs/listSong.json'");
 			noExists.setFormat(Paths.getPath('5by7_b.ttf', 'font'), 24, 0xFFFFB2B2, "center");
 			noExists.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xFF000000, 2, 1);
 			noExists.antialiasing = SaveData.data.antialiasing;
@@ -406,8 +406,8 @@ class FreeplayState extends MusicBeatState {
 		var bpm:Float = freeplayData.songData[curSelected].bpm;
 		var diffName:String = DiffsUtils.difficulties.length > 0 ? DiffsUtils.difficulties[curDiff] : '';
 		if (songSelected != null) {
-			var diffInstPath = Paths.getPath('songs/$songSelected/audio/Inst-$diffName.ogg') ?? Paths.getPath('songs/$songSelected/Inst-$diffName.ogg');
-			var genericInstPath = Paths.getPath('songs/$songSelected/audio/Inst.ogg') ?? Paths.getPath('songs/$songSelected/Inst.ogg');
+			var diffInstPath = Paths.getPath('game/songs/$songSelected/audio/Inst-$diffName', 'music') ?? Paths.getPath('songs/$songSelected/Inst-$diffName.ogg');
+			var genericInstPath = Paths.getPath('game/songs/$songSelected/audio/Inst.ogg') ?? Paths.getPath('songs/$songSelected/Inst.ogg');
 
 			var instPath = (diffName != '' && sys.FileSystem.exists(diffInstPath)) ? diffInstPath : genericInstPath;
 

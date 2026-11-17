@@ -228,7 +228,12 @@ class ScriptHandler {
 
 		scanAndLoadImports(rawContent, path);
 
-		var content = ~/^[ \t]*import\s+[\w.]+(\.\*)?;[ \t]*(\r?\n)?/gm.replace(rawContent, '');
+		var importReg = ~/^[ \t]*import\s+([\w.]+)(\.\*)?;[ \t]*(\r?\n)?/gm;
+		var content = importReg.map(rawContent, function(r) {
+			var importPath = r.matched(1);
+			var filePath = globalEnv.importPathToFile(importPath);
+			return (filePath != null && sys.FileSystem.exists(filePath)) ? '' : r.matched(0);
+		});
 
 		var scriptName = haxe.io.Path.withoutDirectory(path);
 		var script = new Script(content, scriptName, globalEnv);

@@ -27,19 +27,19 @@ class Countdown extends flixel.group.FlxSpriteContainer.FlxTypedSpriteContainer<
 	var imageFolder:String;
 
 	function loadSprite() {
-		imageFolder = 'game/countdown/$curCountdown';
+		imageFolder = 'game/ui/countdown/$curCountdown';
 		var skin = PlayState.instance?.noteController?.noteSkin;
 		if (curCountdown == 'default' && skin != null) {
 			var fromSkin:CountdownData = game.objects.sprites.notes.NoteSkins.read(skin, 'countdown');
 			if (fromSkin != null) {
 				countData = fromSkin;
-				countData.soundFolder ??= 'game/countdown/default/';
+				countData.soundFolder ??= 'game/ui/countdown/default/';
 				var folder = game.objects.sprites.notes.NoteSkins.imageFolder(skin, 'countdown');
 				imageFolder = StringTools.endsWith(folder, '/') ? folder.substr(0, folder.length - 1) : folder;
 				return;
 			}
 		}
-		countData = FormatJson.readJson(Paths.getPath('data/game/countdown/' + curCountdown, "json"));
+		countData = FormatJson.readJson(Paths.getPath('game/ui/countdown/$curCountdown/$curCountdown', "json"));
 	}
 
 	public function onCountdown() {
@@ -66,7 +66,7 @@ class Countdown extends flixel.group.FlxSpriteContainer.FlxTypedSpriteContainer<
 			return;
 
 		if (countStep.sound != null && countStep.sound.path != null)
-			activeSound = core.json.extensions.AudioData.AudioConfig.playElementAudio(countStep.sound, countData.soundFolder ?? 'game/countdown/$curCountdown/');
+			activeSound = core.json.extensions.AudioData.AudioConfig.playElementAudio(countStep.sound, countData.soundFolder ?? 'game/ui/countdown/$curCountdown/');
 
 		if (countStep.props != null && countStep.props.path != null) {
 			var sprite:FunkinSprite = new FunkinSprite(0, 0, true);

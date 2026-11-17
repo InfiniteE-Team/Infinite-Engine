@@ -20,7 +20,7 @@ class GlobalConfig {
 	public function new() {}
 
 	public function configGlobal() {
-		globalData = FormatJson.readJson(Paths.getPath('data/global', 'json'));
+		globalData = FormatJson.readJson(Paths.getPath('general/global', 'json'));
 		if (globalData == null)
 			return;
 
@@ -40,6 +40,6 @@ class GlobalConfig {
 		globalScripts.call('onDestroy', []);
 		globalScripts.destroy();
 		globalScripts = new modding.scripting.ScriptHandler(null);
-		globalScripts.loadFolder('scripts/global');
+		globalScripts.loadFolder('general/global');
 	}
 }

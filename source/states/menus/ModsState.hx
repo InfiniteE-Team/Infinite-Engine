@@ -85,7 +85,7 @@ class ModsState extends MusicBeatState {
 				var modName = ModsRegistry.mods[i];
 				var modsFolder = core.assets.Library.modsFolder;
 
-				var graphic:String = '$modsFolder/$modName/images/iconMod.png';
+				var graphic:String = '$modsFolder/$modName/iconMod.png';
 				if (!sys.FileSystem.exists(graphic)) {
 					graphic = '$modsFolder/$modName/_polymod_icon.png';
 				}
@@ -138,7 +138,7 @@ class ModsState extends MusicBeatState {
 		mouseWasVisible = FlxG.mouse.visible;
 		FlxG.mouse.visible = true;
 
-		core.audio.MasterAudio.playMenu(Paths.getPath('menus/mod-menu-ambience/mod-menu-ambience', 'music'), 0.8, 67);
+		core.audio.MasterAudio.playMenu(Paths.getPath('menus/mods/mod-menu-ambience/mod-menu-ambience', 'music'), 0.8, 67);
 
 		camMods = new Camera(BOX_X, BOX_Y, BOX_W, BOX_H);
 		camMods.bgColor = 0x00000000;

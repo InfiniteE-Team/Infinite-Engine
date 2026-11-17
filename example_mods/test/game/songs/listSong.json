@@ -1,0 +1,32 @@
+{
+    "songData": [
+        {
+            "song": "4score",
+            "bpm": 178,
+            "icon": "dad",
+            "artist": "VGMComposer",
+            "album": "expansion1"
+        },
+        {
+            "song": "fresh",
+            "bpm": 120,
+            "icon": "dad",
+            "artist": "KawaiSprite",
+            "album": "expansion1"
+        },
+        {
+            "song": "Demise Part 1",
+            "bpm": 250,
+            "icon": "dad",
+            "artist": "KawaiSprite",
+            "album": "expansion1"
+        },
+        {
+            "song": "red-3",
+            "bpm": 335,
+            "icon": "dad",
+            "artist": "KawaiSprite",
+            "album": "expansion1"
+        }
+    ]
+}

@@ -50,7 +50,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 	#if HSCRIPT_ALLOWED
 	function initStageScript():Void {
 		stageScript = new ScriptHandler(this);
-		stageScript.load(Paths.getPath('stages/$stage', 'script'));
+		stageScript.loadFolder(Paths.getPath('game/stages/$stage'));
 		stageScript.executeAll();
 		stageScript.call('onCreate', []);
 	}
@@ -60,7 +60,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 		// hardcoder reference!1
 		switch (stage) {
 			default:
-				var stageDataPath = Paths.getPath('data/game/stages/' + stage, "json");
+				var stageDataPath = Paths.getPath('game/stages/$stage/$stage', "json");
 				stageData = modding.vslice.VSliceStages.readStage(stageDataPath);
 
 				if (stageData == null)
@@ -69,7 +69,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 				if (stageData.elements == null) {
 					Console.log('[Stage] WARNING: "$stage" is not a stage format the engine reads, using stage', true);
 					stage = 'stage';
-					stageData = FormatJson.readJson('${core.assets.Library.baseFolder}/data/game/stages/stage.json');
+					stageData = FormatJson.readJson('${core.assets.Library.baseFolder}/game/stages/stage/stage.json');
 					if (stageData == null || stageData.elements == null) {
 						stageData = null;
 						return;

@@ -40,7 +40,7 @@ class CreditsState extends MusicBeatState {
 	override public function create() {
 		super.create();
 
-		MasterAudio.playMenu(Paths.getPath('menus/freeplayRandom/freeplayRandom', 'music'), 0.6, 145);
+		MasterAudio.playMenu(Paths.getPath('menus/freeplay/freeplayRandom/freeplayRandom', 'music'), 0.6, 145);
 
 		bg = new flixel.FlxSprite().makeGraphic(FlxG.width, 10, FlxColor.BLACK);
 		bg.scrollFactor.set(1, 1);
@@ -56,7 +56,7 @@ class CreditsState extends MusicBeatState {
 	}
 
 	function buildCredits() {
-		var creditsData:CreditEntry = FormatJson.readJson(Paths.getPath('data/menus/credits', 'json'));
+		var creditsData:CreditEntry = FormatJson.readJson(Paths.getPath('menus/credits/credits', 'json'));
 		
 		var curY:Float = FlxG.height * 0.35 + GAP_AFTER_SECTION * 2;
 

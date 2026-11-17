@@ -112,7 +112,7 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function loadCharacterData():Void {
-		var folder = core.assets.Library.findLib('images/menus/loading/characters');
+		var folder = core.assets.Library.findLib('menus/loading/characters');
 		if (!sys.FileSystem.exists(folder) || !sys.FileSystem.isDirectory(folder))
 			return;
 
@@ -130,7 +130,7 @@ class LoadingState extends MusicBeatState {
 		if (script.callCancellable("onGetCharacterCancel", []))
 			return;
 		#end
-		final folder = core.assets.Library.findLib('images/menus/loading/characters');
+		final folder = core.assets.Library.findLib('menus/loading/characters');
 		var charNames:Array<String> = [];
 
 		if (sys.FileSystem.exists(folder) && sys.FileSystem.isDirectory(folder)) {
@@ -221,7 +221,7 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function collectStageAssets(stageName:String) {
-		var stageData:Null<StageData> = modding.vslice.VSliceStages.readStage(Paths.getPath('data/game/stages/$stageName', 'json'));
+		var stageData:Null<StageData> = modding.vslice.VSliceStages.readStage(Paths.getPath('game/stages/$stageName/$stageName', 'json'));
 		if (stageData == null || stageData.elements == null)
 			return;
 
@@ -234,7 +234,7 @@ class LoadingState extends MusicBeatState {
 	}
 
 	function collectCharAssets(charName:String) {
-		var charData:Null<CharacterData> = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('data/game/characters/$charName', 'json'));
+		var charData:Null<CharacterData> = modding.vslice.VSliceCharacters.readCharacter(Paths.getPath('game/characters/$charName/$charName', 'json'));
 		if (charData == null || charData.render == null || charData.render.layers == null)
 			return;
 

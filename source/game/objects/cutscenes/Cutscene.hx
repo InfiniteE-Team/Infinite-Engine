@@ -121,7 +121,7 @@ class Cutscene {
 	}
 
 	static function resolve(songFolder:String, slot:String):Null<String> {
-		var local = core.assets.Library.findLib('songs/$songFolder/videos/$slot.mp4');
+		var local = core.assets.Library.findLib('game/songs/$songFolder/videos/$slot.mp4');
 		if (local != null)
 			return local;
 

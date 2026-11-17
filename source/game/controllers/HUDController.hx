@@ -83,7 +83,7 @@ class HUDController extends flixel.group.FlxSpriteContainer {
 			var isOpponent = game.controllers.CharacterController.namesOpponent.contains(charData.role);
 			if (!isPlayer && !isOpponent)
 				continue;
-			var icon = new game.objects.sprites.Icon(isPlayer, char.characterData);
+			var icon = new game.objects.sprites.Icon(isPlayer, char.characterData, char.curCharacter);
 			icon.scrollFactor.set(0, 0);
 			add(icon);
 

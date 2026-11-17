@@ -244,7 +244,7 @@ class StoryMenuState extends MusicBeatState {
 	}
 
 	function buildNoWeeksWarning() {
-		noWeeksText = new FlxText(0, FlxG.height / 2 - 35, FlxG.width, "¡Not exists weeks! — Create your data in 'data/menus/storymenu/weeks/'");
+		noWeeksText = new FlxText(0, FlxG.height / 2 - 35, FlxG.width, "¡Not exists weeks! — Create your data in 'menus/storymenu/weeks/'");
 		noWeeksText.setFormat(Paths.getPath('5by7_b.ttf', 'font'), 24, 0xFFFFB2B2, "center");
 		noWeeksText.setBorderStyle(FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, 2, 1);
 		noWeeksText.antialiasing = SaveData.data.antialiasing;
@@ -260,14 +260,14 @@ class StoryMenuState extends MusicBeatState {
 			for (week in modding.vslice.VSliceSongs.weeks())
 				weeks.push(week);
 		} else {
-			var resolved = Paths.getPath('data/menus/storymenu/weeks');
+			var resolved = Paths.getPath('menus/storymenu/weeks');
 			if (resolved == null || !FileSystem.exists(resolved))
 				return;
 
 			for (file in FileSystem.readDirectory(resolved)) {
 				if (!file.endsWith('.json'))
 					continue;
-				var data:core.json.menus.storymenu.WeekData = FormatJson.readJson(Paths.getPath('data/menus/storymenu/weeks/$file'));
+				var data:core.json.menus.storymenu.WeekData = FormatJson.readJson(Paths.getPath('menus/storymenu/weeks/$file'));
 				if (data != null)
 					weeks.push(data);
 			}

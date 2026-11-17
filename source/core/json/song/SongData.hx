@@ -144,7 +144,7 @@ class SongConfig {
 
 	public function configSong(songFolder:String, diff:String) {
 		var osuPath:String = null;
-		var baseFile = 'songs/$songFolder/charts/$diff';
+		var baseFile = 'game/songs/$songFolder/charts/$diff';
 		for (lib in ['assets', 'mods']) {
 			var candidate = '$lib/$baseFile.osu';
 			if (sys.FileSystem.exists(candidate)) {
@@ -214,7 +214,7 @@ class SongConfig {
 	}
 
 	public static function getSongName(songFolder:String):String {
-		var metaPath = core.assets.Library.findLib('songs/$songFolder/meta.json');
+		var metaPath = core.assets.Library.findLib('game/songs/$songFolder/meta.json');
 		if (metaPath != null) {
 			var file:Dynamic = FormatJson.readJson(metaPath);
 			if (file?.song != null)
@@ -227,7 +227,7 @@ class SongConfig {
 				return meta.songName;
 		}
 
-		var chartsPath = core.assets.Library.findLib('songs/$songFolder/charts');
+		var chartsPath = core.assets.Library.findLib('game/songs/$songFolder/charts');
 		if (chartsPath != null) {
 			for (file in sys.FileSystem.readDirectory(chartsPath)) {
 				if (StringTools.endsWith(file, '.json')) {
@@ -243,7 +243,7 @@ class SongConfig {
 	}
 
 	private function loadSeparateEvents(songFolder:String):Void {
-		var path = core.assets.Library.findLib('songs/$songFolder/events.json');
+		var path = core.assets.Library.findLib('game/songs/$songFolder/events.json');
 		if (path == null || !sys.FileSystem.exists(path))
 			return;
 
@@ -262,7 +262,7 @@ class SongConfig {
 	}
 
 	private function loadSeparateMeta(raw:Dynamic, songFolder:String):Void {
-		var path = core.assets.Library.findLib('songs/$songFolder/meta.json');
+		var path = core.assets.Library.findLib('game/songs/$songFolder/meta.json');
 		if (path == null || !sys.FileSystem.exists(path))
 			return;
 
@@ -278,7 +278,8 @@ class SongConfig {
 
 	private function tryLoadVSliceMeta(songFolder:String, diff:String):Dynamic {
 		var diffMeta:String = (diff != 'easy' && diff != 'normal' && diff != 'hard') ? '-$diff' : '';
-		var path = core.assets.Library.findLib('songs/$songFolder/$songFolder-metadata$diffMeta.json');
+		var path = Paths.getPath('songs/$songFolder/$songFolder-metadata$diffMeta',
+			'json') ?? Paths.getPath('game/songs/$songFolder/$songFolder-metadata$diffMeta', 'json');
 		if (path != null && sys.FileSystem.exists(path)) {
 			var meta:Dynamic = FormatJson.readJson(path);
 			if (meta != null) {

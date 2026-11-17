@@ -16,33 +16,31 @@ class Paths {
 		try {
 			return switch (type) {
 				case DATA:
-					Library.findLib("data/" + fileName);
+					Library.findLib(fileName) ?? Library.findLib('data/' + fileName);
 				case JSON:
 					Library.findLib(fileName + '.json');
 				case FONT:
-					Library.findLib("fonts/" + fileName);
+					Library.findLib("general/fonts/" + fileName);
 				case IMAGE:
-					Library.findLib("images/" + fileName + '.png');
-				case SOUND:
-					Library.findLib("sounds/" + fileName + '.ogg');
-				case MUSIC:
-					Library.findLib("music/" + fileName + '.ogg');
+					Library.findLib(fileName + '.png') ?? Library.findLib('images/' + fileName + '.png');
+				case SOUND, MUSIC:
+					Library.findLib(fileName + '.ogg');
 				case VIDEOS:
-					Library.findLib("videos/" + fileName + '.mp4');
+					Library.findLib("general/videos/" + fileName + '.mp4');
 				case SONG_AUDIO:
 					var songName = PlayState.instance?.songFolder ?? currentSong;
-					Library.findLib('songs/$songName/audio/$fileName.ogg') ?? Library.findLib('songs/$songName/$fileName.ogg');
+					Library.findLib('game/songs/$songName/audio/$fileName.ogg') ?? Library.findLib('songs/$songName/$fileName.ogg');
 				case ANIMATED:
 					getAnimated(fileName);
 				case XML:
 					Library.findLib(fileName + '.xml');
 				case ASTC:
-					Library.findLib("images/" + fileName + '.astc');
+					Library.findLib(fileName + '.astc');
 				case SONG_SCRIPT:
 					var songName = PlayState.instance?.songFolder ?? currentSong;
 					Library.findLib('songs/$songName/scripts/$fileName.hx');
 				case SHADERS:
-					Library.findLib('shaders/$fileName.frag');
+					Library.findLib('general/shaders/$fileName.frag') ?? Library.findLib('shaders/$fileName.frag');
 				// scripting
 				case STATES:
 					Library.findLib(resolveScript('source/states/$fileName'));
@@ -51,7 +49,7 @@ class Paths {
 				case TYPEDEFS:
 					Library.findLib(resolveScript('source/typedefs/$fileName'));
 				case SCRIPT:
-					Library.findLib(resolveScript('scripts/$fileName'));
+					Library.findLib(resolveScript(fileName));
 				default:
 					Library.findLib(fileName);
 			}
@@ -116,21 +114,27 @@ class Paths {
 		}
 
 		inline function tryLib(ext:String, build:flixel.graphics.FlxGraphic->String->Dynamic):Bool {
-			var path = Library.findLib('images/$fileName$ext');
+			var path = Library.findLib('$fileName$ext') ?? Library.findLib('images/$fileName$ext');
 			if (path != null && graphic != null) {
 				result = build(graphic, path);
-				return true;
+				return result != null;
 			}
 			return false;
 		}
 
-		final folder = Library.findLib('images/$fileName');
+		final folder = Library.findLib('$fileName') ?? Library.findLib('images/$fileName');
 		if (folder != null && FileSystem.exists('$folder/Animation.json')) {
 			result = FlxAnimateFrames.fromAnimate(folder);
 		} else {
 			tryLib('.xml', (g, p) -> FlxAtlasFrames.fromSparrow(g, readText(p)))
 			|| tryLib('.txt', (g, p) -> FlxAtlasFrames.fromLibGdx(g, readText(p)))
-			|| tryLib('.json', (g, p) -> FlxAtlasFrames.fromTexturePackerJson(g, readText(p)))
+			|| tryLib('.json', (g, p) -> {
+				var content = readText(p);
+				var parsed:Dynamic = try haxe.Json.parse(content) catch (_:Dynamic) null;
+				if (parsed == null || (Reflect.field(parsed, 'frames') == null && Reflect.field(parsed, 'textures') == null))
+					return null;
+				return FlxAtlasFrames.fromTexturePackerJson(g, content);
+			})
 			|| (result = graphic) != null;
 		}
 
@@ -167,13 +171,13 @@ class Paths {
 		var formatDetected = "image";
 		var folderPath:Null<String> = null;
 		var atlasPath:Null<String> = null;
-		var animFolder = Library.findLib('images/$fileName');
+		var animFolder = Library.findLib('$fileName') ?? Library.findLib('images/$fileName');
 		if (animFolder != null && FileSystem.exists('$animFolder/Animation.json')) {
 			formatDetected = "animate";
 			folderPath = animFolder;
 		} else {
 			for (kind in [["sparrow", ".xml"], ["json", ".json"], ["pack", ".txt"]]) {
-				atlasPath = Library.findLib('images/$fileName${kind[1]}');
+				atlasPath = Library.findLib('$fileName${kind[1]}') ?? Library.findLib('images/$fileName${kind[1]}');
 				if (atlasPath != null) {
 					formatDetected = kind[0];
 					break;

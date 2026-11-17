@@ -308,7 +308,7 @@ class GameplayEditor extends MusicBeatState {
 
 	#if sys
 	static function resolveSongDir(name:String):String {
-		var basePath = 'assets/songs';
+		var basePath = 'assets/game/songs';
 		if (sys.FileSystem.exists(basePath)) {
 			for (entry in sys.FileSystem.readDirectory(basePath)) {
 				if (entry.toLowerCase() == name.toLowerCase())
@@ -316,7 +316,7 @@ class GameplayEditor extends MusicBeatState {
 			}
 		}
 		if (modding.mods.ModsRegistry.onMod && modding.mods.ModsRegistry.currentMod != '') {
-			var modPath = 'mods/${modding.mods.ModsRegistry.currentMod}/songs';
+			var modPath = 'mods/${modding.mods.ModsRegistry.currentMod}/game/songs';
 			if (sys.FileSystem.exists(modPath)) {
 				for (entry in sys.FileSystem.readDirectory(modPath)) {
 					if (entry.toLowerCase() == name.toLowerCase())
@@ -618,7 +618,7 @@ class GameplayEditor extends MusicBeatState {
 
 	function chartOnDisk():Bool {
 		for (ext in ['json', 'osu']) {
-			var path = core.assets.Library.findLib('songs/$songDir/charts/$chartDiff.$ext');
+			var path = core.assets.Library.findLib('game/songs/$songDir/charts/$chartDiff.$ext');
 			if (path != null && sys.FileSystem.exists(path))
 				return true;
 		}
@@ -1484,7 +1484,7 @@ class GameplayEditor extends MusicBeatState {
 
 		try {
 			var stageName:String = SONG.stage;
-			if (stageName == null || !Paths.exists('data/game/stages/$stageName.json'))
+			if (stageName == null || !Paths.exists('game/stages/$stageName/$stageName.json'))
 				stageName = ChartDefaults.FALLBACK_STAGE;
 
 			stage = new game.objects.sprites.Stage(stageName);
@@ -1628,7 +1628,7 @@ class GameplayEditor extends MusicBeatState {
 		}
 
 		if (hit && hitsounds)
-			FlxG.sound.play(Paths.getPath('game/hitsounds/hit-1', 'sound'), 0.6);
+			FlxG.sound.play(Paths.getPath('game/general/sounds/hitsounds/hit-1', 'sound'), 0.6);
 
 		for (n in sustainNotes) {
 			if (pos < n.time || pos > n.time + n.length)
@@ -1698,7 +1698,7 @@ class GameplayEditor extends MusicBeatState {
 			var charObj = chars != null ? cast(chars.get(label.id), game.objects.sprites.Character) : null;
 			if (charObj != null) {
 				try {
-					var icon = new game.objects.sprites.Icon(isPlayer, charObj.characterData);
+					var icon = new game.objects.sprites.Icon(isPlayer, charObj.characterData, charObj.curCharacter);
 					var fit:Float = ICON_SIZE / Math.max(1, icon.frameHeight);
 					icon.scale.set(fit, fit);
 					icon.updateHitbox();
@@ -1795,7 +1795,7 @@ class GameplayEditor extends MusicBeatState {
 			return;
 		}
 
-		var folderPath:String = 'songs/$songDir/charts';
+		var folderPath:String = 'game/songs/$songDir/charts';
 
 		var osuPath = core.assets.Library.findLib('$folderPath/$chartDiff.osu');
 		if (osuPath != null && sys.FileSystem.exists(osuPath)) {
@@ -1821,13 +1821,13 @@ class GameplayEditor extends MusicBeatState {
 			Reflect.setField(chartCopy, 'gameplay', gameplayCopy);
 			Reflect.deleteField(chartCopy, 'meta');
 
-			var metaPath = core.assets.Library.findLib('songs/$songDir/meta.json');
+			var metaPath = core.assets.Library.findLib('game/songs/$songDir/meta.json');
 			if (metaPath == null || !sys.FileSystem.exists(metaPath)) {
 				metaPath = ChartDefaults.newMetaPath(songDir);
 				ChartDefaults.makeDirs(haxe.io.Path.directory(metaPath));
 			}
 
-			var eventsPath = core.assets.Library.findLib('songs/$songDir/events.json');
+			var eventsPath = core.assets.Library.findLib('game/songs/$songDir/events.json');
 			if (eventsPath == null || !sys.FileSystem.exists(eventsPath)) {
 				eventsPath = ChartDefaults.newEventsPath(songDir);
 				ChartDefaults.makeDirs(haxe.io.Path.directory(eventsPath));

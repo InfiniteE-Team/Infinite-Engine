@@ -12,7 +12,7 @@ import core.audio.Sound;
 
 /**
  * Runs immediately after ConfigMain, before the mod's initial state.
- * Scans images/, sounds/, and music/ from the active mod and base 
+ * Scans images, sounds, and music from the active mod and base 
  * assets, then bulk-caches them using `Paths.cacheAutoAsync` (graphics) 
  * and `Sound.streamedCache` (audio) so the first state switch is lag-free.
  */
@@ -200,9 +200,11 @@ class FunkinPreloader extends MusicBeatState {
 		roots.push(core.assets.Library.baseFolder);
 
 		for (root in roots) {
-			scanForImages('$root/images', '$root/images');
-			scanForAudio('$root/sounds', '$root/sounds');
-			scanForAudio('$root/music', '$root/music');
+			scanForImages('$root/game', '$root/game');
+			scanForImages('$root/menus', '$root/menus');
+			scanForAudio('$root/menus', '$root/menus');
+			scanForImages('$root/general', '$root/general');
+			scanForAudio('$root/general', '$root/general');
 		}
 
 		totalImages = imageQueue.length;

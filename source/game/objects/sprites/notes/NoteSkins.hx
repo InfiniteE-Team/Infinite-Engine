@@ -5,7 +5,7 @@ import core.assets.Library;
 import modding.mods.ModsRegistry;
 import modding.vslice.VSliceNoteStyles;
 
-// Note skins as one package per name: data/game/noteskins/<skin>/ holds strumnotes, splashes, holdsplashes and, optional,
+// Note skins as one package per name: game/noteskins/<skin>/ holds strumnotes, splashes, holdsplashes and, optional,
 // popups (rating and combo images) and countdown. A "vslice-<id>" skin is a V-Slice notestyle converted on read -JloorDev
 class NoteSkins {
 	public static inline final DEFAULT:String = 'default';
@@ -21,7 +21,7 @@ class NoteSkins {
 				converted.set(key, VSliceNoteStyles.convert(skin.substr(VSliceNoteStyles.PREFIX.length), part));
 			return converted.get(key);
 		}
-		return FormatJson.readJson(Paths.getPath('data/game/noteskins/$skin/$part', 'json'));
+		return FormatJson.readJson(Paths.getPath('game/noteskins/$skin/$part/$part', 'json'));
 	}
 
 	public static function exists(skin:String):Bool
@@ -31,9 +31,9 @@ class NoteSkins {
 		return StringTools.startsWith(skin ?? '', VSliceNoteStyles.PREFIX) ? '' : 'game/noteskins/$skin/$part/';
 
 	public static function list():Array<String> {
-		var folders = ['${Library.baseFolder}/data/noteskins'];
+		var folders = ['${Library.baseFolder}/game/noteskins'];
 		if (ModsRegistry.onMod && ModsRegistry.currentMod != null && ModsRegistry.currentMod != '')
-			folders.push('${Library.modsFolder}/${ModsRegistry.currentMod}/data/noteskins');
+			folders.push('${Library.modsFolder}/${ModsRegistry.currentMod}/game/noteskins');
 		var names:Array<String> = [];
 		for (folder in folders) {
 			if (!FileSystem.exists(folder) || !FileSystem.isDirectory(folder))

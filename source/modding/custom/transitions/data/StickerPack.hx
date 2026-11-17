@@ -5,8 +5,8 @@ import core.json.engine.StickerData;
 /**
  * Resolves asset paths for a sticker pack by name.
  * The pack JSON lives at:
- *   assets/data/menus/stickers/<packName>.json
- *   mods/<mod>/menus/data/stickers/<packName>.json
+ *   assets/menus/stickers/<packName>.json
+ *   mods/<mod>/menus/stickers/<packName>.json
  */
 class StickerPack {
 	public var data:StickerData;
@@ -18,7 +18,7 @@ class StickerPack {
 	}
 
 	static function loadData(name:String):StickerData {
-		var path = FormatJson.readJson(Paths.getPath('data/menus/stickers/$name', 'json'));
+		var path = FormatJson.readJson(Paths.getPath('menus/stickers/$name/$name', 'json'));
 		return path;
 	}
 
@@ -34,6 +34,6 @@ class StickerPack {
 
 	public function randomClickSound(count:Int = 9):String {
 		var n = FlxG.random.int(1, count);
-		return Paths.getPath('menus/stickersounds/$packName/keyClick$n', 'sound');
+		return Paths.getPath('menus/stickers/$packName/keyClick$n', 'sound');
 	}
 }

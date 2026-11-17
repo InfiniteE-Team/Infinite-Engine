@@ -277,10 +277,10 @@ class NoteController {
 		holdSkinData = skinPart(noteSkin, 'holdsplashes');
 		popupsData = NoteSkins.read(noteSkin, 'popups');
 
-		var ratingPath = Paths.getPath('data/game/ui/popup/${game.PlayStateConfig.comboSkin}', 'json');
+		var ratingPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.comboSkin}/${game.PlayStateConfig.comboSkin}', 'json');
 		ratingData = FormatJson.readJson(ratingPath);
 		if (ratingData == null || ratingData.ratings == null) {
-			trace("WARNING: ratings.json not found or invalid");
+			trace('WARNING: ${game.PlayStateConfig.comboSkin}.json not found or invalid');
 		} else {
 			var best = 0.0;
 			cachedRatings = [];
@@ -902,7 +902,7 @@ class NoteController {
 			return null;
 		if (noteTypeCache.exists(noteType))
 			return noteTypeCache.get(noteType);
-		var path = Paths.getPath('data/game/notetypes/$noteType', 'json');
+		var path = Paths.getPath('game/notetypes/$noteType', 'json');
 		var data:core.json.game.objects.NoteTypeData = path != null ? FormatJson.readJson(path) : null;
 		noteTypeCache.set(noteType, data);
 		return data;

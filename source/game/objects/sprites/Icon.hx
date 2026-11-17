@@ -23,7 +23,7 @@ class Icon extends modding.scripting.types.sprites.ScriptedSprite {
 		super();
 		#if HSCRIPT_ALLOWED
 		var iconScriptPath:String = (characterData != null && characterData.icon != null && characterData.icon.props != null) ? characterData.icon.props.name : (sprite ?? 'face');
-		initScript('characters/icons/$characterData');
+		initScript('game/characters/$sprite/$iconScriptPath-icon');
 		#end
 		updateIcon(isPlayer, characterData, sprite);
 	}
@@ -46,7 +46,7 @@ class Icon extends modding.scripting.types.sprites.ScriptedSprite {
 					if (iconData.props != null) {
 						iconData.props.position ??= [0, 0];
 						setPosition(iconData.props.position[0], iconData.props.position[1]);
-						loadProps(iconData.props, 'game/icons');
+						loadProps(iconData.props, 'game/characters/$sprite');
 						if (frameWidth > 0) {
 							if (iconData.size != null) {
 								baseScale = iconData.size / frameWidth;
@@ -59,7 +59,7 @@ class Icon extends modding.scripting.types.sprites.ScriptedSprite {
 							updateHitbox();
 						}
 					} else {
-						loadProps(defaultProps(sprite), 'game/icons');
+						loadProps(defaultProps(sprite), 'game/characters/$sprite');
 					}
 				} else {
 					var defaultData = FormatJson.getIconDataPlaceholder(null);
@@ -67,7 +67,7 @@ class Icon extends modding.scripting.types.sprites.ScriptedSprite {
 					bumpInBeats = defaultData.bumpInBeats;
 					stepTempo = defaultData.stepTempo;
 
-					loadProps(defaultProps(sprite), 'game/icons');
+					loadProps(defaultProps(sprite), 'game/characters/$sprite');
 				}
 
 				flipX = isPlayer != (characterData?.icon?.props?.flipX == true);

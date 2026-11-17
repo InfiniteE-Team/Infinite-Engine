@@ -81,7 +81,7 @@ class VSliceSongs {
 		var position = [num(prop.offsets, 0) + FlxG.width * 0.25 * index, num(prop.offsets, 1) + 14];
 		if (core.assets.Library.findLib('images/$path.png') == null) {
 			// base game props aren't in the mod, use ours with the same name -JloorDev
-			var engineProp:ObjectData = FormatJson.readJson(Paths.getPath('data/menus/storymenu/chars/${haxe.io.Path.withoutDirectory(path)}', 'json'));
+			var engineProp:ObjectData = FormatJson.readJson(Paths.getPath('menus/storymenu/chars/${haxe.io.Path.withoutDirectory(path)}', 'json'));
 			if (engineProp != null)
 				engineProp.position = position;
 			return engineProp;

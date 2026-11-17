@@ -13,7 +13,7 @@ class VSliceCharacters {
 		if (raw == null || raw.render != null || raw.assetPath == null || raw.animations == null)
 			return raw;
 		var id = haxe.io.Path.withoutExtension(path);
-		var dataDir = ~/data\/(game\/|vslice\/)?characters\//;
+		var dataDir = ~/(game\/|vslice\/)?characters\//;
 		id = dataDir.match(id) ? dataDir.matchedRight() : haxe.io.Path.withoutDirectory(id);
 		raw = applyMerge('data/characters/$id.json', raw);
 		var main = stripLibrary(raw.assetPath);
@@ -23,7 +23,7 @@ class VSliceCharacters {
 		if (!hasAtlas(main)) {
 			var fallback = haxe.io.Path.withoutDirectory(path).startsWith('gf') ? 'gf' : 'bf';
 			Console.log('[V-Slice] ${haxe.io.Path.withoutDirectory(path)} needs "$main" from the base game, using the engine $fallback', true);
-			return FormatJson.readJson('${Library.baseFolder}/data/game/characters/$fallback.json');
+			return FormatJson.readJson('${Library.baseFolder}/game/characters/$fallback/$fallback.json');
 		}
 		return convertCharacter(raw, id);
 	}

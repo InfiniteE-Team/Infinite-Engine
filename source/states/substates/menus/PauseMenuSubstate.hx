@@ -58,7 +58,7 @@ class PauseMenuSubstate extends states.substates.BlurSubState {
 
 		if (cachedPauseMusic == null) {
 			pauseMenuMusic = new FlxSound();
-			pauseMenuMusic.load(Paths.getPath('menus/pauseInfinite', "music"), false);
+			pauseMenuMusic.load(Paths.getPath('menus/pause/pauseInfinite', "music"), false);
 			pauseMenuMusic.looped = true;
 			FlxG.sound.list.add(pauseMenuMusic);
 			cachedPauseMusic = pauseMenuMusic;

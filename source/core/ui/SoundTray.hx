@@ -25,7 +25,7 @@ class SoundTray extends FlxSoundTray {
 		super();
 		removeChildren();
 
-		var bg:Bitmap = new Bitmap(Assets.getBitmapData(Paths.getPath("soundtray/volumebox", 'image')));
+		var bg:Bitmap = new Bitmap(Assets.getBitmapData(Paths.getPath("general/soundtray/volumebox", 'image')));
 		bg.scaleX = graphicScale;
 		bg.scaleY = graphicScale;
 		bg.smoothing = true;
@@ -35,7 +35,7 @@ class SoundTray extends FlxSoundTray {
 		visible = false;
 
 		// makes an alpha'd version of all the bars (bar_10.png)
-		var backingBar:Bitmap = new Bitmap(Assets.getBitmapData(Paths.getPath("soundtray/bars_10", 'image')));
+		var backingBar:Bitmap = new Bitmap(Assets.getBitmapData(Paths.getPath("general/soundtray/bars_10", 'image')));
 		backingBar.x = 9;
 		backingBar.y = 5;
 		backingBar.scaleX = graphicScale;
@@ -51,7 +51,7 @@ class SoundTray extends FlxSoundTray {
 		// 1...11 due to how block named the assets,
 		// we are trying to get assets bars_1-10
 		for (i in 1...11) {
-			var bar:Bitmap = new Bitmap(Assets.getBitmapData(Paths.getPath("soundtray/bars_" + i, 'image')));
+			var bar:Bitmap = new Bitmap(Assets.getBitmapData(Paths.getPath("general/soundtray/bars_" + i, 'image')));
 			bar.x = 9;
 			bar.y = 5;
 			bar.scaleX = graphicScale;
@@ -63,9 +63,9 @@ class SoundTray extends FlxSoundTray {
 
 		screenCenter();
 
-		volumeUpSound = Paths.getPath("soundtray/Volup", 'sound');
-		volumeDownSound = Paths.getPath("soundtray/Voldown", 'sound');
-		volumeMaxSound = Paths.getPath("soundtray/VolMAX", 'sound');
+		volumeUpSound = Paths.getPath("general/soundtray/Volup", 'sound');
+		volumeDownSound = Paths.getPath("general/soundtray/Voldown", 'sound');
+		volumeMaxSound = Paths.getPath("general/soundtray/VolMAX", 'sound');
 
 		trayHeight = height;
 		y = -trayHeight - 10;

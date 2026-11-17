@@ -14,15 +14,15 @@ class CursorConfig extends FunkinSprite {
 	}
 
 	public function loadCursor() {
-		cursorProps = FormatJson.readJson(Paths.getPath('data/cursorConfig', "json"));
-		loadProps(cursorProps, 'cursor');
+		cursorProps = FormatJson.readJson(Paths.getPath('general/cursor/cursor', "json"));
+		loadProps(cursorProps, 'general/cursor');
 
 		if (this.graphic == null || this.graphic.bitmap == null) {
 			Console.log("CursorConfig: graphic is null, cursor not loaded", true);
 			return;
 		}
 
-		var file = core.assets.Library.findLib('images/cursor/${cursorProps.path}.png');
+		var file = core.assets.Library.findLib('general/cursor/${cursorProps.path}.png');
 		if (file != null && sys.FileSystem.exists(file))
 			cursorBitmap = openfl.display.BitmapData.fromFile(file);
 

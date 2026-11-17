@@ -46,7 +46,7 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 
 		for (i in 1...3) {
 			var miss = new FlxSound();
-			miss.load(Paths.getPath('game/misses/missnote' + i, "sound"), false);
+			miss.load(Paths.getPath('game/general/sounds/misses/missnote' + i, "sound"), false);
 			miss.looped = false;
 			FlxG.sound.list.add(miss);
 			soundMisses.push(miss);

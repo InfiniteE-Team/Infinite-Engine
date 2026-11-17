@@ -25,6 +25,6 @@ class CustomBlendShader extends FlxRuntimeShader {
 	}
 
 	public function new() {
-		super(openfl.utils.Assets.getText('assets/shaders/customBlend.frag'));
+		super(openfl.utils.Assets.getText(Paths.getPath('customBlend', 'shaders')));
 	}
 }

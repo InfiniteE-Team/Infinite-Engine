@@ -23,7 +23,7 @@ class Alphabet extends core.assets.FunkinSprite {
 	}
 
 	function loadChar(char:String, style:AlphabetStyle):Void {
-		frames = Paths.getPath("alphabet",'animated');
+		frames = Paths.getPath("general/alphabet", 'animated');
 
 		var xmlChar = charToXmlName(char, style);
 		var prefix = '$xmlChar $style instance ';

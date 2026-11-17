@@ -91,7 +91,7 @@ class CharacterEditor extends MusicBeatState {
 		if (FlxG.mouse != null)
 			FlxG.mouse.visible = true;
 
-		core.audio.MasterAudio.playMenu(Paths.getPath('menus/artistic-expression/artistic-expression', 'music'), 0.6, 137);
+		core.audio.MasterAudio.playMenu(Paths.getPath('menus/editors/artistic-expression/artistic-expression', 'music'), 0.6, 137);
 
 		createCameras();
 
@@ -197,12 +197,10 @@ class CharacterEditor extends MusicBeatState {
 
 		tabRight();
 
-		var path = Paths.getPath('data/game/characters');
+		var path = Paths.getPath('game/characters');
 		var chars:Array<String> = [];
 		if (sys.FileSystem.exists(path) && sys.FileSystem.isDirectory(path)) {
-			chars = sys.FileSystem.readDirectory(path).map(function(file) {
-				return StringTools.replace(file, '.json', '');
-			});
+			chars = sys.FileSystem.readDirectory(path);
 			curCharacter = chars[0];
 		} else
 			Console.log('Chars data not loading in list');
@@ -775,7 +773,7 @@ class CharacterEditor extends MusicBeatState {
 	function getCharAssetDir():String {
 		var base = modding.mods.ModsRegistry.onMod
 			&& modding.mods.ModsRegistry.currentMod != '' ? '${core.assets.Library.modsFolder}/${modding.mods.ModsRegistry.currentMod}' : core.assets.Library.baseFolder;
-		return '$base/images/game/characters/$curCharacter';
+		return '$base/game/characters/$curCharacter/$curCharacter';
 	}
 
 	function importAsset(path:String) {
@@ -1332,7 +1330,7 @@ class CharacterEditor extends MusicBeatState {
 			}
 		}
 
-		var path = Paths.getPath('data/game/characters/$curCharacter', 'json');
+		var path = Paths.getPath('game/characters/$curCharacter/$curCharacter', 'json');
 		var json = haxe.Json.stringify(char.characterData, null, '\t');
 		sys.io.File.saveContent(path, json);
 
