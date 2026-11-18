@@ -183,9 +183,9 @@ class EventManager {
 					taken.push(t.name);
 					extra.push(t);
 				}
-			var dirs = ['${core.assets.Library.baseFolder}/scripts/events'];
+			var dirs = ['${core.assets.Library.baseFolder}/game/events'];
 			if (mod != '')
-				dirs.push('${core.assets.Library.modsFolder}/$mod/scripts/events');
+				dirs.push('${core.assets.Library.modsFolder}/$mod/game/events');
 			for (dir in dirs)
 				if (sys.FileSystem.exists(dir) && sys.FileSystem.isDirectory(dir))
 					for (file in sys.FileSystem.readDirectory(dir)) {

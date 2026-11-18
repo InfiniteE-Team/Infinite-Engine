@@ -187,15 +187,15 @@ class ChartDefaults {
 	}
 
 	public static function newChartPath(songFolder:String, diff:String):String {
-		return '${songRoot()}/songs/$songFolder/charts/$diff.json';
+		return '${songRoot()}/game/songs/$songFolder/charts/$diff.json';
 	}
 
 	public static function newMetaPath(songFolder:String):String {
-		return '${songRoot()}/songs/$songFolder/meta.json';
+		return '${songRoot()}/game/songs/$songFolder/meta.json';
 	}
 
 	public static function newEventsPath(songFolder:String):String {
-		return '${songRoot()}/songs/$songFolder/events.json';
+		return '${songRoot()}/game/songs/$songFolder/events.json';
 	}
 
 	static function songRoot():String {
