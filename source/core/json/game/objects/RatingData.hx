@@ -1,6 +1,7 @@
 package core.json.game.objects;
 
 typedef RatingData = {
+	var ?name:String;
 	var ratings:Array<RatingDataType>;
 }
 
