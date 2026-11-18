@@ -50,7 +50,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 	#if HSCRIPT_ALLOWED
 	function initStageScript():Void {
 		stageScript = new ScriptHandler(this);
-		stageScript.loadFolder(Paths.getPath('game/stages/$stage'));
+		stageScript.load(Paths.getPath('game/stages/$stage/$stage', 'script'));
 		stageScript.executeAll();
 		stageScript.call('onCreate', []);
 	}

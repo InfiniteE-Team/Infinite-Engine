@@ -3,10 +3,11 @@ package core.json.game.objects;
 import core.json.extensions.SpriteData;
 
 typedef CharacterData = {
+	var ?name:String;
 	var meta:MetaData;
-	var gameplay:GameplayData;
+	var ?gameplay:GameplayData;
 	var render:RenderData;
-	var icon:IconData;
+	var ?icon:IconData;
 }
 
 // meta for chars
