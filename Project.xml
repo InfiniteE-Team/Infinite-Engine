@@ -1,22 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project xmlns:config="http://lime.openfl.org/2011/config">
-	<!-- _________________________ Application Settings _________________________ -->
+	<!-- App -->
 
 	<app title="Friday Night Funkin': Infinite Engine" file="InfiniteEngine" main="core.Main"
 		version="0.1.0" company="infiniteTeam" package="com.infiniteTeam.infiniteEngine" />
 
-	<!--The
-	flixel preloader is not accurate in Chrome. You can use it regularly if you embed the swf into a
-	html file
-		or you can set the actual size of your file manually at "FlxPreloaderBase-onUpdate-bytesTotal"-->
-	<!-- <app preloader="Preloader" resizable="true" /> -->
-	<app preloader="flixel.system.FlxPreloader" />
+	<!-- Defines -->
 
-	<!--Minimum
-	without FLX_NO_GAMEPAD: 11.8, without FLX_NO_NATIVE_CURSOR: 11.2-->
 	<set name="SWF_VERSION" value="11.8" />
-
-	<!-- ____________________________ Defines ___________________________ -->
 
 	<define name="CRASH_HANDLER" if="desktop" />
 	<define name="HSCRIPT_ALLOWED" />
@@ -27,25 +18,23 @@
 	<define name="FORCE_TOUCH" if="mobile" />
 	<define name="HX_WINDOWS" if="windows cpp" />
 
-	<!-- ____________________________ Template Settings ___________________________ -->
+	<!-- Template Settings -->
 	<template path="assets/alsoft.ini" />
 
-	<!-- ____________________________ Window Settings ___________________________ -->
+	<!-- Window Settings -->
 
-	<!--These
-	window settings apply to all targets-->
 	<window width="1280" height="720" fps="1000" background="#000000" hardware="true" vsync="false" />
 	<window if="desktop" orientation="landscape" fullscreen="false" resizable="true" />
 	<window if="mobile" orientation="landscape" fullscreen="true" width="0" height="0" />
 
-	<!-- _____________________________ Path Settings ____________________________ -->
+	<!-- Path Settings -->
 
 	<set name="BUILD_DIR" value="export" />
 	<source path="source" />
 	<source path="source/modding/vslice/api" />
 	<assets path="assets" />
 
-	<!-- _______________________________ Libraries ______________________________ -->
+	<!-- Libraries -->
 
 	<haxelib name="flixel" />
 	<haxelib name="flixel-addons" />
@@ -72,7 +61,7 @@
 	<!--<haxelib
 	name="window-modcharting"/>-->
 
-	<!-- ______________________________ Haxedefines _____________________________ -->
+	<!-- Haxedefines -->
 
 	<!--Disable
 	the Flixel core focus lost screen-->
@@ -98,16 +87,19 @@
 	<haxedef name="hxscript_host" value="modding,game,states,core,utils,funkin" />
 	<haxedef name="hxscript_no_hl_bridges" if="hl" />
 
-	<!--<haxedef name="hxscript_cppia" if="release" />-->
-	<!--<haxedef name="scriptable" if="release" />-->
+	<!--<haxedef
+	name="hxscript_cppia" if="release" />-->
+	<!--<haxedef
+	name="scriptable" if="release" />-->
 
 	<haxedef name="no_dce" if="release" />
 
-	<!-- _______________________________Compiler Flags _______________________________ -->
+	<!-- Compiler Flags -->
 	<haxeflag name="--macro" value="include('foxlite')" />
 	<haxeflag name="--macro" value="include('modding.scripting.interfaces')" />
 	<haxeflag name="--macro" value="include('funkin', true, ['funkin.vis'])" />
-	<!--<haxeflag name="-macro" value="exclude('hxvlc')" if="release" /> -->
+	<!--<haxeflag
+	name="-macro" value="exclude('hxvlc')" if="release" /> -->
 
 	<!-- Android -->
 	<config:android>
