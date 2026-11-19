@@ -15,6 +15,9 @@ class StatsButton extends Button {
 
 	public var dragging:Bool = false;
 
+	static var consumedDelete:Bool = false;
+	static var activeVisibleButton:Null<StatsButton> = null;
+
 	var dragStartY:Float = 0;
 	var myIndex:Int = 0;
 	var totalItems:Int = 1;
@@ -48,7 +51,6 @@ class StatsButton extends Button {
 
 		if (onDrag != null) {
 			onDragCallback = onDrag;
-			onDeleteCallback = onDelete;
 
 			dragHandle = new FlxSprite();
 			dragHandle.loadGraphic(Paths.getPath('menus/editors/ui/barsContent', 'image'));
@@ -57,12 +59,6 @@ class StatsButton extends Button {
 			dragHandle.x = bg.width - dragHandle.width - 6;
 			dragHandle.y = (bg.height / 2) - (dragHandle.height / 2);
 			add(dragHandle);
-
-			deleteButton = new FlxText(0, 0, 0, 'X');
-			deleteButton.setFormat(Paths.getPath('Funkin.otf', 'font'), 28, 0xFFFFFFFF, 'center');
-			deleteButton.x = dragHandle.x - deleteButton.width - 30;
-			deleteButton.y = (bg.height / 2) - (deleteButton.height / 2);
-			add(deleteButton);
 		}
 
 		if (onVisible != null) {
@@ -75,6 +71,21 @@ class StatsButton extends Button {
 			visibleHandle.x = bg.width - visibleHandle.width - 6;
 			visibleHandle.y = (bg.height / 2) - (visibleHandle.height / 2);
 			add(visibleHandle);
+		}
+
+		if (onDelete != null) {
+			onDeleteCallback = onDelete;
+
+			deleteButton = new FlxText(0, 0, 0, 'X');
+			deleteButton.setFormat(Paths.getPath('Funkin.otf', 'font'), 28, 0xFFFFFFFF, 'center');
+			if (dragHandle != null)
+				deleteButton.x = dragHandle.x - deleteButton.width - 30;
+			else if (visibleHandle != null)
+				deleteButton.x = visibleHandle.x - deleteButton.width - 30;
+			else
+				deleteButton.x = deleteButton.width - 30;
+			deleteButton.y = (bg.height / 2) - (deleteButton.height / 2);
+			add(deleteButton);
 		}
 	}
 
@@ -93,10 +104,19 @@ class StatsButton extends Button {
 
 	public var isVisibleHit:Bool = false;
 
+	override public function destroy() {
+		if (activeVisibleButton == this)
+			activeVisibleButton = null;
+		super.destroy();
+	}
+
 	override public function update(elapsed:Float) {
 		super.update(elapsed);
 		if (!visible && !dragging)
 			return;
+
+		if (!FlxG.mouse.pressed)
+			consumedDelete = false;
 
 		var mouse = FlxG.mouse.getViewPosition(cam != null ? cam : FlxG.camera);
 		var mx = mouse.x;
@@ -107,20 +127,32 @@ class StatsButton extends Button {
 
 			if (visibleHit && FlxG.mouse.justPressed) {
 				isVisibleHit = !isVisibleHit;
+				if (isVisibleHit) {
+					if (activeVisibleButton != null && activeVisibleButton != this)
+						activeVisibleButton.isVisibleHit = false;
+					activeVisibleButton = this;
+				} else if (activeVisibleButton == this) {
+					activeVisibleButton = null;
+				}
 				onVisibleCallback();
 			}
 
 			visibleHandle.alpha = isVisibleHit ? 0.7 : 1.0;
 		}
 
-		if (onDragCallback != null) {
+		if (onDeleteCallback != null && !consumedDelete) {
 			var deleteHit = detectHit(mx, my, deleteButton);
 
 			deleteButton.color = deleteHit ? 0xFFFFD4D4 : 0xFFFFFFFF;
 
-			if (deleteHit && FlxG.mouse.justPressed)
+			if (deleteHit && FlxG.mouse.justPressed) {
+				consumedDelete = true;
 				onDeleteCallback();
+				return;
+			}
+		}
 
+		if (onDragCallback != null) {
 			var handleHit = detectHit(mx, my, dragHandle);
 
 			if (handleHit && FlxG.mouse.justPressed) {

@@ -15,14 +15,13 @@ class Button extends flixel.group.FlxSpriteContainer {
 
 	var cam:game.objects.Camera;
 
-	public function new(x:Float, y:Float, text:String, ?onClick:Void->Void, ?cam:game.objects.Camera) {
+	public function new(x:Float, y:Float, text:String, ?onClick:Void->Void, ?cam:game.objects.Camera, ?width:Float = 112, ?height:Float = 25.9) {
 		super(x, y);
 
 		this.cam = cam;
 
 		bg = new FlxSprite();
-		bg.loadGraphic(Paths.getPath('menus/editors/ui/button', 'image'));
-		bg.scale.set(0.7, 0.7);
+		bg.loadGraphic(modding.editors.ui.Utils.roundGraphic(width, height, 16));
 		bg.updateHitbox();
 		add(bg);
 

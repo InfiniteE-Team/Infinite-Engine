@@ -597,9 +597,8 @@ class PlayState extends MusicBeatState {
 		events?.videos.resume();
 
 		flixel.tweens.FlxTween.globalManager.forEach((tween:flixel.tweens.FlxTween) -> {
-			if (!tween.active) {
+			if (!tween.active)
 				tween.active = true;
-			}
 		});
 		gameAudio.resumeAll();
 		gameAudio.resyncVocals();

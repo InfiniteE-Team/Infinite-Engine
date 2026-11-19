@@ -165,6 +165,18 @@ class CharacterEditor extends MusicBeatState {
 		sectionTab = new SectionTab(25, 30, 255, 0.3, [{label: 'ANIMATIONS'}, {label: 'LAYERS'}], camHud, (index) -> {
 			tabAnimGroup.visible = index == 0;
 			tabLayersGroup.visible = index == 1;
+			for (btn in animButtons) {
+				btn.active = (index == 0);
+				btn.visible = (index == 0);
+			}
+			if (newAnimButton != null) {
+				newAnimButton.active = (index == 0);
+				newAnimButton.visible = (index == 0);
+			}
+			for (btn in layerButtons) {
+				btn.active = (index == 1);
+				btn.visible = (index == 1);
+			}
 		});
 		sectionTab.cameras = [camHud];
 		tabLeft();
@@ -424,7 +436,7 @@ class CharacterEditor extends MusicBeatState {
 				importAsset(path);
 				refreshCharProps();
 			});
-		}, camHud);
+		}, camHud, 70, 25.9);
 		importButton.cameras = [camHud];
 		g.add(importButton);
 
@@ -479,7 +491,7 @@ class CharacterEditor extends MusicBeatState {
 		sizeStepper = stepper(g, col2, rows + 75, 'Size:', 0.05, setSize, 2, 0.05, 10);
 		sizeStepper.x += 18;
 
-		final saveButton = new Button(col3 - 30, rows + 105, 'Save', saveCharacter, camHud);
+		final saveButton = new Button(col1 + 80, y + 20, 'Save', saveCharacter, camHud, 70, 25.9);
 		saveButton.cameras = [camHud];
 		g.add(saveButton);
 	}
@@ -625,7 +637,8 @@ class CharacterEditor extends MusicBeatState {
 
 		gameOverInput.text = data.gameplay.death?.character ?? '';
 		filesText.text = [
-			for (i => l in data.render.layers) '${i + 1}. ${haxe.io.Path.withoutDirectory(l.path ?? l.name)}.png'
+			for (i => l in data.render.layers)
+				'${i + 1}. ${haxe.io.Path.withoutDirectory(l.path ?? l.name)}.png'
 		].join('\n');
 	}
 
@@ -836,30 +849,30 @@ class CharacterEditor extends MusicBeatState {
 			sys.io.File.copy(pngSrc, destPng);
 
 		if (atlasSrc != null) {
-            var destAtlas = '$destDir/$baseName.$atlasExt';
-            if (!sys.FileSystem.exists(destAtlas))
-                sys.io.File.copy(atlasSrc, destAtlas);
+			var destAtlas = '$destDir/$baseName.$atlasExt';
+			if (!sys.FileSystem.exists(destAtlas))
+				sys.io.File.copy(atlasSrc, destAtlas);
 
-            var frames:flixel.graphics.frames.FlxAtlasFrames = null;
-            try {
-                var bmp = openfl.display.BitmapData.fromFile(destPng);
-                if (bmp != null) {
-                    var graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, destPng);
-                    var atlasData = sys.io.File.getContent(destAtlas);
-                    frames = atlasExt == 'xml' ? flixel.graphics.frames.FlxAtlasFrames.fromSparrow(graphic,
-                        atlasData) : flixel.graphics.frames.FlxAtlasFrames.fromTexturePackerJson(graphic, atlasData);
-                }
-            } catch (e:Dynamic) {
-                Console.log('[CharacterEditor] could not parse $atlasSrc: $e', true);
-            }
+			var frames:flixel.graphics.frames.FlxAtlasFrames = null;
+			try {
+				var bmp = openfl.display.BitmapData.fromFile(destPng);
+				if (bmp != null) {
+					var graphic = flixel.graphics.FlxGraphic.fromBitmapData(bmp, false, destPng);
+					var atlasData = sys.io.File.getContent(destAtlas);
+					frames = atlasExt == 'xml' ? flixel.graphics.frames.FlxAtlasFrames.fromSparrow(graphic,
+						atlasData) : flixel.graphics.frames.FlxAtlasFrames.fromTexturePackerJson(graphic, atlasData);
+				}
+			} catch (e:Dynamic) {
+				Console.log('[CharacterEditor] could not parse $atlasSrc: $e', true);
+			}
 
-            if (frames == null) {
-                showImportError('Failed to parse atlas:\n$baseName.$atlasExt');
-                Console.log('[CharacterEditor] frames null for: $atlasSrc', true);
-                return;
-            }
-            sprite.frames = frames;
-        } else {
+			if (frames == null) {
+				showImportError('Failed to parse atlas:\n$baseName.$atlasExt');
+				Console.log('[CharacterEditor] frames null for: $atlasSrc', true);
+				return;
+			}
+			sprite.frames = frames;
+		} else {
 			var bmp = openfl.display.BitmapData.fromFile(destPng);
 			if (bmp == null) {
 				showImportError('Failed to load:\n$baseName.png');
@@ -935,7 +948,7 @@ class CharacterEditor extends MusicBeatState {
 
 		for (i in 0...layerData.anims.length) {
 			var name = layerData.anims[i].name;
-			var btn = createAnimButton(20, 180 + i * 40, name);
+			var btn = createAnimButton(20, 180 + i * 40, name, layerName);
 			btn.scrollFactor.set(0, 0);
 			btn.cameras = [camHud];
 			animButtons.push(btn);
@@ -950,9 +963,62 @@ class CharacterEditor extends MusicBeatState {
 		}
 	}
 
-	function createAnimButton(x:Float, y:Float, name:String):StatsButton {
+	function createAnimButton(x:Float, y:Float, name:String, owningLayerName:String):StatsButton {
 		var btn:StatsButton = null;
-		btn = new StatsButton(x, y, name, null, camHud, null, null, function() {
+		btn = new StatsButton(x, y, name, null, camHud, null, function() { // delete anim
+			var layerData = char.characterData.render.layers.find(l -> l.name == owningLayerName);
+			if (layerData == null || layerData.anims == null)
+				return;
+			var animIndex = -1;
+			var animDataObj:core.json.extensions.SpriteData.AnimData = null;
+			for (i in 0...layerData.anims.length) {
+				if (layerData.anims[i].name == name) {
+					animIndex = i;
+					animDataObj = layerData.anims[i];
+					break;
+				}
+			}
+
+			if (animIndex == -1 || animDataObj == null)
+				return;
+
+			var ownerSprite = char.layerMap.get(owningLayerName);
+			var oldOffset = ownerSprite != null ? ownerSprite.offsets.get(name) : null;
+			var ownerLayerName = owningLayerName;
+
+			layerData.anims.splice(animIndex, 1);
+			refreshAnimList(ownerLayerName);
+			markChanged();
+
+			final capturedLayerName = ownerLayerName;
+			final capturedData = animDataObj;
+			final capturedIndex = animIndex;
+			final capturedOffset = oldOffset;
+
+			pushAction({
+				undo: () -> {
+					var targetLayer = char.characterData.render.layers.find(l -> l.name == capturedLayerName);
+					if (targetLayer != null) {
+						targetLayer.anims ??= [];
+						targetLayer.anims.insert(capturedIndex, capturedData);
+						if (selectedLayerName == capturedLayerName && selectedLayer != null && capturedOffset != null) {
+							selectedLayer.offsets.set(capturedData.name, capturedOffset);
+							registerAnim(capturedData);
+						}
+						refreshAnimList(capturedLayerName, capturedData.name);
+					}
+				},
+				redo: () -> {
+					var targetLayer = char.characterData.render.layers.find(l -> l.name == capturedLayerName);
+					if (targetLayer != null && targetLayer.anims != null) {
+						targetLayer.anims.remove(capturedData);
+						if (activeAnim == capturedData.name)
+							activeAnim = '';
+						refreshAnimList(capturedLayerName);
+					}
+				}
+			});
+		}, function() {
 			ghostChar.playAnim(btn.label.text, true);
 			ghostChar.visible = btn.isVisibleHit;
 		});
@@ -986,12 +1052,21 @@ class CharacterEditor extends MusicBeatState {
 		if (draggingThumb)
 			listScroll = FlxMath.bound((m.y - LIST_TOP - thumbH / 2) / (trackH - thumbH), 0, 1) * maxScroll;
 
-		for (i => btn in animButtons)
-			placeRow(btn, i);
-		for (i => btn in layerButtons)
-			placeRow(btn, i);
-		if (newAnimButton != null)
-			placeRow(newAnimButton, animButtons.length, newAnimButton.height);
+		if (onAnims) {
+			for (i => btn in animButtons)
+				placeRow(btn, i);
+			for (btn in layerButtons)
+				btn.visible = false;
+			if (newAnimButton != null)
+				placeRow(newAnimButton, animButtons.length, newAnimButton.height);
+		} else {
+			for (i => btn in layerButtons)
+				placeRow(btn, i);
+			for (btn in animButtons)
+				btn.visible = false;
+			if (newAnimButton != null)
+				newAnimButton.visible = false;
+		}
 
 		scrollTrack.visible = scrollThumb.visible = maxScroll > 0;
 		scrollThumb.setGraphicSize(scrollThumb.frameWidth, thumbH);
@@ -1039,8 +1114,11 @@ class CharacterEditor extends MusicBeatState {
 					selectedLayerName = '';
 					activeAnim = '';
 				}
+
+				reloadGhostChar();
 				advertency.visible = true;
 				refreshLayerList();
+				refreshAnimList(selectedLayerName);
 
 				pushAction({
 					undo: () -> {
@@ -1051,7 +1129,10 @@ class CharacterEditor extends MusicBeatState {
 						if (capturedEntry != null)
 							importedLayers.push(capturedEntry);
 						add(capturedSprite);
+
+						reloadGhostChar();
 						refreshLayerList();
+						refreshAnimList(selectedLayerName);
 					},
 					redo: () -> {
 						remove(capturedSprite, true);
@@ -1064,7 +1145,10 @@ class CharacterEditor extends MusicBeatState {
 							selectedLayerName = '';
 							activeAnim = '';
 						}
+
+						reloadGhostChar();
 						refreshLayerList();
+						refreshAnimList(selectedLayerName);
 					}
 				});
 			});
@@ -1074,6 +1158,22 @@ class CharacterEditor extends MusicBeatState {
 			layerButtons.push(btn);
 			tabLayersGroup.add(btn);
 		}
+	}
+
+	function reloadGhostChar() {
+		if (ghostChar != null) {
+			for (layer in ghostChar.layers)
+				remove(ghostChar, true);
+			remove(ghostChar, true);
+			ghostChar.destroy();
+			ghostChar = null;
+		}
+
+		ghostChar = loadCharacter('idk', curCharacter, 0, 0);
+		ghostChar.alpha = 0.7;
+		for (layer in ghostChar.layers)
+			layer.alpha = 0.7;
+		ghostChar.visible = false;
 	}
 
 	function reorderLayer(fromIndex:Int, toIndex:Int) {
@@ -1331,6 +1431,12 @@ class CharacterEditor extends MusicBeatState {
 		}
 
 		var path = Paths.getPath('game/characters/$curCharacter/$curCharacter', 'json');
+
+		var directory = haxe.io.Path.directory(path);
+		if (!sys.FileSystem.exists(directory)) {
+			sys.FileSystem.createDirectory(directory);
+		}
+
 		var json = haxe.Json.stringify(char.characterData, null, '\t');
 		sys.io.File.saveContent(path, json);
 
