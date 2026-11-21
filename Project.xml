@@ -49,7 +49,6 @@
 	<haxelib name="hxdiscord_rpc" if="DISCORD_ALLOWED" />
 	<haxelib name="hxluajit" if="LUA_ALLOWED" />
 	<haxelib name="sl-windows-api" if="windows" />
-	<haxelib name="moonchart" />
 
 	<haxelib name="funkin.vis" />
 	<haxelib name="grig.audio" />
