@@ -157,6 +157,9 @@ class HUDController extends flixel.group.FlxSpriteContainer {
 		#end
 	}
 
+	var p1Losing:Bool = false;
+	var p2Losing:Bool = false;
+
 	function updateLosingAnim():Null<Dynamic> {
 		#if HSCRIPT_ALLOWED
 		if (scriptHUD.hasScripts && scriptHUD.callCancellable('onIconAnim', []))
@@ -165,12 +168,18 @@ class HUDController extends flixel.group.FlxSpriteContainer {
 
 		if (iconP1 != null) {
 			var losing = PlayState.instance.playStateConfig.health < 0.4;
-			iconP1.playAnim(losing ? 'losing' : 'normal');
+			if (losing != p1Losing) {
+				p1Losing = losing;
+				iconP1.playAnim(losing ? 'losing' : 'normal');
+			}
 		}
 
 		if (iconP2 != null) {
 			var losing = PlayState.instance.playStateConfig.health > 1.6;
-			iconP2.playAnim(losing ? 'losing' : 'normal');
+			if (losing != p2Losing) {
+				p2Losing = losing;
+				iconP2.playAnim(losing ? 'losing' : 'normal');
+			}
 		}
 
 		#if HSCRIPT_ALLOWED

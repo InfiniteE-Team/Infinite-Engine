@@ -1,7 +1,7 @@
 package game.objects.sprites.notes;
 
+import core.json.song.SongConfig;
 import core.json.game.objects.NoteSkinData;
-import core.json.song.SongData.SongConfig;
 import flixel.group.FlxGroup.FlxTypedGroup;
 #if HSCRIPT_ALLOWED
 import modding.scripting.ScriptHandler;
@@ -354,7 +354,13 @@ class Strumline {
 	}
 
 	public function update(elapsed:Float):Void {
-		scrollSpeed = flixel.math.FlxMath.lerp(scrollSpeed, targetScrollSpeed, elapsed * lerpSpeed);
+		if (scrollSpeed != targetScrollSpeed) {
+			var diff = targetScrollSpeed - scrollSpeed;
+			if (diff < 0 ? diff < -0.001 : diff > 0.001)
+				scrollSpeed = flixel.math.FlxMath.lerp(scrollSpeed, targetScrollSpeed, elapsed * lerpSpeed);
+			else
+				scrollSpeed = targetScrollSpeed;
+		}
 	}
 
 	public function destroy():Void {

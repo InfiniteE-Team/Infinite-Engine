@@ -1,4 +1,5 @@
-package core.json.song;
+package core.json.game.objects;
+
 import core.enums.ElementType;
 import core.json.extensions.AudioData;
 import core.json.game.objects.StageData.StageElement;

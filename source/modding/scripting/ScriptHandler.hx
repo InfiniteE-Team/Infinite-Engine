@@ -5,11 +5,10 @@ import hxscript.Module;
 
 class ScriptHandler {
 	public static var globalEnv:ScriptEnvironment = new ScriptEnvironment();
+	public static var moduleRegistry:Map<String, Module> = [];
 
 	var scripts:Array<Script> = [];
 	var luaScripts:Array<modding.scripting.lua.LuaScript> = [];
-
-	public static var moduleRegistry:Map<String, Module> = [];
 
 	var paths:Array<String> = [];
 	var modifiedTimes:Array<Float> = [];
@@ -31,7 +30,8 @@ class ScriptHandler {
 
 	public function expose(name:String, value:Dynamic):Void {
 		extraVars.set(name, value);
-		setVar(name, value);
+		for (script in scripts)
+			script.variables.set(name, value);
 		for (script in luaScripts)
 			script.expose(name, value);
 	}
@@ -61,19 +61,21 @@ class ScriptHandler {
 		var files:Map<String, String> = new Map();
 		if (sys.FileSystem.exists(baseDir) && sys.FileSystem.isDirectory(baseDir)) {
 			for (file in sys.FileSystem.readDirectory(baseDir)) {
-				if (file.endsWith('.hx') || file.endsWith('.lua') || file.endsWith('.hxc'))
+				var ext = haxe.io.Path.extension(file);
+				if (ext == 'hx' || ext == 'lua' || ext == 'hxc')
 					files.set(file, '$baseDir/$file');
 			}
 		}
 
 		if (modDir != null && sys.FileSystem.exists(modDir) && sys.FileSystem.isDirectory(modDir)) {
 			for (file in sys.FileSystem.readDirectory(modDir)) {
-				if (file.endsWith('.hx') || file.endsWith('.lua') || file.endsWith('.hxc'))
+				var ext = haxe.io.Path.extension(file);
+				if (ext == 'hx' || ext == 'lua' || ext == 'hxc')
 					files.set(file, '$modDir/$file');
 			}
 		}
 
-		for (resolve => path in files)
+		for (_ => path in files)
 			load(path);
 	}
 
@@ -96,7 +98,7 @@ class ScriptHandler {
 		try {
 			content = sys.io.File.getContent(filePath);
 		} catch (e) {
-			Console.log('[ScriptHandler] Could not be read $filePath: ${e.message}');
+			Console.log('[ScriptHandler] Could not read $filePath: ${e.message}');
 			return null;
 		}
 
@@ -124,7 +126,6 @@ class ScriptHandler {
 	}
 
 	static function scanAndLoadImports(content:String, originPath:String):Void {
-		// `import a.b.C;` or `import a.b.*;`
 		var reg = ~/^[ \t]*import\s+([\w.]+)(\.\*)?;[ \t]*(\r?\n)?/gm;
 		reg.map(content, function(r) {
 			var importPath = r.matched(1);
@@ -161,7 +162,8 @@ class ScriptHandler {
 			return null;
 
 		var result:Dynamic = null;
-		for (fn in hookFns(name))
+		var fns = hookFns(name);
+		for (fn in fns)
 			result = safeCall(fn.script, fn.fun, args);
 		for (script in luaScripts)
 			result = script.call(name, args);
@@ -181,7 +183,6 @@ class ScriptHandler {
 		return false;
 	}
 
-	// cache empty hooks too, most run every frame and no script uses them -JloorDev
 	function hookFns(name:String):Array<{script:Script, fun:Dynamic}> {
 		var cached = callCache.get(name);
 		if (cached != null)
@@ -189,11 +190,9 @@ class ScriptHandler {
 
 		var fns:Array<{script:Script, fun:Dynamic}> = [];
 		for (script in scripts) {
-			if (script.variables.exists(name)) {
-				var fun = script.variables.get(name);
-				if (Reflect.isFunction(fun))
-					fns.push({script: script, fun: fun});
-			}
+			var fun = script.variables.get(name);
+			if (fun != null && Reflect.isFunction(fun))
+				fns.push({script: script, fun: fun});
 		}
 		callCache.set(name, fns);
 		return fns;
@@ -204,17 +203,26 @@ class ScriptHandler {
 			setVar(field, Reflect.getProperty(cls, field));
 	}
 
+	function setVar(name:String, value:Dynamic):Void {
+		for (script in scripts)
+			script.variables.set(name, value);
+	}
+
 	public function hotReload():Void {
 		if (paths == null)
 			return;
+		var reloaded = false;
 		for (i in 0...paths.length) {
 			if (!sys.FileSystem.exists(paths[i]))
 				continue;
 			var mtime = sys.FileSystem.stat(paths[i]).mtime.getTime();
-			if (mtime > modifiedTimes[i])
+			if (mtime > modifiedTimes[i]) {
 				reload(i);
+				reloaded = true;
+			}
 		}
-		callCache.clear();
+		if (reloaded)
+			callCache.clear();
 	}
 
 	function buildScript(path:String):Null<Script> {
@@ -238,9 +246,9 @@ class ScriptHandler {
 		var scriptName = haxe.io.Path.withoutDirectory(path);
 		var script = new Script(content, scriptName, globalEnv);
 
-		script.onParsingError = function(e) {
+		script.onParsingError = function(e)
 			Console.log('[$scriptName] Parse error: ${e.message}');
-		};
+
 		script.onProgramError = function(e) {
 			var d = hxscript.error.Sink.history[hxscript.error.Sink.history.length - 1];
 			var line = d != null ? '${d.line}' : '?';
@@ -249,7 +257,6 @@ class ScriptHandler {
 
 		setupScript(script);
 		script.start();
-
 		return script;
 	}
 
@@ -278,11 +285,6 @@ class ScriptHandler {
 			script.variables.set(name, value);
 	}
 
-	function setVar(name:String, value:Dynamic):Void {
-		for (script in scripts)
-			script.variables.set(name, value);
-	}
-
 	function reload(i:Int):Void {
 		#if hxscript_cppia
 		hxscript.compile.Compiler.reset();
@@ -302,14 +304,14 @@ class ScriptHandler {
 	function safeCall(script:Script, fun:Dynamic, args:Array<Dynamic>):Dynamic {
 		try {
 			return Reflect.callMethod(script.interp, fun, args);
-		} catch (e:haxe.Exception) {
-			var line:String = '?';
+		} catch (e:haxe.Exception) {/*
+			var line = '?';
 			if (Std.isOfType(e, hxscript.error.InterpException)) {
 				var d = (cast e : hxscript.error.InterpException).toDiagnostic();
 				if (d.line > 0)
 					line = '${d.line}';
 			}
-			Console.log('[${script.name}:$line] Runtime error: ${e.message}');
+			Console.log('[${script.name}:$line] Runtime error: ${e.message}');*/
 			return null;
 		}
 	}

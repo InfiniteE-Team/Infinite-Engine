@@ -1,6 +1,6 @@
 package game.controllers.events;
 
-import core.json.song.SongData.SongConfig;
+import core.json.song.SongConfig;
 import game.PlayState;
 import core.json.song.SongData.EventsData;
 import game.objects.sprites.Character;

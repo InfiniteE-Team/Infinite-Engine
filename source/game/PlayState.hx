@@ -14,7 +14,7 @@ import game.objects.sprites.Stage;
 import core.rhythm.DiffsUtils;
 import core.rhythm.RhythmCore;
 import core.audio.GameAudio;
-import core.json.song.SongData.SongConfig;
+import core.json.song.SongConfig;
 import game.controllers.events.EventManager;
 import game.objects.Countdown;
 
@@ -70,6 +70,8 @@ class PlayState extends MusicBeatState {
 
 	public var paused:Bool = false;
 	public var isRewind:Bool = false;
+
+	var hasEvents:Bool = false;
 
 	public var isInCountdown:Bool = false;
 
@@ -341,7 +343,8 @@ class PlayState extends MusicBeatState {
 		if (SONG.songData.notes != null)
 			noteController.generateNotes(startTime, SONG);
 
-		if (SONG.songData.gameplay.events != null) {
+		hasEvents = SONG.songData.gameplay?.events != null;
+		if (hasEvents) {
 			events.loadEvents(SONG.songData.gameplay.events);
 			// V-Slice fires them when the song reaches 0 -JloorDev
 			if (!modding.vslice.VSlice.isActive())
@@ -783,10 +786,8 @@ class PlayState extends MusicBeatState {
 			if (playStateConfig != null && playStateConfig.health <= 0)
 				isDeath();
 
-			if (SONG != null && SONG.songData != null && SONG.songData.gameplay != null && SONG.songData.gameplay.events != null) {
-				if (events != null)
-					events.updateEvents(RhythmCore.songPosition);
-			}
+			if (hasEvents && events != null)
+				events.updateEvents(RhythmCore.songPosition);
 
 			if (chars != null) {
 				if (!osuMode)

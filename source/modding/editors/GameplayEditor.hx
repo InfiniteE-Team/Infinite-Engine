@@ -4,7 +4,7 @@ import game.objects.Camera;
 import flixel.util.FlxColor;
 import core.rhythm.RhythmCore;
 import core.audio.GameAudio;
-import core.json.song.SongData.SongConfig;
+import core.json.song.SongConfig;
 import core.json.song.SongData.NoteDataUtil;
 import flixel.addons.display.FlxGridOverlay;
 import modding.editors.gameplay.ChartDefaults;

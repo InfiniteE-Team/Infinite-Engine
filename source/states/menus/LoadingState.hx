@@ -2,7 +2,7 @@ package states.menus;
 
 import flixel.tweens.FlxTween;
 import core.assets.FunkinSprite;
-import core.json.song.SongData.SongConfig;
+import core.json.song.SongConfig;
 import core.json.game.objects.CharacterData;
 import core.json.game.objects.StageData;
 import core.json.game.objects.NoteSkinData;

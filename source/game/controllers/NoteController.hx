@@ -3,7 +3,7 @@ package game.controllers;
 import game.objects.sprites.notes.NoteSkins;
 import game.PlayStateConfig;
 import core.json.song.SongData.NoteData;
-import core.json.song.SongData.SongConfig;
+import core.json.song.SongConfig;
 import core.json.engine.GlobalData.GlobalConfig;
 import core.json.game.objects.RatingData;
 import core.json.game.objects.NoteSkinData;
@@ -56,6 +56,7 @@ class NoteController {
 
 	var noteSpawnIndex:Int = 0;
 	var toDestroySet:Map<Note, Bool> = new Map();
+	var toDestroyList:Array<Note> = [];
 
 	static inline var GENERATE_AHEAD_MS:Float = 8000.0;
 
@@ -568,6 +569,7 @@ class NoteController {
 
 		toDestroySet.clear();
 		activeOpponentHolds.clear();
+		toDestroyList.resize(0);
 
 		// notes
 		for (note in notes.members) {
@@ -595,8 +597,10 @@ class NoteController {
 					charController.playMissAnim(note.direction);
 				note.strumline?.input.applyMiss(playStateConfig, this, gameAudio);
 			}
-			if (!note.mustPress && note.wasGoodHit && !note.alive)
+			if (!note.mustPress && note.wasGoodHit && !note.alive) {
 				toDestroySet.set(note, true);
+				toDestroyList.push(note);
+			}
 
 			if (!downscroll && note.y + note.frameHeight * note.scale.y < 0) {
 				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
@@ -606,7 +610,10 @@ class NoteController {
 						charController.playMissAnim(note.direction);
 					note.strumline?.input.applyMiss(playStateConfig, this, gameAudio);
 				}
-				toDestroySet.set(note, true);
+				if (!toDestroySet.exists(note)) {
+					toDestroySet.set(note, true);
+					toDestroyList.push(note);
+				}
 			} else if (downscroll && note.y > FlxG.height) {
 				if (note.mustPress && !note.wasGoodHit && !note.wasMissed) {
 					note.wasMissed = true;
@@ -615,7 +622,10 @@ class NoteController {
 						charController.playMissAnim(note.direction);
 					note.strumline?.input.applyMiss(playStateConfig, this, gameAudio);
 				}
-				toDestroySet.set(note, true);
+				if (!toDestroySet.exists(note)) {
+					toDestroySet.set(note, true);
+					toDestroyList.push(note);
+				}
 			}
 		}
 
@@ -686,12 +696,14 @@ class NoteController {
 				var body = sustain.parentNote;
 				if (body == null) {
 					toDestroySet.set(sustain, true);
+					toDestroyList.push(sustain);
 					continue;
 				}
 				if (!body.alive)
 					continue;
 				if (toDestroySet.exists(body)) {
 					toDestroySet.set(sustain, true);
+					toDestroyList.push(sustain);
 					continue;
 				}
 				sustain.x = body.x;
@@ -744,10 +756,13 @@ class NoteController {
 					strums?.stopHoldSplash(sustain.strum);
 				}
 				toDestroySet.set(sustain, true);
+				toDestroyList.push(sustain);
 			} else if (!downscroll && sustain.y + scaledH < 0) {
 				toDestroySet.set(sustain, true);
+				toDestroyList.push(sustain);
 			} else if (downscroll && sustain.y - sustain.offset.y > FlxG.height) {
 				toDestroySet.set(sustain, true);
+				toDestroyList.push(sustain);
 			}
 		}
 
@@ -756,12 +771,12 @@ class NoteController {
 				if (hs == null || !hs.alive)
 					continue;
 				var strum = strums.holdSplashToStrum.get(hs);
-				if (strum != null)
+				if (strum != null && (hs.x != strum.x || hs.y != strum.y))
 					hs.setPosition(strum.x, strum.y);
 			}
 		}
 
-		for (note in toDestroySet.keys())
+		for (note in toDestroyList)
 			if (note != null)
 				destroyNotes(note);
 

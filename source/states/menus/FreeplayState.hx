@@ -14,7 +14,7 @@ import core.assets.FunkinSprite;
 import game.objects.sprites.Icon;
 import flixel.addons.display.FlxBackdrop;
 import states.menus.objects.CardFreeplay;
-import core.json.song.SongData.SongConfig;
+import core.json.song.SongConfig;
 
 class FreeplayState extends MusicBeatState {
 	public static var curSelected:Int = 0;

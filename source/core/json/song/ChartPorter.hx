@@ -4,7 +4,13 @@ import sys.FileSystem;
 import core.json.song.ports.*;
 
 class ChartPorter {
-	static var converters:Array<FormatChartConverter> = [new PsychPorter(), new LegacyPorter(), new VSlicePorter(), new CNEPorter()];
+	static var converters:Array<FormatChartConverter> = [
+		new PsychPorter(),
+		new LegacyPorter(),
+		new VSlicePorter(),
+		new CNEPorter(),
+		new NMVPorter()
+	];
 
 	public static function tryConvert(raw:Dynamic, ?diff:String, ?meta:Dynamic):Null<SongData> {
 		if (raw.meta != null)
@@ -58,7 +64,7 @@ class ChartPorter {
 					Reflect.setField(raw, '_girlfriend', ch.girlfriend);
 
 				if (ch.instrumental != null && ch.instrumental != '')
-					Reflect.setField(raw, '_instPrefix', '-' + Std.string(ch.instrumental)); // V-Slice names it Inst-<id>.ogg -JloorDev
+					Reflect.setField(raw, '_instPrefix', '-' + Std.string(ch.instrumental));
 
 				if (ch.vocals != null && ch.vocals != '')
 					Reflect.setField(raw, '_vocPrefix', Std.string(ch.vocals));

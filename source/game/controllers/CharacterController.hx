@@ -143,31 +143,37 @@ class CharacterController extends FunkinObjectRegistry {
 
 	public function processInput(noteController:NoteController, gameAudio:GameAudio, playStateConfig:PlayStateConfig):Void {
 		for (char in playerChars) {
-			var strums = noteController.getCharStrums(char.id);
+			var sl = noteController.getStrumline(char.id);
+			if (sl == null) continue;
+			var strumsArr = sl.strums.members;
 			#if HSCRIPT_ALLOWED
 			var charScript = scriptMap.get(char.id);
 			#end
 
-			for (i in 0...strums.length) {
+			for (i in 0...strumsArr.length) {
+				if (strumsArr[i] == null) continue;
 				if (playStateConfig.botplayOn) {
-					processBotplayLane(char, strums, i, noteController, playStateConfig);
+					processBotplayLane(char, strumsArr, i, noteController, playStateConfig);
 				} else {
-					processPlayerLane(char, strums, i, noteController, gameAudio, playStateConfig);
+					processPlayerLane(char, strumsArr, i, noteController, gameAudio, playStateConfig);
 				}
 			}
 		}
 
 		// opponent / cpu
 		for (char in opponentChars) {
-			var strums = noteController.getCharStrums(char.id);
+			var sl = noteController.getStrumline(char.id);
+			if (sl == null) continue;
+			var strumsArr = sl.strums.members;
 			#if HSCRIPT_ALLOWED
 			var charScript = scriptMap.get(char.id);
 			#end
 
-			for (i in 0...strums.length) {
+			for (i in 0...strumsArr.length) {
+				if (strumsArr[i] == null) continue;
 				var note = noteController.getHittableNote(char.id, i, false);
 				if (note != null) {
-					input.isCPUHit(strums, noteController, char.id, i, false);
+					input.isCPUHit(strumsArr, noteController, char.id, i, false);
 					modding.vslice.VSliceHooks.dispatch('onNoteHit', modding.vslice.VSliceHooks.noteEvent('NOTE_HIT', note, 'sick'));
 					#if HSCRIPT_ALLOWED
 					charScript?.call("onNoteHitCPU", [note]);
@@ -176,13 +182,12 @@ class CharacterController extends FunkinObjectRegistry {
 					#if HSCRIPT_ALLOWED
 					charScript?.call("onNoteSustainCPU", []);
 					#end
-					var holdingActive = noteController.getStrumline(char.id)?.activeOpponentHolds.exists(i);
+					var holdingActive = sl.activeOpponentHolds.exists(i);
 					if (holdingActive) {
-						strums[i].playAnim('confirm' + i, false);
-						strums[i].confirmHoldTimer = -1;
-					} else if (strums[i].confirmHoldTimer < 0) {
-						strums[i].playAnim('static' + i, true);
-					}
+						strumsArr[i].playAnim('confirm' + i, false);
+						strumsArr[i].confirmHoldTimer = -1;
+					} else if (strumsArr[i].confirmHoldTimer < 0)
+						strumsArr[i].playAnim('static' + i, true);
 					#if HSCRIPT_ALLOWED
 					charScript?.call("postNoteSustainCPU", []);
 					#end
@@ -311,19 +316,22 @@ class CharacterController extends FunkinObjectRegistry {
 
 	public function isSinging(noteController:NoteController):Void {
 		for (char in opponentChars) {
-			var strums = noteController.getCharStrums(char.id);
-			for (i in 0...strums.length) {
+			var sl = noteController.getStrumline(char.id);
+			if (sl == null) continue;
+			var strumsArr = sl.strums.members;
+			var globalLane = noteController.charStrumOffsets.get(char.id);
+			for (i in 0...strumsArr.length) {
+				if (strumsArr[i] == null) continue;
 				var note = noteController.getHittableNote(char.id, i, false);
 				if (note != null) {
 					setSing(char, note.direction);
 					continue;
 				}
-				var globalLane = noteController.charStrumOffsets.get(char.id);
-				var holdingActive = noteController.getStrumline(char.id)?.activeOpponentHolds.exists(i);
+				var holdingActive = sl.activeOpponentHolds.exists(i);
 				if (holdingActive)
-					holdSing(char, globalLane + i);
-				else if (strums[i].confirmHoldTimer < 0)
-					strums[i].playAnim('static' + i, true);
+					holdSing(char, (globalLane ?? 0) + i);
+				else if (strumsArr[i].confirmHoldTimer < 0)
+					strumsArr[i].playAnim('static' + i, true);
 			}
 		}
 	}

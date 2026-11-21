@@ -2,7 +2,7 @@ package core.audio;
 
 import core.assets.Paths;
 import flixel.sound.FlxSound;
-import core.json.song.SongData.SongConfig;
+import core.json.song.SongConfig;
 
 // Class for the gameplay audio
 class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {

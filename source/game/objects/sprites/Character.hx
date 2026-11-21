@@ -179,9 +179,13 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		super.update(elapsed);
 
 		if (!editorMode) {
+			var renderLayers = characterData.render.layers;
 			for (i in 0...layers.length) {
-				layers[i].setPosition(x + (characterData.render.layers[i].position ?? [0.0, 0.0])[0],
-					y + (characterData.render.layers[i].position ?? [0.0, 0.0])[1]);
+				var pos = renderLayers[i].position;
+				if (pos != null)
+					layers[i].setPosition(x + pos[0], y + pos[1]);
+				else
+					layers[i].setPosition(x, y);
 			}
 		}
 
@@ -340,31 +344,36 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		return layers[0].isFinished(anim);
 	}
 
+	static final camPoint:Point = {x: 0, y: 0};
+
 	// camera
 	public function getCamPosition():Point {
 		var off = cameraOffset;
 		var mid = (layers != null && layers.length > 0) ? layers[0].getMidpoint() : getMidpoint();
-		return {
-			x: mid.x + (off != null ? off.x : 0.0),
-			y: mid.y + (off != null ? off.y : 0.0)
-		};
+		camPoint.x = mid.x + (off != null ? off.x : 0.0);
+		camPoint.y = mid.y + (off != null ? off.y : 0.0);
+		return camPoint;
 	}
 
 	final intensityCam:Float = 30;
 
+	static final camPosePoint:Point = {x: 0, y: 0};
+
 	public function getCameraMovementPose():Point {
 		var curAnim = layers[0].currentAnim;
-		if (isMiss || curAnim.indexOf('miss') != -1)
-			return {x: 0, y: 0};
-		if (curAnim.indexOf('LEFT') != -1)
-			return {x: -intensityCam, y: 0};
-		if (curAnim.indexOf('RIGHT') != -1)
-			return {x: intensityCam, y: 0};
-		if (curAnim.indexOf('UP') != -1)
-			return {x: 0, y: -intensityCam};
-		if (curAnim.indexOf('DOWN') != -1)
-			return {x: 0, y: intensityCam};
-		return {x: 0, y: 0};
+		camPosePoint.x = 0;
+		camPosePoint.y = 0;
+		if (!isMiss && curAnim.indexOf('miss') == -1) {
+			if (curAnim.indexOf('LEFT') != -1)
+				camPosePoint.x = -intensityCam;
+			else if (curAnim.indexOf('RIGHT') != -1)
+				camPosePoint.x = intensityCam;
+			else if (curAnim.indexOf('UP') != -1)
+				camPosePoint.y = -intensityCam;
+			else if (curAnim.indexOf('DOWN') != -1)
+				camPosePoint.y = intensityCam;
+		}
+		return camPosePoint;
 	}
 
 	var isDancing:Bool = false;

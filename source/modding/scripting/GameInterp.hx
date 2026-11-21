@@ -15,12 +15,16 @@ class GameInterp extends Interp {
 
 	static var functionFieldCache:Map<String, Bool> = new Map();
 
+	var _resolving:Map<String, Bool> = new Map();
+
 	public function new(?env, ?parent) {
 		super(env, parent);
 	}
 
 	public function setContext(value:Dynamic):Void {
 		context = value;
+		_resolving.clear();
+
 		if (value == null) {
 			instanceFields = new Map();
 			staticFields = new Map();
@@ -28,10 +32,12 @@ class GameInterp extends Interp {
 		}
 
 		var className = Type.getClassName(Type.getClass(value));
+		var iKey = 'i:$className';
+		var sKey = 's:$className';
 
-		if (fieldCache.exists('i:$className') && fieldCache.exists('s:$className')) {
-			instanceFields = fieldCache.get('i:$className');
-			staticFields = fieldCache.get('s:$className');
+		if (fieldCache.exists(iKey) && fieldCache.exists(sKey)) {
+			instanceFields = fieldCache.get(iKey);
+			staticFields = fieldCache.get(sKey);
 			return;
 		}
 
@@ -40,15 +46,15 @@ class GameInterp extends Interp {
 
 		var cls = Type.getClass(value);
 		while (cls != null) {
-			for (fallback in Type.getInstanceFields(cls))
-				instanceFields.set(fallback, true);
-			for (fallback in Type.getClassFields(cls))
-				staticFields.set(fallback, true);
+			for (f in Type.getInstanceFields(cls))
+				instanceFields.set(f, true);
+			for (f in Type.getClassFields(cls))
+				staticFields.set(f, true);
 			cls = Type.getSuperClass(cls);
 		}
 
-		fieldCache.set('i:$className', instanceFields);
-		fieldCache.set('s:$className', staticFields);
+		fieldCache.set(iKey, instanceFields);
+		fieldCache.set(sKey, staticFields);
 	}
 
 	override public function isResolvable(id:String):Bool {
@@ -58,16 +64,23 @@ class GameInterp extends Interp {
 	override public function resolve(id:String):Dynamic {
 		if (variables.exists(id))
 			return variables.get(id);
-
 		if (context != null) {
+			if (_resolving.exists(id))
+				return null;
+
 			if (staticFields.exists(id)) {
+				_resolving.set(id, true);
 				var v = Reflect.getProperty(Type.getClass(context), id);
+				_resolving.remove(id);
 				if (Reflect.isFunction(v))
 					variables.set(id, v);
 				return v;
 			}
+
 			if (instanceFields.exists(id)) {
+				_resolving.set(id, true);
 				var v = Reflect.getProperty(context, id);
+				_resolving.remove(id);
 				if (Reflect.isFunction(v))
 					variables.set(id, v);
 				return v;
@@ -85,7 +98,7 @@ class GameInterp extends Interp {
 
 	override function assign(e1:Expr, e2:Expr):Dynamic {
 		switch (ExprTools.expr(e1)) {
-			case EField(e, f, true):
+			case EField(e, f, true): // null-safe ?.
 				var obj = expr(e);
 				if (obj == null)
 					return null;
@@ -96,10 +109,9 @@ class GameInterp extends Interp {
 		}
 	}
 
-	// Support null-safe compound assignment: obj?.field += value etc.
 	override function evalAssignOp(op:String, e1:Expr, e2:Expr):Dynamic {
 		switch (ExprTools.expr(e1)) {
-			case EField(e, f, true): // null-safe ?.
+			case EField(e, f, true):
 				var obj = expr(e);
 				if (obj == null)
 					return null;

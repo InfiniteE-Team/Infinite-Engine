@@ -12,27 +12,31 @@ class ScriptedSpriteGroup extends core.assets.FunkinObjectRegistry {
 	var scriptPath:String = '';
 
 	#if HSCRIPT_ALLOWED
-	public function initScript(scriptPath:String):Void {
-		scriptPath = this.scriptPath;
+	public function initScript(path:String):Void {
+		scriptPath = path;
 		script = new ScriptHandler(this);
-		script.load(Paths.getPath(scriptPath, 'script'));
+		script.load(Paths.getPath(path, 'script'));
 		script.executeAll();
+		script.call('postCreate', []);
 	}
 	#end
 
-	override public function update(elapsed:Float) {
+	override public function update(elapsed:Float):Void {
 		super.update(elapsed);
 		#if HSCRIPT_ALLOWED
-		if (script.hasScripts)
+		if (script != null && script.hasScripts)
 			script.call('onUpdate', [elapsed]);
 		#end
 	}
 
-	override public function destroy() {
+	override public function destroy():Void {
 		#if HSCRIPT_ALLOWED
-		script.call('onDestroy', []);
-		script.destroy();
-		script = null;
+		if (script != null) {
+			script.call('onDestroy', []);
+			script.destroy();
+			script = null;
+		}
 		#end
+		super.destroy();
 	}
 }
