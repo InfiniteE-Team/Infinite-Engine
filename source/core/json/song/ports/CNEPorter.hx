@@ -16,7 +16,7 @@ class CNEPorter implements FormatChartConverter {
 			bpm: raw._bpm ?? 160.0,
 			speed: raw.scrollSpeed ?? 1.0,
 			stage: raw.stage,
-			needVoices: true
+			needVoices: raw._needVoices ?? true
 		};
 
 		var chars:Array<SongData.CharDataJson> = [];
@@ -30,10 +30,17 @@ class CNEPorter implements FormatChartConverter {
 				default: 'boyfriend';
 			};
 
+			var basePos:Array<Float> = switch (role) {
+				case 'dad': [50, -50];
+				case 'boyfriend': [720, -50];
+				default: [0, -50];
+			};
+
+			var offset:Array<Dynamic> = cast sl.strumPos ?? [0, 0];
 			var strum:SongData.StrumsData = {
 				visible: sl.visible ?? true,
 				noteSkin: 'default',
-				position: sl.strumPos,
+				position: [basePos[0] + (offset[0] : Float), basePos[1] + (offset[1] : Float)],
 				scale: sl.strumScale != null ? [sl.strumScale, sl.strumScale] : null,
 				notesVisible: sl.type != 2
 			};

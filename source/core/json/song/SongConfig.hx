@@ -55,13 +55,12 @@ class SongConfig {
 			if (raw == null)
 				return;
 
-			loadSeparateMeta(raw, songFolder);
-
 			if (meta == null)
 				meta = tryLoadVSliceMeta(songFolder, diff);
 
 			var converted = ChartPorter.tryConvert(raw, diff, meta);
 			songData = converted ?? cast raw;
+			loadSeparateMeta(raw, songFolder);
 
 			if (raw.lbase != null) {
 				lbase = cast raw.lbase;
@@ -105,6 +104,8 @@ class SongConfig {
 		var metaPath = core.assets.Library.findLib('game/songs/$songFolder/meta.json');
 		if (metaPath != null) {
 			var file:Dynamic = FormatJson.readJson(metaPath);
+			if (file?.displayName != null)
+				return file.displayName;
 			if (file?.song != null)
 				return file.song;
 		}
