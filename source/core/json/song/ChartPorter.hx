@@ -26,7 +26,7 @@ class ChartPorter {
 				return converter.convert(raw);
 		}
 
-		trace('Chart Format Unknown lol');
+		trace('Chart Format Unknown or Chart Native');
 		return null;
 	}
 

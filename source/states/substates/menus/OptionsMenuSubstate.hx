@@ -40,6 +40,12 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 				type: NUMBER(30, 240, 5)
 			},
 			{
+				name: 'FPS Counter',
+				description: 'Show the FPS and performance counter overlay.',
+				saveField: 'fpsVisible',
+				type: CHECKBOX
+			},
+			{
 				name: 'Antialiasing',
 				description: 'Softens the edges of the images.',
 				saveField: 'antialiasing',
@@ -524,6 +530,10 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 
 				if (opt.saveField == 'autoPause')
 					core.api.DesktopAPI.setAutoPause(newValue);
+
+				if (opt.saveField == 'fpsVisible')
+					core.ui.FPSCounter.instance?.updateVisibility();
+
 			case NUMBER(min, max, step):
 				var newValue:Float = currentValue + (direction * step);
 				if (newValue < min)

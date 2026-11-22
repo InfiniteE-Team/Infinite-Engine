@@ -65,6 +65,7 @@ class MusicBeatState extends State {
 		script.hotReload();
 		#end
 		MusicBeatState.resetState();
+		@:privateAccess Paths.persistentPathCache.clear();
 	}
 
 	override function update(elapsed:Float):Void {

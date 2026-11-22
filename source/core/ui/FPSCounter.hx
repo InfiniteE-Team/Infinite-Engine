@@ -53,11 +53,7 @@ class FPSCounter extends Sprite {
 	}
 
 	public function updateVisibility():Void {
-		if (Reflect.field(SaveData, "data") != null && SaveData.data != null) {
-			this.visible = SaveData.data.fpsVisible;
-		} else {
-			this.visible = true;
-		}
+		this.visible = SaveData.data?.fpsVisible ?? true;
 	}
 
 	private function _onRemoved(e:Event):Void {

@@ -304,14 +304,14 @@ class ScriptHandler {
 	function safeCall(script:Script, fun:Dynamic, args:Array<Dynamic>):Dynamic {
 		try {
 			return Reflect.callMethod(script.interp, fun, args);
-		} catch (e:haxe.Exception) {/*
+		} catch (e:haxe.Exception) {
 			var line = '?';
 			if (Std.isOfType(e, hxscript.error.InterpException)) {
 				var d = (cast e : hxscript.error.InterpException).toDiagnostic();
 				if (d.line > 0)
 					line = '${d.line}';
 			}
-			Console.log('[${script.name}:$line] Runtime error: ${e.message}');*/
+			Console.log('[${script.name}:$line] Runtime error: ${e.message}');
 			return null;
 		}
 	}
