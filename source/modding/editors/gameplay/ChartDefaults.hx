@@ -165,20 +165,21 @@ class ChartDefaults {
 	}
 
 	public static function listNames(kind:String):Array<String> {
-		var folders:Array<String> = ['${Library.baseFolder}/$kind'];
+		var folders:Array<String> = ['${Library.baseFolder}/game/$kind'];
 		if (ModsRegistry.onMod && ModsRegistry.currentMod != null && ModsRegistry.currentMod != '')
-			folders.push('${Library.modsFolder}/${ModsRegistry.currentMod}/$kind');
+			folders.push('${Library.modsFolder}/${ModsRegistry.currentMod}/game/$kind');
 
 		var names:Array<String> = [];
 		for (folder in folders) {
 			if (!FileSystem.exists(folder) || !FileSystem.isDirectory(folder))
 				continue;
-			for (file in FileSystem.readDirectory(folder)) {
-				if (!StringTools.endsWith(file, '.json'))
+			for (entry in FileSystem.readDirectory(folder)) {
+				if (!FileSystem.isDirectory('$folder/$entry'))
 					continue;
-				var name = file.substr(0, file.length - 5);
-				if (!names.contains(name))
-					names.push(name);
+				if (!FileSystem.exists('$folder/$entry/$entry.json'))
+					continue;
+				if (!names.contains(entry))
+					names.push(entry);
 			}
 		}
 

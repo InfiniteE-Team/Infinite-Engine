@@ -16,20 +16,29 @@ class CustomShader {
 		return new FlxRuntimeShader(sys.io.File.getContent(shaderPath));
 	}
 
-	public static function applyToCamera(name:String, cam:Camera):FlxRuntimeShader {
+	public static inline function applyToCamera(name:String, cam:Camera):FlxRuntimeShader {
+		return applyToCameras(name, [cam]);
+	}
+
+	public static function applyToCameras(name:String, cameras:Array<Camera>):FlxRuntimeShader {
 		var sh = loadShader(name);
 		if (sh == null)
 			return null;
 
-		var filter = new ShaderFilter(sh);
-		if (cam.filters == null)
-			cam.filters = [filter];
-		else
-			cam.filters.push(filter);
+		for (cam in cameras) {
+			if (cam == null)
+				continue;
 
-		if (!appliedFilters.exists(cam))
-			appliedFilters.set(cam, []);
-		appliedFilters.get(cam).push(filter);
+			var filter = new ShaderFilter(sh);
+			if (cam.filters == null)
+				cam.filters = [filter];
+			else
+				cam.filters.push(filter);
+
+			if (!appliedFilters.exists(cam))
+				appliedFilters.set(cam, []);
+			appliedFilters.get(cam).push(filter);
+		}
 
 		return sh;
 	}

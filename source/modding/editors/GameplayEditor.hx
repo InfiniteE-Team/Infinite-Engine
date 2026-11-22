@@ -2222,11 +2222,21 @@ class GameplayEditor extends MusicBeatState {
 			var index = core.rhythm.DiffsUtils.getDiffIndex(chartDiff);
 			if (index < 0)
 				index = states.menus.FreeplayState.curDiff;
+
+			game.PlayState.startTime = findLastCheckpoint(RhythmCore.songPosition);
 			MusicBeatState.switchState(() -> states.menus.LoadingState.forSong(songDir, index));
 		} else if (DebugMenu.inDebugMenu)
 			MusicBeatState.switchState(() -> new DebugMenu());
 		else
 			MusicBeatState.switchState(() -> new states.menus.FreeplayState());
+	}
+
+	function findLastCheckpoint(pos:Float):Float {
+		var t:Float = 0;
+		for (e in SONG.songData.gameplay?.events ?? [])
+			if (e.name == 'Checkpoint' && e.time < pos)
+				t = e.time;
+		return t;
 	}
 
 	function updateTools():Void {

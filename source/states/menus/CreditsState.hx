@@ -9,17 +9,10 @@ import flixel.tweens.FlxEase;
 import core.json.menus.CreditsData.CreditEntry;
 
 class CreditsState extends MusicBeatState {
-	#if windows
-	static final CREDITS_FONT = 'Consolas';
-	#elseif mac
-	static final CREDITS_FONT = 'Menlo';
-	#else
-	static final CREDITS_FONT = 'Courier New';
-	#end
 	static final SCROLL_SPEED:Float = 60;
 
-	static final HEADER_SIZE:Int = 22;
-	static final BODY_SIZE:Int = 16;
+	static final HEADER_SIZE:Int = 24;
+	static final BODY_SIZE:Int = 18;
 
 	static final HEADER_COLOR:FlxColor = FlxColor.YELLOW;
 	static final BODY_COLOR:FlxColor = FlxColor.WHITE;
@@ -57,7 +50,7 @@ class CreditsState extends MusicBeatState {
 
 	function buildCredits() {
 		var creditsData:CreditEntry = FormatJson.readJson(Paths.getPath('menus/credits/credits', 'json'));
-		
+
 		var curY:Float = FlxG.height * 0.35 + GAP_AFTER_SECTION * 2;
 
 		for (entry in creditsData.entries) {
@@ -85,8 +78,8 @@ class CreditsState extends MusicBeatState {
 
 	function makeText(x:Float, y:Float, text:String, size:Int, color:FlxColor, ?align:FlxTextAlign):FlxText {
 		var t = new FlxText(x, y, 0, text);
-		t.font = CREDITS_FONT;
-		t.setFormat(CREDITS_FONT, size, color, align ?? FlxTextAlign.LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, true);
+		t.font = Paths.getPath('FunkinLingLong.otf', 'font');
+		t.setFormat(Paths.getPath('FunkinLingLong.otf', 'font'), size, color, align ?? FlxTextAlign.LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK, true);
 		t.fieldWidth = FlxG.width * (1 - PADDING_X * 2);
 		t.antialiasing = SaveData.data.antialiasing;
 		t.scrollFactor.set(1, 1);

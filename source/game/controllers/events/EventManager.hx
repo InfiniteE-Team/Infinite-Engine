@@ -86,16 +86,19 @@ class EventManager {
 				{key: 'ease', kind: 'text', def: 'linear'}
 			]
 		},
-		{name: 'Change BPM', fields: [
-			{
-				key: 'bpm',
-				kind: 'float',
-				step: 1,
-				min: 20,
-				max: 400,
-				def: 120
-			}
-		]},
+		{
+			name: 'Change BPM',
+			fields: [
+				{
+					key: 'bpm',
+					kind: 'float',
+					step: 1,
+					min: 20,
+					max: 400,
+					def: 120
+				}
+			]
+		},
 		{name: 'Play Anim', fields: [{key: 'char', kind: 'char'}, {key: 'anim', kind: 'text', def: 'hey'}]},
 		{
 			name: 'Zoom Camera',
@@ -148,7 +151,8 @@ class EventManager {
 					def: 1
 				}
 			]
-		}
+		},
+		{name: 'Checkpoint', fields: [{key: 'label', kind: 'text', def: 'Checkpoint'}]}
 	];
 
 	public static function easeByName(name:String):Null<flixel.tweens.FlxEase.EaseFunction> {
@@ -339,8 +343,8 @@ class EventManager {
 			case 'Change BPM':
 				var newBPM:Float = event.arguments.bpm;
 				if (!Math.isNaN(newBPM) && newBPM > 0) {
-					core.rhythm.RhythmCore.changeBPM(newBPM);
 					PlayState.instance?.rhythmTracker?.onBpmChange();
+					core.rhythm.RhythmCore.changeBPM(newBPM);
 				}
 			case 'Play Anim':
 				var charId = event.arguments.char;
@@ -382,6 +386,49 @@ class EventManager {
 		if (handler != null)
 			handler.call('onEvent', [event.arguments, event.time]);
 		#end
+	}
+
+	public function applyEventsBefore(time:Float):Void {
+		var allEvents = pendingEvents.copy();
+
+		for (event in allEvents) {
+			if (event.time >= time)
+				break;
+
+			switch (event.name) {
+				case 'Change BPM':
+					var newBPM:Float = event.arguments.bpm;
+					if (!Math.isNaN(newBPM) && newBPM > 0) {
+						PlayState.instance?.rhythmTracker?.onBpmChange();
+						core.rhythm.RhythmCore.changeBPM(newBPM);
+					}
+				case 'Change Scroll Speed':
+					var newSpeed:Float = Std.parseFloat(Std.string(event.arguments.speed));
+					if (!Math.isNaN(newSpeed))
+						PlayState.instance.noteController.targetScrollSpeed = newSpeed;
+				case 'Change Character':
+					var char = cast PlayState.instance.chars.get(event.arguments.char);
+					if (char != null && char.curCharacter != event.arguments.newCharacter) {
+						char.changeCharacter(event.arguments.newCharacter);
+						PlayState.instance.applyStageProps(char, event.arguments.char);
+					}
+				case 'Camera Follow', 'Center Camera', 'Zoom Camera':
+					var args:Dynamic = Reflect.copy(event.arguments);
+					args.ease = 'INSTANT';
+					args.duration = 0;
+					handleEvent({name: event.name, arguments: args, time: event.time});
+				case 'Camera Bop':
+					handleEvent(event);
+			}
+
+			#if HSCRIPT_ALLOWED
+			var handler = eventScripts.get(event.name);
+			if (handler != null)
+				handler.call('onEvent', [event.arguments, event.time]);
+			#end
+
+			pendingEvents.remove(event);
+		}
 	}
 
 	// time-0 camera events land before the countdown, otherwise the camera swings as the song starts -JloorDev

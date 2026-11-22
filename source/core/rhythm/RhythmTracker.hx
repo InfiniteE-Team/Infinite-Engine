@@ -26,13 +26,13 @@ class RhythmTracker {
 	public function check(onStep:Int->Void, onBeat:Float->Void):Void {
 		var curStep:Int = step;
 
-		if (curStep > lastStep) {
-			onStep(lastStep = curStep);
+		while (lastStep < curStep) {
+			lastStep++;
+			onStep(lastStep);
 
-			var curBeat:Float = beat;
-			if (curBeat > lastBeat) {
-				onBeat(lastBeat = Std.int(curBeat));
-			}
+			var curBeat:Int = lastStep >> 2;
+			if (curBeat > lastBeat)
+				onBeat(lastBeat = curBeat);
 		}
 	}
 
@@ -40,6 +40,11 @@ class RhythmTracker {
 	public function syncTo():Void {
 		lastStep = step - 1;
 		lastBeat = lastStep >> 2;
+	}
+
+	public function setLastStep(step:Int):Void {
+		lastStep = step;
+		lastBeat = step >> 2;
 	}
 
 	public function reset():Void {

@@ -12,6 +12,12 @@ import sys.thread.Thread;
 class DiscordAPI {
 	static final DISCORD_CLIENT_ID:Null<String> = "1534274562496270356"; // Replace with your actual Discord client ID
 
+	/**
+	 * The string value of the currently connected discord user.
+	 * Only used for gags in individual mods, it serves no real purpose.
+	 */
+	public static var username:String = 'Unknown';
+
 	public static var instance(get, never):DiscordAPI;
 	static var _instance:Null<DiscordAPI> = null;
 
@@ -112,19 +118,21 @@ class DiscordAPI {
 	private static function onReady(request:cpp.RawConstPointer<DiscordUser>):Void {
 		trace(' DISCORD Client has connected!');
 
-		final username:String = request[0].username;
+		final user:String = request[0].username;
 		final globalName:String = request[0].globalName;
 		final discriminator:Null<Int> = Std.parseInt(request[0].discriminator);
 
+		username = discriminator != 0 ? '$user#$discriminator' : '$user';
 		if (discriminator != null && discriminator != 0) {
-			trace(' DISCORD User: ${username}#${discriminator} (${globalName})');
+			trace(' DISCORD User: ${user}#${discriminator} (${globalName})');
 		} else {
-			trace(' DISCORD User: @${username} (${globalName})');
+			trace(' DISCORD User: @${user} (${globalName})');
 		}
 	}
 
 	private static function onDisconnected(errorCode:Int, message:cpp.ConstCharStar):Void {
 		trace(' DISCORD Client has disconnected! ($errorCode) "${Std.string(message)}"');
+		username = 'Unknown';
 	}
 
 	private static function onError(errorCode:Int, message:cpp.ConstCharStar):Void {

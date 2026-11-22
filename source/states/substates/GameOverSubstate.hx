@@ -129,10 +129,11 @@ class GameOverSubstate extends MusicBeatSubstate {
 			char.playAnim(deathAnim('deathConfirm'), true);
 			FlxG.sound.music?.stop();
 			FlxG.sound.play(Paths.getPath('game/general/sounds/death/' + endSound, 'music'));
-
 			new flixel.util.FlxTimer().start(0.7, function(_) {
 				FlxG.camera.fade(flixel.util.FlxColor.BLACK, 2, false, function() {
 					close();
+					var checkpoint = PlayState.instance.lastCheckpointBefore(core.rhythm.RhythmCore.songPosition);
+					PlayState.startTime = checkpoint;
 					MusicBeatState.switchState(() -> states.menus.LoadingState.forSong(songFolder, curDifficulty));
 				});
 			});

@@ -75,7 +75,7 @@ class PlayState extends MusicBeatState implements states.HotReloading {
 
 	public var isInCountdown:Bool = false;
 
-	public var startTime:Float = 0;
+	public static var startTime:Float = 0;
 
 	#if VIDEO_ALLOWED
 	public var cutscene:game.objects.cutscenes.Cutscene;
@@ -130,6 +130,8 @@ class PlayState extends MusicBeatState implements states.HotReloading {
 
 	override public function create() {
 		instance = this;
+
+		startTime = 0;
 
 		if (FlxG.mouse != null)
 			FlxG.mouse.visible = false;
@@ -349,7 +351,19 @@ class PlayState extends MusicBeatState implements states.HotReloading {
 			// V-Slice fires them when the song reaches 0 -JloorDev
 			if (!modding.vslice.VSlice.isActive())
 				events.updateEvents(0);
+			if (startTime > 0) {
+				events.applyEventsBefore(startTime);
+				rhythmTracker.setLastStep(Math.floor(startTime / RhythmCore.stepInMs) - 1);
+			}
 		}
+	}
+
+	public function lastCheckpointBefore(pos:Float):Float {
+		var t:Float = 0;
+		for (e in SONG.songData.gameplay?.events ?? [])
+			if (e.name == 'Checkpoint' && e.time < pos)
+				t = e.time;
+		return t;
 	}
 
 	// Code Song

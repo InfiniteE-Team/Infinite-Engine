@@ -188,8 +188,11 @@ class PauseMenuSubstate extends states.substates.BlurSubState {
 						close();
 					case "Restart Song":
 						resumeFunction();
-						if (game.PlayState.instance != null)
+						var checkpoint = game.PlayState.instance.lastCheckpointBefore(core.rhythm.RhythmCore.songPosition);
+						if (game.PlayState.instance != null) {
+							game.PlayState.startTime = checkpoint;
 							game.PlayState.instance.rewindSong();
+						}
 						close();
 					case "Change Difficulty":
 						modeDifficultyChanging = true;
