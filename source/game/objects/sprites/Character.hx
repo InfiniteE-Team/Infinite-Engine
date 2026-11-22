@@ -91,7 +91,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		parent = this;
 		this.curCharacter = curCharacter;
 		#if HSCRIPT_ALLOWED
-		initScript('characters/$curCharacter');
+		initScript('game/characters/$curCharacter/$curCharacter');
 		#end
 		loadSprite();
 	}
@@ -105,7 +105,7 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		switch (curCharacter) {
 			// case 'bf':  hardcoder reference!1
 			default:
-				var charPath:String = 'game/characters/$curCharacter/$curCharacter';
+				var charPath:String = 'game/characters/$curCharacter/$curCharacter' ?? 'data/characters/$curCharacter';
 				if (!Paths.exists('$charPath.json')) {
 					var fallback = curCharacter.startsWith('gf') ? 'gf' : 'bf';
 					Console.log('[Character] WARNING: No character data found for "$curCharacter" and it will be replaced to $fallback.json');

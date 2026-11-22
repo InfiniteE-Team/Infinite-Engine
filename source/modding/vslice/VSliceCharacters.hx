@@ -15,7 +15,7 @@ class VSliceCharacters {
 		var id = haxe.io.Path.withoutExtension(path);
 		var dataDir = ~/(game\/|vslice\/)?characters\//;
 		id = dataDir.match(id) ? dataDir.matchedRight() : haxe.io.Path.withoutDirectory(id);
-		raw = applyMerge('data/characters/$id.json', raw);
+		raw = applyMerge('data/characters/$id.json', raw) ?? applyMerge('game/characters/$id/$id.json', raw);
 		var main = stripLibrary(raw.assetPath);
 		// the base game characters live in images/game/ here -JloorDev
 		if (!hasAtlas(main) && hasAtlas('game/$main'))

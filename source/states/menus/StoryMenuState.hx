@@ -7,7 +7,6 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 import game.PlayStateConfig;
-import states.menus.LoadingState;
 import core.config.SaveScore;
 import core.rhythm.DiffsUtils;
 import core.assets.FunkinSprite;
@@ -535,7 +534,7 @@ class StoryMenuState extends MusicBeatState {
 		new FlxTimer().start(1, function(_) {
 			var firstSong = PlayStateConfig.storyPlaylist[0];
 			PlayStateConfig.storyPlaylist.shift();
-			MusicBeatState.switchState(() -> new LoadingState(firstSong, curDiff), data.stickerPack ?? 'default');
+			MusicBeatState.switchState(() -> states.menus.LoadingState.forSong(firstSong, curDiff), data.stickerPack ?? 'default');
 		});
 	}
 

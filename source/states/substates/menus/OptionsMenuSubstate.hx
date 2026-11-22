@@ -56,15 +56,13 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 				description: 'When disabled, flashing effects are dampened. Useful for people with photosensitive epilepsy.',
 				saveField: 'flashingLights',
 				type: CHECKBOX
-			}
-			#if desktop
-			, {
-				name: 'Pause on Unfocus',
-				description: 'When enabled, the game automatically pauses when losing focus.',
-				saveField: 'autoPause',
-				type: CHECKBOX
 			},
-			#end
+			{
+				name: 'Camera Movements',
+				description: "Camera shifts slightly based on the character's current pose animation.",
+				saveField: 'cameraMovement',
+				type: CHECKBOX
+			}
 		],
 		'Gameplay' => [
 			{
@@ -97,13 +95,15 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 				description: 'Move the rating position wherever you like.',
 				saveField: null,
 				type: null
-			},
-			{
-				name: 'Camera Movements',
-				description: "Camera shifts slightly based on the character's current pose animation.",
-				saveField: 'cameraMovement',
+			}
+			#if desktop
+			, {
+				name: 'Pause on Unfocus',
+				description: 'When enabled, the game automatically pauses when losing focus.',
+				saveField: 'autoPause',
 				type: CHECKBOX
 			}
+			#end
 		],
 		'Keybinds' => [],
 		'Debug' => [
@@ -751,7 +751,7 @@ class OptionsMenuSubstate extends states.substates.BlurSubState {
 		if (layoutChanged && modding.vslice.VSlice.isActive() && modding.vslice.VSliceHooks.active) {
 			var song = ps.songFolder;
 			var diff = ps.curDifficulty;
-			MusicBeatState.switchState(() -> new states.menus.LoadingState(song, diff));
+			MusicBeatState.switchState(() -> states.menus.LoadingState.forSong(song, diff));
 			return;
 		}
 

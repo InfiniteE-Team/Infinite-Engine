@@ -1,26 +1,23 @@
 package states.menus;
 
-import flixel.tweens.FlxTween;
-import core.assets.FunkinSprite;
+import states.HotReloading;
 import core.json.song.SongConfig;
-import core.json.game.objects.CharacterData;
-import core.json.game.objects.StageData;
-import core.json.game.objects.NoteSkinData;
+import core.json.game.objects.*;
 import states.menus.objects.FunkinLoadingCharacter;
 import core.json.menus.loading.LoadingCharacterData;
 
 class LoadingState extends MusicBeatState {
-	// config
-	var songFolder:String;
-	var curDifficulty:Int;
+	public var onQueueCollect:Null<LoadingState->Void>;
+
+	public var onStateReady:Null<() -> MusicBeatState>;
 
 	var total:Int = 0;
 	var loaded:Int = 0;
 	var done:Bool = false;
 
-	// assets Precached
-	var queue:Array<String> = [];
-	var audioQueue:Array<String> = [];
+	public var queue:Array<String> = [];
+
+	public var audioQueue:Array<String> = [];
 
 	public static final BAR_PAD:Int = 16;
 
@@ -36,27 +33,29 @@ class LoadingState extends MusicBeatState {
 	var nextAudio:Int = 0;
 	var destroyed:Bool = false;
 
-	var bar:Null<FunkinSprite> = null;
-	var micStand:Null<FunkinSprite> = null;
+	var bar:Null<core.assets.FunkinSprite> = null;
+	var micStand:Null<core.assets.FunkinSprite> = null;
 	var character:Null<FunkinLoadingCharacter> = null;
 
 	var dataList:Array<LoadingCharacterData> = [];
 
-	var prebuiltState:game.PlayState = null;
-	var isLoadingFinished:Bool = false;
+	var prebuiltState:Null<MusicBeatState> = null;
 
-	function startLoadingSong() {
-		prebuiltState = new game.PlayState(songFolder, curDifficulty);
+	var prebuiltInterface:Null<HotReloading> = null;
+	var isPrebuiltDone:Bool = false;
+
+	public function new(?onQueue:LoadingState->Void, ?onReady:() -> MusicBeatState) {
+		super();
+		this.onQueueCollect = onQueue;
+		this.onStateReady = onReady;
+
+		bar = new core.assets.FunkinSprite(0, 0, true);
+		micStand = new core.assets.FunkinSprite(0, 0, true);
+		character = new FunkinLoadingCharacter();
 	}
 
-	public function new(songFolder:String, curDifficulty:Int = 0) {
-		super();
-		this.songFolder = songFolder;
-		this.curDifficulty = curDifficulty;
-
-		bar = new FunkinSprite(0, 0, true);
-		micStand = new FunkinSprite(0, 0, true);
-		character = new FunkinLoadingCharacter();
+	public static function forSong(songFolder:String, curDifficulty:Int = 0):LoadingState {
+		return new LoadingState((ls) -> ls.collectSongQueue(songFolder, curDifficulty), () -> new game.PlayState(songFolder, curDifficulty));
 	}
 
 	override public function create() {
@@ -76,11 +75,22 @@ class LoadingState extends MusicBeatState {
 
 		buildLoadingUI();
 
-		startLoadingSong();
+		if (onStateReady != null) {
+			prebuiltState = onStateReady();
+			try {
+				prebuiltInterface = cast(prebuiltState, HotReloading);
+			} catch (_:Dynamic) {
+				prebuiltInterface = null;
+			}
+		}
 
-		collectQueue();
+		if (onQueueCollect != null)
+			onQueueCollect(this);
 
 		total = queue.length + audioQueue.length;
+
+		if (total == 0 && isPrebuiltReady())
+			onAllLoaded();
 	}
 
 	function buildLoadingUI() {
@@ -111,17 +121,22 @@ class LoadingState extends MusicBeatState {
 		#end
 	}
 
+	final charNames:Array<String> = [];
+
 	function loadCharacterData():Void {
-		var folder = core.assets.Library.findLib('menus/loading/characters');
-		if (!sys.FileSystem.exists(folder) || !sys.FileSystem.isDirectory(folder))
+		final folder = core.assets.Library.findLib('menus/loading/characters');
+		if (folder == null || !sys.FileSystem.exists(folder) || !sys.FileSystem.isDirectory(folder))
 			return;
 
 		for (file in sys.FileSystem.readDirectory(folder)) {
-			if (!sys.FileSystem.isDirectory('$folder/$file'))
+			final fullPath = '$folder/$file';
+			if (!sys.FileSystem.isDirectory(fullPath))
 				continue;
-			var data:LoadingCharacterData = FormatJson.readJson('$folder/$file/$file.json');
-			if (data != null)
+			var data:LoadingCharacterData = FormatJson.readJson('$fullPath/$file.json');
+			if (data != null) {
 				dataList.push(data);
+				charNames.push(file);
+			}
 		}
 	}
 
@@ -130,22 +145,14 @@ class LoadingState extends MusicBeatState {
 		if (script.callCancellable("onGetCharacterCancel", []))
 			return;
 		#end
-		final folder = core.assets.Library.findLib('menus/loading/characters');
-		var charNames:Array<String> = [];
-
-		if (sys.FileSystem.exists(folder) && sys.FileSystem.isDirectory(folder)) {
-			for (file in sys.FileSystem.readDirectory(folder)) {
-				charNames.push(file);
-			}
-		}
 
 		if (charNames.length == 0)
 			return;
-		var weights:Array<Float> = [];
 
-		for (data in dataList) {
+		var weights:Array<Float> = [];
+		for (data in dataList)
 			weights.push(data.weight);
-		}
+
 		var characterData:LoadingCharacterData = FlxG.random.getObject(dataList, weights);
 		var idx:Int = dataList.indexOf(characterData);
 		var characterId:String = charNames[idx];
@@ -157,19 +164,39 @@ class LoadingState extends MusicBeatState {
 		#end
 	}
 
-	function collectQueue() {
+	var queueSet = new Map<String, Bool>();
+	var audioQueueSet = new Map<String, Bool>();
+
+	public inline function enqueue(path:String) {
+		if (path != null && !queueSet.exists(path)) {
+			queueSet.set(path, true);
+			queue.push(path);
+		}
+	}
+
+	public function enqueueAudio(path:String) {
+		if (path == null)
+			return;
+		var abs = sys.FileSystem.absolutePath(path);
+		if (core.audio.Sound.isStreamable(abs))
+			return;
+		if (!audioQueueSet.exists(abs) && !core.audio.Sound.streamedCache.exists(abs)) {
+			audioQueueSet.set(abs, true);
+			audioQueue.push(abs);
+		}
+	}
+
+	function collectSongQueue(songFolder:String, curDifficulty:Int) {
 		var song:Null<SongConfig> = new SongConfig();
 		song.configSong(songFolder, core.rhythm.DiffsUtils.difficulties[curDifficulty]);
 
 		if (song.songData == null)
 			return;
 
-		var stageId = song.stage ?? 'stage';
-		collectStageAssets(stageId);
+		collectStageAssets(song.stage ?? 'stage');
 
 		for (charData in song.chars) {
-			var charName = charData.name ?? charData.id;
-			collectCharAssets(charName);
+			collectCharAssets(charData.name ?? charData.id);
 		}
 
 		if (song.songData.gameplay?.events != null) {
@@ -182,11 +209,47 @@ class LoadingState extends MusicBeatState {
 			}
 		}
 
-		collectNoteSkinAssets(song.noteSkin ?? 'default');
-		collectAudioAssets(song);
+		var noteSkin = song.noteSkin ?? 'default';
+		collectNoteSkinAssets(noteSkin);
+		collectSplashAssets(noteSkin);
+		collectCountdownAssets(song.countdown ?? 'default', noteSkin);
+		collectSongAudio(song, songFolder);
 	}
 
-	function collectAudioAssets(song:SongConfig) {
+	function collectSplashAssets(skinName:String) {
+		var splashData:Null<NoteSkinData> = game.objects.sprites.notes.NoteSkins.read(skinName, 'splashes');
+		if (splashData != null && splashData.props != null && splashData.props.path != null) {
+			var folder = splashData.props.folder ?? 'game/noteskins/$skinName/splashes';
+			enqueue(folder == '' ? splashData.props.path : '$folder/${splashData.props.path}');
+		}
+	}
+
+	function collectCountdownAssets(countdownName:String, noteSkin:String) {
+		var imageFolder = 'game/ui/countdown/$countdownName';
+		var countData:core.json.game.objects.CountdownData = null;
+
+		if (countdownName == 'default') {
+			var fromSkin:core.json.game.objects.CountdownData = game.objects.sprites.notes.NoteSkins.read(noteSkin, 'countdown');
+			if (fromSkin != null) {
+				countData = fromSkin;
+				var folder = game.objects.sprites.notes.NoteSkins.imageFolder(noteSkin, 'countdown');
+				imageFolder = StringTools.endsWith(folder, '/') ? folder.substr(0, folder.length - 1) : folder;
+			}
+		}
+
+		if (countData == null)
+			countData = FormatJson.readJson(Paths.getPath('game/ui/countdown/$countdownName/$countdownName', 'json'));
+
+		if (countData == null || countData.countdown == null)
+			return;
+
+		for (step in countData.countdown) {
+			if (step?.props?.path != null)
+				enqueue('$imageFolder/${step.props.path}');
+		}
+	}
+
+	function collectSongAudio(song:SongConfig, songFolder:String) {
 		Paths.currentSong = songFolder;
 
 		enqueueAudio(Paths.getPath('Inst' + (song.instPrefix ?? ''), SONG_AUDIO));
@@ -210,16 +273,6 @@ class LoadingState extends MusicBeatState {
 		}
 	}
 
-	function enqueueAudio(path:String) {
-		if (path == null)
-			return;
-		var abs = sys.FileSystem.absolutePath(path);
-		if (core.audio.Sound.isStreamable(abs))
-			return;
-		if (!audioQueue.contains(abs) && !core.audio.Sound.streamedCache.exists(abs))
-			audioQueue.push(abs);
-	}
-
 	function collectStageAssets(stageName:String) {
 		var stageData:Null<StageData> = modding.vslice.VSliceStages.readStage(Paths.getPath('game/stages/$stageName/$stageName', 'json'));
 		if (stageData == null || stageData.elements == null)
@@ -228,7 +281,12 @@ class LoadingState extends MusicBeatState {
 		for (el in stageData.elements) {
 			if (el.props == null || el.props.path == null)
 				continue;
-			var folder = el.props.folder ?? 'game/stages/$stageName';
+			var folder:String;
+			if (el.props.folder != null) {
+				folder = el.props.folder;
+			} else {
+				folder = 'game/stages/$stageName';
+			}
 			enqueue(folder == '' ? el.props.path : '$folder/${el.props.path}');
 		}
 	}
@@ -254,17 +312,17 @@ class LoadingState extends MusicBeatState {
 					enqueue(inFolder(fp));
 			}
 		}
+
+		enqueue('game/characters/$charName/$charName');
 	}
 
 	function collectNoteSkinAssets(skinName:String) {
 		var noteSkinData:Null<NoteSkinData> = game.objects.sprites.notes.NoteSkins.read(skinName, 'strumnotes');
-		if (noteSkinData != null && noteSkinData.props != null && noteSkinData.props.path != null)
-			enqueue(noteSkinData.props.folder != null ? noteSkinData.props.path : 'game/noteskins/$skinName/strumnotes/${noteSkinData.props.path}');
-	}
-
-	inline function enqueue(path:String) {
-		if (!queue.contains(path))
-			queue.push(path);
+		if (noteSkinData != null && noteSkinData.props != null && noteSkinData.props.path != null) {
+			var folder = noteSkinData.props.folder;
+			enqueue(folder != null
+				&& folder != '' ? '$folder/${noteSkinData.props.path}' : 'game/noteskins/$skinName/strumnotes/${noteSkinData.props.path}');
+		}
 	}
 
 	static function getAnimFilePath(anim:core.json.extensions.SpriteData.AnimData):Null<String> {
@@ -312,6 +370,10 @@ class LoadingState extends MusicBeatState {
 		barTargetX = barStartX + bar.width * progress;
 	}
 
+	inline function isPrebuiltReady():Bool {
+		return prebuiltInterface == null || prebuiltInterface.prebuilt;
+	}
+
 	function onAllLoaded() {
 		if (done)
 			return;
@@ -322,23 +384,24 @@ class LoadingState extends MusicBeatState {
 		#end
 
 		new flixel.util.FlxTimer().start(0.1, (_) -> {
-			FlxTween.tween(micStand, {alpha: 0}, 0.4);
+			flixel.tweens.FlxTween.tween(micStand, {alpha: 0}, 0.4);
 			if (character != null)
-				FlxTween.tween(character, {alpha: 0}, 0.4, {
-					onComplete: _ -> {
-						launchPlayState();
-					}
+				flixel.tweens.FlxTween.tween(character, {alpha: 0}, 0.4, {
+					onComplete: _ -> launchState()
 				});
 		});
 	}
 
-	function launchPlayState() {
+	function launchState() {
 		#if HSCRIPT_ALLOWED
 		if (script.callCancellable("onLaunchPlayState", []))
 			return;
 		#end
 
-		MusicBeatState.switchState(() -> prebuiltState);
+		if (prebuiltState != null)
+			MusicBeatState.switchState(() -> prebuiltState)
+		else if (onStateReady != null)
+			MusicBeatState.switchState(onStateReady);
 	}
 
 	override public function update(elapsed:Float) {
@@ -352,16 +415,13 @@ class LoadingState extends MusicBeatState {
 			return;
 		#end
 
-		if (prebuiltState != null && !prebuiltState.prebuilt) {
-			prebuiltState.prebuildStep();
-		}
+		if (prebuiltInterface != null && !prebuiltInterface.prebuilt)
+			prebuiltInterface.prebuildStep();
 
 		var assetsReady:Bool = (loaded >= total);
-		var playStateReady:Bool = (prebuiltState != null && prebuiltState.prebuilt);
 
-		if (assetsReady && playStateReady && !done) {
+		if (assetsReady && isPrebuiltReady() && !done)
 			onAllLoaded();
-		}
 
 		bar.x = InfiniteUtil.smoothLerpPrecision(bar.x, barTargetX, elapsed, 0.2);
 
@@ -376,5 +436,6 @@ class LoadingState extends MusicBeatState {
 		super.destroy();
 		character = null;
 		micStand = null;
+		prebuiltInterface = null;
 	}
 }

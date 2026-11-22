@@ -74,9 +74,11 @@ class Library {
 	}
 
 	public static function findLib(file:String):String {
-		@:privateAccess
-		if (Paths.pathCache.exists(file)) {
-			return Paths.pathCache.get(file);
+		@:privateAccess {
+			if (Paths.persistentPathCache.exists(file))
+				return Paths.persistentPathCache.get(file);
+			if (Paths.pathCache.exists(file))
+				return Paths.pathCache.get(file);
 		}
 
 		if (ModsRegistry.onMod) {
@@ -97,10 +99,7 @@ class Library {
 				if (modding.vslice.VSlice.isActive() && file.startsWith('game/')) {
 					var rest = file.substr('game/'.length);
 					// base game files the mod expects, its _merge patches are written against these -JloorDev
-					for (vslicePath in [
-						'$modsFolder/${ModsRegistry.currentMod}/data/$rest',
-						'$baseFolder/vslice/$rest'
-					])
+					for (vslicePath in ['$modsFolder/${ModsRegistry.currentMod}/data/$rest', '$baseFolder/vslice/$rest'])
 						if (FileSystem.exists(vslicePath)) {
 							@:privateAccess
 							Paths.pathCache.set(file, vslicePath);
@@ -113,7 +112,7 @@ class Library {
 		var basePath = '$baseFolder/$file';
 		if (FileSystem.exists(basePath)) {
 			@:privateAccess
-			Paths.pathCache.set(file, basePath);
+			Paths.persistentPathCache.set(file, basePath);
 			return basePath;
 		}
 		return null;
@@ -148,6 +147,7 @@ class Library {
 				}
 				Paths.cache.remove(trashes);
 			}
+			Paths.persistentPathCache.clear();
 		}
 
 		core.audio.Sound.clearGlobalCache();

@@ -225,7 +225,7 @@ class PauseMenuSubstate extends states.substates.BlurSubState {
 					game.PlayStateConfig.blueBalled = 0;
 					var currentSongName = game.PlayState.instance.songFolder;
 
-					MusicBeatState.switchState(() -> new states.menus.LoadingState(currentSongName, diffIndex));
+					MusicBeatState.switchState(() -> states.menus.LoadingState.forSong(currentSongName, diffIndex));
 				}
 			}
 		}

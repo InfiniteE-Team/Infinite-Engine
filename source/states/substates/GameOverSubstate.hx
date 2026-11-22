@@ -133,7 +133,7 @@ class GameOverSubstate extends MusicBeatSubstate {
 			new flixel.util.FlxTimer().start(0.7, function(_) {
 				FlxG.camera.fade(flixel.util.FlxColor.BLACK, 2, false, function() {
 					close();
-					MusicBeatState.switchState(() -> new states.menus.LoadingState(songFolder, curDifficulty));
+					MusicBeatState.switchState(() -> states.menus.LoadingState.forSong(songFolder, curDifficulty));
 				});
 			});
 		}

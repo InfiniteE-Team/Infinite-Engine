@@ -9,6 +9,7 @@ import flixel.graphics.frames.FlxFramesCollection;
 @:nullSafety
 class Paths {
 	private static var pathCache = new Map<String, String>();
+	private static var persistentPathCache = new Map<String, String>();
 	private static var cache = new Map<String, Dynamic>();
 	public static var currentSong:String = "";
 
@@ -157,6 +158,26 @@ class Paths {
 	public static function cacheAutoAsync(fileName:String, onComplete:Dynamic->Void):Void {
 		var imagePath = getPath(fileName, 'image');
 		if (imagePath == null) {
+			var animFolder = Library.findLib('$fileName') ?? Library.findLib('images/$fileName');
+			if (animFolder != null && sys.FileSystem.exists('$animFolder/Animation.json')) {
+				if (cache.exists(animFolder)) {
+					if (onComplete != null) onComplete(cache.get(animFolder));
+					return;
+				}
+				sys.thread.Thread.create(function() {
+					haxe.MainLoop.runInMainThread(function() {
+						var result:Dynamic = null;
+						if (!cache.exists(animFolder)) {
+							result = FlxAnimateFrames.fromAnimate(animFolder);
+							if (result != null)
+								cache.set(animFolder, result);
+						}
+						if (onComplete != null)
+							onComplete(cache.get(animFolder) ?? result);
+					});
+				});
+				return;
+			}
 			if (onComplete != null)
 				onComplete(null);
 			return;
@@ -171,22 +192,24 @@ class Paths {
 		var formatDetected = "image";
 		var folderPath:Null<String> = null;
 		var atlasPath:Null<String> = null;
-		var animFolder = Library.findLib('$fileName') ?? Library.findLib('images/$fileName');
-		if (animFolder != null && FileSystem.exists('$animFolder/Animation.json')) {
-			formatDetected = "animate";
-			folderPath = animFolder;
-		} else {
-			for (kind in [["sparrow", ".xml"], ["json", ".json"], ["pack", ".txt"]]) {
-				atlasPath = Library.findLib('$fileName${kind[1]}') ?? Library.findLib('images/$fileName${kind[1]}');
-				if (atlasPath != null) {
-					formatDetected = kind[0];
-					break;
-				}
-			}
-		}
 
 		// CPU / RAM
 		sys.thread.Thread.create(function() {
+			var animFolder = Library.findLib('$fileName') ?? Library.findLib('images/$fileName');
+			if (animFolder != null && FileSystem.exists('$animFolder/Animation.json')) {
+				formatDetected = "animate";
+				folderPath = animFolder;
+			} else {
+				for (kind in [["sparrow", ".xml"], ["json", ".json"], ["pack", ".txt"]]) {
+					atlasPath = Library.findLib('$fileName${kind[1]}') ?? Library.findLib('images/$fileName${kind[1]}');
+					if (atlasPath != null) {
+						formatDetected = kind[0];
+						break;
+					}
+				}
+			}
+
+			var rawData:Null<String> = null;
 			var img:Null<lime.graphics.Image> = null;
 			try {
 				final loaded = lime.graphics.Image.fromFile(imagePath);
@@ -194,7 +217,6 @@ class Paths {
 			} catch (e:Dynamic) {
 				Console.log('cacheAutoAsync: could not decode "$imagePath": $e', true);
 			}
-			var rawData:Null<String> = null;
 			try {
 				if (atlasPath != null) {
 					final text = readText(atlasPath);

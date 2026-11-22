@@ -18,6 +18,9 @@ class PopUp extends flixel.group.FlxSpriteContainer.FlxTypedSpriteContainer<Funk
 	var missPool:Array<FunkinSprite> = [];
 	var poolPaths:Map<FunkinSprite, String> = [];
 
+	public var numberOffsetX:Float = 0;
+	public var numberOffsetY:Float = 0;
+
 	public var onNoteHitPlayer:Void->Void = () -> {};
 	public var onNoteHitMiss:Void->Void = () -> {};
 
@@ -45,7 +48,7 @@ class PopUp extends flixel.group.FlxSpriteContainer.FlxTypedSpriteContainer<Funk
 		var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.comboSkin}/$comboName', 'image');
 		var skinData = getSkinData('rating', comboName);
 
-		setupSprite(comboSprite, skinData != null && skinData.path != null ? skinData.path : defaultPath, skinData != null && skinData.scale != null ? skinData.scale : 0.7,
+		setupSprite(comboSprite, skinData != null && skinData.path != null ? skinData.path : defaultPath, skinData != null && skinData.scale != null ? skinData.scale : 0.62,
 			this.x + (skinData != null && skinData.offsetX != null ? skinData.offsetX : -160),
 			this.y + (skinData != null && skinData.offsetY != null ? skinData.offsetY : -90));
 
@@ -88,9 +91,11 @@ class PopUp extends flixel.group.FlxSpriteContainer.FlxTypedSpriteContainer<Funk
 			setupSprite(numScore, skinDigit != null && skinDigit.path != null ? skinDigit.path : defaultPath, skinDigit != null && skinDigit.scale != null ? skinDigit.scale : 0.38,
 				this.x
 				+ (spacing * daLoop)
-				+ (skinDigit != null && skinDigit.offsetX != null ? skinDigit.offsetX : -90),
+				+ (skinDigit != null && skinDigit.offsetX != null ? skinDigit.offsetX : -150)
+				+ numberOffsetX,
 				this.y
-				+ (skinDigit != null && skinDigit.offsetY != null ? skinDigit.offsetY : 20));
+				+ (skinDigit != null && skinDigit.offsetY != null ? skinDigit.offsetY : 0)
+				+ numberOffsetY);
 
 			#if HSCRIPT_ALLOWED
 			if (scripRat?.hasScripts && scripRat?.call('onCustomNumberAnimation', [numScore, i, daLoop]) == true) {
@@ -116,7 +121,7 @@ class PopUp extends flixel.group.FlxSpriteContainer.FlxTypedSpriteContainer<Funk
 		var defaultPath = Paths.getPath('game/ui/popup/${game.PlayStateConfig.comboSkin}/miss', 'image');
 		var skinData = getSkinData('miss', 'miss');
 
-		setupSprite(rating, skinData != null && skinData.path != null ? skinData.path : defaultPath, skinData != null && skinData.scale != null ? skinData.scale : 0.7,
+		setupSprite(rating, skinData != null && skinData.path != null ? skinData.path : defaultPath, skinData != null && skinData.scale != null ? skinData.scale : 0.62,
 			this.x + (skinData != null && skinData.offsetX != null ? skinData.offsetX : -145),
 			this.y + (skinData != null && skinData.offsetY != null ? skinData.offsetY : -90));
 

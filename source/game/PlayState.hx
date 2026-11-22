@@ -18,7 +18,7 @@ import core.json.song.SongConfig;
 import game.controllers.events.EventManager;
 import game.objects.Countdown;
 
-class PlayState extends MusicBeatState {
+class PlayState extends MusicBeatState implements states.HotReloading {
 	public static var instance:PlayState;
 
 	// cameras
@@ -221,7 +221,7 @@ class PlayState extends MusicBeatState {
 		script.hotReload();
 		#end
 		if (game.PlayState.instance != null)
-			MusicBeatState.switchState(() -> new states.menus.LoadingState(songFolder, curDifficulty));
+			MusicBeatState.switchState(() -> states.menus.LoadingState.forSong(songFolder, curDifficulty));
 	}
 
 	function buildStageAndChars():Void {
@@ -497,7 +497,7 @@ class PlayState extends MusicBeatState {
 					var nextSong = PlayStateConfig.storyPlaylist[0];
 					PlayStateConfig.storyPlaylist.shift();
 					new flixel.util.FlxTimer().start(0.9, (_) -> {
-						MusicBeatState.switchState(() -> new states.menus.LoadingState(nextSong, curDifficulty));
+						MusicBeatState.switchState(() -> states.menus.LoadingState.forSong(nextSong, curDifficulty));
 					});
 				} else {
 					core.config.SaveScore.saveWeek(PlayStateConfig.storyWeekName, PlayStateConfig.storyScore, curDifficulty);

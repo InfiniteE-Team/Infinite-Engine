@@ -60,7 +60,7 @@ class Stage extends FlxTypedGroup<FlxBasic> {
 		// hardcoder reference!1
 		switch (stage) {
 			default:
-				var stageDataPath = Paths.getPath('game/stages/$stage/$stage', "json");
+				var stageDataPath = Paths.getPath('game/stages/$stage/$stage', "json") ?? Paths.getPath('data/stages/$stage', "json");
 				stageData = modding.vslice.VSliceStages.readStage(stageDataPath);
 
 				if (stageData == null)

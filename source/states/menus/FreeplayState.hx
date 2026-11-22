@@ -55,6 +55,12 @@ class FreeplayState extends MusicBeatState {
 
 	var camFollow:flixel.FlxObject;
 
+	var currentAlbumPath:String = null;
+
+	var charDataCache:Map<String, Dynamic> = new Map();
+
+	var musicTimer:FlxTimer = null;
+
 	public function new() {
 		super();
 	}
@@ -82,7 +88,8 @@ class FreeplayState extends MusicBeatState {
 
 		core.audio.MasterAudio.playMenu(Paths.getPath('menus/freakyMenu/freakyMenu', 'music'), 0.6, 102);
 
-		freeplayData = modding.vslice.VSlice.isActive() ? modding.vslice.VSliceSongs.freeplay() : FormatJson.readJson(Paths.getPath('game/songs/listSong', 'json'));
+		freeplayData = modding.vslice.VSlice.isActive() ? modding.vslice.VSliceSongs.freeplay() : FormatJson.readJson(Paths.getPath('game/songs/listSong',
+			'json'));
 
 		#if HSCRIPT_ALLOWED
 		if (script.callCancellable("onCreateCancel", []))
@@ -113,7 +120,6 @@ class FreeplayState extends MusicBeatState {
 		add(buildings);
 
 		if (freeplayData != null && freeplayData.songData != null) {
-			var charDataCache:Map<String, Dynamic> = new Map();
 			for (i in 0...freeplayData.songData.length) {
 				var card:CardFreeplay = new CardFreeplay(220 - (i * 60), 30 + (i * 200), i);
 				songs.push(card);
@@ -140,6 +146,7 @@ class FreeplayState extends MusicBeatState {
 
 				card.createCard(FlxG.width / 2 + (i * 200), FlxG.height / 2 - 100, SongConfig.getSongName(freeplayData.songData[i].song), i);
 			}
+			charDataCache.clear();
 
 			box = new FlxSprite(700, 0).loadGraphic(Paths.getPath('menus/freeplay/leftBarBFGF', 'image'));
 			box.scrollFactor.set(0, 0);
@@ -264,7 +271,7 @@ class FreeplayState extends MusicBeatState {
 		var totalWidth:Float = (freeplayData != null && freeplayData.songData != null) ? FlxG.width + freeplayData.songData.length * 50 + 200 : FlxG.width;
 		FlxG.camera.setScrollBoundsRect(-totalWidth, 0, totalWidth * 2, totalHeight, true);
 
-		changeSelection(0);
+		changeSelection();
 	}
 
 	override public function update(elapsed:Float) {
@@ -327,7 +334,7 @@ class FreeplayState extends MusicBeatState {
 			#end
 
 			new FlxTimer().start(1, function(tmr:FlxTimer) {
-				MusicBeatState.switchState(() -> new states.menus.LoadingState(songSelected, curDiff),
+				MusicBeatState.switchState(() -> states.menus.LoadingState.forSong(songSelected, curDiff),
 					freeplayData.songData[curSelected].stickerPack ?? 'default');
 			});
 		}
@@ -402,24 +409,36 @@ class FreeplayState extends MusicBeatState {
 		if (freeplayData == null || freeplayData.songData == null || freeplayData.songData[curSelected] == null)
 			return;
 
-		var songSelected:String = freeplayData.songData[curSelected].song;
-		var bpm:Float = freeplayData.songData[curSelected].bpm;
-		var diffName:String = DiffsUtils.difficulties.length > 0 ? DiffsUtils.difficulties[curDiff] : '';
-		if (songSelected != null) {
-			var diffInstPath = Paths.getPath('game/songs/$songSelected/audio/Inst-$diffName', 'music') ?? Paths.getPath('songs/$songSelected/Inst-$diffName.ogg');
-			var genericInstPath = Paths.getPath('game/songs/$songSelected/audio/Inst.ogg') ?? Paths.getPath('songs/$songSelected/Inst.ogg');
-
-			var instPath = (diffName != '' && sys.FileSystem.exists(diffInstPath)) ? diffInstPath : genericInstPath;
-
-			core.audio.MasterAudio.playMenu(instPath, 0.6, bpm);
+		if (musicTimer != null) {
+			musicTimer.cancel();
+			musicTimer = null;
 		}
 
-		#if HSCRIPT_ALLOWED
-		script.call("onChangeMusic", []);
-		#end
+		musicTimer = new FlxTimer().start(0.15, function(_) {
+			musicTimer = null;
+			if (freeplayData == null || freeplayData.songData == null || freeplayData.songData[curSelected] == null)
+				return;
+
+			var songSelected:String = freeplayData.songData[curSelected].song;
+			var bpm:Float = freeplayData.songData[curSelected].bpm;
+			var diffName:String = DiffsUtils.difficulties.length > 0 ? DiffsUtils.difficulties[curDiff] : '';
+			if (songSelected != null) {
+				var diffInstPath = Paths.getPath('game/songs/$songSelected/audio/Inst-$diffName',
+					'music') ?? Paths.getPath('songs/$songSelected/Inst-$diffName.ogg');
+				var genericInstPath = Paths.getPath('game/songs/$songSelected/audio/Inst.ogg') ?? Paths.getPath('songs/$songSelected/Inst.ogg');
+
+				var instPath = (diffName != '' && sys.FileSystem.exists(diffInstPath)) ? diffInstPath : genericInstPath;
+
+				core.audio.MasterAudio.playMenu(instPath, 0.6, bpm);
+			}
+
+			#if HSCRIPT_ALLOWED
+			script.call("onChangeMusic", []);
+			#end
+		});
 	}
 
-	function changeSelection(change:Int = 0):Void {
+	function changeSelection(?change:Int = 0):Void {
 		if (!hasSongs())
 			return;
 
@@ -468,25 +487,29 @@ class FreeplayState extends MusicBeatState {
 		if (album != null) {
 			var albumName = freeplayData.songData[curSelected].album;
 			var albumPath = albumName == null ? null : Paths.getPath(albumName.indexOf('/') >= 0 ? albumName : 'menus/freeplay/albums/' + albumName, 'image');
-			if (albumPath == null) {
+			if (albumPath == null)
 				albumPath = Paths.getPath('menus/freeplay/albums/placeholder', 'image');
+			if (albumPath != currentAlbumPath) {
+				currentAlbumPath = albumPath;
+				album.loadGraphic(albumPath);
+				var sx = disk != null ? disk.scale.x : 0.5;
+				var sy = disk != null ? disk.scale.y : 0.5;
+				album.setGraphicSize(Std.int(ALBUM_WINDOW[2] * sx), Std.int(ALBUM_WINDOW[3] * sy));
+				album.updateHitbox();
+				album.x = (disk != null ? disk.x : FlxG.width * 0.96 - 370) + ALBUM_WINDOW[0] * sx;
+				album.y = (disk != null ? disk.y : 90) + ALBUM_WINDOW[1] * sy;
 			}
-			album.loadGraphic(albumPath);
-			var sx = disk != null ? disk.scale.x : 0.5;
-			var sy = disk != null ? disk.scale.y : 0.5;
-			album.setGraphicSize(Std.int(ALBUM_WINDOW[2] * sx), Std.int(ALBUM_WINDOW[3] * sy));
-			album.updateHitbox();
-			album.x = (disk != null ? disk.x : FlxG.width * 0.96 - 370) + ALBUM_WINDOW[0] * sx;
-			album.y = (disk != null ? disk.y : 90) + ALBUM_WINDOW[1] * sy;
 		}
 
-		if (songs.length > 0) {
-			var targetCard = songs[curSelected];
-			if (targetCard != null) {
-				camFollow.x = targetCard.x + (targetCard.width / 2) + (FlxG.width * 0.15);
-				camFollow.y = targetCard.y + (targetCard.height / 2) + (FlxG.height * 0.15);
-			}
-		}
+		var globalCardX = 220 - (curSelected * 60);
+		var globalCardY = 30 + (curSelected * 200);
+
+		var refCard = songs.length > 0 ? songs[0] : null;
+		var cardWidth = refCard != null ? refCard.width : 300;
+		var cardHeight = refCard != null ? refCard.height : 150;
+
+		camFollow.x = globalCardX + (cardWidth / 2) + (FlxG.width * 0.15);
+		camFollow.y = globalCardY + (cardHeight / 2) + (FlxG.height * 0.15);
 
 		changeDifficulty(0);
 
@@ -526,6 +549,11 @@ class FreeplayState extends MusicBeatState {
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
+		if (musicTimer != null) {
+			musicTimer.cancel();
+			musicTimer = null;
+		}
+
 		songs = null;
 		icons = null;
 		freeplayData = null;
@@ -535,6 +563,8 @@ class FreeplayState extends MusicBeatState {
 		diffTxt = null;
 		leftArrow = null;
 		rightArrow = null;
+		charDataCache = null;
+		currentAlbumPath = null;
 
 		FlxG.bitmap.clearUnused();
 	}
