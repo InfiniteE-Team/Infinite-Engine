@@ -693,9 +693,8 @@ class InfoHUD extends flixel.group.FlxGroup.FlxTypedGroup<flixel.FlxBasic> {
 		}
 	}
 
-	public function updateInfoText(songPosition:Float, stepInMs:Float, bpm:Float) {
+	public function updateInfoText(songPosition:Float, step:Int, bpm:Float) {
 		var seconds:Float = songPosition / 1000.0;
-		var step:Int = Std.int(songPosition / stepInMs);
 		var beat:Int = step >> 2;
 
 		values[0].text = flixel.util.FlxStringUtil.formatTime(seconds, true);

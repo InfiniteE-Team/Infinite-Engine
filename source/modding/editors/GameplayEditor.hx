@@ -201,6 +201,10 @@ class GameplayEditor extends MusicBeatState {
 
 	var eventGroup:flixel.group.FlxGroup;
 	var eventEntries:Array<EventEntry> = [];
+
+	// steps <-> ms through the song's BPM changes, the grid is laid out in steps -JloorDev
+	var bpmMap:core.rhythm.BpmMap = new core.rhythm.BpmMap(120);
+	var bpmMapKey:String = '';
 	var lastEventName:String = 'Camera Follow';
 
 	var panel:OptionPanel;
@@ -448,6 +452,7 @@ class GameplayEditor extends MusicBeatState {
 		rhythmTracker.reset();
 
 		songLength = songLengthMs();
+		syncBpmMap(true);
 
 		buildColumns();
 		buildGrid(songLength);
@@ -728,7 +733,7 @@ class GameplayEditor extends MusicBeatState {
 		else
 			add(gridChunks);
 
-		var totalRows:Int = Math.ceil(totalMs / RhythmCore.stepInMs) + 1;
+		var totalRows:Int = Math.ceil(timeRow(totalMs)) + 1;
 		var chunks:Int = Math.ceil(totalRows / CHUNK_ROWS);
 		totalSteps = chunks * CHUNK_ROWS;
 
@@ -837,16 +842,38 @@ class GameplayEditor extends MusicBeatState {
 		return Math.floor(worldY / GRID_SIZE / snapRows() + 0.0001) * snapRows();
 
 	inline function rowTime(row:Float):Float
-		return row * RhythmCore.stepInMs;
+		return bpmMap.timeAt(row);
 
 	inline function timeRow(ms:Float):Float
-		return ms / RhythmCore.stepInMs;
+		return bpmMap.stepAt(ms);
+
+	// rebuilds the tempo map when the base BPM or a "Change BPM" event changed, and lays everything out again -JloorDev
+	function syncBpmMap(force:Bool = false):Void {
+		var bpm:Float = SONG.songData.meta.bpm;
+		var events = SONG.songData.gameplay.events ?? [];
+		var changes = [for (e in events) if (e.name == 'Change BPM') '${e.time}:${Reflect.field(e.arguments, "bpm")}'];
+		var key = '$bpm|${changes.join(",")}';
+		if (!force && key == bpmMapKey)
+			return;
+		bpmMapKey = key;
+		bpmMap = new core.rhythm.BpmMap(bpm, events);
+		rhythmTracker.map = bpmMap;
+
+		if (gridChunks == null)
+			return;
+		buildGrid(songLength);
+		for (e in noteEntries) {
+			placeEntry(e);
+			updateTail(e);
+		}
+		refreshEventMarks();
+	}
 
 	inline function cellX(n:core.json.song.SongData.NoteData):Float
 		return GRID_X + (charColumnOffset.get(n.char) + n.lane) * GRID_SIZE;
 
 	inline function cellY(n:core.json.song.SongData.NoteData):Float
-		return n.time * GRID_SIZE / RhythmCore.stepInMs;
+		return timeRow(n.time) * GRID_SIZE;
 
 	function createSprites(entry:NoteEntry):Void {
 		var n = entry.data;
@@ -931,7 +958,8 @@ class GameplayEditor extends MusicBeatState {
 		if (len <= 0)
 			return;
 
-		entry.tail.setGraphicSize(Std.int(GRID_SIZE * 0.3), Std.int(Math.max(1, len * GRID_SIZE / RhythmCore.stepInMs)));
+		var rows = timeRow(entry.data.time + len) - timeRow(entry.data.time);
+		entry.tail.setGraphicSize(Std.int(GRID_SIZE * 0.3), Std.int(Math.max(1, rows * GRID_SIZE)));
 		entry.tail.updateHitbox();
 	}
 
@@ -1122,8 +1150,8 @@ class GameplayEditor extends MusicBeatState {
 		for (o in moveOrigins) {
 			minCol = Std.int(Math.min(minCol, o.col));
 			maxCol = Std.int(Math.max(maxCol, o.col));
-			minRow = Math.min(minRow, o.time / RhythmCore.stepInMs);
-			maxEndRow = Math.max(maxEndRow, (o.time + o.entry.data.length) / RhythmCore.stepInMs);
+			minRow = Math.min(minRow, timeRow(o.time));
+			maxEndRow = Math.max(maxEndRow, timeRow(o.time + o.entry.data.length));
 		}
 
 		dcol = Std.int(Math.max(-minCol, Math.min(dcol, columnOwners.length - 1 - maxCol)));
@@ -1140,7 +1168,7 @@ class GameplayEditor extends MusicBeatState {
 			var owner = columnOwners[o.col + dcol];
 			o.entry.data.char = owner.char;
 			o.entry.data.lane = owner.lane;
-			o.entry.data.time = o.time + drows * RhythmCore.stepInMs;
+			o.entry.data.time = rowTime(timeRow(o.time) + drows);
 
 			if (columnChanged) {
 				destroySprites(o.entry);
@@ -1170,7 +1198,7 @@ class GameplayEditor extends MusicBeatState {
 
 	function findEntry(column:Int, worldY:Float, includeBody:Bool):NoteEntry {
 		var owner = columnOwners[column];
-		var mouseMs:Float = worldY / GRID_SIZE * RhythmCore.stepInMs;
+		var mouseMs:Float = rowTime(worldY / GRID_SIZE);
 
 		var best:NoteEntry = null;
 		var bestDistance:Float = 1e9;
@@ -1276,7 +1304,7 @@ class GameplayEditor extends MusicBeatState {
 		if (dragEntry != null) {
 			if (FlxG.mouse.pressed) {
 				var rows:Float = Math.max(0, Math.min(row, totalSteps - 1) - dragStartRow);
-				dragEntry.data.length = rows * RhythmCore.stepInMs;
+				dragEntry.data.length = rowTime(dragStartRow + rows) - rowTime(dragStartRow);
 				updateTail(dragEntry);
 			}
 
@@ -1904,7 +1932,8 @@ class GameplayEditor extends MusicBeatState {
 		if (acceptOption)
 			return;
 
-		infoHUD.updateInfoText(RhythmCore.songPosition, RhythmCore.stepInMs, RhythmCore.bpm);
+		syncBpmMap();
+		infoHUD.updateInfoText(RhythmCore.songPosition, Math.floor(timeRow(RhythmCore.songPosition) + 0.0001), bpmMap.bpmAt(RhythmCore.songPosition));
 
 		try {
 			updateMenu(keysLocked);
@@ -1983,7 +2012,7 @@ class GameplayEditor extends MusicBeatState {
 			}
 		}
 
-		camEditor.scroll.y = RhythmCore.songPosition / RhythmCore.stepInMs * GRID_SIZE - FlxG.height * 0.5;
+		camEditor.scroll.y = timeRow(RhythmCore.songPosition) * GRID_SIZE - FlxG.height * 0.5;
 
 		if (!keysLocked && (FlxG.keys.pressed.CONTROL || FlxG.keys.pressed.WINDOWS) && FlxG.keys.justPressed.S)
 			saveChart();
@@ -2497,7 +2526,7 @@ class GameplayEditor extends MusicBeatState {
 
 	function refreshEvent(entry:EventEntry):Void {
 		var x:Float = GRID_X + columnOwners.length * GRID_SIZE;
-		var y:Float = entry.data.time * GRID_SIZE / RhythmCore.stepInMs;
+		var y:Float = timeRow(entry.data.time) * GRID_SIZE;
 
 		entry.box.setPosition(x + 2, y + 2);
 		entry.box.color = EditorWidgets.eventColor(entry.data.name);
@@ -2516,7 +2545,7 @@ class GameplayEditor extends MusicBeatState {
 		var best:EventEntry = null;
 		var bestDistance:Float = 1e9;
 		for (e in eventEntries) {
-			var top:Float = e.data.time * GRID_SIZE / RhythmCore.stepInMs;
+			var top:Float = timeRow(e.data.time) * GRID_SIZE;
 			if (worldY >= top && worldY < top + GRID_SIZE) {
 				var distance:Float = Math.abs(worldY - (top + GRID_SIZE * 0.5));
 				if (distance < bestDistance) {
@@ -2574,12 +2603,7 @@ class GameplayEditor extends MusicBeatState {
 		rhythmTracker.reset();
 
 		songLength = songLengthMs();
-		buildGrid(songLength);
-		for (e in noteEntries) {
-			placeEntry(e);
-			updateTail(e);
-		}
-		refreshEventMarks();
+		syncBpmMap(true);
 
 		markDirty();
 	}
@@ -2955,8 +2979,8 @@ class GameplayEditor extends MusicBeatState {
 
 		if (panelRow == 0) {
 			pushUndoOnce();
-			var delta:Float = dir * snapRows() * RhythmCore.stepInMs * (big ? 4 : 1);
-			data.time = Math.max(0, Math.min(data.time + delta, (totalSteps - 1) * RhythmCore.stepInMs));
+			var row:Float = timeRow(data.time) + dir * snapRows() * (big ? 4 : 1);
+			data.time = rowTime(Math.max(0, Math.min(row, totalSteps - 1)));
 		} else if (panelRow == 1) {
 			setEventType(cycleName(game.controllers.events.EventManager.schemaNames(), data.name, dir));
 			return;
@@ -3071,7 +3095,7 @@ class GameplayEditor extends MusicBeatState {
 			rows.push({label: 'BPM', value: Std.string(SONG.songData.meta.bpm), arrows: true});
 			rows.push({label: '+ Add character', value: '', wide: true});
 
-			footer = 'The grid follows the starting BPM; "Change BPM" events are not drawn on it.';
+			footer = 'The grid follows the "Change BPM" events, each step keeps its length in time.';
 			if (prompt.active)
 				footer = prompt.label + ': ' + prompt.text + '_    (Enter: accept, Esc: cancel)';
 

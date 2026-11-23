@@ -10,8 +10,14 @@ class RhythmTracker {
 	private var stepOffset:Int = 0;
 	private var timeAtBpmChange:Float = 0;
 
-	inline function get_step():Int
+	// with a tempo map the steps come from it, so seeking past a BPM change still counts right -JloorDev
+	public var map:Null<BpmMap> = null;
+
+	inline function get_step():Int {
+		if (map != null)
+			return Math.floor(map.stepAt(core.rhythm.RhythmCore.songPosition) + 0.0001);
 		return stepOffset + Math.floor((core.rhythm.RhythmCore.songPosition - timeAtBpmChange) / core.rhythm.RhythmCore.stepInMs);
+	}
 
 	inline function get_beat():Int
 		return step >> 2;
