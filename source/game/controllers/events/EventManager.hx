@@ -411,6 +411,9 @@ class EventManager {
 					if (char != null && char.curCharacter != event.arguments.newCharacter) {
 						char.changeCharacter(event.arguments.newCharacter);
 						PlayState.instance.applyStageProps(char, event.arguments.char);
+						var hud = PlayState.instance.controllerHUD;
+						var icon = char.isPlayer ? hud.iconP1 : hud.iconP2;
+						icon?.updateIcon(char.isPlayer, char.characterData, event.arguments.newCharacter);
 					}
 				case 'Camera Follow', 'Center Camera', 'Zoom Camera':
 					var args:Dynamic = Reflect.copy(event.arguments);
