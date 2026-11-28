@@ -59,7 +59,7 @@ class Library {
 		clearModCache();
 		ModsRegistry.mods = getAvailableMods();
 
-		trace('Mods scan → cwd: ${Sys.getCwd()} | found: ${ModsRegistry.mods}');
+		trace('Mods scan -> cwd: ${Sys.getCwd()} | found: ${ModsRegistry.mods}');
 
 		var savedMod = SaveData.data.currentMod;
 		var savedOnMod = SaveData.data.onMod;

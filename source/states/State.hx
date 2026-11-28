@@ -3,9 +3,6 @@ package states;
 import cpp.vm.Gc;
 
 class State extends flixel.FlxState {
-	private var tweenManager:flixel.tweens.FlxTween.FlxTweenManager;
-	private var timerManager:flixel.util.FlxTimer.FlxTimerManager;
-
 	public function new() {
 		super();
 	}
@@ -13,45 +10,21 @@ class State extends flixel.FlxState {
 	override public function create() {
 		super.create();
 
-		if (members == null)
-			members = new Array<flixel.FlxBasic>();
-
-		if (tweenManager == null)
-			tweenManager = new flixel.tweens.FlxTween.FlxTweenManager();
-		if (!members.contains(tweenManager))
-			add(tweenManager);
-
-		if (timerManager == null)
-			timerManager = new flixel.util.FlxTimer.FlxTimerManager();
-		if (!members.contains(timerManager))
-			add(timerManager);
-
 		core.config.CursorConfig.refresh();
 	}
 
 	override function openSubState(substate:flixel.FlxSubState) {
 		super.openSubState(substate);
-		tweenTimerPause(false);
-	}
-
-	function tweenTimerPause(active:Bool) {
-		if (tweenManager != null)
-			tweenManager.active = active;
-		if (timerManager != null)
-			timerManager.active = active;
 	}
 
 	override function closeSubState() {
 		super.closeSubState();
-		tweenTimerPause(true);
 	}
 
 	var lastVolume:Float = 1.0;
 	var volumeTween:flixel.tweens.FlxTween;
 
 	override public function onFocusLost():Void {
-		tweenTimerPause(false);
-
 		if (volumeTween == null || !volumeTween.active) {
 			lastVolume = FlxG.sound.volume;
 		}
@@ -63,8 +36,6 @@ class State extends flixel.FlxState {
 	}
 
 	override public function onFocus():Void {
-		tweenTimerPause(true);
-
 		if (volumeTween != null)
 			volumeTween.cancel();
 		volumeTween = flixel.tweens.FlxTween.tween(FlxG.sound, {volume: lastVolume}, 0.5);
@@ -83,17 +54,6 @@ class State extends flixel.FlxState {
 		Gc.run(true);
 		Gc.compact();
 		#end
-
-		if (tweenManager != null) {
-			tweenManager.clear();
-			tweenManager.destroy();
-			tweenManager = null;
-		}
-		if (timerManager != null) {
-			timerManager.clear();
-			timerManager.destroy();
-			timerManager = null;
-		}
 
 		core.audio.Sound.clearGlobalCache();
 	}

@@ -2,7 +2,6 @@ package states.menus;
 
 import flixel.FlxSprite;
 import flixel.text.FlxText;
-import states.menus.CreditsState;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;

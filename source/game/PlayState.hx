@@ -160,6 +160,12 @@ class PlayState extends MusicBeatState implements states.HotReloading {
 
 		add(gameAudio);
 
+		if (SONG?.songData?.gameplay?.events != null) {
+			for (e in SONG.songData.gameplay.events)
+				if (e.name == 'Checkpoint')
+					startTime = e.time;
+		}
+
 		loadSong();
 		buildStageAndChars();
 

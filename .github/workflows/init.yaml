@@ -24,12 +24,12 @@ jobs:
             build_cmd: haxelib run lime build linux
             artifact_path: export/linux/bin
 
-          - platform: MacOS
+          - platform: MacOS ARM
             os: macos-15
             build_cmd: haxelib run lime build macos --app-version="4.0.0-${{ github.run_id}}"
             artifact_path: export/macos/bin
 
-          - platform: MacOS x64
+          - platform: MacOS Intel
             os: macos-15-intel
             build_cmd: haxelib run lime build macos --app-version="4.0.0-${{ github.run_id}}"
             artifact_path: export/macos/bin

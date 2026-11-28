@@ -100,19 +100,18 @@ class MainMenuState extends ScriptState {
 			FlxG.sound.play(Paths.getPath('menus/confirmMenu', 'sound'));
 			if (SaveData.data.flashingLights)
 				FlxG.camera.flash(0xFFFFFFFF, 0.4);
+			acceptOption = true;
 			new FlxTimer().start(1, function() {
 				switch (menuOptions[curSelected]) {
 					case 'storymode':
-						acceptOption = true;
 						MusicBeatState.switchState(() -> new states.menus.StoryMenuState());
 					case 'freeplay':
-						acceptOption = true;
 						MusicBeatState.switchState(() -> new states.menus.FreeplayState());
 					case 'credits':
-						acceptOption = true;
 						MusicBeatState.switchState(() -> new states.menus.CreditsState());
 					case 'options':
 						openSubState(new OptionsMenuSubstate([FlxG.camera]));
+						acceptOption = false;
 				}
 			});
 		}

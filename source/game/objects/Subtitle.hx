@@ -6,9 +6,9 @@ import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
 
 class Subtitle extends flixel.group.FlxSpriteGroup {
-	var bg:FlxSprite;
-	var subs:FlxText;
-    var hideTimer:FlxTimer;
+	public var bg:FlxSprite;
+	public var subs:FlxText;
+    public var hideTimer:FlxTimer;
 
 	public function new() {
 		super();

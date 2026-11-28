@@ -300,6 +300,9 @@ class EventManager {
 				if (char.curCharacter != newCharacter) {
 					char.changeCharacter(newCharacter);
 					PlayState.instance.applyStageProps(char, charId);
+					var hud = PlayState.instance.controllerHUD;
+					var icon = char.isPlayer ? hud.iconP1 : hud.iconP2;
+					icon?.updateIcon(char.isPlayer, char.characterData, newCharacter);
 				}
 			case 'Camera Follow':
 				var charId:String = event.arguments.char;
