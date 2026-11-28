@@ -2246,7 +2246,7 @@ class GameplayEditor extends MusicBeatState {
 				title: 'File',
 				items: () -> [
 					item('New chart...', 'Ctrl/Cmd+N', openNew),
-					item('Open chart...', 'Ctrl/Cmd+O', openChartPicker),
+					item('Import chart/song...', 'Ctrl/Cmd+O', openChartPicker),
 					line,
 					item('Save', 'Ctrl/Cmd+S', saveChart),
 					line,
