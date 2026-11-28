@@ -121,11 +121,13 @@ class CameraController {
 			gameBop = FlxMath.lerp(gameBop, 0, lerpVal);
 			hudBop = FlxMath.lerp(hudBop, 0, lerpVal);
 			camGame.zoom = defaultZoom + gameBop;
-			camHUD.zoom = 1.0 + hudBop;
+			if (camHUD != null)
+				camHUD.zoom = 1.0 + hudBop;
 			return;
 		}
 		camGame.zoom = FlxMath.lerp(camGame.zoom, defaultZoom, lerpVal);
-		camHUD.zoom = FlxMath.lerp(camHUD.zoom, 1.0, lerpVal);
+		if (camHUD != null)
+			camHUD.zoom = FlxMath.lerp(camHUD.zoom, 1.0, lerpVal);
 	}
 
 	public function bumpZoom() {
@@ -190,6 +192,12 @@ class CameraController {
 		focusTween.cancel();
 		focusTween = null;
 		camGame.followLerp = lerp;
+	}
+
+	public function cancelTweens():Void {
+		cancelFocusTween();
+		zoomTween?.cancel();
+		zoomTween = null;
 	}
 
 	public function moveCameraTo(x:Float, y:Float) {

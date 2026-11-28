@@ -1,15 +1,17 @@
 package modding.editors.gameplay;
 
-import core.json.song.SongData.EventsData;
-import flixel.FlxCamera;
-import flixel.math.FlxPoint;
+import game.controllers.CameraController;
 import game.controllers.CharacterController;
+import game.controllers.events.EventManager;
+import game.objects.Camera;
 import game.objects.sprites.Character;
+import core.json.song.SongData.EventsData;
 
 class PreviewEvents {
 	public var follow:Bool = true;
 
-	var cam:FlxCamera;
+	var cam:Camera;
+	var camCtrl:CameraController;
 	var chars:CharacterController;
 	var charData:Array<core.json.song.SongData.CharDataJson> = [];
 	var onCharChanged:Character->Void;
@@ -17,17 +19,11 @@ class PreviewEvents {
 	var events:Array<EventsData> = [];
 	var index:Int = 0;
 
-	var point:FlxPoint = FlxPoint.get();
-	var camChar:Character = null;
-	var camCharId:String = '';
-	var locked:Bool = false;
-	var hasCamEvents:Bool = false;
-	var snap:Bool = true;
-
 	var currentNames:Map<String, String> = new Map();
 	var speed:Float = 1;
 	var bpm:Float = 120;
 	var lastEvent:String = '';
+	var lastEventChar:String = '-';
 
 	public var lastError:String = '';
 
@@ -35,12 +31,19 @@ class PreviewEvents {
 		this.onCharChanged = onCharChanged;
 	}
 
-	public function attach(cam:FlxCamera, chars:CharacterController, charData:Array<core.json.song.SongData.CharDataJson>, speed:Float, bpm:Float):Void {
+	public function attach(cam:Camera, chars:CharacterController, charData:Array<core.json.song.SongData.CharDataJson>, speed:Float, bpm:Float):Void {
 		this.cam = cam;
 		this.chars = chars;
 		this.charData = charData ?? [];
 		this.speed = speed;
 		this.bpm = bpm;
+
+		var currentZoom:Float = cam != null ? cam.zoom : 1.0;
+		camCtrl = new CameraController(cam, null);
+		camCtrl.zoomEnabled = false;
+		camCtrl.lerp = 0.04;
+		camCtrl.defaultZoom = currentZoom;
+		camCtrl.stageZoom = currentZoom;
 
 		currentNames = new Map();
 		for (c in this.charData)
@@ -65,6 +68,9 @@ class PreviewEvents {
 		if (chars == null)
 			return;
 
+		if (camCtrl != null)
+			camCtrl.cancelTweens();
+
 		events = (list ?? []).copy();
 		events.sort((a, b) -> a.time < b.time ? -1 : (a.time > b.time ? 1 : 0));
 		index = 0;
@@ -84,11 +90,17 @@ class PreviewEvents {
 		for (id => name in wanted)
 			setCharacter(id, name, 'restore');
 
-		hasCamEvents = false;
-		locked = false;
-		camCharId = opponentId();
-		camChar = charOf(camCharId);
 		lastEvent = '';
+		lastEventChar = '-';
+
+		if (camCtrl != null) {
+			var initChar = charOf(opponentId());
+			camCtrl.char = initChar;
+			if (initChar != null) {
+				var p = initChar.getCamPosition();
+				camCtrl.snapCameraTo(p.x, p.y);
+			}
+		}
 
 		while (index < last) {
 			if (events[index].name != 'Change Character')
@@ -97,8 +109,6 @@ class PreviewEvents {
 				lastEvent = events[index].name;
 			index++;
 		}
-
-		snap = true;
 	}
 
 	public function advance(pos:Float):Void {
@@ -108,9 +118,13 @@ class PreviewEvents {
 		}
 	}
 
+	function stepsToSeconds(steps:Float):Float {
+		return steps * (60.0 / bpm) / 4.0;
+	}
+
 	public function noteSung(char:Character):Void {
-		if (!hasCamEvents && char != null)
-			camChar = char;
+		if (camCtrl != null && !camCtrl.existsCamEvents && char != null)
+			camCtrl.char = char;
 	}
 
 	function setCharacter(id:String, name:String, why:String):Void {
@@ -137,6 +151,8 @@ class PreviewEvents {
 
 	function fire(e:EventsData, silent:Bool):Void {
 		lastEvent = e.name;
+		if (camCtrl == null)
+			return;
 		try {
 			switch (e.name) {
 				case 'Change Character':
@@ -144,31 +160,52 @@ class PreviewEvents {
 					var name:String = arg(e, 'newCharacter');
 					if (name != null)
 						setCharacter(id, name, 'event');
+
 				case 'Camera Follow':
 					var char = charOf(arg(e, 'char'));
-					if (char != null) {
-						hasCamEvents = true;
-						camChar = char;
-						camCharId = arg(e, 'char');
-					}
+					var ox:Float = arg(e, 'x') ?? 0;
+					var oy:Float = arg(e, 'y') ?? 0;
+					var steps:Float = arg(e, 'duration') ?? 4.0;
+					var easeName:String = arg(e, 'ease') ?? 'CLASSIC';
+					var isClassic = easeName == 'CLASSIC';
+					var isInstant = easeName == 'INSTANT';
+					var snap = silent || (isInstant && steps <= 0);
+					var ease = (isClassic || isInstant) ? null : EventManager.easeByName(easeName);
+					var duration = (isClassic || isInstant || snap) ? 0.0 : stepsToSeconds(steps);
+					camCtrl.existsCamEvents = true;
+					lastEventChar = arg(e, 'char') ?? '-';
+					camCtrl.focusOn(char, ox, oy, duration, ease, snap);
+
 				case 'Center Camera':
 					var a = charOf(arg(e, 'char1'));
 					var b = charOf(arg(e, 'char2'));
 					if (a != null && b != null) {
-						hasCamEvents = true;
-						var pa = a.getCamPosition();
-						var pb = b.getCamPosition();
-						point.set((pa.x + pb.x) / 2, (pa.y + pb.y) / 2);
-						locked = arg(e, 'isLock') == true;
+						camCtrl.existsCamEvents = true;
+						camCtrl.centerCamera(a, b, arg(e, 'isLock') == true);
 					}
+
+				case 'Zoom Camera':
+					var zoom:Float = arg(e, 'zoom') ?? 1.0;
+					var mode:String = arg(e, 'mode') ?? 'stage';
+					if (mode != 'direct')
+						zoom *= camCtrl.stageZoom;
+					var steps:Float = arg(e, 'duration') ?? 4.0;
+					var easeName:String = arg(e, 'ease') ?? 'expoOut';
+					var isInstant = silent || steps <= 0;
+					var duration = isInstant ? 0.0 : stepsToSeconds(steps);
+					var ease = isInstant ? null : EventManager.easeByName(easeName);
+					camCtrl.zoomTo(zoom, duration, ease);
+
 				case 'Change Scroll Speed':
 					var v = Std.parseFloat(Std.string(arg(e, 'speed')));
 					if (!Math.isNaN(v))
 						speed = v;
+
 				case 'Change BPM':
 					var v = Std.parseFloat(Std.string(arg(e, 'bpm')));
 					if (!Math.isNaN(v) && v > 0)
 						bpm = v;
+
 				case 'Play Anim':
 					if (!silent) {
 						var id:String = arg(e, 'char');
@@ -184,39 +221,31 @@ class PreviewEvents {
 	}
 
 	public function update(elapsed:Float):Void {
-		if (!follow || cam == null || chars == null)
+		if (!follow || camCtrl == null)
 			return;
-
-		if (!locked && camChar != null) {
-			var p = camChar.getCamPosition();
-			point.set(p.x, p.y);
-		}
-
-		var tx:Float = point.x - cam.width * 0.5;
-		var ty:Float = point.y - cam.height * 0.5;
-
-		if (snap) {
-			cam.scroll.set(tx, ty);
-			snap = false;
-		} else {
-			var k:Float = 1 - Math.pow(1 - 0.04, elapsed * 60);
-			cam.scroll.x += (tx - cam.scroll.x) * k;
-			cam.scroll.y += (ty - cam.scroll.y) * k;
-		}
+		camCtrl.update(elapsed);
 	}
 
 	public function snapNow():Void {
-		snap = true;
+		if (camCtrl == null)
+			return;
+		if (camCtrl.char != null) {
+			var p = camCtrl.char.getCamPosition();
+			camCtrl.snapCameraTo(p.x + camCtrl.focusX, p.y + camCtrl.focusY);
+		}
 	}
 
 	public function describe():String {
 		var who:String = '-';
-		if (locked)
-			who = 'locked';
-		else if (!hasCamEvents && camChar != null)
-			who = 'auto';
-		else if (camChar != null)
-			who = camCharId;
+		if (camCtrl != null) {
+			if (camCtrl.isLock)
+				who = 'locked';
+			else if (!camCtrl.existsCamEvents)
+				who = 'auto';
+			else
+				who = lastEventChar;
+		}
+
 		var text:String = 'Camera: ' + (follow ? who : 'off') + '  ·  Speed ' + speed + '  ·  BPM ' + bpm;
 		if (lastEvent != '')
 			text += '  ·  Last: ' + lastEvent;
@@ -234,7 +263,8 @@ class PreviewEvents {
 	}
 
 	public function destroy():Void {
-		point.put();
+		camCtrl?.destroy();
+		camCtrl = null;
 		cam = null;
 		chars = null;
 		onCharChanged = null;

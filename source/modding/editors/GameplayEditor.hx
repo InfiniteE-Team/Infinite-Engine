@@ -851,7 +851,10 @@ class GameplayEditor extends MusicBeatState {
 	function syncBpmMap(force:Bool = false):Void {
 		var bpm:Float = SONG.songData.meta.bpm;
 		var events = SONG.songData.gameplay.events ?? [];
-		var changes = [for (e in events) if (e.name == 'Change BPM') '${e.time}:${Reflect.field(e.arguments, "bpm")}'];
+		var changes = [
+			for (e in events)
+				if (e.name == 'Change BPM') '${e.time}:${Reflect.field(e.arguments, "bpm")}'
+		];
 		var key = '$bpm|${changes.join(",")}';
 		if (!force && key == bpmMapKey)
 			return;
@@ -882,7 +885,7 @@ class GameplayEditor extends MusicBeatState {
 		var bitmap = noteBitmaps[((n.lane % NOTE_COLORS.length) + NOTE_COLORS.length) % NOTE_COLORS.length];
 
 		var tail = new flixel.FlxSprite(x + GRID_SIZE * 0.35, y + GRID_SIZE * 0.5);
-		tail.loadGraphic(bitmap);
+		tail.loadGraphic(bitmap, false, 0, 0, true);
 		tail.alpha = 0.7;
 		tail.active = false;
 		noteGroup.add(tail);
@@ -911,6 +914,8 @@ class GameplayEditor extends MusicBeatState {
 			noteGroup.remove(spr, true);
 			spr.destroy();
 		}
+		entry.head = null;
+		entry.tail = null;
 		entry.mark = null;
 		entry.typeMark = null;
 	}
@@ -922,6 +927,8 @@ class GameplayEditor extends MusicBeatState {
 			for (spr in [e.head, e.tail, e.mark, e.typeMark])
 				if (spr != null)
 					doomed.set(spr, true);
+			e.head = null;
+			e.tail = null;
 			e.mark = null;
 			e.typeMark = null;
 		}
@@ -1686,7 +1693,7 @@ class GameplayEditor extends MusicBeatState {
 			FlxG.sound.play(Paths.getPath('menus/editors/ge/metronome' + FlxG.random.int(1, 2), 'sound'), 0.5);
 	}
 
-	function assignCamera(obj:flixel.FlxBasic, cam:flixel.FlxCamera):Void {
+	function assignCamera(obj:flixel.FlxBasic, cam:game.objects.Camera):Void {
 		if (obj == null)
 			return;
 
@@ -1955,7 +1962,7 @@ class GameplayEditor extends MusicBeatState {
 
 			if (isPlaying)
 				director.advance(RhythmCore.songPosition);
-			director.update(elapsed);
+			director.update(isPlaying ? elapsed : 0);
 
 			if (previewLabel != null) {
 				previewLabel.text = director.describe();
