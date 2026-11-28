@@ -644,7 +644,7 @@ class NoteController {
 				if (inHold) {
 					if (!sustain.isHeld) {
 						sustain.isHeld = true;
-						strums?.spawnHoldSplash(sustain.strum, lk, sustain.noteType);
+						spawnHoldSplash(sustain.strum, lk, sustain.noteType);
 						syncHoldSplashToGlobal(strums);
 					}
 					sustain.strum.playAnim('confirm$lk', false);
@@ -654,7 +654,7 @@ class NoteController {
 					}
 				} else if (sustain.isHeld) {
 					sustain.isHeld = false;
-					strums?.stopHoldSplash(sustain.strum);
+					stopHoldSplash(sustain.strum);
 					sustain.strum.playAnim('static$lk', true);
 					if (strums != null) {
 						strums.activeOpponentHolds.remove(lk);
@@ -668,7 +668,7 @@ class NoteController {
 					sustain.wasNoteHit = true;
 					if (!sustain.isHeld) {
 						sustain.isHeld = true;
-						strums?.spawnHoldSplash(sustain.strum, lk, sustain.noteType);
+						spawnHoldSplash(sustain.strum, lk, sustain.noteType);
 						syncHoldSplashToGlobal(strums);
 					}
 					if (strums != null) {
@@ -678,7 +678,7 @@ class NoteController {
 					sustain.strum.playAnim(confirmAnims[lk], false);
 				} else if (sustain.isHeld) {
 					sustain.isHeld = false;
-					strums?.stopHoldSplash(sustain.strum);
+					stopHoldSplash(sustain.strum);
 					sustain.strum.playAnim(staticAnims[lk], true);
 					if (strums != null) {
 						strums.activeOpponentHolds.remove(lk);
@@ -753,7 +753,7 @@ class NoteController {
 			if (sustain.strumTime + sustain.length < songTime) {
 				if (sustain.isHeld) {
 					sustain.isHeld = false;
-					strums?.stopHoldSplash(sustain.strum);
+					stopHoldSplash(sustain.strum);
 				}
 				toDestroySet.set(sustain, true);
 				toDestroyList.push(sustain);
@@ -805,13 +805,6 @@ class NoteController {
 		}
 	}
 
-	public function recycleSplash(splash:NoteSplash):Void {
-		var strums = splash.strumline;
-		if (strums != null)
-			strums.recycleSplash(splash);
-		splashes.remove(splash, true);
-	}
-
 	public function spawnHoldSplash(strum:StrumNote, direction:Int, noteType:String = 'normal'):Void {
 		for (strums in strumlines) {
 			if (strums.strums.members.indexOf(strum) >= 0) {
@@ -828,16 +821,6 @@ class NoteController {
 				strums.stopHoldSplash(strum);
 				return;
 			}
-	}
-
-	public function recycleHoldSplash(hs:HoldSplash):Void {
-		for (strums in strumlines) {
-			if (strums.holdSplashToStrum.exists(hs)) {
-				strums.recycleHoldSplash(hs);
-				holdsplashes.remove(hs, true);
-				return;
-			}
-		}
 	}
 
 	public function destroyNotes(note:Note):Void {

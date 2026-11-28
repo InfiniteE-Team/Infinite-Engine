@@ -14,7 +14,7 @@ class HoldSplash extends FunkinSprite {
 	public var keys:Int = 4;
 	public var isEnding:Bool = false;
 
-	public var noteControl:game.controllers.NoteController;
+	public var strumline:Strumline;
 
 	var _lastAnimForShader:String = '';
 
@@ -51,27 +51,29 @@ class HoldSplash extends FunkinSprite {
 		if (isEnding)
 			return;
 		isEnding = true;
-		playAnim('note$direction-endHold', true);
+		if (strumline?.isPlayer)
+			playAnim('note$direction-endHold', true);
 	}
 
 	override function update(elapsed:Float) {
 		super.update(elapsed);
 
-		if (currentAnim != null && currentAnim != '' && currentAnim != _lastAnimForShader) {
-			RGBShader.applyByAnimation(this, noteSkinData, currentAnim);
-			_lastAnimForShader = currentAnim;
-		}
+		if (animation.curAnim != null) {
+			if (currentAnim != null && currentAnim != '' && currentAnim != _lastAnimForShader) {
+				RGBShader.applyByAnimation(this, noteSkinData, currentAnim);
+				_lastAnimForShader = currentAnim;
+			}
 
-		if (animation.curAnim != null && animation.curAnim.finished) {
-			var animName:String = animation.curAnim.name;
-
-			if (animName == 'note$direction-startHold') {
-				playAnim('note$direction-loopHold', true);
-			} else if (animName == 'note$direction-endHold') {
-				if (noteControl != null)
-					noteControl.recycleHoldSplash(this);
-				else
-					kill();
+			if (animation.curAnim.finished) {
+				if (animation.curAnim.name == 'note$direction-startHold') {
+					playAnim('note$direction-loopHold', true);
+				} else if (animation.curAnim.name == 'note$direction-endHold'
+					|| (!strumline?.isPlayer && animation.curAnim.name == 'note$direction-loopHold')) {
+					if (strumline != null)
+						strumline.recycleHoldSplash(this);
+					else
+						kill();
+				}
 			}
 		}
 	}

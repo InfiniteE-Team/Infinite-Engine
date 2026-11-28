@@ -262,7 +262,7 @@ class CharacterController extends FunkinObjectRegistry {
 				note.kill();
 				strums[i].confirmHoldTimer = 0;
 				if (ratingType != null && ratingType.splash)
-					nc.spawnSplash(strums[i], i, note.noteType);
+					nc.getStrumline(char.id)?.spawnSplash(strums[i], i, note.noteType);
 				setSing(char, note.direction);
 				char.isMiss = false;
 				modding.vslice.VSliceHooks.dispatch('onNoteHit', modding.vslice.VSliceHooks.noteEvent('NOTE_HIT', note, note.rating));

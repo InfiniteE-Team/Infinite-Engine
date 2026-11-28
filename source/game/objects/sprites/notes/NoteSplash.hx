@@ -17,8 +17,6 @@ class NoteSplash extends FunkinSprite {
 
 	public var strumline:Strumline;
 
-	public var noteControl:game.controllers.NoteController;
-
 	var _lastAnimForShader:String = '';
 
 	public function new(keys:Int, x:Float, y:Float, noteSkinData:NoteSkinData, noteSkin:String, direction:Int = 0, ?noteType:String = 'normal') {
@@ -56,10 +54,9 @@ class NoteSplash extends FunkinSprite {
 			RGBShader.applyByAnimation(this, noteSkinData, currentAnim);
 			_lastAnimForShader = currentAnim;
 		}
-
 		if (animation.curAnim != null && animation.curAnim.finished) {
-			if (noteControl != null)
-				noteControl.recycleSplash(this);
+			if (strumline != null)
+				strumline.recycleSplash(this);
 			else
 				kill();
 		}

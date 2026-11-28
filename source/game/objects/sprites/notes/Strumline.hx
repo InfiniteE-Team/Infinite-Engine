@@ -255,6 +255,7 @@ class Strumline {
 		} else {
 			hs = new HoldSplash(keys, strum.x, strum.y, holdSkinData, noteSkin, direction % keys, noteType);
 		}
+		hs.strumline = this;
 		hs.alpha = _alpha;
 		holdsplashes.add(hs);
 		holdSplashToStrum.set(hs, strum);
@@ -265,15 +266,10 @@ class Strumline {
 			if (hs == null || holdSplashToStrum.get(hs) != strum)
 				continue;
 			holdSplashToStrum.remove(hs);
-			holdsplashes.remove(hs, true);
-			hs.animation.onFinish.addOnce(function(name:String) {
-				hs.kill();
-				if (holdsplashPool.length < POOL_LENGTH)
-					holdsplashPool.push(hs);
-				else
-					hs.destroy();
-			});
-			hs.endHold();
+			if (!isPlayer)
+				recycleHoldSplash(hs);
+			else
+				hs.endHold();
 			break;
 		}
 	}
