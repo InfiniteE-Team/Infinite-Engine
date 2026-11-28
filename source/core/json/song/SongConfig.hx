@@ -26,6 +26,8 @@ class SongConfig {
 
 	public var lbase:Float = 0.0;
 
+	public var absolutePath:String = null;
+
 	public function new() {}
 
 	public function configSong(songFolder:String, diff:String) {
@@ -129,6 +131,72 @@ class SongConfig {
 		}
 
 		return songFolder;
+	}
+
+	public function configSongFromAbsPath(folderPath:String, diff:String):Void {
+		var chartsPath = '$folderPath/charts';
+		var chartPath = '$chartsPath/$diff.json';
+
+		var osuPath = '$chartsPath/$diff.osu';
+		if (sys.FileSystem.exists(osuPath)) {
+			songData = ChartPorter.tryConvertOsu(osuPath);
+		}
+
+		if (songData == null) {
+			if (!sys.FileSystem.exists(chartPath))
+				return;
+			var raw:Dynamic = FormatJson.readJson(chartPath);
+			if (raw == null)
+				return;
+
+			var metaPath = '$folderPath/meta.json';
+			if (sys.FileSystem.exists(metaPath)) {
+				var file:Dynamic = FormatJson.readJson(metaPath);
+				if (file != null) {
+					var base:Dynamic = raw.meta ?? {};
+					for (key in Reflect.fields(file))
+						Reflect.setField(base, key, Reflect.field(file, key));
+					raw.meta = base;
+				}
+			}
+
+			var converted = ChartPorter.tryConvert(raw, diff, null);
+			songData = converted ?? cast raw;
+		}
+
+		if (songData == null)
+			return;
+
+		var eventsPath = '$folderPath/events.json';
+		if (sys.FileSystem.exists(eventsPath)) {
+			var raw:Dynamic = FormatJson.readJson(eventsPath);
+			if (raw != null) {
+				var list:Dynamic = Std.isOfType(raw, Array) ? raw : Reflect.field(raw, 'events');
+				if (list != null && Std.isOfType(list, Array)) {
+					if (songData.gameplay == null)
+						songData.gameplay = cast {chars: [], events: []};
+					songData.gameplay.events = cast list;
+				}
+			}
+		}
+
+		songName = songData.meta.song ?? 'Fresh';
+		bpmSong = songData.meta.bpm ?? 120;
+		speed = songData.meta.speed ?? 1.2;
+		needVoices = songData.meta.needVoices ?? true;
+		stage = songData.meta.stage ?? 'stage';
+		countdown = songData.meta.countdown ?? 'default';
+		instPrefix = songData.meta.instPrefix ?? '';
+		vocPrefix = songData.meta.vocPrefix ?? '';
+		vocs = songData.meta.vocs ?? null;
+
+		RhythmCore.changeBPM(bpmSong);
+		chars = songData.gameplay.chars;
+		for (i in 0...chars.length) {
+			noteSkin = chars[i].strums.noteSkin ?? 'default';
+			strumsVisible = chars[i].strums.visible ?? true;
+		}
+		this.absolutePath = folderPath;
 	}
 
 	private function loadSeparateEvents(songFolder:String):Void {

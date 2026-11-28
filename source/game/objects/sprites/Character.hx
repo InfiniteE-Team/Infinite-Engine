@@ -182,27 +182,19 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 			var renderLayers = characterData.render.layers;
 			for (i in 0...layers.length) {
 				var pos = renderLayers[i].position;
-				if (pos != null)
-					layers[i].setPosition(x + pos[0], y + pos[1]);
-				else
-					layers[i].setPosition(x, y);
+				layers[i].setPosition(x + (pos != null ? pos[0] : 0), y + (pos != null ? pos[1] : 0));
 			}
 		}
 
 		if (isSpecial && layers.length > 0) {
 			var cur = layers[0].currentAnim;
-			if (cur != specialAnimName) {
+			if (cur != specialAnimName || layers[0].isFinished(cur)) {
 				isSpecial = false;
 				specialAnimName = null;
-			} else if (layers[0].isFinished(cur)) {
-				isSpecial = false;
-				specialAnimName = null;
-				dance();
+				if (layers[0].isFinished(cur))
+					dance();
 			}
 		}
-
-		if ((isSing || isMiss) && !isSpecial)
-			singCountTime += elapsed;
 
 		if (vslice != null && layers.length > 0) {
 			var cur = layers[0].currentAnim;
@@ -217,8 +209,8 @@ class Character extends modding.scripting.types.sprites.ScriptedSpriteGroup {
 		}
 
 		if ((isSing || isMiss) && !isSpecial) {
-			var beatLengthSecs = core.rhythm.RhythmCore.crochet / 1000.0;
-			if (singCountTime >= singTime * beatLengthSecs) {
+			singCountTime += elapsed;
+			if (singCountTime >= singTime * (core.rhythm.RhythmCore.crochet / 1000.0)) {
 				isSing = false;
 				isMiss = false;
 				singCountTime = 0;

@@ -1824,6 +1824,74 @@ class GameplayEditor extends MusicBeatState {
 		return (index >= 0 && index < list.length) ? list[index] : 'normal';
 	}
 
+	function openChartPicker():Void {
+		var dialog = new lime.ui.FileDialog();
+		dialog.onSelect.add(function(path:String) {
+			path = path.split('\\').join('/');
+			if (path.endsWith('/'))
+				path = path.substr(0, path.length - 1);
+			var folderName = path.split('/').pop();
+
+			prompt.open('Open chart - Difficulty', chartDiff, function(diff:String) {
+				diff = StringTools.trim(diff);
+				if (diff == '')
+					diff = 'normal';
+
+				var config = new SongConfig();
+				config.configSongFromAbsPath(path, diff);
+				if (config.songData == null) {
+					setStatus('Chart "$diff" not found in $folderName.', 0xFFFF5555);
+					return;
+				}
+
+				var onMod = modding.mods.ModsRegistry.onMod && modding.mods.ModsRegistry.currentMod != '';
+				var songDst = onMod ? 'mods/${modding.mods.ModsRegistry.currentMod}/game/songs/$folderName' : 'assets/game/songs/$folderName';
+
+				var existsInEngine = sys.FileSystem.exists(songDst)
+					|| core.assets.Library.findLib('game/songs/$folderName/meta.json') != null;
+
+				if (!existsInEngine) {
+					var audioSrc = '$path/audio';
+					if (sys.FileSystem.exists(audioSrc)) {
+						ChartDefaults.makeDirs('$songDst/audio');
+						for (file in sys.FileSystem.readDirectory(audioSrc)) {
+							var src = '$audioSrc/$file';
+							if (!sys.FileSystem.isDirectory(src))
+								sys.io.File.copy(src, '$songDst/audio/$file');
+						}
+					}
+					var chartsSrc = '$path/charts';
+					if (sys.FileSystem.exists(chartsSrc)) {
+						ChartDefaults.makeDirs('$songDst/charts');
+						for (file in sys.FileSystem.readDirectory(chartsSrc)) {
+							var src = '$chartsSrc/$file';
+							if (!sys.FileSystem.isDirectory(src))
+								sys.io.File.copy(src, '$songDst/charts/$file');
+						}
+					}
+					for (file in ['meta.json', 'events.json']) {
+						var src = '$path/$file';
+						if (sys.FileSystem.exists(src))
+							sys.io.File.copy(src, '$songDst/$file');
+					}
+					setStatus('Imported "$folderName" into engine.', 0xFF66DD66);
+				}
+
+				var finalConfig = new SongConfig();
+				finalConfig.configSong(folderName, diff);
+				if (finalConfig.songData != null)
+					config = finalConfig;
+
+				GameplayEditor.SONG = config;
+				GameplayEditor.folder = folderName;
+				GameplayEditor.diff = diff;
+				Paths.currentSong = folderName;
+				MusicBeatState.switchState(() -> new GameplayEditor());
+			});
+		});
+		dialog.browse(lime.ui.FileDialogType.OPEN_DIRECTORY, null, null, 'Select song folder');
+	}
+
 	function saveChart():Void {
 		if (SONG.songData == null) {
 			setStatus('Nothing to save: this song has no chart data.', 0xFFFF5555);
@@ -2177,6 +2245,9 @@ class GameplayEditor extends MusicBeatState {
 			{
 				title: 'File',
 				items: () -> [
+					item('New chart...', 'Ctrl/Cmd+N', openNew),
+					item('Open chart...', 'Ctrl/Cmd+O', openChartPicker),
+					line,
 					item('Save', 'Ctrl/Cmd+S', saveChart),
 					line,
 					item('Leave editor', 'Esc', requestLeave)

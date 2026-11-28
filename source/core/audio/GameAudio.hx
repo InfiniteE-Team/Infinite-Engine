@@ -37,12 +37,19 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 		}
 		soundMisses = [];
 
-		inst = audio('Inst' + SONG?.instPrefix, onfinish);
+		if (SONG.absolutePath != null)
+			inst = audioFromPath(SONG.absolutePath + '/audio/Inst' + (SONG.instPrefix ?? '') + '.ogg', onfinish);
+		else
+			inst = audio('Inst' + (SONG.instPrefix ?? ''), onfinish);
 		if (inst != null)
 			add(inst);
 
-		if (needVoices)
-			vocalsSeparated(SONG, null);
+		if (needVoices) {
+			if (SONG.absolutePath != null)
+				vocalsFromAbsPath(SONG);
+			else
+				vocalsSeparated(SONG, null);
+		}
 
 		for (i in 1...3) {
 			var miss = new FlxSound();
@@ -131,6 +138,57 @@ class GameAudio extends flixel.group.FlxGroup.FlxTypedGroup<FlxSound> {
 				}
 			}
 		}
+	}
+
+	function audioFromPath(path:String, onfinish:() -> Void):Sound {
+		if (!sys.FileSystem.exists(path))
+			return null;
+		var sound = new Sound(MUSIC, path);
+		sound.volume = 1.0;
+		if (onfinish != null) {
+			sound.onComplete = onfinish;
+			sound.onLoaded = () -> {
+				sound.onComplete = onfinish;
+			};
+		}
+		return sound;
+	}
+
+	function vocalsFromAbsPath(SONG:SongConfig):Void {
+		var audioDir = SONG.absolutePath + '/audio';
+		if (!sys.FileSystem.exists(audioDir))
+			return;
+		var stems:Array<{id:String, path:String}> = [];
+		for (char in SONG.chars) {
+			for (candidate in [char.name, char.id]) {
+				if (candidate == null || candidate == '')
+					continue;
+				var p = '$audioDir/Voices-$candidate.ogg';
+				if (sys.FileSystem.exists(p) && !Lambda.exists(stems, s -> s.path == p)) {
+					stems.push({id: char.id, path: p});
+					break;
+				}
+			}
+		}
+		if (stems.length == 0) {
+			var p = '$audioDir/Voices' + (SONG.vocPrefix ?? '') + '.ogg';
+			if (sys.FileSystem.exists(p))
+				stems.push({id: 'default', path: p});
+		}
+
+		for (s in stems) {
+			var v = audioFromPath(s.path, null);
+			if (v == null)
+				continue;
+			vocalsGroup.push(v);
+			vocalsMap.set(s.id, v);
+			add(v);
+			var charData = Lambda.find(SONG.chars, c -> c.id == s.id);
+			if (charData != null && game.controllers.CharacterController.namesPlayer.contains(charData.role))
+				playerVocals.push(v);
+		}
+		if (vocalsGroup.length > 0)
+			vocals = vocalsGroup[0];
 	}
 
 	public function resyncVocals():Void {
