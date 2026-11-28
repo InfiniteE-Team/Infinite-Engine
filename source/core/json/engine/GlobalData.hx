@@ -3,7 +3,7 @@ package core.json.engine;
 typedef GlobalData = {
 	var ?developerMode:Bool;
 	var ?noteSkin:String;
-	var ?hud:String;
+	var ?ui:String;
 	var ?startState:String;
 	var ?skipTrans:Bool;
 }
@@ -12,7 +12,7 @@ class GlobalConfig {
 	public var globalData:GlobalData;
 	public var developerMode:Bool = true;
 	public var noteSkin:String = 'default';
-	public var hud:String = 'default';
+	public var ui:String = 'default';
 	public var startState:String = 'TitleState';
 	public var startStateScript:String = null;
 	public var skipTrans:Bool = false;
@@ -25,7 +25,7 @@ class GlobalConfig {
 			return;
 
 		noteSkin = globalData.noteSkin ?? 'default';
-		hud = globalData.hud ?? 'default';
+		ui = globalData.ui ?? 'default';
 		developerMode = globalData.developerMode ?? true;
 		skipTrans = globalData.skipTrans ?? false;
 
